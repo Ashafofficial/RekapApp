@@ -1,0 +1,23 @@
+{
+    "id": "aplikasi-logistik-mandiri",
+    "scope": "./logistik.html",
+    "start_url": "./logistik.html",
+    "short_name": "Logistik Pro",
+    "name": "Panel Logistik HMR",
+    "icons": [
+      {
+        "src": "LOGISTIK.PNG",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "LOGISTIK.PNG",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "background_color": "#f6f8fb",
+    "theme_color": "#4f46e5",
+    "display": "standalone",
+    "orientation": "portrait"
+  }

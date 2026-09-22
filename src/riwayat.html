@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarimbit Pro - Riwayat Sistem</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="database.js?v=999"></script>
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fdfbfb;
+            background-image:
+                radial-gradient(at 10% 20%, hsla(28,100%,74%,0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 10%, hsla(189,100%,56%,0.15) 0px, transparent 50%),
+                radial-gradient(at 10% 50%, hsla(355,100%,93%,0.5) 0px, transparent 50%),
+                radial-gradient(at 80% 50%, hsla(340,100%,76%,0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            -webkit-tap-highlight-color: transparent; 
+            color: #1e293b;
+        }
+        .glass { background: rgba(255, 255, 255, 0.6) !important; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.8) !important; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08) !important; }
+        .glass-header { background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important; }
+        .glass-input { background: rgba(255, 255, 255, 0.7) !important; border: 1px solid rgba(226, 232, 240, 0.8) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important; transition: all 0.2s ease; outline: none; }
+        
+        .timeline-item { animation: slideIn 0.4s ease-out forwards; opacity: 0; transform: translateX(-15px); }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+    </style>
+</head>
+<body class="relative min-h-screen pb-20">
+
+    <nav class="glass-header shadow-sm sticky top-0 z-50 mt-3 lg:mt-0">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-indigo-100 hover:text-indigo-600 transition-all shadow-sm">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                        <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                    </div>
+                    <span class="font-black text-2xl tracking-tighter text-slate-800 drop-shadow-sm">Log<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">Aktivitas</span></span>
+                </div>
+                
+                <div class="hidden sm:flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-laptop text-indigo-500"></i>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Perangkat Anda</span>
+                        <span id="my-device-id" class="text-xs font-black text-indigo-700 leading-none mt-1">Memeriksa...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <div class="glass p-6 md:p-8 rounded-[2.5rem] shadow-sm mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Rekam Jejak Sistem</h1>
+                <p class="text-sm font-bold text-slate-500 mt-1">Pantau seluruh penambahan, revisi, unduhan, dan penghapusan data.</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <div class="relative flex-1 md:flex-none md:w-56 group">
+                    <input type="date" id="filterTgl" onchange="renderTimeline()" class="glass-input w-full pl-11 pr-4 py-3 rounded-2xl text-sm font-bold text-slate-700 cursor-pointer focus:ring-2 focus:ring-indigo-500/20">
+                    <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 transform -translate-y-1/2 text-indigo-500 pointer-events-none drop-shadow-sm"></i>
+                </div>
+                <button onclick="document.getElementById('filterTgl').value=''; renderTimeline();" class="px-5 py-3 rounded-2xl text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200">
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <div class="glass p-8 md:p-10 rounded-[2.5rem] shadow-xl border border-white">
+            <div id="timeline-container" class="relative border-l-2 border-indigo-100 ml-4 md:ml-6 space-y-8 pb-4">
+                </div>
+        </div>
+    </main>
+
+    <script>
+        let realLogs = [];
+
+        async function initData() {
+            initDeviceId();
+            document.getElementById('filterTgl').value = new Date().toISOString().split('T')[0];
+            await loadLogs();
+        }
+
+        async function loadLogs() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = `<p class="text-center font-bold text-slate-400 animate-pulse">Memuat riwayat...</p>`;
+            
+            try {
+                // PERBAIKAN: Tameng Anti-Error mendeteksi nama database lama Bapak
+                const dbInstance = typeof dbLokal !== 'undefined' ? dbLokal : (typeof db !== 'undefined' ? db : null);
+                
+                if (!dbInstance || !dbInstance.logs) {
+                    container.innerHTML = `
+                        <div class="pl-8 py-10 text-center">
+                            <i class="fa-solid fa-ghost text-4xl text-slate-300 mb-4 block"></i>
+                            <p class="text-slate-500 font-bold">Tabel riwayat belum tersedia di versi database Anda saat ini.</p>
+                        </div>`;
+                    return;
+                }
+
+                // PERBAIKAN: Jika fungsi supabaseFetch dari database lama gagal/diblokir RLS, 
+                // aplikasi tidak akan error melainkan langsung membaca jejak dari memori lokal (Dexie)
+                if (navigator.onLine && typeof supabaseFetch === 'function') {
+                    try {
+                        const data = await supabaseFetch('/rest/v1/logs?select=*&order=time.desc&limit=200');
+                        if (data && data.length > 0) {
+                            realLogs = data;
+                            try { await dbInstance.logs.bulkPut(realLogs); } catch(e){} // Simpan diam-diam ke memori lokal
+                        } else {
+                            realLogs = await dbInstance.logs.orderBy('time').reverse().toArray();
+                        }
+                    } catch (fetchErr) {
+                        realLogs = await dbInstance.logs.orderBy('time').reverse().toArray();
+                    }
+                } else {
+                    realLogs = await dbInstance.logs.orderBy('time').reverse().toArray();
+                }
+                
+                renderTimeline();
+            } catch (e) {
+                console.error("Gagal memuat log:", e);
+                container.innerHTML = `<p class="text-center text-rose-500 font-bold">Gagal memuat riwayat dari memori.</p>`;
+            }
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            const filterDate = document.getElementById('filterTgl').value;
+            
+            let displayLogs = realLogs;
+            if (filterDate) {
+                displayLogs = realLogs.filter(log => {
+                    try {
+                        return String(log.time).split('T')[0] === filterDate;
+                    } catch(e) { return false; }
+                });
+            }
+
+            if (!displayLogs || displayLogs.length === 0) {
+                container.innerHTML = `
+                    <div class="pl-8 py-10 text-center">
+                        <i class="fa-solid fa-ghost text-4xl text-slate-300 mb-4 block"></i>
+                        <p class="text-slate-500 font-bold">Tidak ada aktivitas pada tanggal ini.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            let lastDateStr = '';
+
+            displayLogs.forEach((log, index) => {
+                const ui = getActionUI(log.action);
+                
+                let logDate = "Waktu Tidak Diketahui";
+                let logTime = "--:--";
+                try {
+                    const t = new Date(log.time);
+                    logDate = t.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                    logTime = t.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                } catch(e) {}
+                
+                const deviceName = log.device || "Sistem";
+                const deviceIcon = deviceName.toUpperCase().includes('HP') ? 'fa-mobile-screen' : 'fa-laptop';
+                
+                if (logDate !== lastDateStr) {
+                    html += `
+                        <div class="relative pl-8 md:pl-10 mt-8 mb-6 first:mt-0">
+                            <span class="absolute -left-[9px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-indigo-200 border-4 border-white"></span>
+                            <span class="bg-indigo-50 text-indigo-700 font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg border border-indigo-100 shadow-sm">${logDate}</span>
+                        </div>
+                    `;
+                    lastDateStr = logDate;
+                }
+
+                html += `
+                    <div class="relative pl-8 md:pl-10 timeline-item" style="animation-delay: ${index * 0.02}s">
+                        <span class="absolute -left-[7px] top-4 w-3.5 h-3.5 rounded-full ${ui.bgColor} border-2 border-white shadow-sm z-10"></span>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="flex gap-4 items-center">
+                                    <div class="w-10 h-10 rounded-xl ${ui.bgColor} ${ui.textColor} flex items-center justify-center flex-shrink-0 shadow-inner">
+                                        <i class="fa-solid ${ui.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[10px] font-black uppercase tracking-widest ${ui.textColor}">${log.action}</span>
+                                            <span class="text-[10px] font-bold text-slate-400">• Modul ${log.module}</span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-slate-800 leading-relaxed">${log.detail}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-end gap-3 pl-14 md:pl-0 border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
+                                    <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-md shadow-sm">${logTime} WIB</span>
+                                    <span class="text-[10px] font-black text-slate-400 flex items-center gap-1.5">
+                                        <i class="fa-solid ${deviceIcon}"></i> ${deviceName}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function getActionUI(action) {
+            const act = String(action || "").toUpperCase();
+            switch(act) {
+                case 'CREATE': return { icon: 'fa-plus', bgColor: 'bg-emerald-100', textColor: 'text-emerald-600' };
+                case 'UPDATE': return { icon: 'fa-pen', bgColor: 'bg-blue-100', textColor: 'text-blue-600' };
+                case 'DELETE': return { icon: 'fa-trash-can', bgColor: 'bg-rose-100', textColor: 'text-rose-600' };
+                case 'ARCHIVE': return { icon: 'fa-box-archive', bgColor: 'bg-purple-100', textColor: 'text-purple-600' };
+                case 'DOWNLOAD': return { icon: 'fa-download', bgColor: 'bg-amber-100', textColor: 'text-amber-600' }; 
+                default: return { icon: 'fa-info', bgColor: 'bg-slate-100', textColor: 'text-slate-600' };
+            }
+        }
+
+        function initDeviceId() {
+            try {
+                let deviceId = localStorage.getItem('sarimbit_device_id') || "Perangkat Anda";
+                document.getElementById('my-device-id').innerText = deviceId;
+            } catch(e) {
+                document.getElementById('my-device-id').innerText = "Sistem";
+            }
+        }
+
+        window.onload = initData;
+    </script>
+</body>
+</html>

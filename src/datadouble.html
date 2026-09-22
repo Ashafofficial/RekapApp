@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Data Ganda - Sarimbit Pro</title>
+    <!-- Aset Tampilan Offline & Pustaka Pendukung -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+    <!-- NAVIGASI ATAS -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <a href="./index.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2.5 rounded-xl transition flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Menu Utama
+                    </a>
+                    <div class="h-6 w-px bg-slate-300 mx-1"></div>
+                    <div>
+                        <h1 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
+                            <i class="fa-solid fa-clone text-rose-600"></i> RADAR AUDIT DATA GANDA
+                        </h1>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Sarimbit Pro Management System</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="lakukanAudit()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Scan Ulang Database
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KONTEN UTAMA -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- KARTU RINGKASAN AUDIT -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Invoice Diperiksa</p>
+                    <h3 id="stat-total-invoice" class="text-2xl font-black text-slate-800">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Duplikat Nama Sama</p>
+                    <h3 id="stat-nama" class="text-2xl font-black text-rose-600">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-user-tag"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Duplikat No. HP / Alamat</p>
+                    <h3 id="stat-kontak" class="text-2xl font-black text-amber-600">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-address-book"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Orderan Identik (Double Klik)</p>
+                    <h3 id="stat-identik" class="text-2xl font-black text-purple-600">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-copy"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTER TAB AUDIT -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-2 justify-between items-center">
+                <div class="flex flex-wrap gap-2" id="tab-buttons">
+                    <button onclick="gantiTab('identik')" id="btn-tab-identik" class="px-4 py-2 rounded-xl font-bold text-xs transition bg-purple-600 text-white shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Orderan Identik 100% (Double Klik)
+                    </button>
+                    <button onclick="gantiTab('nama')" id="btn-tab-nama" class="px-4 py-2 rounded-xl font-bold text-xs transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-user"></i> Nama Customer Sama
+                    </button>
+                    <button onclick="gantiTab('nohp')" id="btn-tab-nohp" class="px-4 py-2 rounded-xl font-bold text-xs transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-phone"></i> Nomor HP / WhatsApp Sama
+                    </button>
+                    <button onclick="gantiTab('alamat')" id="btn-tab-alamat" class="px-4 py-2 rounded-xl font-bold text-xs transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot"></i> Alamat Sama
+                    </button>
+                </div>
+                <div class="text-xs font-bold text-slate-400 italic">
+                    * Menampilkan kelompok data yang memiliki kemiripan parameter
+                </div>
+            </div>
+
+            <!-- AREA DAFTAR DATA GANDA -->
+            <div id="wadah-hasil-audit" class="p-6 divide-y divide-slate-200">
+                <div class="text-center py-12 text-slate-400 font-bold">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 block text-indigo-600"></i>
+                    Memindai database lokal...
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- HUBUNGKAN KE DATABASE LOKAL -->
+    <script src="./database.js"></script>
+    <script>
+        let semuaInvoice = [];
+        let kelompokAudit = {
+            identik: [],
+            nama: [],
+            nohp: [],
+            alamat: []
+        };
+        let tabAktif = 'identik';
+
+        window.onload = function() {
+            lakukanAudit();
+        };
+
+        async function lakukanAudit() {
+            document.getElementById('wadah-hasil-audit').innerHTML = `
+                <div class="text-center py-12 text-slate-400 font-bold">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 block text-indigo-600"></i>
+                    Sedang memindai dan menganalisis duplikasi data...
+                </div>
+            `;
+
+            try {
+                // 1. Tarik seluruh data orderan aktif dari Dexie lokal
+                const rawOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true).toArray();
+                
+                // 2. Kelompokkan menjadi berbasis Invoice (Berdasarkan idcustomer)
+                const grupInvoice = {};
+                rawOrders.forEach(o => {
+                    const idCust = o.idcustomer || o.idCustomer || "TANPA-ID";
+                    if (!grupInvoice[idCust]) {
+                        grupInvoice[idCust] = {
+                            idcustomer: idCust,
+                            nama: (o.nama || o.customer || "-").trim(),
+                            nohp: (o.nohp || o.wa || o.telepon || "-").trim(),
+                            alamat: (o.alamat || "-").trim(),
+                            toko: o.toko || "-",
+                            tanggal: o.tanggal || o.updated_at || new Date().toISOString(),
+                            items: [],
+                            totalPcs: 0,
+                            totalBerat: 0
+                        };
+                    }
+                    grupInvoice[idCust].items.push(o);
+                    grupInvoice[idCust].totalPcs += Number(o.jumlah || 0);
+                    const b = Number(o.berat || 0);
+                    grupInvoice[idCust].totalBerat += (b > 0 ? b + 300 : 0) * Number(o.jumlah || 0);
+                });
+
+                semuaInvoice = Object.values(grupInvoice);
+                document.getElementById('stat-total-invoice').innerText = semuaInvoice.length;
+
+                // 3. Jalankan Algoritma Pemindai Duplikat
+                analisisDataGanda();
+
+            } catch (err) {
+                console.error("Gagal melakukan audit:", err);
+                document.getElementById('wadah-hasil-audit').innerHTML = `
+                    <div class="text-center py-12 text-rose-500 font-bold">
+                        <i class="fa-solid fa-triangle-exclamation text-3xl mb-3 block"></i>
+                        Terjadi kesalahan saat memindai database lokal.
+                    </div>
+                `;
+            }
+        }
+
+        function analisisDataGanda() {
+            kelompokAudit = { identik: [], nama: [], nohp: [], alamat: [] };
+
+            // Peta sementara untuk mengelompokkan
+            const petaNama = {};
+            const petaNoHP = {};
+            const petaAlamat = {};
+            const petaIdentik = {};
+
+            semuaInvoice.forEach(inv => {
+                // A. Kunci Nama (Huruf kecil & tanpa spasi berlebih)
+                const kNama = inv.nama.toLowerCase().trim();
+                if (kNama && kNama !== "-" && kNama !== "") {
+                    if (!petaNama[kNama]) petaNama[kNama] = [];
+                    petaNama[kNama].push(inv);
+                }
+
+                // B. Kunci No HP (Hanya ambil angkanya saja)
+                const kNoHP = inv.nohp.replace(/\D/g, '');
+                if (kNoHP && kNoHP.length > 6) {
+                    if (!petaNoHP[kNoHP]) petaNoHP[kNoHP] = [];
+                    petaNoHP[kNoHP].push(inv);
+                }
+
+                // C. Kunci Alamat
+                const kAlamat = inv.alamat.toLowerCase().trim();
+                if (kAlamat && kAlamat !== "-" && kAlamat.length > 5) {
+                    if (!petaAlamat[kAlamat]) petaAlamat[kAlamat] = [];
+                    petaAlamat[kAlamat].push(inv);
+                }
+
+                // D. Kunci Identik 100% (Nama + Daftar Barang Persis Sama)
+                // Mengurutkan string barang agar urutan input berbeda tetap terdeteksi jika isinya sama
+                const stringBarang = inv.items.map(it => `${it.sarimbit}|${it.barang}|${it.varian}|${it.size}|${it.jumlah}`).sort().join('###');
+                const kIdentik = `${kNama}_${stringBarang}`;
+                if (!petaIdentik[kIdentik]) petaIdentik[kIdentik] = [];
+                petaIdentik[kIdentik].push(inv);
+            });
+
+            // Saring hanya kelompok yang jumlah invoicenya lebih dari 1 (Duplikat)
+            kelompokAudit.nama = Object.values(petaNama).filter(grup => grup.length > 1);
+            kelompokAudit.nohp = Object.values(petaNoHP).filter(grup => grup.length > 1);
+            kelompokAudit.alamat = Object.values(petaAlamat).filter(grup => grup.length > 1);
+            kelompokAudit.identik = Object.values(petaIdentik).filter(grup => grup.length > 1);
+
+            // Perbarui Angka Statistik
+            document.getElementById('stat-nama').innerText = hitungTotalInvoiceDuplikat(kelompokAudit.nama);
+            document.getElementById('stat-kontak').innerText = hitungTotalInvoiceDuplikat(kelompokAudit.nohp);
+            document.getElementById('stat-identik').innerText = hitungTotalInvoiceDuplikat(kelompokAudit.identik);
+
+            // Tampilkan tab yang sedang aktif
+            renderHasilAudit();
+        }
+
+        function hitungTotalInvoiceDuplikat(kelompok) {
+            return kelompok.reduce((total, grup) => total + grup.length, 0);
+        }
+
+        function gantiTab(tab) {
+            tabAktif = tab;
+            
+            // Atur gaya tombol tab
+            const tombol = ['identik', 'nama', 'nohp', 'alamat'];
+            tombol.forEach(t => {
+                const btn = document.getElementById(`btn-tab-${t}`);
+                if (t === tab) {
+                    btn.className = "px-4 py-2 rounded-xl font-bold text-xs transition bg-purple-600 text-white shadow-sm flex items-center gap-2";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl font-bold text-xs transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 flex items-center gap-2";
+                }
+            });
+
+            renderHasilAudit();
+        }
+
+        function renderHasilAudit() {
+            const wadah = document.getElementById('wadah-hasil-audit');
+            const dataGrup = kelompokAudit[tabAktif];
+
+            if (!dataGrup || dataGrup.length === 0) {
+                wadah.innerHTML = `
+                    <div class="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-300 my-4">
+                        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-800">Bagus! Tidak Ditemukan Data Ganda</h4>
+                        <p class="text-xs font-bold text-slate-400 mt-1">Sistem tidak menemukan duplikasi untuk kategori pemeriksaan ini.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let htmlOutput = '';
+
+            dataGrup.forEach((grup, indeksGrup) => {
+                const sampel = grup[0];
+                let judulKelompok = '';
+                let badgeTipe = '';
+
+                if (tabAktif === 'identik') {
+                    judulKelompok = `${sampel.nama.toUpperCase()} <span class="text-xs font-normal text-slate-500 block sm:inline mt-1 sm:mt-0 sm:ml-2">(Terdeteksi ${grup.length} Invoice Identik Persis)</span>`;
+                    badgeTipe = `<span class="bg-purple-100 text-purple-700 font-extrabold text-[10px] px-2.5 py-1 rounded-lg border border-purple-200 uppercase tracking-wider"><i class="fa-solid fa-clone mr-1"></i> Identik 100%</span>`;
+                } else if (tabAktif === 'nama') {
+                    judulKelompok = `${sampel.nama.toUpperCase()}`;
+                    badgeTipe = `<span class="bg-rose-100 text-rose-700 font-extrabold text-[10px] px-2.5 py-1 rounded-lg border border-rose-200 uppercase tracking-wider"><i class="fa-solid fa-user mr-1"></i> ${grup.length} Invoice Nama Sama</span>`;
+                } else if (tabAktif === 'nohp') {
+                    judulKelompok = `No. HP / WA: ${sampel.nohp}`;
+                    badgeTipe = `<span class="bg-amber-100 text-amber-700 font-extrabold text-[10px] px-2.5 py-1 rounded-lg border border-amber-200 uppercase tracking-wider"><i class="fa-solid fa-phone mr-1"></i> ${grup.length} Invoice Kontak Sama</span>`;
+                } else if (tabAktif === 'alamat') {
+                    judulKelompok = `Alamat: ${sampel.alamat.substring(0, 60)}...`;
+                    badgeTipe = `<span class="bg-blue-100 text-blue-700 font-extrabold text-[10px] px-2.5 py-1 rounded-lg border border-blue-200 uppercase tracking-wider"><i class="fa-solid fa-location-dot mr-1"></i> ${grup.length} Invoice Alamat Sama</span>`;
+                }
+
+                htmlOutput += `
+                    <div class="py-6 first:pt-2 last:pb-2">
+                        <!-- HEADER KELOMPOK -->
+                        <div class="bg-slate-800 text-white p-4 rounded-t-2xl flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Kelompok Duplikat #${indeksGrup + 1}</span>
+                                <h4 class="text-base font-black text-white mt-0.5">${judulKelompok}</h4>
+                            </div>
+                            <div>${badgeTipe}</div>
+                        </div>
+
+                        <!-- DAFTAR INVOICE DALAM KELOMPOK -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-slate-50 border-x border-b border-slate-200 rounded-b-2xl">
+                `;
+
+                grup.forEach((inv, indeksInv) => {
+                    const beratKg = inv.totalBerat >= 1000 ? (inv.totalBerat / 1000).toFixed(2) + " kg" : inv.totalBerat + " gr";
+                    const tanggalFormat = new Date(inv.tanggal).toLocaleString('id-ID', {
+                        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    // Susun HTML Daftar Barang
+                    const daftarBarangHTML = inv.items.map(it => `
+                        <div class="text-xs py-1.5 border-b border-slate-100 last:border-0 flex justify-between items-center text-slate-700">
+                            <span class="font-medium truncate pr-2">
+                                <span class="font-black text-blue-600 mr-1">${it.jumlah}x</span> 
+                                ${it.sarimbit} - ${it.barang} 
+                                <span class="text-[10px] text-slate-400">(${it.varian}/${it.size})</span>
+                            </span>
+                        </div>
+                    `).join('');
+
+                    htmlOutput += `
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden relative">
+                            <div class="p-4">
+                                <!-- IDENTITAS KARTU -->
+                                <div class="flex justify-between items-start gap-2 mb-3 pb-3 border-b border-slate-100">
+                                    <div>
+                                        <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-slate-100 text-slate-600 rounded inline-block mb-1">
+                                            Invoice #${indeksInv + 1}
+                                        </span>
+                                        <h5 class="font-black text-slate-800 text-sm leading-tight">${inv.nama.toUpperCase()}</h5>
+                                        <p class="text-[11px] font-bold text-indigo-600 mt-0.5"><i class="fa-solid fa-store mr-1"></i>${inv.toko || 'TANPA TOKO'}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-regular fa-clock mr-1"></i>Waktu Input:</span>
+                                        <span class="text-xs font-bold text-slate-700 block">${tanggalFormat}</span>
+                                    </div>
+                                </div>
+
+                                <!-- DATA KONTAK & ALAMAT -->
+                                <div class="space-y-1 mb-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 text-xs">
+                                    <div class="flex items-center text-slate-600 font-medium truncate">
+                                        <i class="fa-brands fa-whatsapp text-emerald-500 w-5 text-center mr-1"></i>
+                                        <span>${inv.nohp}</span>
+                                    </div>
+                                    <div class="flex items-start text-slate-600 font-medium">
+                                        <i class="fa-solid fa-location-dot text-rose-500 w-5 text-center mr-1 mt-0.5 shrink-0"></i>
+                                        <span class="line-clamp-2 text-[11px] leading-tight">${inv.alamat}</span>
+                                    </div>
+                                </div>
+
+                                <!-- DAFTAR BARANG -->
+                                <div class="mb-3">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Rincian Barang (${inv.items.length} Baris):</span>
+                                    <div class="max-h-36 overflow-y-auto pr-1 divide-y divide-slate-100 border border-slate-100 rounded-lg p-2 bg-white">
+                                        ${daftarBarangHTML}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FOOTER KARTU -->
+                            <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-between items-center text-xs font-black">
+                                <span class="text-indigo-600"><i class="fa-solid fa-shirt mr-1"></i>Total: ${inv.totalPcs} Pcs</span>
+                                <span class="text-slate-700"><i class="fa-solid fa-weight-hanging mr-1"></i>Berat: ${beratKg}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                htmlOutput += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            wadah.innerHTML = htmlOutput;
+        }
+    </script>
+</body>
+</html>

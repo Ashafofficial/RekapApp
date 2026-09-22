@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget KPI Sarimbit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Latar belakang transparan agar menyatu dengan wallpaper MacBook/Android */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: transparent !important; 
+            margin: 0; padding: 20px;
+            overflow: hidden; /* Mencegah scroll di widget */
+        }
+        .glass-widget { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            border-radius: 1.5rem;
+        }
+        .progress-bar-animated { transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body>
+
+    <div class="glass-widget p-5 mb-4 relative overflow-hidden">
+        <div class="flex justify-between items-end mb-3">
+            <div>
+                <h3 class="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-1 rounded w-fit mb-1 border border-indigo-100">Performance Metrik</h3>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">Target Omset 2026</h2>
+            </div>
+            <div class="text-right">
+                <span class="block text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Total Dana Masuk Saat Ini</span>
+                <span class="text-2xl font-black text-emerald-600" id="w-dana-masuk">Rp 0</span>
+                <span class="text-xs font-bold text-slate-400">/ Rp 10 M</span>
+            </div>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-4 mb-1.5 shadow-inner">
+            <div class="bg-gradient-to-r from-emerald-400 to-teal-500 h-4 rounded-full progress-bar-animated flex items-center justify-end px-2" style="width: 0%" id="w-target-bar">
+                <span class="text-[8px] font-black text-white" id="w-target-percent">0%</span>
+            </div>
+        </div>
+        <p class="text-[10px] font-semibold text-slate-500 text-center">Kekurangan target: <strong class="text-rose-500" id="w-target-lack">Rp 0</strong></p>
+    </div>
+
+    <div class="grid grid-cols-4 gap-3">
+        <div class="glass-widget p-3 flex items-center gap-3">
+            <div class="bg-blue-100 w-10 h-10 rounded-xl flex items-center justify-center text-blue-600"><i class="fa-solid fa-boxes-stacked text-lg"></i></div>
+            <div>
+                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Total PCS</p>
+                <p class="text-sm font-black text-slate-800" id="w-pcs">0 <span class="text-[9px] font-bold text-slate-500">pcs</span></p>
+            </div>
+        </div>
+        <div class="glass-widget bg-gradient-to-br from-indigo-500 to-purple-600 p-3 flex items-center gap-3 border-none">
+            <div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center text-white backdrop-blur-sm"><i class="fa-solid fa-file-invoice-dollar text-lg"></i></div>
+            <div>
+                <p class="text-[8px] font-black text-indigo-100 uppercase tracking-widest">Nilai Pesanan</p>
+                <p class="text-sm font-black text-white" id="w-nilai">Rp 0</p>
+            </div>
+        </div>
+        <div class="glass-widget p-3 flex items-center gap-3">
+            <div class="bg-emerald-100 w-10 h-10 rounded-xl flex items-center justify-center text-emerald-600"><i class="fa-solid fa-money-bill-wave text-lg"></i></div>
+            <div>
+                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Dana Masuk</p>
+                <p class="text-sm font-black text-slate-800" id="w-masuk">Rp 0</p>
+            </div>
+        </div>
+        <div class="glass-widget p-3 flex items-center gap-3">
+            <div class="bg-amber-100 w-10 h-10 rounded-xl flex items-center justify-center text-amber-600"><i class="fa-solid fa-hand-holding-dollar text-lg"></i></div>
+            <div>
+                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Sisa Tagihan</p>
+                <p class="text-sm font-black text-amber-600" id="w-sisa">Rp 0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi Database Supabase Bapak
+        const SUPABASE_URL = "https://dhrnbqitaxykmufucucv.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_I0ehNCjUO9Y-FULSmMVPAg_3VlsLqL6";
+        const TARGET_OMSET = 10000000000; // 10 Miliar
+
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        async function fetchWidgetData() {
+            try {
+                // Tarik langsung dari server Supabase agar selalu Real-Time
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*`, {
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                
+                if (!res.ok) return;
+                const orders = await res.json();
+
+                // Kalkulasi Logic Sama Persis dengan Dashboard.html
+                let totalPcs = 0;
+                let grossNilaiOrder = 0;
+                let totalDanaMasuk = 0;
+
+                const grouped = {};
+                orders.forEach(it => {
+                    if (it.syncstatus === -1) return; // Abaikan data terhapus
+                    if(!grouped[it.idcustomer]) grouped[it.idcustomer] = [];
+                    grouped[it.idcustomer].push(it);
+                });
+
+                Object.values(grouped).forEach(items => {
+                    const grossInvoice = items.reduce((sum, it) => sum + ((Number(it.jumlah)||0) * (Number(it.harga)||0)), 0);
+                    const dTipe = items[0].diskonTipe || 'none';
+                    const dNilai = Number(items[0].diskonNilai) || 0;
+
+                    let diskonInvoice = 0;
+                    if (dTipe === 'persen') diskonInvoice = (grossInvoice * dNilai) / 100;
+                    else if (dTipe === 'angka') diskonInvoice = dNilai;
+
+                    let netInvoice = grossInvoice - diskonInvoice;
+                    if (netInvoice < 0) netInvoice = 0;
+
+                    grossNilaiOrder += netInvoice;
+                    
+                    items.forEach(it => totalPcs += (Number(it.jumlah)||0));
+                    
+                    // Hitung Dana Masuk (Ambil dari baris pertama tiap invoice agar tidak ganda)
+                    totalDanaMasuk += (Number(items[0].cicilan1)||0) + (Number(items[0].cicilan2)||0) + (Number(items[0].cicilan3)||0);
+                });
+
+                const sisaTagihan = grossNilaiOrder - totalDanaMasuk;
+
+                // Update UI
+                document.getElementById('w-pcs').innerHTML = `${totalPcs} <span class="text-[9px] font-bold text-slate-500">pcs</span>`;
+                document.getElementById('w-nilai').innerText = formatRp(grossNilaiOrder);
+                document.getElementById('w-masuk').innerText = formatRp(totalDanaMasuk);
+                document.getElementById('w-sisa').innerText = formatRp(sisaTagihan);
+                document.getElementById('w-dana-masuk').innerText = formatRp(totalDanaMasuk);
+
+                // Update Progress Bar
+                let persentase = (totalDanaMasuk / TARGET_OMSET) * 100;
+                if (persentase > 100) persentase = 100;
+                
+                setTimeout(() => {
+                    document.getElementById('w-target-bar').style.width = persentase + '%';
+                }, 300);
+                
+                document.getElementById('w-target-percent').innerText = persentase.toFixed(1) + '%';
+                
+                let kekurangan = TARGET_OMSET - totalDanaMasuk;
+                const lackElem = document.getElementById('w-target-lack');
+                if(kekurangan <= 0){
+                    lackElem.innerText = "TARGET TERLAMPAUI!";
+                    lackElem.className = "text-emerald-500 font-black";
+                } else {
+                    lackElem.innerText = formatRp(kekurangan);
+                }
+
+            } catch (error) {
+                console.error("Gagal memuat data widget:", error);
+            }
+        }
+
+        // Jalankan saat dibuka
+        fetchWidgetData();
+        
+        // Auto-refresh setiap 5 Menit (300.000 ms) agar selalu update
+        setInterval(fetchWidgetData, 300000);
+    </script>
+</body>
+</html>

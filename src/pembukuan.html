@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dashboard Pembukuan PO</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(() => console.log("Pembukuan Offline Aktif!"));
+    }
+  </script>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  <script src="database.js?v=14"></script>
+
+  <style>
+    /* ==========================================
+       UI UPGRADE: WINDOWS 11 / DESKTOP FEEL
+       ========================================== */
+    body { 
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f0f4f8; 
+        background-image:
+            radial-gradient(at 0% 0%, hsla(210, 100%, 95%, 1) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(220, 100%, 90%, 0.8) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, hsla(240, 100%, 94%, 1) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, hsla(200, 100%, 92%, 0.8) 0px, transparent 50%);
+        background-attachment: fixed;
+        -webkit-tap-highlight-color: transparent; 
+        color: #1e293b;
+    }
+    
+    .glass { 
+        background: rgba(255, 255, 255, 0.7) !important; 
+        backdrop-filter: blur(20px) saturate(150%); 
+        -webkit-backdrop-filter: blur(20px) saturate(150%); 
+        border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+        box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(255,255,255,0.8) !important; 
+    }
+    
+    .glass-header { 
+        background: rgba(255, 255, 255, 0.85) !important; 
+        backdrop-filter: blur(24px); 
+        -webkit-backdrop-filter: blur(24px); 
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important; 
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+    }
+    
+    /* ==========================================
+       REAKSI KOLOM INPUT (KURSOR MENDEKAT & DIKLIK)
+       ========================================== */
+    .glass-input { 
+        background: rgba(255, 255, 255, 0.8) !important; 
+        border: 1px solid rgba(226, 232, 240, 0.8) !important; 
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+        outline: none; 
+    }
+    
+    .glass-input:hover, input[type="text"]:hover, input[type="number"]:hover, input[type="date"]:hover, select:hover, textarea:hover {
+        background: #ffffff !important;
+        border-color: #93c5fd !important;
+        box-shadow: 0 6px 16px -4px rgba(59, 130, 246, 0.25), inset 0 1px 2px rgba(0,0,0,0.01) !important;
+        transform: translateY(-2px);
+    }
+
+    .glass-input:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+        background: #ffffff !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25), 0 8px 24px -4px rgba(59, 130, 246, 0.2) !important;
+        transform: translateY(-3px);
+        outline: none !important;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    tbody tr { transition: background-color 0.2s ease; }
+    tbody tr:hover { 
+        background-color: rgba(219, 234, 254, 0.5) !important; 
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background-color: rgba(148, 163, 184, 0.6); }
+
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    
+    button:active { transform: scale(0.96); }
+    
+    .fade-update { animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeInScale { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  </style>
+</head>
+<body class="p-2 md:p-6 pb-24 text-slate-800">
+
+  <div id="connection-banner" class="fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[10px] font-black uppercase tracking-widest hidden shadow-sm transition-opacity duration-300"></div>
+
+  <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <a href="index.html" class="text-blue-600 font-bold text-[11px] flex items-center gap-1.5 mb-3 hover:text-blue-800 transition-all drop-shadow-sm w-fit px-3 py-1.5 bg-blue-50/50 rounded-lg border border-blue-100 hover:bg-blue-100 active:scale-95">
+        <i class="fa-solid fa-arrow-left"></i> KEMBALI KE PANEL UTAMA
+      </a>
+      <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm">DASHBOARD PEMBUKUAN</h1>
+      <p class="text-slate-500 font-semibold mt-1 text-xs md:text-sm">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center glass rounded-xl hover:bg-white active:scale-95 transition-all text-slate-500 hover:text-blue-600 border border-slate-200 shadow-sm" title="Refresh Data">
+          <i class="fa-solid fa-rotate text-base"></i>
+        </button>
+        <div id="status-sync" class="transition-all duration-300 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm border border-slate-200 bg-white/50">
+           <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-400"></div> 
+           <span id="status-text">MEMERIKSA KONEKSI...</span>
+        </div>
+    </div>
+  </div>
+
+  <div class="max-w-[98%] mx-auto mb-6 space-y-3">
+    <div class="glass p-4 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 shadow-sm">
+      <div class="relative group">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base"></i>
+          <input type="text" id="filter-sarimbit" onkeyup="filterTable()" placeholder="Cari Koleksi Sarimbit..." class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-slate-800">
+      </div>
+      <div class="relative group">
+          <i class="fa-solid fa-building absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base"></i>
+          <input type="text" id="filter-pusat" onkeyup="filterTable()" placeholder="Cari Nama Pusat/Brand..." class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-slate-800">
+      </div>
+    </div>
+    
+    <div class="flex flex-wrap gap-2">
+      <button onclick="exportToExcel()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-black text-[11px] shadow-md border border-emerald-400/50 flex items-center gap-1.5 btn-hover-fx">
+        <i class="fa-solid fa-file-excel text-sm"></i> UNDUH EXCEL
+      </button>
+      <button onclick="exportToPDF()" class="bg-gradient-to-r from-rose-500 to-rose-600 text-white px-5 py-2.5 rounded-xl font-black text-[11px] shadow-md border border-rose-400/50 flex items-center gap-1.5 btn-hover-fx">
+        <i class="fa-solid fa-file-pdf text-sm"></i> UNDUH PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-[98%] mx-auto glass rounded-3xl shadow-xl overflow-hidden border border-slate-200/80 bg-white/40">
+    <div class="overflow-x-auto max-h-[75vh]">
+      <table class="w-full text-left min-w-[1050px] xl:min-w-full" id="table-pembukuan">
+        <thead class="sticky-head">
+          <tr class="text-slate-500 text-[9px] uppercase tracking-widest font-black">
+            <th class="p-2.5 2xl:p-3 w-10 text-center">No</th>
+            <th class="p-2.5 2xl:p-3 w-[11%]">Koleksi Sarimbit</th>
+            <th class="p-2.5 2xl:p-3 w-[8%]">Nama Pusat</th>
+            <th class="p-2.5 2xl:p-3 w-[6%] text-center">Total Pcs</th>
+            <th class="p-2.5 2xl:p-3 w-[16%]">Produksi (Close/Ready)</th>
+            <th class="p-2.5 2xl:p-3 w-[18%]">Penagihan (C1/C2/Lunas)</th>
+            <th class="p-2.5 2xl:p-3 w-[16%] text-blue-700">Pembayaran (DP/Lunas)</th>
+            <th class="p-2.5 2xl:p-3 w-[12%]">Logistik & Alamat</th>
+            <th class="p-2.5 2xl:p-3 w-[8%]">Status Admin</th>
+            <th class="p-2.5 2xl:p-3 w-[5%] text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="pembukuan-body" class="divide-y divide-slate-200">
+          <tr>
+            <td colspan="10" class="p-20 text-center text-slate-400 font-bold animate-pulse">
+                <div class="flex flex-col items-center justify-center gap-3">
+                    <i class="fa-solid fa-circle-notch animate-spin text-3xl text-blue-500/50"></i>
+                    <span class="text-base">Sedang memuat & menyinkronkan data pembukuan...</span>
+                </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
+      <span id="toast-msg" class="text-xs font-semibold tracking-wide"></span>
+  </div>
+
+  <script>
+    let rawSummary = [];
+
+    // ==========================================
+    // FUNGSI BARU: FORMAT RIBUAN DENGAN TITIK (DIHAPUS, DIGANTI NUMBER)
+
+    function bersihkanAngka(value) {
+        if (!value) return 0;
+        return Number(value.toString().replace(/\./g, '')) || 0;
+    }
+
+    function updateSinyal() {
+      const div = document.getElementById('status-sync');
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('status-text');
+      const banner = document.getElementById('connection-banner');
+
+      if (navigator.onLine) {
+        div.className = "bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
+        dot.className = "w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
+        txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+        
+        banner.innerText = "SISTEM ONLINE (SINKRONISASI AKTIF)";
+        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-emerald-500 text-white block shadow-sm";
+        setTimeout(() => banner.classList.add('hidden'), 3500); 
+      } else {
+        div.className = "bg-orange-50 border border-orange-200 text-orange-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
+        dot.className = "w-2 h-2 bg-orange-500 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.8)]";
+        txt.innerText = "OFFLINE (MODE LOKAL)";
+
+        banner.innerText = "OFFLINE MODE (DATA TERSIMPAN DI PERANGKAT)";
+        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-orange-500 text-white block shadow-sm";
+        setTimeout(() => banner.classList.add('hidden'), 3500); 
+      }
+    }
+   // ==============================================================
+    // SENSOR SINYAL & MESIN SINKRONISASI PINTAR (SMART AUTO-SYNC)
+    // ==============================================================
+    window.addEventListener('offline', () => { 
+        updateSinyal(); 
+        showToast("📶 Sinyal terputus. Data otomatis diamankan di memori lokal."); 
+    });
+
+    window.addEventListener('online', () => { 
+        updateSinyal(); 
+        showToast("🌐 Online kembali! Memeriksa sinkronisasi data..."); 
+        sinkronisasiSenyap(); // Panggil mesin pintar tanpa me-refresh layar
+    });
+
+    async function sinkronisasiSenyap() {
+        if (!navigator.onLine) return;
+        try {
+            const headersJSON = { 
+                "Content-Type": "application/json", 
+                "Prefer": "resolution=merge-duplicates",
+                "x-sacha-token": tokenPerangkat // <-- TAMBAHAN VVIP
+            };
+            
+            // 1. MENGINTIP DATA PEMBUKUAN SERVER
+            let dataServerBuku = [];
+            if (typeof supabaseFetch === 'function') {
+                const resServer = await supabaseFetch('/rest/v1/pembukuan?select=id,updated_at');
+                if (resServer) dataServerBuku = resServer;
+            }
+
+            // 2. PROSES PENYARINGAN CERDAS (SMART FILTER)
+            const semuaBukuLokal = await dbLokal.pembukuan.toArray();
+            const dataSiapKirimBuku = [];
+
+            semuaBukuLokal.forEach(lokal => {
+                const serverMatch = dataServerBuku.find(s => String(s.id) === String(lokal.id));
+                
+                if (!serverMatch) {
+                    dataSiapKirimBuku.push(lokal);
+                } else {
+                    const waktuLokal = new Date(lokal.updated_at || 0).getTime();
+                    const waktuServer = new Date(serverMatch.updated_at || 0).getTime();
+                    if (waktuLokal > waktuServer) dataSiapKirimBuku.push(lokal);
+                }
+            });
+
+            // 3. EKSEKUSI PENGIRIMAN (Hanya yang tersaring)
+            if (dataSiapKirimBuku.length > 0 && typeof supabaseFetch === 'function') {
+                await supabaseFetch('/rest/v1/pembukuan?on_conflict=id', {
+                    method: "POST", headers: headersJSON, body: JSON.stringify(dataSiapKirimBuku)
+                });
+                console.log(`✅ Smart Auto-Sync: Berhasil menembakkan ${dataSiapKirimBuku.length} data Pembukuan ke Supabase.`);
+            } else {
+                console.log("✅ Smart Auto-Sync: Pembukuan Selesai. Tidak ada bentrok.");
+            }
+        } catch (error) {
+            console.error("❌ Gagal Smart Auto-Sync Pembukuan:", error);
+        }
+    }
+
+  // ==============================================================
+    // FUNGSI TARIK DATA OFFLINE (DEXIE LOKAL)
+    // ==============================================================
+    async function loadDataOffline() {
+        console.log("🎮 Mode Offline Active: Memuat data dari Dexie...");
+        try {
+            const localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
+            const localBuku = await dbLokal.pembukuan.toArray();
+            
+            // 1. Rekap pesanan dari memori lokal (pengganti server Google)
+            const summaryMap = {};
+            localOrders.forEach(o => {
+                if (!o.sarimbit) return;
+                if (!summaryMap[o.sarimbit]) {
+                    summaryMap[o.sarimbit] = { sarimbit: o.sarimbit, brand: o.pusat || o.toko || "Pusat", totalOrder: 0 };
+                }
+                summaryMap[o.sarimbit].totalOrder += Number(o.jumlah || 0);
+            });
+            
+            let mergedSummary = Object.values(summaryMap);
+            
+            // 2. Tempelkan seluruh isian kolom form (DP, Lunas, Jadwal) ke data rekap
+            mergedSummary = mergedSummary.map(item => {
+                const localMatch = localBuku.find(l => l.sarimbit === item.sarimbit);
+                if (localMatch) {
+                    Object.assign(item, localMatch); // Menarik isi form DP, Tanggal, dll
+                    item.isarchived = localMatch.isarchived || localMatch.isArchived || false;
+                    if (item.isarchived) item.totalOrder = localMatch.total || item.totalOrder;
+                    item.waktuPembuatan = localMatch.id || 0;
+                } else {
+                    item.waktuPembuatan = Date.now() + Math.random();
+                }
+                return item;
+            });
+
+            // 3. Masukkan juga data yang sudah diarsipkan (Soft-Delete)
+            localBuku.forEach(buku => {
+                if (!mergedSummary.find(m => m.sarimbit === buku.sarimbit)) {
+                    buku.totalOrder = buku.total; 
+                    buku.waktuPembuatan = buku.id || 0;
+                    mergedSummary.push(buku);
+                }
+            });
+
+            mergedSummary.sort((a, b) => b.waktuPembuatan - a.waktuPembuatan);
+            renderPembukuan(mergedSummary);
+            showToast("✅ Berhasil memuat data dari memori lokal.");
+        } catch (e) {
+            console.error("Gagal load offline:", e);
+            showToast("❌ Gagal memuat data lokal.");
+            document.getElementById('pembukuan-body').innerHTML = `<tr><td colspan="10" class="p-10 text-center font-bold text-rose-500">Gagal memuat data offline.</td></tr>`;
+        }
+    }
+
+    // MEMUAT DATA PERTAMA KALI HALAMAN DIBUKA
+    window.onload = function() {
+      updateSinyal();
+      
+      // JIKA OFFLINE ATAU TIDAK ADA GOOGLE SCRIPT (SEPERTI DI VSCODE)
+      if (!navigator.onLine || typeof google === 'undefined') {
+          loadDataOffline();
+          return;
+      }
+
+      google.script.run
+        .withSuccessHandler(async (summaryArray) => {
+            try {
+                const localBuku = await dbLokal.pembukuan.toArray();
+                const mergedSummary = summaryArray.map(item => {
+                        const localMatch = localBuku.find(l => l.sarimbit === item.sarimbit);
+                        if (localMatch) {
+                            // PERBAIKAN: Suntikkan seluruh isi form agar tidak kosong saat baru refresh
+                            Object.assign(item, localMatch);
+                            item.isarchived = localMatch.isarchived || localMatch.isArchived || false;
+                            if (item.isarchived) item.totalOrder = localMatch.total || item.totalOrder;
+                            item.waktuPembuatan = localMatch.id || 0;
+                        } else {
+                            item.waktuPembuatan = Date.now() + Math.random();
+                        }
+                        return item;
+                    });
+                    
+                    // Pastikan data yang sudah diarsip tetap muncul di tabel
+                    localBuku.forEach(buku => {
+                        if (!mergedSummary.find(m => m.sarimbit === buku.sarimbit)) {
+                            buku.totalOrder = buku.total; 
+                            buku.waktuPembuatan = buku.id || 0;
+                            mergedSummary.push(buku);
+                        }
+                    });
+
+                    mergedSummary.sort((a, b) => b.waktuPembuatan - a.waktuPembuatan);
+                    renderPembukuan(mergedSummary);
+            } catch (err) {
+                console.error("Gagal sinkronisasi arsip lokal:", err);
+                renderPembukuan(summaryArray);
+            }
+        })
+        .withFailureHandler(() => {
+            showToast("⚠️ Gagal terhubung ke Server Google, menggunakan memori lokal.");
+            loadDataOffline();
+        })
+        .getDataPembukuan();
+    };
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      t.classList.remove('-translate-y-32', 'opacity-0', 'scale-90');
+      t.classList.add('translate-y-0', 'opacity-100', 'scale-100');
+      if(window.toastTimeout) clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(() => {
+          t.classList.remove('translate-y-0', 'opacity-100', 'scale-100');
+          t.classList.add('-translate-y-32', 'opacity-0', 'scale-90');
+      }, 3000);
+    }
+
+    function formatTanggalPanjang(dateString) {
+      if (!dateString || dateString === "") return "-";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "-";
+      const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+      return `${hari[date.getDay()]}, ${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    function renderPembukuan(summaryArray) {
+      rawSummary = summaryArray; 
+      const tbody = document.getElementById('pembukuan-body');
+
+      if (!summaryArray || summaryArray.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-16 text-center text-slate-400 font-bold bg-white/40">Belum ada data pesanan masuk.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = summaryArray.map((item, index) => {
+        const sarimbitName = item.sarimbit || "Tanpa Nama";
+        const autoSave = `onchange="simpanRow(${index}, '${sarimbitName}')"`;
+        
+        // 1. AMBIL TOTAL TERAKHIR (Jika order aktif 0 karena diarsip, pakai data 'total' yang sudah terkunci di Supabase)
+        const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
+        
+        // 2. CEK STATUS ARSIP (Mendukung pembacaan huruf kecil dari Supabase)
+        const statusArsip = item.isarchived || item.isArchived;
+
+        return `
+          <tr class="item-row hover:bg-slate-50/80 transition-colors align-top border-b border-slate-200">
+            <td class="p-2.5 2xl:p-3 font-black text-slate-400 text-[10px] text-center border-r border-slate-100">${index + 1}</td>
+            
+            <td class="p-2.5 2xl:p-3 font-black text-slate-800 sarimbit-name text-[10px] leading-tight drop-shadow-sm border-r border-slate-100">
+                ${sarimbitName}
+                ${statusArsip ? '<br><span class="inline-block mt-1.5 px-2 py-1 text-[8px] bg-rose-100 text-rose-600 rounded font-black uppercase tracking-widest shadow-sm"><i class="fa-solid fa-box-archive mr-1"></i>Diarsip</span>' : ''}
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 border-r border-slate-100">
+              <div class="font-bold text-slate-700 text-[9px] uppercase tracking-wider bg-white px-1.5 py-1 rounded border border-slate-200 shadow-sm w-fit">${item.brand || '-'}</div>
+              <input type="hidden" id="brand-${index}" value="${item.brand || ''}" class="brand-name">
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 text-center border-r border-slate-100">
+              <div class="flex flex-col items-center justify-center bg-blue-50/80 py-1.5 rounded-lg border border-blue-100 h-full ${statusArsip ? 'opacity-80' : ''}">
+                <span class="val-total-pcs text-base font-black text-blue-600 leading-none drop-shadow-sm">${finalQty}</span>
+                <span class="text-[7px] font-bold text-slate-500 mt-0.5 uppercase tracking-widest">Pcs</span>
+              </div>
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 space-y-1.5 border-r border-slate-100">
+              <div class="flex flex-col gap-0.5">
+                <label class="text-[8px] font-bold text-slate-500 tracking-widest uppercase">CLOSE PO:</label>
+                <div class="flex flex-col xl:flex-row xl:items-center gap-1">
+                    <input type="date" id="close-${index}" value="${item.close || ''}" ${autoSave} class="glass-input flex-1 p-2 text-[10px] font-bold text-slate-700 rounded-md cursor-pointer">
+                    <span class="text-[7px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded border border-blue-100 w-fit whitespace-nowrap">${formatTanggalPanjang(item.close)}</span>
+                </div>
+              </div>
+              <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-100">
+                <label class="text-[8px] font-bold text-slate-500 tracking-widest uppercase">READY:</label>
+                <div class="flex flex-col xl:flex-row xl:items-center gap-1">
+                    <input type="date" id="ready-${index}" value="${item.ready || ''}" ${autoSave} class="glass-input flex-1 p-2 text-[10px] font-bold text-slate-700 rounded-md cursor-pointer">
+                    <span class="text-[7px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100 w-fit whitespace-nowrap">${formatTanggalPanjang(item.ready)}</span>
+                </div>
+              </div>
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 space-y-1.5 border-r border-slate-100 bg-slate-50/30">
+              <div class="flex flex-col gap-0.5">
+                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Jadwal C1</label>
+                  <input type="text" id="c1-${index}" value="${item.c1 || ''}" ${autoSave} placeholder="Ketik C1..." class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-800">
+              </div>
+              <div class="flex flex-col gap-0.5">
+                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Jadwal C2</label>
+                  <input type="text" id="c2-${index}" value="${item.c2 || ''}" ${autoSave} placeholder="Ketik C2..." class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-800">
+              </div>
+              <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-200">
+                  <label class="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">PELUNASAN</label>
+                  <input type="text" id="lunas-${index}" value="${item.Lunas || ''}" ${autoSave} placeholder="Jadwal Lunas..." class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-emerald-700 bg-emerald-50/50 border-emerald-200">
+              </div>
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 border-r border-slate-100">
+              <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm space-y-2.5">
+                <div class="flex flex-col gap-0.5">
+                  <label class="text-[8px] font-black text-blue-600 uppercase tracking-widest">Total Uang DP</label>
+                <div class="relative">
+                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[9px]">Rp</span>
+                    <input type="number" id="dp-${index}" value="${item.dp || ''}" ${autoSave} class="input-dp glass-input w-full pl-8 pr-1.5 py-2 text-[10px] rounded-md font-black text-blue-700 shadow-inner bg-blue-50/30">
+                 </div>
+
+                 <label class="text-[8px] font-black text-emerald-600 uppercase tracking-widest mt-2">Uang Pelunasan</label>
+                 <div class="relative">
+                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[9px]">Rp</span>
+                    <input type="number" id="bayar-${index}" value="${item.bayar || ''}" ${autoSave} class="input-bayar glass-input w-full pl-8 pr-1.5 py-2 text-[10px] rounded-md font-black text-emerald-700 shadow-inner bg-emerald-50/30">
+                 </div>
+                </div>
+              </div>
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 space-y-2 border-r border-slate-100 bg-slate-50/30">
+              <div>
+                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest block mb-0.5">Metode Kirim</label>
+                  <select id="kirim-${index}" ${autoSave} class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-700 cursor-pointer shadow-sm">
+                    <option value="Langsung" ${item.statusKirim === 'Langsung' ? 'selected' : ''}>🚀 Langsung</option>
+                    <option value="DS" ${item.statusKirim === 'DS' ? 'selected' : ''}>📦 Drop Ship</option>
+                  </select>
+              </div>
+              <div>
+                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest block mb-0.5">Status Alamat</label>
+                  <select id="alamat-${index}" ${autoSave} class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-700 cursor-pointer shadow-sm">
+                    <option value="Belum Lengkap" ${item.statusAlamat === 'Belum Lengkap' ? 'selected' : ''}>❌ Belum Lengkap</option>
+                    <option value="Sudah Lengkap" ${item.statusAlamat === 'Sudah Lengkap' ? 'selected' : ''}>✅ Lengkap</option>
+                  </select>
+              </div>
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 space-y-1.5 border-r border-slate-100">
+              <label class="flex items-center gap-1.5 cursor-pointer group bg-white p-1.5 rounded-lg border border-slate-200 hover:border-blue-300 shadow-sm transition-all active:scale-95">
+                <input type="checkbox" id="print-${index}" ${item.isPrinted ? 'checked' : ''} ${autoSave} class="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer">
+                <span class="text-[8px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors uppercase tracking-widest">Diprint</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer group bg-white p-1.5 rounded-lg border border-slate-200 hover:border-emerald-300 shadow-sm transition-all active:scale-95">
+                <input type="checkbox" id="info-${index}" ${item.isInformed ? 'checked' : ''} ${autoSave} class="w-3.5 h-3.5 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer">
+                <span class="text-[8px] font-bold text-slate-600 group-hover:text-emerald-600 transition-colors uppercase tracking-widest">Info Lunas</span>
+              </label>
+            </td>
+            
+            <td class="p-2.5 2xl:p-3 text-center align-middle">
+              <div class="h-8 w-8 mx-auto flex items-center justify-center bg-white rounded-full border border-slate-200 shadow-sm backdrop-blur-sm">
+                <div id="loader-${index}" class="hidden text-blue-500 animate-spin text-sm"><i class="fa-solid fa-circle-notch"></i></div>
+                <div id="check-${index}" class="hidden text-emerald-500 text-sm scale-110 drop-shadow-sm"><i class="fa-solid fa-check"></i></div>
+                <div id="idle-${index}" class="text-slate-300 text-xs"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              </div>
+              <div class="text-[7px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Sync</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // KUNCI REVISI 2: Mengamankan properti isarchived saat auto-save
+    async function simpanRow(idx, sarimbit) {
+      const loader = document.getElementById(`loader-${idx}`);
+      const check = document.getElementById(`check-${idx}`);
+      const idle = document.getElementById(`idle-${idx}`);
+
+      // PENARIKAN DATA INPUT DARI FORM
+      const valClose = document.getElementById(`close-${idx}`).value;
+      const valReady = document.getElementById(`ready-${idx}`).value;
+      const valC1 = document.getElementById(`c1-${idx}`).value;
+      const valC2 = document.getElementById(`c2-${idx}`).value;
+      const valLunas = document.getElementById(`lunas-${idx}`).value;
+
+      const dpBersih = Number(document.getElementById(`dp-${idx}`).value) || 0;
+      const bayarBersih = Number(document.getElementById(`bayar-${idx}`).value) || 0;
+
+      const activeData = rawSummary[idx];
+
+      // MEMPERTAHANKAN STATUS ARSIP ASLI DARI DATABASE LOKAL AGAR TIDAK TERTELAN JADI FALSE
+      let statusArsipAsli = false;
+      try {
+          const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
+          if (existingData) {
+              statusArsipAsli = existingData.isarchived || existingData.isArchived || false;
+          }
+      } catch (err) {
+          console.error("Gagal memeriksa status arsip lokal:", err);
+      }
+
+     // DATA YANG DIKIRIM (Pakai "" bukan null agar kebal terhadap error Not Null Database)
+     const dataToSave = {
+        sarimbit: sarimbit || "",
+        brand: document.getElementById(`brand-${idx}`).value || "",
+        total: activeData ? (Number(activeData.totalOrder) || 0) : 0, 
+        close: valClose || "", 
+        ready: valReady || "", 
+        c1: valC1 || "",
+        c2: valC2 || "",
+        Lunas: valLunas || "", // Menggunakan L besar
+        dp: dpBersih, 
+        bayar: bayarBersih.toString(), // Di Supabase text, jadi dikonversi ke teks
+        statusKirim: document.getElementById(`kirim-${idx}`).value || "",
+        statusAlamat: document.getElementById(`alamat-${idx}`).value || "",
+        isarchived: statusArsipAsli, // Mengunci nilai asli agar tidak berubah menjadi false saat diedit
+        isPrinted: document.getElementById(`print-${idx}`).checked,
+        isInformed: document.getElementById(`info-${idx}`).checked,
+        updated_at: new Date().toISOString()
+      };
+
+      if (idle) idle.classList.add('hidden');
+      if (loader) loader.classList.remove('hidden');
+      
+      try {
+        const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
+        
+        // Penguncian ID agar tidak undefined (Prioritas 1: Cloud, Prioritas 2: Lokal)
+        let idValid = (activeData && activeData.id) ? activeData.id : (existingData ? existingData.id : null);
+        let resServer = null;
+
+        if (navigator.onLine) {
+            if (idValid) {
+                // Update Data (PATCH) - Pastikan ID tidak undefined
+                resServer = await supabaseFetch(`/rest/v1/pembukuan?id=eq.${idValid}`, { 
+                    method: 'PATCH', 
+                    headers: { "Content-Type": "application/json", "Prefer": "return=representation" },
+                    body: JSON.stringify(dataToSave) 
+                });
+            } else {
+                // Bikin Data Baru (POST)
+                dataToSave.id = Date.now() + Math.floor(Math.random() * 1000);
+                idValid = dataToSave.id;
+                resServer = await supabaseFetch('/rest/v1/pembukuan', { 
+                    method: 'POST', 
+                    headers: { "Content-Type": "application/json", "Prefer": "return=representation" },
+                    body: JSON.stringify([dataToSave]) 
+                });
+            }
+
+            // Jika gagal tembus Supabase, langsung lemparkan ke error lokal
+            if (resServer === null || resServer.error) {
+                throw new Error("Ditolak oleh Server Supabase");
+            }
+        } else {
+            // Jika Offline, buat ID baru untuk ditampung di lokal
+            if (!idValid) {
+                dataToSave.id = Date.now() + Math.floor(Math.random() * 1000);
+                idValid = dataToSave.id;
+            }
+        }
+
+        // 3. SIMPAN KE DATABASE LOKAL (DEXIE)
+        dataToSave.id = idValid; // Pasang ID yang valid ke dalam data sebelum disimpan ke lokal
+        
+        // Pakai .put() (Upsert) agar lebih stabil dan tidak crash saat koneksi terputus
+        await dbLokal.pembukuan.put(dataToSave);
+        catatLog(existingData ? 'UPDATE' : 'CREATE', 'PEMBUKUAN', `Simpan pembukuan sarimbit: ${sarimbit}`);
+
+        if (loader) loader.classList.add('hidden');
+        if (check) {
+          check.classList.remove('hidden');
+          setTimeout(() => { check.classList.add('hidden'); if (idle) idle.classList.remove('hidden'); }, 2500);
+        }
+      } catch (e) {
+        console.error("Gagal simpan:", e);
+        if (loader) loader.classList.add('hidden');
+        if (idle) idle.classList.remove('hidden');
+        showToast("⚠️ Gagal ke Cloud. Pastikan internet stabil!");
+      }
+    }
+
+    function filterTable() {
+      const sQuery = document.getElementById('filter-sarimbit').value.toLowerCase();
+      const bQuery = document.getElementById('filter-pusat').value.toLowerCase();
+      document.querySelectorAll('.item-row').forEach(row => {
+        const sName = row.querySelector('.sarimbit-name').innerText.toLowerCase();
+        const bName = row.querySelector('.brand-name').value.toLowerCase();
+        row.style.display = (sName.includes(sQuery) && bName.includes(bQuery)) ? "" : "none";
+      });
+    }
+
+    function exportToExcel() {
+      const rows = document.querySelectorAll('.item-row');
+      const dataForExcel = [["No", "Koleksi Sarimbit", "Nama Pusat", "Total Pcs", "Tgl Close", "Tgl Ready", "Jadwal C1", "Jadwal C2", "Pelunasan", "Nominal DP", "Nominal Pelunasan", "Status Kirim", "Status Alamat", "Sudah Diprint", "Info Lunas"]];
+      rows.forEach((row, i) => {
+        if (row.style.display !== 'none') {
+          dataForExcel.push([
+            i + 1, 
+            row.querySelector('.sarimbit-name').innerText.replace('Diarsip','').trim(), 
+            row.querySelector('.brand-name').value, 
+            row.querySelector('.val-total-pcs').innerText,
+            formatTanggalPanjang(row.querySelectorAll('input[type="date"]')[0].value), 
+            formatTanggalPanjang(row.querySelectorAll('input[type="date"]')[1].value),
+            row.querySelectorAll('input[type="text"]')[0].value, 
+            row.querySelectorAll('input[type="text"]')[1].value, 
+            row.querySelectorAll('input[type="text"]')[2].value,
+            bersihkanAngka(row.querySelector('.input-dp').value),
+            bersihkanAngka(row.querySelector('.input-bayar').value),
+            row.querySelectorAll('select')[0].value, 
+            row.querySelectorAll('select')[1].value,
+            row.querySelectorAll('input[type="checkbox"]')[0].checked ? "Ya" : "Belum",
+            row.querySelectorAll('input[type="checkbox"]')[1].checked ? "Ya" : "Belum"
+          ]);
+        }
+      });
+      const ws = XLSX.utils.aoa_to_sheet(dataForExcel); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Pembukuan");
+      XLSX.writeFile(wb, `Pembukuan_Export_${new Date().toLocaleDateString('id-ID')}.xlsx`);
+      
+      catatLog('DOWNLOAD', 'PEMBUKUAN', `Mengunduh Laporan Excel Dashboard Pembukuan`);
+    }
+
+    function exportToPDF() {
+      try {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
+        doc.setFontSize(16); doc.text("LAPORAN PEMBUKUAN PO", 14, 15); doc.setFontSize(10); doc.text(`Tanggal Cetak: ${new Date().toLocaleString('id-ID')}`, 14, 22);
+        const visibleRows = [];
+        document.querySelectorAll('.item-row').forEach((row, i) => {
+          if (row.style.display !== 'none') {
+            visibleRows.push([
+              i + 1, 
+              row.querySelector('.sarimbit-name').innerText.replace('DIARSIP','').trim(), 
+              row.querySelector('.brand-name').value, 
+              row.querySelector('.val-total-pcs').innerText,
+              formatTanggalPanjang(row.querySelectorAll('input[type="date"]')[0].value), 
+              formatTanggalPanjang(row.querySelectorAll('input[type="date"]')[1].value),
+              `Rp ${row.querySelector('.input-dp').value} / Rp ${row.querySelector('.input-bayar').value}`,
+              row.querySelectorAll('select')[0].value, 
+              row.querySelectorAll('select')[1].value
+            ]);
+          }
+        });
+        doc.autoTable({
+          head: [["No", "Sarimbit", "Pusat", "Pcs", "Close", "Ready", "Uang (DP/Lunas)", "Logistik", "Status Alamat"]], body: visibleRows, startY: 30, theme: 'grid',
+          headStyles: { fillColor: [30, 41, 59], fontSize: 8, halign: 'center' }, styles: { fontSize: 7, cellPadding: 3, valign: 'middle' }, columnStyles: { 0: { cellWidth: 8, halign: 'center' }, 3: { halign: 'center' } }
+        });
+        doc.save(`Laporan_Pembukuan_${new Date().toLocaleDateString('id-ID')}.pdf`); showToast("✅ PDF Berhasil diunduh");
+        
+        catatLog('DOWNLOAD', 'PEMBUKUAN', `Mengunduh Laporan PDF Dashboard Pembukuan`);
+      } catch (e) { alert("Gagal membuat PDF: " + e.message); }
+    }
+  </script>
+</body>
+</html>
