@@ -617,14 +617,22 @@ simpanSetoranCloud: async function(idVarian, disetor) {
     
 window.addEventListener('online', () => window.google.script.run.syncOfflineData());
 // ========================================================
-// SINKRONISASI SILUMAN (OTOMATIS SETIAP 30 DETIK)
+// PENYEGAR OTOMATIS (AUTO-REFRESH CLOUD KE LOKAL)
 // ========================================================
 setInterval(() => {
-    // Hanya berjalan jika internet menyala dan sistem siap
     if (navigator.onLine && typeof window.google !== 'undefined') {
-        window.google.script.run.syncOfflineData();
+        window.google.script.run
+            .withSuccessHandler(function(dataServer) {
+                if (typeof tampilkanData === 'function' && document.getElementById('tableBody')) {
+                    tampilkanData();
+                }
+                if (typeof loadPembukuan === 'function' && document.getElementById('pembukuanBody')) {
+                    loadPembukuan();
+                }
+            })
+            .getAllData(); 
     }
-}, 30000); // 30000 milidetik = 30 detik
+}, 5000); // Dipercepat menjadi 5 detik
 
 // ========================================================
 // 7. SISTEM KTP PERANGKAT & REKAM JEJAK (AUDIT TRAIL)
