@@ -162,10 +162,11 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
   
-    <div id="connection-banner" class="fixed top-4 right-4 z-[9999] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-2 border transition-all duration-300 bg-white">
-        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-        <span>MEMERIKSA...</span>
-    </div>
+  <!-- INDIKATOR SINYAL MODERN (Pojok Kanan Atas) -->
+  <div id="connection-banner" class="fixed top-6 right-6 transform translate-x-[150%] opacity-0 z-[9999] px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-3 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] backdrop-blur-md border">
+    <span id="connection-dot" class="w-2.5 h-2.5 rounded-full"></span>
+    <span id="connection-text">MEMERIKSA...</span>
+</div>
   
     <!-- NOTIFIKASI KANAN ATAS (NEMPEL DI LAYAR LAPTOP/MONITOR) -->
     <div id="toast" class="fixed top-6 right-4 md:top-8 md:right-8 z-[100] flex items-center justify-center gap-3 transform translate-x-[150%] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
@@ -1075,34 +1076,56 @@
     
     let currentPageMaster = 1; let currentPageSlip = 1; let currentPageRekap = 1;
     const rowsPerPageRekap = 200; const rowsPerPageSlip = 150; const rowsPerPageMaster = 300;
+   
+    let sinyalTimeout;
 
-    function updateConnectionStatus() {
+    // 1. Tambahkan parameter "isOnline" untuk memaksa status
+    function updateConnectionStatus(isOnline = navigator.onLine) {
         const banner = document.getElementById('connection-banner');
-        if (!banner) return;
+        const dot = document.getElementById('connection-dot');
+        const text = document.getElementById('connection-text');
+        if (!banner || !dot || !text) return;
         
-        if (navigator.onLine) {
-            // Hijau Premium + Efek Lampu LED Berkedip
-            banner.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> <span>ONLINE</span>`;
-            banner.className = "fixed top-4 right-4 z-[9999] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-md flex items-center gap-2 transition-all duration-300";
+        // Hapus timer lama jika ada agar animasi tidak bentrok
+        if (sinyalTimeout) clearTimeout(sinyalTimeout);
+
+        // Meluncur mulus masuk dari samping kanan
+        banner.classList.remove('translate-x-[150%]', 'opacity-0');
+        banner.classList.add('translate-x-0', 'opacity-100');
+        
+        if (isOnline) {
+            // TEMA ONLINE: Biru cerah, estetik, dan tembus pandang
+            banner.classList.remove('bg-rose-50/90', 'border-rose-200', 'text-rose-700');
+            banner.classList.add('bg-blue-50/90', 'border-blue-200', 'text-blue-700');
+            dot.className = "w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]";
+            text.innerText = "ONLINE (SINKRONISASI AKTIF)";
+            
+            // Hilangkan otomatis setelah 3.5 detik dengan meluncur keluar ke kanan
+            sinyalTimeout = setTimeout(() => {
+                banner.classList.remove('translate-x-0', 'opacity-100');
+                banner.classList.add('translate-x-[150%]', 'opacity-0');
+            }, 3500);
         } else {
-            // Oranye Stabil + Lampu LED Siaga
-            banner.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span> <span>OFFLINE MODE</span>`;
-            banner.className = "fixed top-4 right-4 z-[9999] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 border border-orange-200 text-orange-700 shadow-md flex items-center gap-2 transition-all duration-300";
+            // TEMA OFFLINE: Merah tegas
+            banner.classList.remove('bg-blue-50/90', 'border-blue-200', 'text-blue-700');
+            banner.classList.add('bg-rose-50/90', 'border-rose-200', 'text-rose-700');
+            dot.className = "w-2.5 h-2.5 rounded-full bg-rose-600 shadow-[0_0_8px_rgba(225,29,72,0.8)]";
+            text.innerText = "OFFLINE (MODE LOKAL)";
+            
+            // Dibiarkan tanpa setTimeout agar terus muncul di layar memperingatkan Admin
         }
     }
 
-   // ==============================================================
-    // SENSOR SINYAL & MESIN SINKRONISASI PINTAR (SMART AUTO-SYNC)
-    // ==============================================================
+    // 2. Beri instruksi paksa "false" saat offline dan "true" saat online
     window.addEventListener('offline', () => { 
         showToast("📶 Sinyal terputus. Data otomatis diamankan di memori lokal."); 
-        updateConnectionStatus(); 
+        updateConnectionStatus(false); // PAKSA JADI MERAH
     });
 
     window.addEventListener('online', () => { 
         showToast("🌐 Online kembali! Memeriksa sinkronisasi data..."); 
-        updateConnectionStatus(); 
-        sinkronisasiSenyap(); // Panggil mesin pintar tanpa me-refresh layar
+        updateConnectionStatus(true); // PAKSA JADI BIRU
+        if (typeof sinkronisasiSenyap === 'function') sinkronisasiSenyap(); 
     });
     async function sinkronisasiSenyap() {
         if (!navigator.onLine) return;
@@ -1239,73 +1262,31 @@
         else { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
     }
 
-    async function loadAllData(isKeepScroll = false) {
-        // =========================================================================
-        // TAMBALAN OFFLINE-FIRST: Jika sedang offline, potong jalur langsung baca Dexie!
-        // =========================================================================
-        if (!navigator.onLine) {
-            console.log("🎮 Mode Offline Active: Memuat data langsung dari memori Dexie Perangkat...");
-            try {
-                // Tarik data langsung dari gudang Dexie lokal laptop
-                const localMaster = await dbLokal.master.toArray();
-                const localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
-                
-              // Urutkan pesanan dari yang paling baru
-              localOrders.sort((a, b) => {
-                    const dateA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
-                    const dateB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
-                    // PERBAIKAN: Mempertahankan urutan susunan barang
-                    if (dateA === dateB) {
-                        return a.id - b.id; 
-                    }
-                    return dateB - dateA;
-                });
+  async function loadAllData(isKeepScroll = false) {
+        if (typeof window.DatabaseAPI === 'undefined') return;
+        
+        // Memanggil API Sentral di database.js
+        window.DatabaseAPI.getAllData(
+            (res) => { // Jika Sukses
+                masterData = res.master || [];
+                const semuaOrder = res.orders || [];
+                orderData = semuaOrder.filter(o => o.isarchived !== true && o.isArchived !== true);
 
-                masterData = localMaster;
-                orderData = localOrders;
-
-                // Hitung berat otomatis secara offline
                 if (orderData.length > 0 && masterData.length > 0) {
                     orderData.forEach(order => {
                         const matchingMaster = masterData.find(m => m.sarimbit === order.sarimbit && m.barang === order.barang && m.varian === order.varian && m.size === order.size);
                         if (matchingMaster) order.berat = matchingMaster.berat; 
                     });
                 }
-
-                // Daftarkan ulang pilihan koleksi sarimbit ke Dropdown input order harian
-                updateGlobalFilters(); 
-                
-                // Lukis layar tabel master, rekap kuantitas, dan slip rincian secara offline
-                if (typeof renderMaster === 'function') renderMaster();
-                if (typeof renderRekap === 'function') renderRekap();
-                if (typeof renderSlip === 'function') renderSlip();
-                
-                console.log("✅ Sukses! Layar offline berhasil dilukis sempurna dari memori lokal.");
-                return; // Berhenti di sini, tidak usah lanjut ke kode online di bawah
-            } catch (err) {
-                console.error("Gagal melukis layar offline:", err);
+                updateGlobalFilters();
+                renderMaster(); renderRekap(); renderSlip(); 
+                if (isKeepScroll) { setTimeout(() => window.scrollTo({ top: currentScrollPos, behavior: 'instant' }), 150); }
+                console.log("✅ Data UI Berhasil Dimuat");
+            },
+            (err) => { // Jika Gagal
+                console.error("Gagal memuat data utama:", err);
             }
-        }
-        // =========================================================================
-
-        // JALUR ONLINE RESMI (KODE ASLI BAPAK TETAP UTUH DI SINI)
-        if(typeof google === 'undefined') return;
-        google.script.run.withSuccessHandler((res) => {
-            masterData = res.master || [];
-            
-            const semuaOrder = res.orders || [];
-            orderData = semuaOrder.filter(o => o.isarchived !== true && o.isArchived !== true);
-
-            if (orderData.length > 0 && masterData.length > 0) {
-                orderData.forEach(order => {
-                    const matchingMaster = masterData.find(m => m.sarimbit === order.sarimbit && m.barang === order.barang && m.varian === order.varian && m.size === order.size);
-                    if (matchingMaster) order.berat = matchingMaster.berat; 
-                });
-            }
-            updateGlobalFilters();
-            renderMaster(); renderRekap(); renderSlip(); 
-            if (isKeepScroll) { setTimeout(() => window.scrollTo({ top: currentScrollPos, behavior: 'instant' }), 150); }
-        }).getAllData();
+        );
     }
     async function handleOrderSubmit(e) {
         e.preventDefault();
@@ -1432,70 +1413,50 @@
         else if (tipeDiskonLog === 'angka') diskonFinalLog = nilaiDiskonLog;
         const grandTotalLog = subtotalLog - diskonFinalLog;
 
-        google.script.run.withSuccessHandler(() => {
-            // PERBAIKAN: Buka kunci & kembalikan tampilan tombol untuk pesanan Baru maupun Edit
-            const btnSimpan = document.getElementById('btn-save-order');
-            btnSimpan.disabled = false;
-            btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
+        window.DatabaseAPI.saveOrders(
+            items,
+            () => { // onSuccess
+                const btnSimpan = document.getElementById('btn-save-order');
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
 
-            form.reset(); 
-            document.getElementById('order-items-list').innerHTML = '';
-            document.getElementById('o-tanggal-asli').value = ''; 
-            
-            // =====================================================================
-            // LOGIKA PENYUSUNAN KALIMAT LOG (Mencatat perubahannya saja)
-            // =====================================================================
-            let pesanLog = "";
-            if (isEditMode) {
-                let perubahan = [];
-                // Cek apakah ada perubahan kuantitas
-                if (oldTotalPcs !== totalPcsLog) {
-                    perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
-                }
-                // Cek apakah ada perubahan nilai uang / tagihan
-                if (oldGrandTotal !== grandTotalLog) {
-                    perubahan.push(`Tagihan: Rp ${oldGrandTotal.toLocaleString('id-ID')} ➔ Rp ${grandTotalLog.toLocaleString('id-ID')}`);
-                }
+                form.reset(); 
+                document.getElementById('order-items-list').innerHTML = '';
+                document.getElementById('o-tanggal-asli').value = ''; 
                 
-                // Jika terjadi perubahan Qty atau Uang
-                if (perubahan.length > 0) {
-                    pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')}`;
+                let pesanLog = "";
+                if (isEditMode) {
+                    let perubahan = [];
+                    if (oldTotalPcs !== totalPcsLog) perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
+                    if (oldGrandTotal !== grandTotalLog) perubahan.push(`Tagihan: Rp ${oldGrandTotal.toLocaleString('id-ID')} ➔ Rp ${grandTotalLog.toLocaleString('id-ID')}`);
+                    
+                    if (perubahan.length > 0) pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')}`;
+                    else pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian Barang diubah)`;
+                    
+                    delete form.dataset.editMode; 
+                    btnSimpan.classList.replace('bg-orange-500', 'bg-blue-600');
+                    btnSimpan.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
+                    
+                    switchTab('slip');
                 } else {
-                    // Jika harganya tetap, berarti admin hanya mengubah alamat / kurir / varian warna yang harganya sama
-                    pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian Barang diubah)`;
+                    pesanLog = `Pesanan Baru ${customer} (${toko}) - ${totalPcsLog} Pcs | Total: Rp ${grandTotalLog.toLocaleString('id-ID')}`;
+                    document.getElementById('o-nama').focus(); 
                 }
-                
-                delete form.dataset.editMode; 
-                btnSimpan.classList.replace('bg-orange-500', 'bg-blue-600');
-                btnSimpan.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
-                
-                // PERBAIKAN: Pindah otomatis ke menu Rincian Customer setelah update selesai
-                switchTab('slip');
-                
-            } else {
-                pesanLog = `Pesanan Baru ${customer} (${toko}) - ${totalPcsLog} Pcs | Total: Rp ${grandTotalLog.toLocaleString('id-ID')}`;
-                
-                // PERBAIKAN: Fokuskan kembali kursor ke kolom nama HANYA jika ini pesanan baru
-                document.getElementById('o-nama').focus(); 
-            }
 
-            // Bersiap menambahkan baris kosong di menu order untuk input selanjutnya
-            addOrderRow(); 
-            calculateOrderTotal();
-             
-            showToast("✅ Pesanan Berhasil Disimpan!");
-            
-            // EKSEKUSI PENCATATAN LOG KE RIWAYAT
-            catatLog(isEditMode ? 'UPDATE' : 'CREATE', 'ORDER', pesanLog);
-            
-            loadAllData();
-        }).withFailureHandler((err) => {
-            // Jaga-jaga: Buka kunci tombol jika koneksi gagal
-            const btnSimpan = document.getElementById('btn-save-order');
-            btnSimpan.disabled = false;
-            btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
-            showToast("❌ Gagal menyimpan. Silakan cek koneksi internet!");
-        }).saveOrders(items);
+                addOrderRow(); 
+                calculateOrderTotal();
+                 
+                showToast("✅ Pesanan Berhasil Disimpan!");
+                catatLog(isEditMode ? 'UPDATE' : 'CREATE', 'ORDER', pesanLog);
+                loadAllData();
+            },
+            () => { // onFailure
+                const btnSimpan = document.getElementById('btn-save-order');
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
+                showToast("❌ Gagal menyimpan pesanan!");
+            }
+        );
     }
     function updateDataDirect(idCustomer, field, nilai) {
         if(typeof google === 'undefined' || !idCustomer) return;
@@ -1526,27 +1487,30 @@
         const teksBaru = formatNilai(nilaiBersih);
         // =========================================================================
 
-        // Update ke memori lokal browser (agar tampilan langsung berubah)
-        orderData.forEach(o => { if ((o.idcustomer || o.idCustomer) === idCustomer) o[field] = nilaiBersih; });
+      // Update ke memori lokal browser (agar tampilan langsung berubah)
+      orderData.forEach(o => { if ((o.idcustomer || o.idCustomer) === idCustomer) o[field] = nilaiBersih; });
         
-        google.script.run.withSuccessHandler(() => {
-            showToast(`✅ ${fieldLabel} Berhasil Diperbarui!`);
-            
-            // PENCATATAN LOG KE RIWAYAT (Hanya mencatat jika nilainya memang berubah)
-            if (teksLama !== teksBaru) {
-                catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru})`);
-            }
-            
-        }).updateFieldKeSheet(idCustomer, field, nilaiBersih);
+        window.DatabaseAPI.updateFieldKeSheet(
+            idCustomer, field, nilaiBersih,
+            () => { // onSuccess
+                showToast(`✅ ${fieldLabel} Berhasil Diperbarui!`);
+                if (teksLama !== teksBaru) catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru})`);
+            },
+            (e) => showToast("❌ Gagal memperbarui status!") // onFailure
+        );
     }
 
     function hapusSatuCustomer(idCustomer) {
         if (confirm(`Apakah Anda yakin ingin menghapus SELURUH pesanan customer ini?`)) {
             showToast("Menghapus data pesanan...");
-            google.script.run.withSuccessHandler((pesan) => { showToast("✅ " + pesan); 
-            catatLog('DELETE', 'ORDER', `Menghapus seluruh pesanan Customer ID: ${idCustomer}`);
-    loadAllData();
-         }).hapusDataCustomer(idCustomer); 
+            window.DatabaseAPI.hapusDataCustomer(
+                idCustomer,
+                (pesan) => { // onSuccess
+                    showToast("✅ " + pesan); 
+                    catatLog('DELETE', 'ORDER', `Menghapus seluruh pesanan Customer ID: ${idCustomer}`);
+                    loadAllData();
+                }
+            );
         }
     }
 
@@ -1555,7 +1519,7 @@
         showToast("Menghapus...");
         const targetRow = orderData.find(o => (o.idcustomer || o.idCustomer) === idCustomer && o.sarimbit === sarimbit && o.barang === barang && o.varian === varian && o.size === size);
         if(targetRow && targetRow.id) {
-            google.script.run.withSuccessHandler(() => { showToast("Berhasil dihapus!"); loadAllData(); }).hapusSatuBaris(targetRow.id); 
+            window.DatabaseAPI.hapusSatuBaris(targetRow.id, () => { showToast("Berhasil dihapus!"); loadAllData(); });
         }
     }
 
@@ -1563,8 +1527,7 @@
         e.preventDefault();
         const form = e.target;
         const editInfo = form.dataset.editMode ? JSON.parse(form.dataset.editMode) : null;
-        const now = new Date().toISOString();
-
+        
         const payload = {
             pusat: document.getElementById('m-pusat').value, sarimbit: document.getElementById('m-sarimbit').value,
             barang: document.getElementById('m-barang').value, varian: document.getElementById('m-varian').value,
@@ -1572,38 +1535,27 @@
             berat: Number(document.getElementById('m-berat').value)
         };
 
-        try {
-            if (editInfo) {
-                const dataLama = masterData.find(m => m.pusat === editInfo.pusat && m.sarimbit === editInfo.sarimbit && m.barang === editInfo.barang && m.varian === editInfo.varian && m.size === editInfo.size);
-                if (dataLama && dataLama.id) {
-                    await dbLokal.master.update(dataLama.id, { ...payload, updated_at: now });
-                    if (navigator.onLine) await supabaseFetch(`/rest/v1/master?id=eq.${dataLama.id}`, { method: 'PATCH', body: JSON.stringify({ ...payload, updated_at: now }) });
+        window.DatabaseAPI.simpanMasterBaru(
+            payload, editInfo,
+            () => { // onSuccess
+                if (editInfo) {
+                    showToast("✅ Master Diperbarui!");
+                    const btn = form.querySelector('button[type="submit"]');
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> SIMPAN BARANG`;
+                    btn.classList.replace('bg-orange-500', 'bg-slate-800');
+                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-slate-900');
+                    catatLog('UPDATE', 'MASTER', `Edit Katalog: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size}) menjadi Rp ${payload.harga.toLocaleString('id-ID')}`);
+                } else {
+                    showToast("✅ Master Baru Tersimpan!");
+                    catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size})`);
                 }
-                showToast("✅ Master Diperbarui!");
                 form.reset(); delete form.dataset.editMode;
-                const btn = form.querySelector('button[type="submit"]');
-                btn.innerHTML = `<i class="fa-solid fa-check"></i> SIMPAN BARANG`;
-                btn.classList.replace('bg-orange-500', 'bg-slate-800');
-                btn.classList.replace('hover:bg-orange-600', 'hover:bg-slate-900');
-                
-                // PENCATATAN LOG EDIT MASTER
-                catatLog('UPDATE', 'MASTER', `Edit Katalog: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size}) menjadi Rp ${payload.harga.toLocaleString('id-ID')}`);
-            } else {
-                const newId = Date.now() + Math.floor(Math.random() * 1000);
-                const newData = { id: newId, ...payload, updated_at: now };
-                
-                await dbLokal.master.add(newData);
-                if (navigator.onLine) await supabaseFetch(`/rest/v1/master`, { method: 'POST', body: JSON.stringify(newData) });
-                
-                showToast("✅ Master Baru Tersimpan!");
-                form.reset();
-                
-                // PENCATATAN LOG BUAT MASTER
-                catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size})`);
-            }
-            loadAllData();
-        } catch(e) { showToast("Gagal menyimpan master."); }
+                loadAllData();
+            },
+            (e) => { showToast("Gagal menyimpan master."); }
+        );
     }
+    
     async function importMasterExcel(input) {
         const file = input.files[0];
         if (!file) return;
@@ -1621,64 +1573,40 @@
                 const waktuDasar = Date.now(); 
                 
                 const payloadMassal = jsonData.map((row, index) => {
-                    const rawId = row["ID_SISTEM"];
-                    const rowId = rawId ? Number(rawId) : (waktuDasar + index);
-                    
+                    const rowId = row["ID_SISTEM"] ? Number(row["ID_SISTEM"]) : (waktuDasar + index);
                     let hargaBersih = row["Harga Jual"] || row["Harga"] || 0;
                     if (typeof hargaBersih === 'string') hargaBersih = Number(hargaBersih.replace(/[^0-9]/g, ''));
-                    
                     let beratBersih = row["Berat (gr)"] || row["Berat"] || 0;
                     if (typeof beratBersih === 'string') beratBersih = Number(beratBersih.replace(/[^0-9]/g, ''));
 
                     return {
-                        id: rowId,
-                        pusat: row["Nama Pusat"] || row["Pusat"] || "", 
-                        sarimbit: row["Koleksi Sarimbit"] || row["Sarimbit"] || "",
-                        barang: row["Nama Barang"] || row["Barang"] || "", 
-                        varian: row["Warna"] || row["Varian"] || "",
-                        size: String(row["Size"] || row["Ukuran"] || ""),
-                        harga: Number(hargaBersih),
-                        berat: Number(beratBersih), 
-                        updated_at: now
+                        id: rowId, pusat: row["Nama Pusat"] || row["Pusat"] || "", sarimbit: row["Koleksi Sarimbit"] || row["Sarimbit"] || "",
+                        barang: row["Nama Barang"] || row["Barang"] || "", varian: row["Warna"] || row["Varian"] || "",
+                        size: String(row["Size"] || row["Ukuran"] || ""), harga: Number(hargaBersih), berat: Number(beratBersih), updated_at: now
                     };
                 });
 
                 const penyaringUnik = new Map();
-                payloadMassal.forEach(item => {
-                    penyaringUnik.set(item.id, item); 
-                });
+                payloadMassal.forEach(item => penyaringUnik.set(item.id, item));
                 const dataSiapKirim = Array.from(penyaringUnik.values());
 
                 showToast(`🚀 Memproses ${dataSiapKirim.length} data. Mohon tunggu...`);
-                await dbLokal.master.bulkPut(dataSiapKirim); 
                 
-                if(navigator.onLine) {
-                    showToast("☁️ Mengirim data ke Cloud secara bertahap...");
-                    const chunkSize = 500;
-                    for (let i = 0; i < dataSiapKirim.length; i += chunkSize) {
-                        const chunk = dataSiapKirim.slice(i, i + chunkSize);
-                        await supabaseFetch('/rest/v1/master', { 
-                            method: "POST", 
-                            headers: { "Prefer": "resolution=merge-duplicates" },
-                            body: JSON.stringify(chunk) 
-                        });
-                    }
-                }
-                
-                showToast("✅ Import Master Berhasil 100%!");
-                input.value = null; 
-                
-                // CATAT LOG IMPORT EXCEL
-                catatLog('CREATE', 'MASTER', `Mengimpor Excel Master Barang secara massal (${dataSiapKirim.length} Item)`);
-                
-                loadAllData();
-                
-            } catch (err) { 
-                alert("Gagal memproses file: " + err); 
-            }
+                window.DatabaseAPI.importMasterMassal(
+                    dataSiapKirim,
+                    () => {
+                        showToast("✅ Import Master Berhasil 100%!");
+                        input.value = null; 
+                        catatLog('CREATE', 'MASTER', `Mengimpor Excel Master Barang secara massal (${dataSiapKirim.length} Item)`);
+                        loadAllData();
+                    },
+                    (e) => { alert("Gagal menyimpan ke database lokal: " + e); }
+                );
+            } catch (err) { alert("Gagal memproses file: " + err); }
         };
         reader.readAsArrayBuffer(file);
     }
+    
     function hapusSarimbitTerpilih() {
         const sarimbit = document.getElementById('filter-sarimbit-master').value;
         if (!sarimbit) return showToast("Pilih salah satu Sarimbit dulu!");
@@ -1686,17 +1614,18 @@
         if (confirm(`⚠️ PERINGATAN VITAL!\n\nAnda akan menghapus SELURUH varian, ukuran, dan harga untuk koleksi: "${sarimbit.toUpperCase()}".\n\nData yang dihapus tidak bisa dikembalikan. Lanjutkan?`)) {
             showToast(`⏳ Menghapus koleksi ${sarimbit}...`);
             
-            google.script.run.withSuccessHandler((pesan) => {
-                showToast("✅ " + pesan);
-                
-                // Matikan sakelar setelah berhasil agar aman
-                appSettings.allowDeleteMaster = false;
-                localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
-                document.getElementById('set-allow-delete-master').checked = false;
-                
-                document.getElementById('filter-sarimbit-master').value = ""; // Reset filter
-                loadAllData(); // Refresh data
-            }).hapusSarimbitMaster(sarimbit);
+            window.DatabaseAPI.hapusSarimbitMaster(
+                sarimbit,
+                (pesan) => { // onSuccess
+                    showToast("✅ " + pesan);
+                    appSettings.allowDeleteMaster = false;
+                    localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
+                    document.getElementById('set-allow-delete-master').checked = false;
+                    document.getElementById('filter-sarimbit-master').value = ""; 
+                    loadAllData(); 
+                },
+                (e) => showToast("❌ Gagal menghapus koleksi.")
+            );
         }
     }
     function updateGlobalFilters() {
@@ -3068,7 +2997,6 @@
         showToast("⏳ Mengunci Omset & Qty ke Pembukuan...");
         
         try {
-            // HITUNG TOTAL QTY & OMSET SEBELUM DIHAPUS (AGAR DASHBOARD TIDAK 0)
             const orderTarget = orderData.filter(o => o.sarimbit === fSarimbit);
             const totalQtyTerjual = orderTarget.reduce((sum, o) => sum + Number(o.jumlah || 0), 0);
             
@@ -3083,59 +3011,32 @@
                 totalOmsetTerjual += (gross - diskon);
             });
 
-            // 1. KUNCI DATA ARSIP DI PEMBUKUAN 
             const archivePayload = { 
-                sarimbit: fSarimbit, 
-                isarchived: true, 
-                total: totalQtyTerjual, // Kunci Qty permanen
-                omset: totalOmsetTerjual, // Kunci Omset permanen
+                sarimbit: fSarimbit, isarchived: true, 
+                total: totalQtyTerjual, omset: totalOmsetTerjual, 
                 updated_at: new Date().toISOString() 
             };
 
-            const existing = await dbLokal.pembukuan.where('sarimbit').equals(fSarimbit).first();
-            const headersJSON = { "Content-Type": "application/json", "Prefer": "return=representation" };
-
-            if (navigator.onLine) {
-                let resBuku;
-                if (existing) {
-                    resBuku = await supabaseFetch(`/rest/v1/pembukuan?id=eq.${existing.id}`, { method: 'PATCH', headers: headersJSON, body: JSON.stringify(archivePayload) });
-                } else {
-                    archivePayload.id = Date.now();
-                    resBuku = await supabaseFetch('/rest/v1/pembukuan', { method: 'POST', headers: headersJSON, body: JSON.stringify([archivePayload]) });
-                }
-                if (resBuku === null) throw new Error("Gagal mengunci status arsip ke Supabase pembukuan!");
-            } else {
-                if (!existing) archivePayload.id = Date.now();
-            }
-
-            if (existing) await dbLokal.pembukuan.update(existing.id, archivePayload);
-            else await dbLokal.pembukuan.add(archivePayload);
-
-            showToast("🧹 Melakukan Soft-Delete rincian pesanan...");
-
-            // 2. SOFT-DELETE RINCIAN CUSTOMER (DI TABEL ORDERS)
-            if (navigator.onLine) {
-                await supabaseFetch(`/rest/v1/orders?sarimbit=eq.${encodeURIComponent(fSarimbit)}`, { method: 'PATCH', headers: headersJSON, body: JSON.stringify({ isarchived: true, updated_at: new Date().toISOString() }) });
-            }
-            // TAMBAHAN: Kita sisipkan syncstatus: 0 agar mesin 30 detik otomatis menyodoknya ke server jika internet mati saat proses arsip
-await dbLokal.orders.where('sarimbit').equals(fSarimbit).modify({ isarchived: true, syncstatus: 0, updated_at: new Date().toISOString() });
-
-            // 3. HARD-DELETE MASTER BARANG
-            if (navigator.onLine) await supabaseFetch(`/rest/v1/master?sarimbit=eq.${encodeURIComponent(fSarimbit)}`, { method: 'DELETE' });
-            await dbLokal.master.where('sarimbit').equals(fSarimbit).delete();
+            showToast("🧹 Melakukan pengarsipan di belakang layar...");
             
-            orderData = orderData.filter(o => o.sarimbit !== fSarimbit);
-            masterData = masterData.filter(m => m.sarimbit !== fSarimbit);
+            window.DatabaseAPI.prosesArsipSarimbit(
+                archivePayload, fSarimbit,
+                () => { // onSuccess
+                    orderData = orderData.filter(o => o.sarimbit !== fSarimbit);
+                    masterData = masterData.filter(m => m.sarimbit !== fSarimbit);
 
-            showToast(`✅ Sukses! Orderan disembunyikan. Target Omset aman di Dashboard Pembukuan.`);
-            appSettings.allowArchive = false;
-            localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
-            document.getElementById('set-allow-archive').checked = false;
-            document.getElementById('filter-sarimbit-slip').value = "";
-            
-            updateGlobalFilters();
-            renderMaster(); renderRekap(); renderSlip(); 
-        } catch (e) { console.error(e); showToast("❌ Gagal melakukan proses arsip. Cek koneksi!"); }
+                    showToast(`✅ Sukses! Orderan disembunyikan. Target Omset aman di Dashboard Pembukuan.`);
+                    appSettings.allowArchive = false;
+                    localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
+                    document.getElementById('set-allow-archive').checked = false;
+                    document.getElementById('filter-sarimbit-slip').value = "";
+                    
+                    updateGlobalFilters();
+                    renderMaster(); renderRekap(); renderSlip(); 
+                },
+                (e) => { showToast("❌ Gagal melakukan proses arsip. Cek koneksi!"); }
+            );
+        } catch (e) { console.error(e); showToast("❌ Terjadi kesalahan pada kalkulasi awal arsip."); }
     }
 
     function isiOtomatisWA() {

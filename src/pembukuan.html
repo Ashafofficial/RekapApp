@@ -205,20 +205,22 @@
       const banner = document.getElementById('connection-banner');
 
       if (navigator.onLine) {
-        div.className = "bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
-        dot.className = "w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
+        // Mode Online (Biru Berkedip)
+        div.className = "bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
+        dot.className = "w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]";
         txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
         
         banner.innerText = "SISTEM ONLINE (SINKRONISASI AKTIF)";
-        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-emerald-500 text-white block shadow-sm";
+        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-blue-600 text-white block shadow-sm";
         setTimeout(() => banner.classList.add('hidden'), 3500); 
       } else {
-        div.className = "bg-orange-50 border border-orange-200 text-orange-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
-        dot.className = "w-2 h-2 bg-orange-500 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.8)]";
+        // Mode Offline (Merah Stabil)
+        div.className = "bg-rose-50 border border-rose-200 text-rose-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
+        dot.className = "w-2 h-2 bg-rose-600 rounded-full shadow-[0_0_8px_rgba(225,29,72,0.8)]";
         txt.innerText = "OFFLINE (MODE LOKAL)";
 
         banner.innerText = "OFFLINE MODE (DATA TERSIMPAN DI PERANGKAT)";
-        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-orange-500 text-white block shadow-sm";
+        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-rose-600 text-white block shadow-sm";
         setTimeout(() => banner.classList.add('hidden'), 3500); 
       }
     }
@@ -282,109 +284,106 @@
         }
     }
 
-  // ==============================================================
-    // FUNGSI TARIK DATA OFFLINE (DEXIE LOKAL)
+ // ==============================================================
+    // FUNGSI TARIK DATA UTAMA (MENGGUNAKAN DATABASE.JS BARU)
     // ==============================================================
-    async function loadDataOffline() {
-        console.log("🎮 Mode Offline Active: Memuat data dari Dexie...");
+    async function muatDataPembukuan() {
         try {
-            const localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
-            const localBuku = await dbLokal.pembukuan.toArray();
-            
-            // 1. Rekap pesanan dari memori lokal (pengganti server Google)
+            // Ambil data langsung dari Dexie lokal (sangat cepat)
+            const orders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
+            let localPembukuan = await dbLokal.pembukuan.toArray();
+
+            // SINKRONISASI PEMBUKUAN DENGAN SUPABASE (JIKA ONLINE)
+            if (navigator.onLine) {
+                const lastSync = (await dbLokal.metadata.get("last_sync_pembukuan"))?.value || "1970-01-01T00:00:00Z";
+                const cloudData = await supabaseFetch(`/rest/v1/pembukuan?select=*&updated_at=gt.${encodeURIComponent(lastSync)}`);
+                if (cloudData && cloudData.length > 0) {
+                    await dbLokal.pembukuan.bulkPut(cloudData);
+                    const maxUpdate = cloudData.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSync);
+                    await dbLokal.metadata.put({ key: "last_sync_pembukuan", value: maxUpdate });
+                    localPembukuan = await dbLokal.pembukuan.toArray(); 
+                }
+            }
+
             const summaryMap = {};
-            localOrders.forEach(o => {
-                if (!o.sarimbit) return;
-                if (!summaryMap[o.sarimbit]) {
-                    summaryMap[o.sarimbit] = { sarimbit: o.sarimbit, brand: o.pusat || o.toko || "Pusat", totalOrder: 0 };
-                }
-                summaryMap[o.sarimbit].totalOrder += Number(o.jumlah || 0);
-            });
             
+            localPembukuan.forEach(p => {
+                summaryMap[p.sarimbit] = { 
+                    totalOrder: Number(p.total) || 0,
+                    totalOmset: Number(p.omset) || 0,
+                    isPrinted: p.isPrinted || false, 
+                    isInformed: p.isInformed || false, 
+                    ...p 
+                };
+            });
+
+            const orderGroup = {};
+            orders.forEach(o => {
+                if(!orderGroup[o.sarimbit]) orderGroup[o.sarimbit] = {};
+                if(!orderGroup[o.sarimbit][o.idcustomer]) orderGroup[o.sarimbit][o.idcustomer] = [];
+                orderGroup[o.sarimbit][o.idcustomer].push(o);
+            });
+
+            Object.keys(orderGroup).forEach(sarimbit => {
+                let qtyAktif = 0;
+                let omsetAktif = 0;
+                let namaBrand = "";
+
+                Object.values(orderGroup[sarimbit]).forEach(items => {
+                    if (!namaBrand && items[0].pusat) namaBrand = items[0].pusat;
+                    
+                    const grossInvoice = items.reduce((sum, it) => sum + ((Number(it.jumlah)||0) * (Number(it.harga)||0)), 0);
+                    const dTipe = items[0].diskonTipe || 'none';
+                    const dNilai = Number(items[0].diskonNilai) || 0;
+                    
+                    let diskonInvoice = 0;
+                    if (dTipe === 'persen') diskonInvoice = (grossInvoice * dNilai) / 100;
+                    else if (dTipe === 'angka') diskonInvoice = dNilai;
+                    
+                    let netInvoice = grossInvoice - diskonInvoice;
+                    if (netInvoice < 0) netInvoice = 0;
+
+                    omsetAktif += netInvoice;
+                    items.forEach(it => qtyAktif += (Number(it.jumlah)||0));
+                });
+
+                if (!summaryMap[sarimbit]) {
+                    summaryMap[sarimbit] = {
+                        sarimbit: sarimbit, isArchived: false, isPrinted: false, isInformed: false,
+                        brand: namaBrand, close: "", ready: "", c1: "", c2: "", lunas: "", 
+                        dp: 0, bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap",
+                        waktuPembuatan: Date.now() + Math.random()
+                    };
+                }
+                
+                summaryMap[sarimbit].totalOrder = qtyAktif;
+                summaryMap[sarimbit].totalOmset = omsetAktif;
+                if (!summaryMap[sarimbit].brand) summaryMap[sarimbit].brand = namaBrand;
+                if (!summaryMap[sarimbit].waktuPembuatan) summaryMap[sarimbit].waktuPembuatan = summaryMap[sarimbit].id || 0;
+            });
+
             let mergedSummary = Object.values(summaryMap);
-            
-            // 2. Tempelkan seluruh isian kolom form (DP, Lunas, Jadwal) ke data rekap
-            mergedSummary = mergedSummary.map(item => {
-                const localMatch = localBuku.find(l => l.sarimbit === item.sarimbit);
-                if (localMatch) {
-                    Object.assign(item, localMatch); // Menarik isi form DP, Tanggal, dll
-                    item.isarchived = localMatch.isarchived || localMatch.isArchived || false;
-                    if (item.isarchived) item.totalOrder = localMatch.total || item.totalOrder;
-                    item.waktuPembuatan = localMatch.id || 0;
-                } else {
-                    item.waktuPembuatan = Date.now() + Math.random();
-                }
-                return item;
-            });
-
-            // 3. Masukkan juga data yang sudah diarsipkan (Soft-Delete)
-            localBuku.forEach(buku => {
-                if (!mergedSummary.find(m => m.sarimbit === buku.sarimbit)) {
-                    buku.totalOrder = buku.total; 
-                    buku.waktuPembuatan = buku.id || 0;
-                    mergedSummary.push(buku);
-                }
-            });
-
             mergedSummary.sort((a, b) => b.waktuPembuatan - a.waktuPembuatan);
+            
             renderPembukuan(mergedSummary);
-            showToast("✅ Berhasil memuat data dari memori lokal.");
-        } catch (e) {
-            console.error("Gagal load offline:", e);
-            showToast("❌ Gagal memuat data lokal.");
-            document.getElementById('pembukuan-body').innerHTML = `<tr><td colspan="10" class="p-10 text-center font-bold text-rose-500">Gagal memuat data offline.</td></tr>`;
+            showToast(navigator.onLine ? "✅ Data Pembukuan tersinkronisasi." : "✅ Berhasil memuat data lokal (Offline).");
+
+        } catch(e) { 
+            console.error("Gagal memuat pembukuan:", e);
+            showToast("❌ Gagal memuat data.");
+            document.getElementById('pembukuan-body').innerHTML = `<tr><td colspan="10" class="p-10 text-center font-bold text-rose-500">Gagal memuat data. Periksa sistem penyimpanan.</td></tr>`;
         }
     }
 
     // MEMUAT DATA PERTAMA KALI HALAMAN DIBUKA
     window.onload = function() {
-      updateSinyal();
-      
-      // JIKA OFFLINE ATAU TIDAK ADA GOOGLE SCRIPT (SEPERTI DI VSCODE)
-      if (!navigator.onLine || typeof google === 'undefined') {
-          loadDataOffline();
-          return;
-      }
+        updateSinyal();
+        
+        // Memanggil fungsi baru di atas
+        muatDataPembukuan();
 
-      google.script.run
-        .withSuccessHandler(async (summaryArray) => {
-            try {
-                const localBuku = await dbLokal.pembukuan.toArray();
-                const mergedSummary = summaryArray.map(item => {
-                        const localMatch = localBuku.find(l => l.sarimbit === item.sarimbit);
-                        if (localMatch) {
-                            // PERBAIKAN: Suntikkan seluruh isi form agar tidak kosong saat baru refresh
-                            Object.assign(item, localMatch);
-                            item.isarchived = localMatch.isarchived || localMatch.isArchived || false;
-                            if (item.isarchived) item.totalOrder = localMatch.total || item.totalOrder;
-                            item.waktuPembuatan = localMatch.id || 0;
-                        } else {
-                            item.waktuPembuatan = Date.now() + Math.random();
-                        }
-                        return item;
-                    });
-                    
-                    // Pastikan data yang sudah diarsip tetap muncul di tabel
-                    localBuku.forEach(buku => {
-                        if (!mergedSummary.find(m => m.sarimbit === buku.sarimbit)) {
-                            buku.totalOrder = buku.total; 
-                            buku.waktuPembuatan = buku.id || 0;
-                            mergedSummary.push(buku);
-                        }
-                    });
-
-                    mergedSummary.sort((a, b) => b.waktuPembuatan - a.waktuPembuatan);
-                    renderPembukuan(mergedSummary);
-            } catch (err) {
-                console.error("Gagal sinkronisasi arsip lokal:", err);
-                renderPembukuan(summaryArray);
-            }
-        })
-        .withFailureHandler(() => {
-            showToast("⚠️ Gagal terhubung ke Server Google, menggunakan memori lokal.");
-            loadDataOffline();
-        })
-        .getDataPembukuan();
+        // Inisialisasi KTP Perangkat (Bawaan database.js)
+        if (typeof initDeviceId === 'function') initDeviceId();
     };
 
     function showToast(msg) {
