@@ -14,18 +14,105 @@
     }
   </script>
   
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- KEMBALIKAN KE CDN INTERNET (AKAN DI-CACHE OLEH SERVICE WORKER) -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-
   <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+
   <script src="database.js?v=14"></script>
+
+<!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (TAURI V2 - FINAL) -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // FUNGSI INTI MENYIMPAN KE HARDISK MAC/WINDOWS VIA TAURI
+        window.simpanKeTauriData = async function(uint8Array, filename) {
+            if (!window.__TAURI__ || !window.__TAURI__.core) return false;
+            
+            try {
+                const tauriCore = window.__TAURI__.core;
+                
+                // Ambil ekstensi untuk deteksi format otomatis
+                const extMatch = filename.match(/\.([^.]+)$/);
+                const ext = extMatch ? extMatch[1].toLowerCase() : '';
+                
+                const dialogOptions = { defaultPath: filename };
+                if (ext) dialogOptions.filters = [{ name: ext.toUpperCase(), extensions: [ext] }];
+
+                // Memunculkan kotak Save As bawaan sistem
+                const savePath = await tauriCore.invoke('plugin:dialog|save', { 
+                    options: dialogOptions 
+                });
+
+                if (savePath) {
+                    try {
+                        const fs = window.__TAURI__.fs || window.__TAURI__.plugin_fs;
+                        await fs.writeFile(savePath, uint8Array);
+                    } catch(err) {
+                        // Fallback terkuat jika penulisan standar ditolak
+                        await tauriCore.invoke('plugin:fs|write', { path: savePath, contents: Array.from(uint8Array) });
+                    }
+                    if (typeof showToast === 'function') showToast("✅ File " + ext.toUpperCase() + " berhasil disimpan!");
+                    return true;
+                }
+            } catch (e) {
+                const msg = typeof e === 'string' ? e : (e.message || JSON.stringify(e));
+                alert("❌ Gagal menyimpan file: " + msg);
+            }
+            return false;
+        };
+
+      // PEMBAJAK 1: FileSaver.js (Word Document)
+      if (window.saveAs) {
+            const originalSaveAs = window.saveAs;
+            window.saveAs = async function(blob, filename) {
+                if (window.__TAURI__) {
+                    try {
+                        const arrayBuffer = await blob.arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
+                        const sukses = await window.simpanKeTauriData(uint8Array, filename);
+                        if (sukses) return;
+                    } catch(e) {}
+                }
+                originalSaveAs(blob, filename);
+            };
+        }
+        
+        // PEMBAJAK 2: jsPDF (Semua PDF - Menangkap doc.save dan window.saveAs)
+        if (window.jspdf && window.jspdf.jsPDF) {
+            const originalPdfSave = window.jspdf.jsPDF.prototype.save;
+            window.jspdf.jsPDF.prototype.save = function(filename) {
+                if (window.__TAURI__) {
+                    const arrayBuffer = this.output('arraybuffer');
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    window.simpanKeTauriData(uint8Array, filename);
+                    return this;
+                }
+                return originalPdfSave.call(this, filename);
+            };
+        }
+        
+        // PEMBAJAK 3: SheetJS / XLSX (Semua Excel)
+        if (window.XLSX) {
+            const originalXlsxWrite = window.XLSX.writeFile;
+            window.XLSX.writeFile = function(wb, filename) {
+                if (window.__TAURI__) {
+                    const arrayBuffer = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    window.simpanKeTauriData(uint8Array, filename);
+                    return;
+                }
+                originalXlsxWrite(wb, filename);
+            };
+        }
+    });
+</script>
 
   <style>
     /* ==========================================
@@ -162,11 +249,11 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
   
-  <!-- INDIKATOR SINYAL MODERN (Pojok Kanan Atas) -->
-  <div id="connection-banner" class="fixed top-6 right-6 transform translate-x-[150%] opacity-0 z-[9999] px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-3 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] backdrop-blur-md border">
-    <span id="connection-dot" class="w-2.5 h-2.5 rounded-full"></span>
-    <span id="connection-text">MEMERIKSA...</span>
-</div>
+    <!-- INDIKATOR SINYAL PERMANEN ANTI HANCUR (Pojok Kanan Atas) -->
+    <div id="connection-banner" style="position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 10px 20px; border-radius: 12px; font-size: 11px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; background-color: #eff6ff; color: #1d4ed8;">
+      <span id="connection-dot" style="width: 12px; height: 12px; border-radius: 50%; background-color: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.8);"></span>
+      <span id="connection-text">MEMERIKSA KONEKSI...</span>
+    </div>
   
     <!-- NOTIFIKASI KANAN ATAS (NEMPEL DI LAYAR LAPTOP/MONITOR) -->
     <div id="toast" class="fixed top-6 right-4 md:top-8 md:right-8 z-[100] flex items-center justify-center gap-3 transform translate-x-[150%] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
@@ -1077,55 +1164,65 @@
     let currentPageMaster = 1; let currentPageSlip = 1; let currentPageRekap = 1;
     const rowsPerPageRekap = 200; const rowsPerPageSlip = 150; const rowsPerPageMaster = 300;
    
-    let sinyalTimeout;
-
-    // 1. Tambahkan parameter "isOnline" untuk memaksa status
-    function updateConnectionStatus(isOnline = navigator.onLine) {
+ // SENSOR SINYAL ANTI MACET
+ async function periksaSinyal() {
         const banner = document.getElementById('connection-banner');
         const dot = document.getElementById('connection-dot');
-        const text = document.getElementById('connection-text');
-        if (!banner || !dot || !text) return;
-        
-        // Hapus timer lama jika ada agar animasi tidak bentrok
-        if (sinyalTimeout) clearTimeout(sinyalTimeout);
+        const txt = document.getElementById('connection-text');
+        const statusSync = document.getElementById('status-sync'); // Khusus pembukuan
+        const statusDot = document.getElementById('status-dot');   // Khusus pembukuan
+        const statusTxt = document.getElementById('status-text');  // Khusus pembukuan
 
-        // Meluncur mulus masuk dari samping kanan
-        banner.classList.remove('translate-x-[150%]', 'opacity-0');
-        banner.classList.add('translate-x-0', 'opacity-100');
-        
-        if (isOnline) {
-            // TEMA ONLINE: Biru cerah, estetik, dan tembus pandang
-            banner.classList.remove('bg-rose-50/90', 'border-rose-200', 'text-rose-700');
-            banner.classList.add('bg-blue-50/90', 'border-blue-200', 'text-blue-700');
-            dot.className = "w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]";
-            text.innerText = "ONLINE (SINKRONISASI AKTIF)";
-            
-            // Hilangkan otomatis setelah 3.5 detik dengan meluncur keluar ke kanan
-            sinyalTimeout = setTimeout(() => {
-                banner.classList.remove('translate-x-0', 'opacity-100');
-                banner.classList.add('translate-x-[150%]', 'opacity-0');
-            }, 3500);
-        } else {
-            // TEMA OFFLINE: Merah tegas
-            banner.classList.remove('bg-blue-50/90', 'border-blue-200', 'text-blue-700');
-            banner.classList.add('bg-rose-50/90', 'border-rose-200', 'text-rose-700');
-            dot.className = "w-2.5 h-2.5 rounded-full bg-rose-600 shadow-[0_0_8px_rgba(225,29,72,0.8)]";
-            text.innerText = "OFFLINE (MODE LOKAL)";
-            
-            // Dibiarkan tanpa setTimeout agar terus muncul di layar memperingatkan Admin
+        // Pengecekan Paling Akurat via Fetch Bantuan
+        let isOnline = false;
+        if (navigator.onLine) {
+            try {
+                await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
+                isOnline = true;
+            } catch (e) { isOnline = false; }
+        }
+
+        // Terapkan Gaya untuk index.html
+        if (banner && txt) {
+            if (isOnline) {
+                banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
+                dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+                txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+            } else {
+                banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
+                dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+                txt.innerText = "OFFLINE (MODE LOKAL)";
+            }
+        }
+
+        // Terapkan Gaya untuk pembukuan.html
+        if (statusSync && statusTxt) {
+            if (isOnline) {
+                statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
+                statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+                statusTxt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+            } else {
+                statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
+                statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+                statusTxt.innerText = "OFFLINE (MODE LOKAL)";
+            }
         }
     }
 
-    // 2. Beri instruksi paksa "false" saat offline dan "true" saat online
+    // Paksa mesin meraba sinyal setiap 4 detik (Detak Jantung)
+    setInterval(periksaSinyal, 4000);
+
     window.addEventListener('offline', () => { 
+        periksaSinyal();
         showToast("📶 Sinyal terputus. Data otomatis diamankan di memori lokal."); 
-        updateConnectionStatus(false); // PAKSA JADI MERAH
     });
 
     window.addEventListener('online', () => { 
+        periksaSinyal();
         showToast("🌐 Online kembali! Memeriksa sinkronisasi data..."); 
-        updateConnectionStatus(true); // PAKSA JADI BIRU
         if (typeof sinkronisasiSenyap === 'function') sinkronisasiSenyap(); 
+        // Restart realtime jika sebelumnya mati
+        if (typeof inisialisasiSupabaseRealtime === 'function') inisialisasiSupabaseRealtime();
     });
     async function sinkronisasiSenyap() {
         if (!navigator.onLine) return;
@@ -2356,7 +2453,7 @@
         XLSX.writeFile(wb, `REKAP_${fSarimbit || "SEMUA"}.xlsx`); 
         showToast("Excel Berhasil Diunduh!");
         
-        catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan Excel Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
+        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan Excel Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
     }
     function exportRekapPDF() {
         if (!orderData.length) return showToast("Data kosong!");
@@ -2369,21 +2466,14 @@
         orderData.forEach(o => {
             if (fTglMulai || fTglAkhir) { const tglOrder = new Date(o.tanggal); if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; }
             if(fSarimbit && o.sarimbit !== fSarimbit) return; if(fVarian && o.varian !== fVarian) return; if(fBarang && o.barang !== fBarang) return; if(fSize && o.size !== fSize) return;
-         // Tarik memori setoran untuk dicocokkan dengan barang
-         const memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
-            const filterEkspor = document.getElementById('export-rekap-filter') ? document.getElementById('export-rekap-filter').value : 'semua';
+         
             const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
-            
-            // Kumpulkan total murni terlebih dahulu
             summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
-        }); // <-- Batas akhir perulangan pengumpulan data
+        });
 
-        // ====================================================================
-        // REVISI PENYARINGAN PDF BERDASARKAN STATUS SETORAN PUSAT
-        // ====================================================================
         const memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
         const filterSetoran = document.getElementById('export-rekap-filter') ? document.getElementById('export-rekap-filter').value : 'semua';
-        grandTotalQty = 0; // Reset total agar dihitung ulang dari hasil filter
+        grandTotalQty = 0; 
 
         for (const k in summary) {
             const disetor = memoriSetoran[k] || 0;
@@ -2396,9 +2486,9 @@
 
             if (qtyValid > 0) {
                 summary[k] = qtyValid; 
-                grandTotalQty += qtyValid; // Tambahkan ke total akhir di bagian bawah PDF
+                grandTotalQty += qtyValid; 
             } else {
-                delete summary[k]; // Buang dari tabel PDF jika tidak lolos filter
+                delete summary[k]; 
             }
         }
         
@@ -2422,9 +2512,11 @@
         doc.setFontSize(16); doc.text("LAPORAN REKAP BARANG", 14, 15); 
         doc.setFontSize(10); doc.text(`Periode: ${fTglMulai || 'Semua'} s/d ${fTglAkhir || 'Sekarang'}`, 14, 22); doc.text(`Total Qty Keseluruhan: ${grandTotalQty}`, 14, 27);
         doc.autoTable({ startY: 32, head: [['No', 'Nama Barang', 'Varian & Size', 'Total Qty']], body: bodyData, theme: 'grid', headStyles: { fillColor: [225, 29, 72], halign: 'center' }, columnStyles: { 0: { halign: 'center', cellWidth: 10 }, 3: { halign: 'center', fontStyle: 'bold' } } });
-        doc.save(`REKAP_${fSarimbit || "SEMUA"}.pdf`); showToast("PDF Rekap Berhasil Diunduh!");
         
-        catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan PDF Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
+        window.saveAs(doc.output('blob'), `REKAP_${fSarimbit || "SEMUA"}.pdf`);
+        showToast("PDF Rekap Berhasil Diunduh!");
+        
+        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan PDF Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
     }
 
     async function printOneSlip(idCustomer) {
@@ -2814,7 +2906,7 @@
         doc.text(catatanSplit, 105, yInfo, { align: "center" });
 
         const cleanName = (head.customer || "Nota").replace(/[^a-zA-Z0-9]/g, '_');
-        doc.save(`NOTA_${cleanName}.pdf`);
+        window.saveAs(doc.output('blob'), `NOTA_${cleanName}.pdf`);
         showToast("✅ PDF Nota Berhasil Diunduh!");
         
         catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Nota Transparan untuk: ${head.customer.toUpperCase()}`);
@@ -2979,9 +3071,18 @@
             columnStyles: { 0: { cellWidth: 8, halign: 'center' }, 1: { cellWidth: 22 }, 2: { cellWidth: 28 }, 3: { cellWidth: 42 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' }, 6: { cellWidth: 18, halign: 'right' }, 7: { cellWidth: 18, halign: 'right' }, 8: { cellWidth: 18, halign: 'right' }, 9: { cellWidth: 24, halign: 'right' } } 
         });
         
-        doc.save(getDynamicFilename('RINCIAN_CUSTOMER') + '.pdf'); showToast("PDF Berhasil Diunduh!");
+        const namaFileRincian = getDynamicFilename('RINCIAN_CUSTOMER') + '.pdf';
         
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Rincian Database Pelanggan`);
+        if (window.__TAURI__) {
+            const arrayBuffer = doc.output('arraybuffer');
+            const uint8Array = new Uint8Array(arrayBuffer);
+            window.simpanKeTauriData(uint8Array, namaFileRincian);
+        } else {
+            doc.save(namaFileRincian); 
+            showToast("PDF Berhasil Diunduh!");
+        }
+        
+        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Rincian Database Pelanggan`);
     }
     async function arsipPerSarimbit() {
         if (!appSettings.allowArchive) return showToast("⚠️ Izin Pengarsipan belum diaktifkan!");
@@ -3101,7 +3202,9 @@
             dateFilterWrapper.classList.remove('hidden');
         }
         
-        updateConnectionStatus();
+        // Panggil status sinyal seketika saat web terbuka (tanpa jeda)
+        periksaSinyal();
+        
         addOrderRow(); 
         if (typeof loadAllData === 'function') loadAllData();
     };
@@ -3631,7 +3734,7 @@ function unduhPdfSumber(tipe) {
         }
     });
 
-    doc.save(namaFile);
+    window.saveAs(doc.output('blob'), namaFile);
     if (typeof showToast === 'function') showToast("✅ PDF Berhasil Diunduh!");
 }
   </script>

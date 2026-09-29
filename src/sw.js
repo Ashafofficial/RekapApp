@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sarimbit-pro-cache-v2';
+const CACHE_NAME = 'sarimbit-pro-cache-v3'; // Naikkan versi cache
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,17 +7,16 @@ const ASSETS_TO_CACHE = [
   './logo.png',
   './logo-toko.png',
   './manifest.json',
-  // MENYIMPAN ASSET TAMPILAN SUPAYA MESKIPUN OFFLINE TETAP MEWAH
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
-  // Menyimpan library pendukung cetak nota offline
   'https://unpkg.com/dexie/dist/dexie.js',
   'https://unpkg.com/docx@7.1.0/build/index.js',
   'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js',
-  'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js'
+  'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2' // TAMBAHAN WAJIB
 ];
 
 // Tahap Install: Amankan semua aset ke memori browser laptop

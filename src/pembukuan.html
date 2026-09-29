@@ -14,16 +14,91 @@
     }
   </script>
   
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- KEMBALIKAN KE CDN INTERNET (AKAN DI-CACHE OLEH SERVICE WORKER) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+
   <script src="database.js?v=14"></script>
+
+ <!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (TAURI V2 - FINAL) -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      // FUNGSI INTI MENYIMPAN KE HARDISK MAC/WINDOWS VIA TAURI
+      window.simpanKeTauriData = async function(uint8Array, filename) {
+          if (!window.__TAURI__ || !window.__TAURI__.core) return false;
+          
+          try {
+              const tauriCore = window.__TAURI__.core;
+              
+              // Ambil ekstensi untuk deteksi format otomatis
+              const extMatch = filename.match(/\.([^.]+)$/);
+              const ext = extMatch ? extMatch[1].toLowerCase() : '';
+              
+              const dialogOptions = { defaultPath: filename };
+              if (ext) dialogOptions.filters = [{ name: ext.toUpperCase(), extensions: [ext] }];
+
+              // Memunculkan kotak Save As bawaan sistem
+              const savePath = await tauriCore.invoke('plugin:dialog|save', { 
+                  options: dialogOptions 
+              });
+
+              if (savePath) {
+                  try {
+                      const fs = window.__TAURI__.fs || window.__TAURI__.plugin_fs;
+                      await fs.writeFile(savePath, uint8Array);
+                  } catch(err) {
+                      // Fallback terkuat jika penulisan standar ditolak
+                      await tauriCore.invoke('plugin:fs|write', { path: savePath, contents: Array.from(uint8Array) });
+                  }
+                  if (typeof showToast === 'function') showToast("✅ File " + ext.toUpperCase() + " berhasil disimpan!");
+                  return true;
+              }
+          } catch (e) {
+              const msg = typeof e === 'string' ? e : (e.message || JSON.stringify(e));
+              alert("❌ Gagal menyimpan file: " + msg);
+          }
+          return false;
+      };
+
+      // PEMBAJAK 1: FileSaver.js (Word Document)
+      if (window.saveAs) {
+          const originalSaveAs = window.saveAs;
+          window.saveAs = async function(blob, filename) {
+              if (window.__TAURI__) {
+                  try {
+                      const arrayBuffer = await blob.arrayBuffer();
+                      const uint8Array = new Uint8Array(arrayBuffer);
+                      const sukses = await window.simpanKeTauriData(uint8Array, filename);
+                      if (sukses) return;
+                  } catch(e) {}
+              }
+              originalSaveAs(blob, filename);
+          };
+      }
+      
+      // PEMBAJAK 3: SheetJS / XLSX (Semua Excel)
+      if (window.XLSX) {
+          const originalXlsxWrite = window.XLSX.writeFile;
+          window.XLSX.writeFile = function(wb, filename) {
+              if (window.__TAURI__) {
+                  const arrayBuffer = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                  const uint8Array = new Uint8Array(arrayBuffer);
+                  window.simpanKeTauriData(uint8Array, filename);
+                  return;
+              }
+              originalXlsxWrite(wb, filename);
+          };
+      }
+  });
+</script>
 
   <style>
     /* ==========================================
@@ -198,46 +273,66 @@
         return Number(value.toString().replace(/\./g, '')) || 0;
     }
 
-    function updateSinyal() {
-      const div = document.getElementById('status-sync');
-      const dot = document.getElementById('status-dot');
-      const txt = document.getElementById('status-text');
-      const banner = document.getElementById('connection-banner');
+   // SENSOR SINYAL ANTI MACET
+   async function periksaSinyal() {
+        const banner = document.getElementById('connection-banner');
+        const dot = document.getElementById('connection-dot');
+        const txt = document.getElementById('connection-text');
+        const statusSync = document.getElementById('status-sync'); // Khusus pembukuan
+        const statusDot = document.getElementById('status-dot');   // Khusus pembukuan
+        const statusTxt = document.getElementById('status-text');  // Khusus pembukuan
 
-      if (navigator.onLine) {
-        // Mode Online (Biru Berkedip)
-        div.className = "bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
-        dot.className = "w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]";
-        txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
-        
-        banner.innerText = "SISTEM ONLINE (SINKRONISASI AKTIF)";
-        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-blue-600 text-white block shadow-sm";
-        setTimeout(() => banner.classList.add('hidden'), 3500); 
-      } else {
-        // Mode Offline (Merah Stabil)
-        div.className = "bg-rose-50 border border-rose-200 text-rose-700 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm transition-all";
-        dot.className = "w-2 h-2 bg-rose-600 rounded-full shadow-[0_0_8px_rgba(225,29,72,0.8)]";
-        txt.innerText = "OFFLINE (MODE LOKAL)";
+        // Pengecekan Paling Akurat via Fetch Bantuan
+        let isOnline = false;
+        if (navigator.onLine) {
+            try {
+                await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
+                isOnline = true;
+            } catch (e) { isOnline = false; }
+        }
 
-        banner.innerText = "OFFLINE MODE (DATA TERSIMPAN DI PERANGKAT)";
-        banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-rose-600 text-white block shadow-sm";
-        setTimeout(() => banner.classList.add('hidden'), 3500); 
-      }
+        // Terapkan Gaya untuk index.html
+        if (banner && txt) {
+            if (isOnline) {
+                banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
+                dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+                txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+            } else {
+                banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
+                dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+                txt.innerText = "OFFLINE (MODE LOKAL)";
+            }
+        }
+
+        // Terapkan Gaya untuk pembukuan.html
+        if (statusSync && statusTxt) {
+            if (isOnline) {
+                statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
+                statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+                statusTxt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+            } else {
+                statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
+                statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+                statusTxt.innerText = "OFFLINE (MODE LOKAL)";
+            }
+        }
     }
-   // ==============================================================
-    // SENSOR SINYAL & MESIN SINKRONISASI PINTAR (SMART AUTO-SYNC)
-    // ==============================================================
+
+    // Paksa mesin meraba sinyal setiap 4 detik (Detak Jantung)
+    setInterval(periksaSinyal, 4000);
+
     window.addEventListener('offline', () => { 
-        updateSinyal(); 
+        periksaSinyal();
         showToast("📶 Sinyal terputus. Data otomatis diamankan di memori lokal."); 
     });
 
     window.addEventListener('online', () => { 
-        updateSinyal(); 
+        periksaSinyal();
         showToast("🌐 Online kembali! Memeriksa sinkronisasi data..."); 
-        sinkronisasiSenyap(); // Panggil mesin pintar tanpa me-refresh layar
+        if (typeof sinkronisasiSenyap === 'function') sinkronisasiSenyap(); 
+        // Restart realtime jika sebelumnya mati
+        if (typeof inisialisasiSupabaseRealtime === 'function') inisialisasiSupabaseRealtime();
     });
-
     async function sinkronisasiSenyap() {
         if (!navigator.onLine) return;
         try {
@@ -375,9 +470,9 @@
         }
     }
 
-    // MEMUAT DATA PERTAMA KALI HALAMAN DIBUKA
-    window.onload = function() {
-        updateSinyal();
+   // MEMUAT DATA PERTAMA KALI HALAMAN DIBUKA
+   window.onload = function() {
+        periksaSinyal();
         
         // Memanggil fungsi baru di atas
         muatDataPembukuan();
@@ -683,7 +778,15 @@
         }
       });
       const ws = XLSX.utils.aoa_to_sheet(dataForExcel); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Pembukuan");
-      XLSX.writeFile(wb, `Pembukuan_Export_${new Date().toLocaleDateString('id-ID')}.xlsx`);
+      const filename = `Pembukuan_Export_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.xlsx`;
+      
+      if (window.__TAURI__) {
+          const arrayBuffer = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const uint8Array = new Uint8Array(arrayBuffer);
+          window.simpanKeTauriData(uint8Array, filename);
+      } else {
+          XLSX.writeFile(wb, filename);
+      }
       
       catatLog('DOWNLOAD', 'PEMBUKUAN', `Mengunduh Laporan Excel Dashboard Pembukuan`);
     }
@@ -697,7 +800,7 @@
           if (row.style.display !== 'none') {
             visibleRows.push([
               i + 1, 
-              row.querySelector('.sarimbit-name').innerText.replace('DIARSIP','').trim(), 
+              row.querySelector('.sarimbit-name').innerText.replace('Diarsip','').trim(), 
               row.querySelector('.brand-name').value, 
               row.querySelector('.val-total-pcs').innerText,
               formatTanggalPanjang(row.querySelectorAll('input[type="date"]')[0].value), 
@@ -712,7 +815,17 @@
           head: [["No", "Sarimbit", "Pusat", "Pcs", "Close", "Ready", "Uang (DP/Lunas)", "Logistik", "Status Alamat"]], body: visibleRows, startY: 30, theme: 'grid',
           headStyles: { fillColor: [30, 41, 59], fontSize: 8, halign: 'center' }, styles: { fontSize: 7, cellPadding: 3, valign: 'middle' }, columnStyles: { 0: { cellWidth: 8, halign: 'center' }, 3: { halign: 'center' } }
         });
-        doc.save(`Laporan_Pembukuan_${new Date().toLocaleDateString('id-ID')}.pdf`); showToast("✅ PDF Berhasil diunduh");
+        
+        const filename = `Laporan_Pembukuan_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.pdf`;
+        
+        if (window.__TAURI__) {
+            const arrayBuffer = doc.output('arraybuffer');
+            const uint8Array = new Uint8Array(arrayBuffer);
+            window.simpanKeTauriData(uint8Array, filename);
+        } else {
+            doc.save(filename);
+            showToast("✅ PDF Berhasil diunduh");
+        }
         
         catatLog('DOWNLOAD', 'PEMBUKUAN', `Mengunduh Laporan PDF Dashboard Pembukuan`);
       } catch (e) { alert("Gagal membuat PDF: " + e.message); }
