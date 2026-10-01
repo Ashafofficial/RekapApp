@@ -17,16 +17,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- KEMBALIKAN KE CDN INTERNET (AKAN DI-CACHE OLEH SERVICE WORKER) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+ <!-- KEMBALIKAN KE CDN INTERNET (AKAN DI-CACHE OLEH SERVICE WORKER) -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+ 
+ <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
+ <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+ 
+ <!-- 2. PANGGIL SUPABASE (Pondasi Awan) -->
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="database.js?v=14"></script>
+ <!-- 3. BARU PANGGIL DATABASE.JS (Mesin Anda) -->
+ <script src="database.js?v=16"></script>
 
 <!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (TAURI V2 - FINAL) -->
 <script>
@@ -256,7 +262,7 @@
     </div>
   
     <!-- NOTIFIKASI KANAN ATAS (NEMPEL DI LAYAR LAPTOP/MONITOR) -->
-    <div id="toast" class="fixed top-6 right-4 md:top-8 md:right-8 z-[100] flex items-center justify-center gap-3 transform translate-x-[150%] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
         <span id="toast-icon" class="text-2xl drop-shadow-md"></span>
         <span id="toast-msg" class="text-sm md:text-base font-semibold tracking-wide"></span>
     </div>
@@ -336,7 +342,7 @@
 
     <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 relative bg-white/40 backdrop-blur-3xl">
     
-        <div id="toast" class="fixed top-6 right-4 md:top-8 md:right-8 z-[100] flex items-center justify-center gap-3 transform translate-x-[150%] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
+        <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
             <span id="toast-icon" class="text-2xl drop-shadow-md"></span>
             <span id="toast-msg" class="text-sm md:text-base font-semibold tracking-wide"></span>
         </div>
@@ -350,6 +356,11 @@
       
       <form onsubmit="handleOrderSubmit(event)" class="space-y-6">
         <input type="hidden" id="o-tanggal-asli">
+        <!-- PENAMPUNG DATA KEUANGAN LAMA AGAR TIDAK HANGUS SAAT EDIT -->
+        <input type="hidden" id="o-cicilan2">
+        <input type="hidden" id="o-cicilan3">
+        <input type="hidden" id="o-ongkir">
+        <input type="hidden" id="o-resi">
     
         <div class="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/60 p-8 md:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
             
@@ -1187,7 +1198,7 @@
             if (isOnline) {
                 banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
                 dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+                txt.innerText = "ONLINE";
             } else {
                 banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
                 dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
@@ -1200,11 +1211,11 @@
             if (isOnline) {
                 statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
                 statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                statusTxt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+                statusTxt.innerText = "ONLINE";
             } else {
                 statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
                 statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
-                statusTxt.innerText = "OFFLINE (MODE LOKAL)";
+                statusTxt.innerText = "OFFLINE";
             }
         }
     }
@@ -1322,16 +1333,16 @@
         if (match) { tIcon.innerText = match[0]; tMsg.innerText = m.replace(match[0], '').trim(); tIcon.style.display = 'block'; } 
         else { tIcon.style.display = 'none'; tMsg.innerText = m; }
         
-        // Animasi meluncur mulus masuk dari kanan
-        t.classList.remove('translate-x-[150%]', 'opacity-0');
-        t.classList.add('translate-x-0', 'opacity-100');
+        // Animasi meluncur mulus masuk dari atas tengah
+        t.classList.remove('-translate-y-32', 'opacity-0', 'scale-90');
+        t.classList.add('translate-y-0', 'opacity-100', 'scale-100');
         
         if(window.toastTimeout) clearTimeout(window.toastTimeout);
         window.toastTimeout = setTimeout(() => {
-            // Animasi meluncur mulus keluar ke kanan
-            t.classList.remove('translate-x-0', 'opacity-100');
-            t.classList.add('translate-x-[150%]', 'opacity-0');
-        }, 2500);
+            // Animasi meluncur mulus keluar ke atas
+            t.classList.remove('translate-y-0', 'opacity-100', 'scale-100');
+            t.classList.add('-translate-y-32', 'opacity-0', 'scale-90');
+        }, 6000);
     };
 
   // LOGIKA TAB & SIDEBAR
@@ -1396,6 +1407,13 @@
         const ekspedisi = document.getElementById('o-ekspedisi').value; 
         const cicilan1 = Number(document.getElementById('o-cicilan1').value) || 0;
         const asal_order = document.getElementById('o-sumber').value; // PENANGKAP SUMBER ORDER
+        
+        // Menarik kembali data keuangan lama dari elemen tersembunyi
+        const cicilan2 = isEditMode ? (Number(document.getElementById('o-cicilan2').value) || 0) : 0;
+        const cicilan3 = isEditMode ? (Number(document.getElementById('o-cicilan3').value) || 0) : 0;
+        const ongkir = isEditMode ? (Number(document.getElementById('o-ongkir').value) || 0) : 0;
+        const resi = isEditMode ? document.getElementById('o-resi').value : "";
+
         const idToSave = isEditMode ? isEditMode : "CUST-" + Date.now();
         const items = [];
         const waktuSekarang = new Date().toISOString();
@@ -1483,7 +1501,9 @@
     idcustomer: idToSave, customer: customer, telepon: telepon, alamat: alamat, toko: toko,
     pusat: meta.pusat, sarimbit: meta.sarimbit, barang: meta.barang, varian: meta.varian, 
     size: meta.size, harga: meta.harga, berat: meta.berat, jumlah: qty, 
-    total: meta.harga * qty, cicilan1: cicilan1, 
+    total: meta.harga * qty, 
+    cicilan1: cicilan1, cicilan2: cicilan2, cicilan3: cicilan3, // Data Keuangan Aman
+    ongkir: ongkir, resi: resi, // Data Ongkir dan Resi Aman
     ekspedisi: ekspedisi, 
     asal_order: asal_order,
     diskonTipe: document.getElementById('o-tipe-diskon').value,
@@ -1556,7 +1576,9 @@
         );
     }
     function updateDataDirect(idCustomer, field, nilai) {
-        if(typeof google === 'undefined' || !idCustomer) return;
+        // HAPUS PENGECEKAN GOOGLE! Biarkan fungsi berjalan walau bukan di server Google
+        if(!idCustomer) return; 
+        
         let fieldLabel = field;
         let nilaiBersih = nilai;
 
@@ -2062,8 +2084,29 @@
         document.getElementById('o-telp').value = head.telepon;
         document.getElementById('o-alamat').value = head.alamat;
         document.getElementById('o-toko').value = head.toko || "";
-        document.getElementById('o-ekspedisi').value = head.ekspedisi || ""; // DATA EKSPEDISI OTOMATIS TERISI SAAT FORM EDIT TERBUKA
-        document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || 0;
+        document.getElementById('o-sumber').value = head.asal_order || ""; 
+        
+        // Membaca Ekspedisi dengan aman dari perbedaan huruf besar/kecil
+        const dropdownEkspedisi = document.getElementById('o-ekspedisi');
+        const opsiEkspedisi = Array.from(dropdownEkspedisi.options).map(opt => opt.value.toLowerCase());
+        const ekspedisiAsli = (head.ekspedisi || "").toLowerCase();
+        if (opsiEkspedisi.includes(ekspedisiAsli)) {
+            dropdownEkspedisi.value = Array.from(dropdownEkspedisi.options).find(opt => opt.value.toLowerCase() === ekspedisiAsli).value;
+        } else {
+            dropdownEkspedisi.value = "";
+        }
+
+        // DP / Cicilan 1
+        document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || head.cicilan1 || 0;
+        
+        // =========================================================================
+        // REVISI UTAMA: AMBIL DAN KUNCI KEUANGAN LAMA KE INPUT HIDDEN DENGAN AMAN
+        // =========================================================================
+        document.getElementById('o-cicilan2').value = Number(head.cicilan2) || 0;
+        document.getElementById('o-cicilan3').value = Number(head.cicilan3) || 0;
+        document.getElementById('o-ongkir').value = Number(head.ongkir) || 0;
+        document.getElementById('o-resi').value = head.resi || "";
+        // =========================================================================
         
         // MENARIK DATA DISKON SAAT EDIT
         document.getElementById('o-tipe-diskon').value = head.diskonTipe || "none";
@@ -2082,8 +2125,6 @@
             if (masterData.length > 0) {
                 const sarimbits = [...new Set(masterData.map(m => m.sarimbit))].sort();
                 selectFilter.innerHTML = `<option value="">-- Sarimbit --</option>` + sarimbits.map(s => `<option value="${s}">${s}</option>`).join('');
-                
-                // BARIS REVISI: Mengatur nilai dropdown sesuai dengan sarimbit yang tersimpan di database
                 selectFilter.value = it.sarimbit; 
             }
 
@@ -2097,7 +2138,6 @@
             input.dataset.meta = JSON.stringify(metaDataPesanan);
             qtyInput.value = it.jumlah;
             
-            // KODE ASLI TETAP UTUH (Logic merubah text abu-abu saat mode edit)
             if (textDisplay) {
                 textDisplay.textContent = `${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang} (${metaDataPesanan.varian}/${metaDataPesanan.size})`;
                 textDisplay.classList.remove('text-slate-400');
@@ -3321,12 +3361,12 @@ async function eksekusiDorongDataPaksa() {
                     close: b.close || "",
                     ready: b.ready || "",
                     
-                    // PERBAIKAN FATAL: Memaksa kolom uang menjadi ANGKA (0), bukan teks kosong ("")
-                    c1: Number(b.c1) || 0,
-                    c2: Number(b.c2) || 0,
-                    bayar: Number(b.bayar) || 0,
-                    dp: Number(b.dp) || 0,
-                    Lunas: Number(b.Lunas || b.lunas) || 0,
+                  // PERBAIKAN FATAL: Sesuaikan dengan tipe data asli dari Supabase
+                  c1: b.c1 || "", // Kolom TEXT, JANGAN diubah jadi Number
+                    c2: b.c2 || "", // Kolom TEXT, JANGAN diubah jadi Number
+                    bayar: Number(b.bayar) || 0, // Kolom NUMERIC, dipaksa jadi Angka
+                    dp: Number(b.dp) || 0,       // Kolom NUMERIC, dipaksa jadi Angka
+                    Lunas: b.Lunas || b.lunas || "", // Kolom TEXT, KEMBALIKAN KE STRING
                     
                     statusKirim: b.statusKirim || "",
                     statusAlamat: b.statusAlamat || "",

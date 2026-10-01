@@ -24,9 +24,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  
+  <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
   <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  
+  <!-- 2. PANGGIL SUPABASE (Pondasi Awan) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="database.js?v=14"></script>
+  <!-- 3. BARU PANGGIL DATABASE.JS (Mesin Anda) -->
+  <script src="database.js?v=16"></script>
 
  <!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (TAURI V2 - FINAL) -->
 <script>
@@ -296,11 +302,11 @@
             if (isOnline) {
                 banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
                 dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                txt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+                txt.innerText = "ONLINE";
             } else {
                 banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
                 dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
-                txt.innerText = "OFFLINE (MODE LOKAL)";
+                txt.innerText = "OFFLINE";
             }
         }
 
@@ -309,11 +315,11 @@
             if (isOnline) {
                 statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
                 statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                statusTxt.innerText = "ONLINE (SINKRONISASI AKTIF)";
+                statusTxt.innerText = "ONLINE";
             } else {
                 statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
                 statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
-                statusTxt.innerText = "OFFLINE (MODE LOKAL)";
+                statusTxt.innerText = "OFFLINE";
             }
         }
     }
@@ -490,7 +496,7 @@
       window.toastTimeout = setTimeout(() => {
           t.classList.remove('translate-y-0', 'opacity-100', 'scale-100');
           t.classList.add('-translate-y-32', 'opacity-0', 'scale-90');
-      }, 3000);
+      }, 6000);
     }
 
     function formatTanggalPanjang(dateString) {
@@ -513,7 +519,10 @@
 
       tbody.innerHTML = summaryArray.map((item, index) => {
         const sarimbitName = item.sarimbit || "Tanpa Nama";
-        const autoSave = `onchange="simpanRow(${index}, '${sarimbitName}')"`;
+        // Mencegah error jika ada tanda kutip tunggal (') pada nama Sarimbit
+        const safeSarimbitName = sarimbitName.replace(/'/g, "\\'");
+        // Menambahkan respon tombol "Enter" agar data langsung tersimpan tanpa harus klik di luar kotak
+        const autoSave = `onchange="simpanRow(${index}, '${safeSarimbitName}')" onkeypress="if(event.key === 'Enter') this.blur();"`;
         
         // 1. AMBIL TOTAL TERAKHIR (Jika order aktif 0 karena diarsip, pakai data 'total' yang sudah terkunci di Supabase)
         const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
@@ -662,8 +671,8 @@
           console.error("Gagal memeriksa status arsip lokal:", err);
       }
 
-     // DATA YANG DIKIRIM (Pakai "" bukan null agar kebal terhadap error Not Null Database)
-     const dataToSave = {
+   // DATA YANG DIKIRIM (Sudah disesuaikan 100% dengan skema Supabase)
+   const dataToSave = {
         sarimbit: sarimbit || "",
         brand: document.getElementById(`brand-${idx}`).value || "",
         total: activeData ? (Number(activeData.totalOrder) || 0) : 0, 
@@ -671,14 +680,15 @@
         ready: valReady || "", 
         c1: valC1 || "",
         c2: valC2 || "",
-        Lunas: valLunas || "", // Menggunakan L besar
-        dp: dpBersih, 
-        bayar: bayarBersih.toString(), // Di Supabase text, jadi dikonversi ke teks
+        Lunas: valLunas || "", // KEMBALIKAN KE L BESAR sesuai skema database
+        dp: dpBersih,
+        bayar: bayarBersih, // HARUS BERUPA ANGKA KARENA DB NUMERIC (Hapus .toString)
         statusKirim: document.getElementById(`kirim-${idx}`).value || "",
         statusAlamat: document.getElementById(`alamat-${idx}`).value || "",
         isarchived: statusArsipAsli, // Mengunci nilai asli agar tidak berubah menjadi false saat diedit
         isPrinted: document.getElementById(`print-${idx}`).checked,
         isInformed: document.getElementById(`info-${idx}`).checked,
+        omset: activeData ? (Number(activeData.omset) || 0) : 0, // MENGUNCI OMSET AGAR TIDAK HANGUS MENJADI 0
         updated_at: new Date().toISOString()
       };
 
@@ -735,6 +745,10 @@
           check.classList.remove('hidden');
           setTimeout(() => { check.classList.add('hidden'); if (idle) idle.classList.remove('hidden'); }, 2500);
         }
+        
+        // Panggil notifikasi eksplisit agar admin yakin data sudah terkunci
+        showToast(`✅ Data ${sarimbit} otomatis tersimpan!`);
+        
       } catch (e) {
         console.error("Gagal simpan:", e);
         if (loader) loader.classList.add('hidden');

@@ -334,45 +334,109 @@ window.catatLog = async function(action, module, detail) {
 };
 
 async function inisialisasiSupabaseRealtime() {
-    // PENGAMANAN: Jangan coba eksekusi jika offline
     if (!(await cekInternetAktif())) {
-        console.warn("Offline: Supabase Realtime ditunda.");
+        console.warn("⚠️ Offline: Supabase Realtime ditunda.");
         return;
     }
 
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-    
-    script.onload = () => {
-        try {
-            if (typeof supabase === 'undefined') return;
-            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    try {
+        if (typeof supabase === 'undefined') {
+            console.error("❌ Library Supabase JS belum siap!");
+            return;
+        }
 
-            function aktifkanRealtimeListener() {
-                if (!navigator.onLine) return;
-                supabaseClient
-                  .channel('public:orders')
-                  .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-                      if (typeof DatabaseAPI !== 'undefined') {
-                          DatabaseAPI.getAllData((res) => {
-                              if (typeof updateGlobalFilters === 'function') {
-                                  if (typeof masterData !== 'undefined') masterData = res.master || []; 
-                                  if (typeof orderData !== 'undefined') orderData = res.orders || [];
-                                  updateGlobalFilters();
-                                  if (document.getElementById('page-slip')?.classList.contains('active')) renderSlip();
-                                  if (document.getElementById('page-rekap')?.classList.contains('active')) renderRekap();
-                              }
-                          });
-                      }
-                  })
-                  .subscribe();
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const channel = supabaseClient
+            .channel('public-db-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+                console.log("⚡ Realtime orders diterima:", payload);
+                handleSmartRefresh(payload);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'pembukuan' }, (payload) => {
+                console.log("⚡ Realtime pembukuan diterima:", payload);
+                handleSmartRefresh(payload);
+            })
+            .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log("✅ KONEKSI REALTIME AKTIF: Siap mendengar perubahan data dari Android!");
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error("❌ Gagal terhubung ke Realtime channel:", err);
+                } else {
+                    console.log("ℹ️ Status Realtime:", status);
+                }
+            });
+
+       function handleSmartRefresh(payload) {
+                // 1. SENSOR AKTIVITAS (Cek apakah kursor admin sedang di dalam kotak ketikan)
+                const elemenAktif = document.activeElement;
+                const adminSedangNgetik = elemenAktif && ['INPUT', 'TEXTAREA', 'SELECT'].includes(elemenAktif.tagName);
+                
+                // Cek apakah admin sedang menggunakan Form Edit Orderan (Pena Oranye)
+                const formOrder = document.querySelector('form');
+                const adminSedangEdit = formOrder && formOrder.dataset.editMode;
+
+                if (adminSedangNgetik || adminSedangEdit) {
+                    // JIKA ADMIN SIBUK: Jangan kedipkan layar, beri tahu, DAN TANDAI bahwa ada data tertunda
+                    window.pendingSyncFromAndroid = true;
+                    
+                    if (typeof showToast === 'function') {
+                        // REVISI TEKS NOTIFIKASI
+                        showToast("🔄 Ada perubahan data. Layar akan diperbarui otomatis setelah Anda selesai mengetik.");
+                    }
+
+                    // Pasang pendengar (listener) sekali saja: Begitu admin selesai mengetik (keluar dari input), langsung sinkronkan!
+                    if (!window._listenerSelesaiNgetik) {
+                        window._listenerSelesaiNgetik = () => {
+                            setTimeout(() => {
+                                const masihNgetik = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+                                if (!masihNgetik && window.pendingSyncFromAndroid) {
+                                    window.pendingSyncFromAndroid = false;
+                                    window._listenerSelesaiNgetik = null;
+                                    document.removeEventListener('focusout', window._listenerSelesaiNgetik);
+                                    
+                                    // EKSEKUSI TARIK DATA OTOMATIS BEGITU ADMIN SELESAI MENGETIK!
+                                    jalankanPenyegaranLayarWindows();
+                                }
+                            }, 500);
+                        };
+                        document.addEventListener('focusout', window._listenerSelesaiNgetik);
+                    }
+                } else {
+                    // JIKA ADMIN DIAM: Refresh data di latar belakang secara senyap seketika
+                    jalankanPenyegaranLayarWindows();
+                }
             }
-            aktifkanRealtimeListener();
-        } catch (e) { console.error("Gagal inisialisasi Realtime:", e); }
-    };
-    document.head.appendChild(script);
-}
 
+            // Fungsi pembantu agar kode refresh bersih dan bisa dipanggil dari mana saja
+            function jalankanPenyegaranLayarWindows() {
+                if (typeof DatabaseAPI !== 'undefined') {
+                    DatabaseAPI.getAllData((res) => {
+                        const scrollSlip = document.getElementById('page-slip') ? document.getElementById('page-slip').scrollTop : 0;
+                        const scrollRekap = document.getElementById('page-rekap') ? document.getElementById('page-rekap').scrollTop : 0;
+                        
+                        if (typeof masterData !== 'undefined') masterData = res.master || []; 
+                        if (typeof orderData !== 'undefined') orderData = res.orders || [];
+                        
+                        if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
+                        if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
+                        if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
+                        if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
+
+                        if (document.getElementById('page-slip')) document.getElementById('page-slip').scrollTop = scrollSlip;
+                        if (document.getElementById('page-rekap')) document.getElementById('page-rekap').scrollTop = scrollRekap;
+                        
+                        if (typeof showToast === 'function') {
+                            // REVISI TEKS NOTIFIKASI
+                            showToast("⚡ Ada perubahan data. Layar telah diperbarui otomatis!");
+                        }
+                    });
+                }
+            }
+    } catch (e) {
+        console.error("Gagal menginisialisasi Realtime:", e);
+    }
+}
 document.addEventListener('DOMContentLoaded', () => {
     initDeviceId();      
     bersihkanLogLama();  
