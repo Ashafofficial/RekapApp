@@ -335,6 +335,22 @@
             <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-gear"></i></div>
             <span>Pengaturan</span>
         </button>
+        <!-- WIDGET KAPASITAS SERVER -->
+        <div class="px-5 mt-10 mb-2">
+            <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest"><i class="fa-solid fa-cloud text-blue-500 mr-1"></i> Cloud Storage</span>
+                    <span id="db-usage-percent" class="text-[10px] font-black text-blue-600">0%</span>
+                </div>
+                <div class="w-full bg-white rounded-full h-2.5 mb-2 shadow-inner overflow-hidden border border-blue-100">
+                    <div id="db-usage-bar" class="bg-gradient-to-r from-blue-400 to-indigo-500 h-2.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-[9px] font-bold text-slate-500">
+                    <span id="db-usage-text">Memuat...</span>
+                    <span>Max: 500 MB</span>
+                </div>
+            </div>
+        </div>
       </nav>
     </aside> 
 
@@ -1482,20 +1498,9 @@
             
             if(input.dataset.meta && qty > 0) {
                 const meta = JSON.parse(input.dataset.meta);
-                let tanggalBarang = waktuSekarang; 
                 
-                if (isEditMode) {
-                    const barangLama = orderData.find(o => 
-                        (o.idcustomer === isEditMode || o.idCustomer === isEditMode) && 
-                        o.sarimbit === meta.sarimbit && 
-                        o.barang === meta.barang && 
-                        o.varian === meta.varian && 
-                        o.size === meta.size
-                    );
-                    if (barangLama && barangLama.tanggal) {
-                        tanggalBarang = barangLama.tanggal;
-                    }
-                }
+                // REVISI: KUNCI TANGGAL ASLI AGAR TIDAK PERNAH BERUBAH SAAT DIEDIT
+                let tanggalBarang = isEditMode ? (document.getElementById('o-tanggal-asli').value || waktuSekarang) : waktuSekarang;
 
                 items.push({
     idcustomer: idToSave, customer: customer, telepon: telepon, alamat: alamat, toko: toko,
@@ -3126,6 +3131,7 @@
     }
     async function arsipPerSarimbit() {
         if (!appSettings.allowArchive) return showToast("⚠️ Izin Pengarsipan belum diaktifkan!");
+        if (!navigator.onLine) return showToast("⛔ PENGARSIPAN DITOLAK: Anda sedang Offline! Fitur ini membutuhkan internet agar aman.");
         
         const fSarimbit = document.getElementById('filter-sarimbit-slip').value;
         if (!fSarimbit) return showToast("⚠️ Pilih satu Sarimbit di filter pencarian!");
@@ -3462,9 +3468,9 @@ window.simpanSetoranLokal = function(key, val, total, laciId) {
     memoriSetoran[key] = nilai;
     localStorage.setItem('DataSetoranPusat', JSON.stringify(memoriSetoran));
     
-    // 2. TEMBAKKAN KE SUPABASE VIA DATABASE ENGINE (Tanpa Refresh)
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.simpanSetoranCloud(key, nilai);
+   // 2. TEMBAKKAN KE SUPABASE VIA DATABASE ENGINE
+   if (typeof DatabaseAPI !== 'undefined' && DatabaseAPI.simpanSetoranPusat) {
+        DatabaseAPI.simpanSetoranPusat(key, nilai);
     }
     
     // Update visual angka "Antre (Belum Disetor)" secara seketika (real-time)
@@ -3534,9 +3540,9 @@ window.setorSemuaFilter = function() {
             adaPerubahan = true;
             countItems++;
             
-            // Tembakkan ke Supabase agar sinkron dengan database pusat
-            if (typeof google !== 'undefined' && google.script && google.script.run) {
-                google.script.run.simpanSetoranCloud(k, summary[k]);
+         // Tembakkan ke Supabase agar sinkron dengan database pusat
+         if (typeof DatabaseAPI !== 'undefined' && DatabaseAPI.simpanSetoranPusat) {
+                DatabaseAPI.simpanSetoranPusat(k, summary[k]);
             }
         }
     }

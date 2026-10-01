@@ -135,6 +135,15 @@ window.DatabaseAPI = {
                     await dbLokal.metadata.put({ key: "last_sync_pembukuan", value: maxP });
                 }
 
+                // TARIK DATA SETORAN PUSAT DARI SUPABASE
+                const cloudSetoran = await supabaseFetch(`/rest/v1/setoran_pusat`);
+                if (cloudSetoran && cloudSetoran.length > 0) {
+                    await dbLokal.setoran_pusat.bulkPut(cloudSetoran);
+                    let memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
+                    cloudSetoran.forEach(s => memoriSetoran[s.id] = s.disetor);
+                    localStorage.setItem('DataSetoranPusat', JSON.stringify(memoriSetoran));
+                }
+
                 // 3. RENDER ULANG JIKA ADA PERUBAHAN DARI CLOUD
                 localMaster = await dbLokal.master.toArray();
                 localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
@@ -225,6 +234,11 @@ window.DatabaseAPI = {
     },
 
     importMasterMassal: async function(dataArray, onSuccess, onFailure) {
+        // REVISI: Mengunci fitur Import agar wajib online
+        if (!navigator.onLine) {
+            if (typeof showToast === 'function') showToast("⛔ IMPORT DITOLAK: Fitur ini wajib menggunakan koneksi internet!");
+            return;
+        }
         try {
             await dbLokal.master.bulkPut(dataArray); 
             if(await cekInternetAktif()) {
@@ -237,9 +251,14 @@ window.DatabaseAPI = {
     },
 
     hapusSarimbitMaster: async function(namaSarimbit, onSuccess, onFailure) {
+        // REVISI: Mengunci fitur Hapus agar wajib online mencegah data zombie
+        if (!navigator.onLine) {
+            if (typeof showToast === 'function') showToast("⛔ HAPUS DITOLAK: Harus online agar data tidak menjadi Data Zombie di server!");
+            return;
+        }
         try {
+            await supabaseFetch(`/rest/v1/master?sarimbit=eq.${encodeURIComponent(namaSarimbit)}`, { method: "DELETE" });
             await dbLokal.master.where('sarimbit').equals(namaSarimbit).delete();
-            if (await cekInternetAktif()) await supabaseFetch(`/rest/v1/master?sarimbit=eq.${encodeURIComponent(namaSarimbit)}`, { method: "DELETE" });
             if (onSuccess) onSuccess(`Koleksi ${namaSarimbit} berhasil dihapus permanen!`);
         } catch(e) { if(onFailure) onFailure(e); }
     },
@@ -280,6 +299,23 @@ window.DatabaseAPI = {
             if (res.ok) await dbLokal.orders.where("idcustomer").equals(idCustomer).delete();
         }
         if (onSuccess) onSuccess("Dihapus");
+    },
+
+    simpanSetoranPusat: async function(id_koleksi, jumlah_disetor) {
+        const now = new Date().toISOString();
+        const payload = { id: id_koleksi, disetor: jumlah_disetor, updated_at: now };
+        
+        try {
+            await dbLokal.setoran_pusat.put({ ...payload, syncstatus: 0 });
+            if (await cekInternetAktif()) {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/setoran_pusat?on_conflict=id`, {
+                    method: "POST",
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates", "x-sacha-token": tokenPerangkat },
+                    body: JSON.stringify([payload])
+                });
+                if (res.ok) await dbLokal.setoran_pusat.update(id_koleksi, { syncstatus: 1 });
+            }
+        } catch (e) { console.error("Gagal simpan setoran:", e); }
     },
 
     prosesArsipSarimbit: async function(archivePayload, fSarimbit, onSuccess, onFailure) {
@@ -333,6 +369,53 @@ window.catatLog = async function(action, module, detail) {
     } catch (e) {}
 };
 
+// FUNGSI CEK KAPASITAS SERVER SUPABASE (FREE TIER 500MB)
+async function cekKapasitasSupabase() {
+    if (!(await cekInternetAktif())) {
+        const txt = document.getElementById('db-usage-text');
+        if (txt) txt.innerText = "Offline";
+        return;
+    }
+    
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_db_size`, {
+            method: "POST",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`,
+                "Content-Type": "application/json",
+                "x-sacha-token": tokenPerangkat
+            }
+        });
+        
+        if (res.ok) {
+            const sizeBytes = await res.json();
+            const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(2);
+            const maxMB = 500; // Limit Free Tier Supabase
+            let percentage = (sizeMB / maxMB) * 100;
+            if (percentage > 100) percentage = 100;
+            
+            const bar = document.getElementById('db-usage-bar');
+            const text = document.getElementById('db-usage-text');
+            const pctText = document.getElementById('db-usage-percent');
+            
+            if (bar && text && pctText) {
+                bar.style.width = `${percentage}%`;
+                pctText.innerText = `${percentage.toFixed(1)}%`;
+                text.innerText = `${sizeMB} MB Terpakai`;
+                
+                // Ubah warna menjadi merah jika kapasitas sudah di atas 85%
+                if (percentage > 85) {
+                    bar.className = "bg-gradient-to-r from-orange-400 to-rose-500 h-2.5 rounded-full transition-all duration-1000";
+                    pctText.classList.replace('text-blue-600', 'text-rose-600');
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Gagal cek kapasitas:", error);
+    }
+}
+
 async function inisialisasiSupabaseRealtime() {
     if (!(await cekInternetAktif())) {
         console.warn("⚠️ Offline: Supabase Realtime ditunda.");
@@ -368,24 +451,17 @@ async function inisialisasiSupabaseRealtime() {
             });
 
        function handleSmartRefresh(payload) {
-                // 1. SENSOR AKTIVITAS (Cek apakah kursor admin sedang di dalam kotak ketikan)
                 const elemenAktif = document.activeElement;
                 const adminSedangNgetik = elemenAktif && ['INPUT', 'TEXTAREA', 'SELECT'].includes(elemenAktif.tagName);
-                
-                // Cek apakah admin sedang menggunakan Form Edit Orderan (Pena Oranye)
                 const formOrder = document.querySelector('form');
                 const adminSedangEdit = formOrder && formOrder.dataset.editMode;
 
                 if (adminSedangNgetik || adminSedangEdit) {
-                    // JIKA ADMIN SIBUK: Jangan kedipkan layar, beri tahu, DAN TANDAI bahwa ada data tertunda
                     window.pendingSyncFromAndroid = true;
-                    
                     if (typeof showToast === 'function') {
-                        // REVISI TEKS NOTIFIKASI
                         showToast("🔄 Ada perubahan data. Layar akan diperbarui otomatis setelah Anda selesai mengetik.");
                     }
 
-                    // Pasang pendengar (listener) sekali saja: Begitu admin selesai mengetik (keluar dari input), langsung sinkronkan!
                     if (!window._listenerSelesaiNgetik) {
                         window._listenerSelesaiNgetik = () => {
                             setTimeout(() => {
@@ -394,8 +470,6 @@ async function inisialisasiSupabaseRealtime() {
                                     window.pendingSyncFromAndroid = false;
                                     window._listenerSelesaiNgetik = null;
                                     document.removeEventListener('focusout', window._listenerSelesaiNgetik);
-                                    
-                                    // EKSEKUSI TARIK DATA OTOMATIS BEGITU ADMIN SELESAI MENGETIK!
                                     jalankanPenyegaranLayarWindows();
                                 }
                             }, 500);
@@ -403,12 +477,10 @@ async function inisialisasiSupabaseRealtime() {
                         document.addEventListener('focusout', window._listenerSelesaiNgetik);
                     }
                 } else {
-                    // JIKA ADMIN DIAM: Refresh data di latar belakang secara senyap seketika
                     jalankanPenyegaranLayarWindows();
                 }
             }
 
-            // Fungsi pembantu agar kode refresh bersih dan bisa dipanggil dari mana saja
             function jalankanPenyegaranLayarWindows() {
                 if (typeof DatabaseAPI !== 'undefined') {
                     DatabaseAPI.getAllData((res) => {
@@ -427,7 +499,6 @@ async function inisialisasiSupabaseRealtime() {
                         if (document.getElementById('page-rekap')) document.getElementById('page-rekap').scrollTop = scrollRekap;
                         
                         if (typeof showToast === 'function') {
-                            // REVISI TEKS NOTIFIKASI
                             showToast("⚡ Ada perubahan data. Layar telah diperbarui otomatis!");
                         }
                     });
@@ -437,8 +508,10 @@ async function inisialisasiSupabaseRealtime() {
         console.error("Gagal menginisialisasi Realtime:", e);
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     initDeviceId();      
     bersihkanLogLama();  
     inisialisasiSupabaseRealtime();
+    cekKapasitasSupabase();
 });
