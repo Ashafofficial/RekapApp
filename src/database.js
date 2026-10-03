@@ -87,8 +87,20 @@ window.DatabaseAPI = {
                 await this.syncOfflineData();
 
                 const lastSyncMaster = (await dbLokal.metadata.get("last_sync_master"))?.value || "1970-01-01T00:00:00Z";
-                const cloudMaster = await supabaseFetch(`/rest/v1/master?select=*&updated_at=gt.${encodeURIComponent(lastSyncMaster)}&limit=5000`);
-                if (cloudMaster && cloudMaster.length > 0) {
+                let cloudMaster = [];
+                let offsetMaster = 0;
+                let keepFetchingMaster = true;
+                
+                while (keepFetchingMaster) {
+                    const batchMaster = await supabaseFetch(`/rest/v1/master?select=*&updated_at=gt.${encodeURIComponent(lastSyncMaster)}&order=updated_at.asc&limit=1000&offset=${offsetMaster}`);
+                    if (batchMaster && batchMaster.length > 0) {
+                        cloudMaster = cloudMaster.concat(batchMaster);
+                        if (batchMaster.length < 1000) keepFetchingMaster = false;
+                        else offsetMaster += 1000;
+                    } else keepFetchingMaster = false;
+                }
+
+                if (cloudMaster.length > 0) {
                     await dbLokal.master.bulkPut(cloudMaster);
                     const maxM = cloudMaster.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncMaster);
                     await dbLokal.metadata.put({ key: "last_sync_master", value: maxM });
@@ -431,79 +443,124 @@ async function inisialisasiSupabaseRealtime() {
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const channel = supabaseClient
-            .channel('public-db-changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-                console.log("⚡ Realtime orders diterima:", payload);
-                handleSmartRefresh(payload);
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'pembukuan' }, (payload) => {
-                console.log("⚡ Realtime pembukuan diterima:", payload);
-                handleSmartRefresh(payload);
-            })
-            .subscribe((status, err) => {
-                if (status === 'SUBSCRIBED') {
-                    console.log("✅ KONEKSI REALTIME AKTIF: Siap mendengar perubahan data dari Android!");
-                } else if (status === 'CHANNEL_ERROR') {
-                    console.error("❌ Gagal terhubung ke Realtime channel:", err);
-                } else {
-                    console.log("ℹ️ Status Realtime:", status);
+        .channel('public-db-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+            let pesan = "Perubahan pada data Pesanan";
+            const namaCust = payload.new?.customer || payload.old?.customer || "Customer";
+            const lama = payload.old || {}; const baru = payload.new || {};
+            
+            if (payload.eventType === 'INSERT') {
+                pesan = `Pesanan Baru: ${namaCust} telah ditambahkan`;
+            } else if (payload.eventType === 'UPDATE') {
+                if (baru.isarchived === true || baru.isArchived === true) pesan = `Data Diarsipkan: Pesanan ${namaCust} dipindah ke riwayat`;
+                else if (baru.syncstatus === -1) pesan = `Data Dibatalkan: Pesanan ${namaCust} telah dihapus`;
+                else if (lama.cicilan3 !== undefined && baru.cicilan3 !== lama.cicilan3) pesan = `Update Keuangan: ${namaCust} melakukan Pelunasan`;
+                else if (lama.cicilan2 !== undefined && baru.cicilan2 !== lama.cicilan2) pesan = `Update Keuangan: ${namaCust} menambah Cicilan 2`;
+                else if (lama.cicilan1 !== undefined && baru.cicilan1 !== lama.cicilan1) pesan = `Update Keuangan: DP ${namaCust} diperbarui`;
+                else pesan = `Perubahan Data: Detail pesanan milik ${namaCust} diperbarui`;
+            } else if (payload.eventType === 'DELETE') {
+                pesan = `Data Dihapus: Pesanan ditarik dari server`;
+            }
+            handleSmartRefresh(payload, pesan);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pembukuan' }, (payload) => {
+            let pesan = "Perubahan pada data Pembukuan";
+            const namaSarimbit = payload.new?.sarimbit || payload.old?.sarimbit || "Koleksi";
+            const lama = payload.old || {}; const baru = payload.new || {};
+            
+            if (payload.eventType === 'INSERT') {
+                pesan = `Pembukuan Baru: Koleksi ${namaSarimbit} ditambahkan`;
+            } else if (payload.eventType === 'UPDATE') {
+                if (baru.isarchived === true && lama.isarchived !== true) pesan = `Arsip: Koleksi ${namaSarimbit} resmi dipindahkan ke riwayat`;
+                else if (lama.close !== undefined && baru.close !== lama.close) pesan = `Jadwal Produksi: Tanggal Close PO ${namaSarimbit} diperbarui`;
+                else if (lama.ready !== undefined && baru.ready !== lama.ready) pesan = `Jadwal Produksi: Tanggal Ready ${namaSarimbit} diperbarui`;
+                else if (lama.bayar !== undefined && baru.bayar !== lama.bayar) pesan = `Keuangan Pusat: Setoran Lunas ${namaSarimbit} berubah`;
+                else if (lama.dp !== undefined && baru.dp !== lama.dp) pesan = `Keuangan Pusat: Setoran DP ${namaSarimbit} berubah`;
+                else if (lama.isPrinted !== undefined && baru.isPrinted !== lama.isPrinted) pesan = `Status Pembukuan: Ceklis Print ${namaSarimbit} diubah`;
+                else pesan = `Update Pembukuan: Detail ${namaSarimbit} diperbarui`;
+            }
+            handleSmartRefresh(payload, pesan);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'master' }, (payload) => {
+            let pesan = "Perubahan pada Katalog Master";
+            const namaBrg = payload.new?.barang || payload.old?.barang || "Barang";
+            
+            if (payload.eventType === 'INSERT') {
+                pesan = `Katalog Baru: ${payload.new?.sarimbit} - ${namaBrg} ditambahkan`;
+            } else if (payload.eventType === 'UPDATE') {
+                pesan = `Update Katalog: Detail/Harga ${namaBrg} diperbarui`;
+            } else if (payload.eventType === 'DELETE') {
+                pesan = `Katalog Dihapus: Koleksi ditarik dari sistem`;
+            }
+            handleSmartRefresh(payload, pesan);
+        })
+        .subscribe((status, err) => {
+            if (status === 'SUBSCRIBED') {
+                console.log("✅ KONEKSI REALTIME AKTIF: Siap mendengar perubahan data spesifik!");
+            } else if (status === 'CHANNEL_ERROR') {
+                console.error("❌ Gagal terhubung ke Realtime channel:", err);
+            }
+        });
+
+   function handleSmartRefresh(payload, pesanKhusus) {
+            const elemenAktif = document.activeElement;
+            const adminSedangNgetik = elemenAktif && ['INPUT', 'TEXTAREA', 'SELECT'].includes(elemenAktif.tagName);
+            const formOrder = document.querySelector('form');
+            const adminSedangEdit = formOrder && formOrder.dataset.editMode;
+
+            // Simpan pesan terakhir ke memori global
+            window.lastSyncMessage = pesanKhusus || "Ada perubahan data";
+
+            if (adminSedangNgetik || adminSedangEdit) {
+                window.pendingSyncFromAndroid = true;
+                if (typeof showToast === 'function') {
+                    // Notifikasi saat admin sedang mengetik
+                    showToast(`🔄 ${window.lastSyncMessage} (Layar akan direfresh otomatis nanti)`);
                 }
-            });
 
-       function handleSmartRefresh(payload) {
-                const elemenAktif = document.activeElement;
-                const adminSedangNgetik = elemenAktif && ['INPUT', 'TEXTAREA', 'SELECT'].includes(elemenAktif.tagName);
-                const formOrder = document.querySelector('form');
-                const adminSedangEdit = formOrder && formOrder.dataset.editMode;
+                if (!window._listenerSelesaiNgetik) {
+                    window._listenerSelesaiNgetik = () => {
+                        setTimeout(() => {
+                            const masihNgetik = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+                            if (!masihNgetik && window.pendingSyncFromAndroid) {
+                                window.pendingSyncFromAndroid = false;
+                                window._listenerSelesaiNgetik = null;
+                                document.removeEventListener('focusout', window._listenerSelesaiNgetik);
+                                jalankanPenyegaranLayarWindows();
+                            }
+                        }, 500);
+                    };
+                    document.addEventListener('focusout', window._listenerSelesaiNgetik);
+                }
+            } else {
+                jalankanPenyegaranLayarWindows();
+            }
+        }
 
-                if (adminSedangNgetik || adminSedangEdit) {
-                    window.pendingSyncFromAndroid = true;
+        function jalankanPenyegaranLayarWindows() {
+            if (typeof DatabaseAPI !== 'undefined') {
+                DatabaseAPI.getAllData((res) => {
+                    const scrollSlip = document.getElementById('page-slip') ? document.getElementById('page-slip').scrollTop : 0;
+                    const scrollRekap = document.getElementById('page-rekap') ? document.getElementById('page-rekap').scrollTop : 0;
+                    
+                    if (typeof masterData !== 'undefined') masterData = res.master || []; 
+                    if (typeof orderData !== 'undefined') orderData = res.orders || [];
+                    
+                    if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
+                    if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
+                    if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
+                    if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
+
+                    if (document.getElementById('page-slip')) document.getElementById('page-slip').scrollTop = scrollSlip;
+                    if (document.getElementById('page-rekap')) document.getElementById('page-rekap').scrollTop = scrollRekap;
+                    
                     if (typeof showToast === 'function') {
-                        showToast("🔄 Ada perubahan data. Layar akan diperbarui otomatis setelah Anda selesai mengetik.");
+                        // Notifikasi sukses setelah sinkronisasi selesai
+                        showToast(`⚡ ${window.lastSyncMessage || "Ada perubahan data"}. Layar telah diperbarui!`);
                     }
-
-                    if (!window._listenerSelesaiNgetik) {
-                        window._listenerSelesaiNgetik = () => {
-                            setTimeout(() => {
-                                const masihNgetik = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
-                                if (!masihNgetik && window.pendingSyncFromAndroid) {
-                                    window.pendingSyncFromAndroid = false;
-                                    window._listenerSelesaiNgetik = null;
-                                    document.removeEventListener('focusout', window._listenerSelesaiNgetik);
-                                    jalankanPenyegaranLayarWindows();
-                                }
-                            }, 500);
-                        };
-                        document.addEventListener('focusout', window._listenerSelesaiNgetik);
-                    }
-                } else {
-                    jalankanPenyegaranLayarWindows();
-                }
+                });
             }
-
-            function jalankanPenyegaranLayarWindows() {
-                if (typeof DatabaseAPI !== 'undefined') {
-                    DatabaseAPI.getAllData((res) => {
-                        const scrollSlip = document.getElementById('page-slip') ? document.getElementById('page-slip').scrollTop : 0;
-                        const scrollRekap = document.getElementById('page-rekap') ? document.getElementById('page-rekap').scrollTop : 0;
-                        
-                        if (typeof masterData !== 'undefined') masterData = res.master || []; 
-                        if (typeof orderData !== 'undefined') orderData = res.orders || [];
-                        
-                        if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
-                        if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
-                        if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
-                        if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
-
-                        if (document.getElementById('page-slip')) document.getElementById('page-slip').scrollTop = scrollSlip;
-                        if (document.getElementById('page-rekap')) document.getElementById('page-rekap').scrollTop = scrollRekap;
-                        
-                        if (typeof showToast === 'function') {
-                            showToast("⚡ Ada perubahan data. Layar telah diperbarui otomatis!");
-                        }
-                    });
-                }
-            }
+        }
     } catch (e) {
         console.error("Gagal menginisialisasi Realtime:", e);
     }
