@@ -14,18 +14,111 @@
     }
   </script>
   
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+ <!-- KEMBALIKAN KE CDN INTERNET (AKAN DI-CACHE OLEH SERVICE WORKER) -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+ 
+ <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
+ <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+ 
+ <!-- 2. PANGGIL SUPABASE (Pondasi Awan) -->
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-  <script src="database.js?v=14"></script>
+ <!-- 3. BARU PANGGIL DATABASE.JS (Mesin Anda) -->
+ <script src="database.js?v=16"></script>
+
+<!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (TAURI V2 - FINAL) -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // FUNGSI INTI MENYIMPAN KE HARDISK MAC/WINDOWS VIA TAURI
+        window.simpanKeTauriData = async function(uint8Array, filename) {
+            if (!window.__TAURI__ || !window.__TAURI__.core) return false;
+            
+            try {
+                const tauriCore = window.__TAURI__.core;
+                
+                // Ambil ekstensi untuk deteksi format otomatis
+                const extMatch = filename.match(/\.([^.]+)$/);
+                const ext = extMatch ? extMatch[1].toLowerCase() : '';
+                
+                const dialogOptions = { defaultPath: filename };
+                if (ext) dialogOptions.filters = [{ name: ext.toUpperCase(), extensions: [ext] }];
+
+                // Memunculkan kotak Save As bawaan sistem
+                const savePath = await tauriCore.invoke('plugin:dialog|save', { 
+                    options: dialogOptions 
+                });
+
+                if (savePath) {
+                    try {
+                        const fs = window.__TAURI__.fs || window.__TAURI__.plugin_fs;
+                        await fs.writeFile(savePath, uint8Array);
+                    } catch(err) {
+                        // Fallback terkuat jika penulisan standar ditolak
+                        await tauriCore.invoke('plugin:fs|write', { path: savePath, contents: Array.from(uint8Array) });
+                    }
+                    if (typeof showToast === 'function') showToast("✅ File " + ext.toUpperCase() + " berhasil disimpan!");
+                    return true;
+                }
+            } catch (e) {
+                const msg = typeof e === 'string' ? e : (e.message || JSON.stringify(e));
+                alert("❌ Gagal menyimpan file: " + msg);
+            }
+            return false;
+        };
+
+      // PEMBAJAK 1: FileSaver.js (Word Document)
+      if (window.saveAs) {
+            const originalSaveAs = window.saveAs;
+            window.saveAs = async function(blob, filename) {
+                if (window.__TAURI__) {
+                    try {
+                        const arrayBuffer = await blob.arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
+                        const sukses = await window.simpanKeTauriData(uint8Array, filename);
+                        if (sukses) return;
+                    } catch(e) {}
+                }
+                originalSaveAs(blob, filename);
+            };
+        }
+        
+        // PEMBAJAK 2: jsPDF (Semua PDF - Menangkap doc.save dan window.saveAs)
+        if (window.jspdf && window.jspdf.jsPDF) {
+            const originalPdfSave = window.jspdf.jsPDF.prototype.save;
+            window.jspdf.jsPDF.prototype.save = function(filename) {
+                if (window.__TAURI__) {
+                    const arrayBuffer = this.output('arraybuffer');
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    window.simpanKeTauriData(uint8Array, filename);
+                    return this;
+                }
+                return originalPdfSave.call(this, filename);
+            };
+        }
+        
+        // PEMBAJAK 3: SheetJS / XLSX (Semua Excel)
+        if (window.XLSX) {
+            const originalXlsxWrite = window.XLSX.writeFile;
+            window.XLSX.writeFile = function(wb, filename) {
+                if (window.__TAURI__) {
+                    const arrayBuffer = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    window.simpanKeTauriData(uint8Array, filename);
+                    return;
+                }
+                originalXlsxWrite(wb, filename);
+            };
+        }
+    });
+</script>
 
   <style>
     /* ==========================================
@@ -162,13 +255,14 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
   
-    <div id="connection-banner" class="fixed top-4 right-4 z-[9999] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-2 border transition-all duration-300 bg-white">
-        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-        <span>MEMERIKSA...</span>
+    <!-- INDIKATOR SINYAL PERMANEN ANTI HANCUR (Pojok Kanan Atas) -->
+    <div id="connection-banner" style="position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 10px 20px; border-radius: 12px; font-size: 11px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; background-color: #eff6ff; color: #1d4ed8;">
+      <span id="connection-dot" style="width: 12px; height: 12px; border-radius: 50%; background-color: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.8);"></span>
+      <span id="connection-text">MEMERIKSA KONEKSI...</span>
     </div>
   
     <!-- NOTIFIKASI KANAN ATAS (NEMPEL DI LAYAR LAPTOP/MONITOR) -->
-    <div id="toast" class="fixed top-6 right-4 md:top-8 md:right-8 z-[100] flex items-center justify-center gap-3 transform translate-x-[150%] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
         <span id="toast-icon" class="text-2xl drop-shadow-md"></span>
         <span id="toast-msg" class="text-sm md:text-base font-semibold tracking-wide"></span>
     </div>
@@ -241,6 +335,22 @@
             <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-gear"></i></div>
             <span>Pengaturan</span>
         </button>
+        <!-- WIDGET KAPASITAS SERVER -->
+        <div class="px-5 mt-10 mb-2">
+            <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest"><i class="fa-solid fa-cloud text-blue-500 mr-1"></i> Cloud Storage</span>
+                    <span id="db-usage-percent" class="text-[10px] font-black text-blue-600">0%</span>
+                </div>
+                <div class="w-full bg-white rounded-full h-2.5 mb-2 shadow-inner overflow-hidden border border-blue-100">
+                    <div id="db-usage-bar" class="bg-gradient-to-r from-blue-400 to-indigo-500 h-2.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-[9px] font-bold text-slate-500">
+                    <span id="db-usage-text">Memuat...</span>
+                    <span>Max: 500 MB</span>
+                </div>
+            </div>
+        </div>
       </nav>
     </aside> 
 
@@ -248,7 +358,7 @@
 
     <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 relative bg-white/40 backdrop-blur-3xl">
     
-        <div id="toast" class="fixed top-6 right-4 md:top-8 md:right-8 z-[100] flex items-center justify-center gap-3 transform translate-x-[150%] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
+        <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
             <span id="toast-icon" class="text-2xl drop-shadow-md"></span>
             <span id="toast-msg" class="text-sm md:text-base font-semibold tracking-wide"></span>
         </div>
@@ -262,6 +372,11 @@
       
       <form onsubmit="handleOrderSubmit(event)" class="space-y-6">
         <input type="hidden" id="o-tanggal-asli">
+        <!-- PENAMPUNG DATA KEUANGAN LAMA AGAR TIDAK HANGUS SAAT EDIT -->
+        <input type="hidden" id="o-cicilan2">
+        <input type="hidden" id="o-cicilan3">
+        <input type="hidden" id="o-ongkir">
+        <input type="hidden" id="o-resi">
     
         <div class="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/60 p-8 md:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
             
@@ -647,10 +762,30 @@
             <p class="text-slate-500 font-medium mt-1">Analitik dan rekapitulasi penjualan berdasarkan sumber (WhatsApp, TikTok, dll).</p>
         </div>
         
-  <!-- Tombol Unduh Utama -->
-  <button onclick="toggleModalUnduh(true)" class="bg-rose-50 text-rose-600 px-5 py-2.5 rounded-xl text-sm font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all shadow-sm flex items-center gap-2 mb-6">
-    <i class="fa-solid fa-file-pdf"></i> Unduh Laporan PDF
-</button>
+  <!-- Filter Dashboard Sumber & Tombol Unduh -->
+  <div class="glass p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row items-end gap-4 justify-between">
+    <div class="flex flex-wrap items-end gap-4 w-full md:w-auto">
+        <div>
+            <label class="text-[10px] font-semibold text-slate-600 block mb-1">Filter Bulan</label>
+            <select id="filter-bulan-sumber" onchange="renderDashboardSumber()" class="glass-input w-full md:w-auto p-2.5 rounded-lg text-xs font-bold text-slate-700 cursor-pointer">
+                <option value="">Semua Bulan</option>
+            </select>
+        </div>
+      <div>
+          <label class="text-[10px] font-semibold text-slate-600 block mb-1">Dari Tanggal</label>
+          <input type="date" id="filter-tgl-mulai-sumber" onchange="renderDashboardSumber()" class="glass-input w-full md:w-auto p-2.5 rounded-lg text-xs font-bold text-slate-700">
+      </div>
+      <div>
+          <label class="text-[10px] font-semibold text-slate-600 block mb-1">Sampai Tanggal</label>
+          <input type="date" id="filter-tgl-akhir-sumber" onchange="renderDashboardSumber()" class="glass-input w-full md:w-auto p-2.5 rounded-lg text-xs font-bold text-slate-700">
+      </div>
+      <button onclick="document.getElementById('filter-bulan-sumber').value=''; document.getElementById('filter-tgl-mulai-sumber').value=''; document.getElementById('filter-tgl-akhir-sumber').value=''; renderDashboardSumber();" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border border-slate-200 shadow-sm active:scale-95">Reset</button>
+    </div>
+
+    <button onclick="toggleModalUnduh(true)" class="w-full md:w-auto bg-rose-50 text-rose-600 px-5 py-2.5 rounded-xl text-sm font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+        <i class="fa-solid fa-file-pdf"></i> Laporan PDF
+    </button>
+</div>
 
 
 
@@ -772,13 +907,16 @@
                 </div>
             
                 <div class="flex flex-col md:flex-row justify-end pt-4 gap-3">
+                    <a href="kunci-rahasia.html" class="w-full md:w-auto px-6 py-4 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl font-bold shadow-sm hover:bg-indigo-100 active:scale-95 transition-all text-sm tracking-wide flex items-center justify-center">
+                        <i class="fa-solid fa-key mr-2"></i> OTORISASI VVIP
+                    </a>
                     <button type="button" onclick="resetDatabaseLokal()" class="w-full md:w-auto px-6 py-4 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl font-bold shadow-sm hover:bg-rose-100 active:scale-95 transition-all text-sm tracking-wide flex items-center justify-center">
                         <i class="fa-solid fa-arrows-rotate mr-2"></i> RESET MEMORI LOKAL
                     </button>
-                    <button type="submit" class="w-full md:w-auto px-10 py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg shadow-slate-200 hover:bg-slate-900 active:scale-95 transition-all text-sm tracking-wide">
-                        SIMPAN KONFIGURASI
-                    </button>
-                </div>
+                    <button type="submit" class="w-full md:w-auto px-10 py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg shadow-slate-200 hover:bg-slate-900 active:scale-95 transition-all text-sm tracking-wide">
+                        SIMPAN KONFIGURASI
+                    </button>
+                </div>
             </div>
         </form>
         <div class="mt-6 p-5 bg-orange-50 border border-orange-200 rounded-2xl shadow-sm">
@@ -924,6 +1062,17 @@
             return;
         }
 
+        // KUMPULKAN BARANG YANG SUDAH DIPILIH DI FORM (Mencegah Double Item)
+        const barangSudahDipilih = new Set();
+        document.querySelectorAll('.order-row').forEach(r => {
+            const inp = r.querySelector('.row-input');
+            // Abaikan baris yang sedang aktif agar bisa diubah produknya
+            if (inp && inp.dataset.meta && r !== rowAktifPencarian) { 
+                const meta = JSON.parse(inp.dataset.meta);
+                barangSudahDipilih.add(`${meta.sarimbit}|${meta.barang}|${meta.varian}|${meta.size}`);
+            }
+        });
+
         let filterSarimbit = "";
         if (rowAktifPencarian) {
             filterSarimbit = rowAktifPencarian.querySelector('.row-filter-sarimbit').value;
@@ -939,23 +1088,41 @@
             let html = '';
             hasil.forEach(m => {
                 const hargaItem = Number(m.harga) || 0;
-                
-                // KODE ASLI TETAP UTUH (Logic enkripsi tanda kutip aman %27)
                 const metaAman = encodeURIComponent(JSON.stringify(m)).replace(/'/g, "%27");
+                
+                const itemKey = `${m.sarimbit}|${m.barang}|${m.varian}|${m.size}`;
+                const isDipilih = barangSudahDipilih.has(itemKey);
 
-                // HANYA MENGUBAH CLASS TAILWIND PADA STRING HTML INI AGAR DESAIN NYA COCOK
-                html += `
-                    <div onclick="pilihProdukBesar('${metaAman}')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer flex justify-between items-center group transition-all active:scale-[0.98]">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-slate-700 group-hover:text-blue-700 text-sm mb-1">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
-                            <div class="flex gap-1.5">
-                                <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase border border-slate-200">${escapeHTML(m.varian)}</span>
-                                <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase border border-slate-200">Size: ${escapeHTML(m.size)}</span>
+                if (isDipilih) {
+                    // TAMPILAN TERKUNCI (REdup & Ada Tanda "Sudah Terpilih")
+                    html += `
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm opacity-50 cursor-not-allowed flex justify-between items-center relative">
+                            <div class="absolute inset-0 z-10" title="Sudah dipilih di daftar belanja, silakan tambahkan jumlah Qty-nya saja"></div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-500 text-sm mb-1">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)} <span class="text-rose-500 text-[10px] ml-1 font-black italic">(Sudah Terpilih)</span></span>
+                                <div class="flex gap-1.5">
+                                    <span class="text-[9px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded uppercase border border-slate-300">${escapeHTML(m.varian)}</span>
+                                    <span class="text-[9px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded uppercase border border-slate-300">Size: ${escapeHTML(m.size)}</span>
+                                </div>
                             </div>
+                            <span class="font-black text-slate-400 text-sm md:text-base">${formatRp(hargaItem)}</span>
                         </div>
-                        <span class="font-black text-slate-400 group-hover:text-blue-600 text-sm md:text-base">${formatRp(hargaItem)}</span>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // TAMPILAN NORMAL
+                    html += `
+                        <div onclick="pilihProdukBesar('${metaAman}')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer flex justify-between items-center group transition-all active:scale-[0.98]">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-700 group-hover:text-blue-700 text-sm mb-1">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
+                                <div class="flex gap-1.5">
+                                    <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase border border-slate-200">${escapeHTML(m.varian)}</span>
+                                    <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase border border-slate-200">Size: ${escapeHTML(m.size)}</span>
+                                </div>
+                            </div>
+                            <span class="font-black text-slate-400 group-hover:text-blue-600 text-sm md:text-base">${formatRp(hargaItem)}</span>
+                        </div>
+                    `;
+                }
             });
             boxHasil.innerHTML = html;
         } else {
@@ -1023,34 +1190,66 @@
     
     let currentPageMaster = 1; let currentPageSlip = 1; let currentPageRekap = 1;
     const rowsPerPageRekap = 200; const rowsPerPageSlip = 150; const rowsPerPageMaster = 300;
-
-    function updateConnectionStatus() {
+   
+ // SENSOR SINYAL ANTI MACET
+ async function periksaSinyal() {
         const banner = document.getElementById('connection-banner');
-        if (!banner) return;
-        
+        const dot = document.getElementById('connection-dot');
+        const txt = document.getElementById('connection-text');
+        const statusSync = document.getElementById('status-sync'); // Khusus pembukuan
+        const statusDot = document.getElementById('status-dot');   // Khusus pembukuan
+        const statusTxt = document.getElementById('status-text');  // Khusus pembukuan
+
+        // Pengecekan Paling Akurat via Fetch Bantuan
+        let isOnline = false;
         if (navigator.onLine) {
-            // Hijau Premium + Efek Lampu LED Berkedip
-            banner.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> <span>ONLINE</span>`;
-            banner.className = "fixed top-4 right-4 z-[9999] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-md flex items-center gap-2 transition-all duration-300";
-        } else {
-            // Oranye Stabil + Lampu LED Siaga
-            banner.innerHTML = `<span class="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span> <span>OFFLINE MODE</span>`;
-            banner.className = "fixed top-4 right-4 z-[9999] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 border border-orange-200 text-orange-700 shadow-md flex items-center gap-2 transition-all duration-300";
+            try {
+                await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
+                isOnline = true;
+            } catch (e) { isOnline = false; }
+        }
+
+        // Terapkan Gaya untuk index.html
+        if (banner && txt) {
+            if (isOnline) {
+                banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
+                dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+                txt.innerText = "ONLINE";
+            } else {
+                banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
+                dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+                txt.innerText = "OFFLINE (MODE LOKAL)";
+            }
+        }
+
+        // Terapkan Gaya untuk pembukuan.html
+        if (statusSync && statusTxt) {
+            if (isOnline) {
+                statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
+                statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+                statusTxt.innerText = "ONLINE";
+            } else {
+                statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
+                statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+                statusTxt.innerText = "OFFLINE";
+            }
         }
     }
 
-   // ==============================================================
-    // SENSOR SINYAL & MESIN SINKRONISASI PINTAR (SMART AUTO-SYNC)
-    // ==============================================================
+    // Paksa mesin meraba sinyal setiap 4 detik (Detak Jantung)
+    setInterval(periksaSinyal, 4000);
+
     window.addEventListener('offline', () => { 
+        periksaSinyal();
         showToast("📶 Sinyal terputus. Data otomatis diamankan di memori lokal."); 
-        updateConnectionStatus(); 
     });
 
     window.addEventListener('online', () => { 
+        periksaSinyal();
         showToast("🌐 Online kembali! Memeriksa sinkronisasi data..."); 
-        updateConnectionStatus(); 
-        sinkronisasiSenyap(); // Panggil mesin pintar tanpa me-refresh layar
+        if (typeof sinkronisasiSenyap === 'function') sinkronisasiSenyap(); 
+        // Restart realtime jika sebelumnya mati
+        if (typeof inisialisasiSupabaseRealtime === 'function') inisialisasiSupabaseRealtime();
     });
     async function sinkronisasiSenyap() {
         if (!navigator.onLine) return;
@@ -1150,16 +1349,16 @@
         if (match) { tIcon.innerText = match[0]; tMsg.innerText = m.replace(match[0], '').trim(); tIcon.style.display = 'block'; } 
         else { tIcon.style.display = 'none'; tMsg.innerText = m; }
         
-        // Animasi meluncur mulus masuk dari kanan
-        t.classList.remove('translate-x-[150%]', 'opacity-0');
-        t.classList.add('translate-x-0', 'opacity-100');
+        // Animasi meluncur mulus masuk dari atas tengah
+        t.classList.remove('-translate-y-32', 'opacity-0', 'scale-90');
+        t.classList.add('translate-y-0', 'opacity-100', 'scale-100');
         
         if(window.toastTimeout) clearTimeout(window.toastTimeout);
         window.toastTimeout = setTimeout(() => {
-            // Animasi meluncur mulus keluar ke kanan
-            t.classList.remove('translate-x-0', 'opacity-100');
-            t.classList.add('translate-x-[150%]', 'opacity-0');
-        }, 2500);
+            // Animasi meluncur mulus keluar ke atas
+            t.classList.remove('translate-y-0', 'opacity-100', 'scale-100');
+            t.classList.add('-translate-y-32', 'opacity-0', 'scale-90');
+        }, 6000);
     };
 
   // LOGIKA TAB & SIDEBAR
@@ -1187,73 +1386,31 @@
         else { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
     }
 
-    async function loadAllData(isKeepScroll = false) {
-        // =========================================================================
-        // TAMBALAN OFFLINE-FIRST: Jika sedang offline, potong jalur langsung baca Dexie!
-        // =========================================================================
-        if (!navigator.onLine) {
-            console.log("🎮 Mode Offline Active: Memuat data langsung dari memori Dexie Perangkat...");
-            try {
-                // Tarik data langsung dari gudang Dexie lokal laptop
-                const localMaster = await dbLokal.master.toArray();
-                const localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
-                
-              // Urutkan pesanan dari yang paling baru
-              localOrders.sort((a, b) => {
-                    const dateA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
-                    const dateB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
-                    // PERBAIKAN: Mempertahankan urutan susunan barang
-                    if (dateA === dateB) {
-                        return a.id - b.id; 
-                    }
-                    return dateB - dateA;
-                });
+  async function loadAllData(isKeepScroll = false) {
+        if (typeof window.DatabaseAPI === 'undefined') return;
+        
+        // Memanggil API Sentral di database.js
+        window.DatabaseAPI.getAllData(
+            (res) => { // Jika Sukses
+                masterData = res.master || [];
+                const semuaOrder = res.orders || [];
+                orderData = semuaOrder.filter(o => o.isarchived !== true && o.isArchived !== true);
 
-                masterData = localMaster;
-                orderData = localOrders;
-
-                // Hitung berat otomatis secara offline
                 if (orderData.length > 0 && masterData.length > 0) {
                     orderData.forEach(order => {
                         const matchingMaster = masterData.find(m => m.sarimbit === order.sarimbit && m.barang === order.barang && m.varian === order.varian && m.size === order.size);
                         if (matchingMaster) order.berat = matchingMaster.berat; 
                     });
                 }
-
-                // Daftarkan ulang pilihan koleksi sarimbit ke Dropdown input order harian
-                updateGlobalFilters(); 
-                
-                // Lukis layar tabel master, rekap kuantitas, dan slip rincian secara offline
-                if (typeof renderMaster === 'function') renderMaster();
-                if (typeof renderRekap === 'function') renderRekap();
-                if (typeof renderSlip === 'function') renderSlip();
-                
-                console.log("✅ Sukses! Layar offline berhasil dilukis sempurna dari memori lokal.");
-                return; // Berhenti di sini, tidak usah lanjut ke kode online di bawah
-            } catch (err) {
-                console.error("Gagal melukis layar offline:", err);
+                updateGlobalFilters();
+                renderMaster(); renderRekap(); renderSlip(); 
+                if (isKeepScroll) { setTimeout(() => window.scrollTo({ top: currentScrollPos, behavior: 'instant' }), 150); }
+                console.log("✅ Data UI Berhasil Dimuat");
+            },
+            (err) => { // Jika Gagal
+                console.error("Gagal memuat data utama:", err);
             }
-        }
-        // =========================================================================
-
-        // JALUR ONLINE RESMI (KODE ASLI BAPAK TETAP UTUH DI SINI)
-        if(typeof google === 'undefined') return;
-        google.script.run.withSuccessHandler((res) => {
-            masterData = res.master || [];
-            
-            const semuaOrder = res.orders || [];
-            orderData = semuaOrder.filter(o => o.isarchived !== true && o.isArchived !== true);
-
-            if (orderData.length > 0 && masterData.length > 0) {
-                orderData.forEach(order => {
-                    const matchingMaster = masterData.find(m => m.sarimbit === order.sarimbit && m.barang === order.barang && m.varian === order.varian && m.size === order.size);
-                    if (matchingMaster) order.berat = matchingMaster.berat; 
-                });
-            }
-            updateGlobalFilters();
-            renderMaster(); renderRekap(); renderSlip(); 
-            if (isKeepScroll) { setTimeout(() => window.scrollTo({ top: currentScrollPos, behavior: 'instant' }), 150); }
-        }).getAllData();
+        );
     }
     async function handleOrderSubmit(e) {
         e.preventDefault();
@@ -1266,6 +1423,13 @@
         const ekspedisi = document.getElementById('o-ekspedisi').value; 
         const cicilan1 = Number(document.getElementById('o-cicilan1').value) || 0;
         const asal_order = document.getElementById('o-sumber').value; // PENANGKAP SUMBER ORDER
+        
+        // Menarik kembali data keuangan lama dari elemen tersembunyi
+        const cicilan2 = isEditMode ? (Number(document.getElementById('o-cicilan2').value) || 0) : 0;
+        const cicilan3 = isEditMode ? (Number(document.getElementById('o-cicilan3').value) || 0) : 0;
+        const ongkir = isEditMode ? (Number(document.getElementById('o-ongkir').value) || 0) : 0;
+        const resi = isEditMode ? document.getElementById('o-resi').value : "";
+
         const idToSave = isEditMode ? isEditMode : "CUST-" + Date.now();
         const items = [];
         const waktuSekarang = new Date().toISOString();
@@ -1321,43 +1485,45 @@
         }
         // =========================================================================
 
+    // PENGAMAN 1: KUNCI TOMBOL SAAT LOADING (Anti Double-Click)
+    const btnSave = document.getElementById('btn-save-order');
+        if (btnSave.disabled) return; 
+        btnSave.disabled = true;
+        const originalBtnContent = btnSave.innerHTML;
+        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> MENYIMPAN...`;
+
         document.querySelectorAll('.order-row').forEach(row => {
             const input = row.querySelector('.row-input');
             const qty = Number(row.querySelector('.row-qty').value);
             
             if(input.dataset.meta && qty > 0) {
                 const meta = JSON.parse(input.dataset.meta);
-                let tanggalBarang = waktuSekarang; 
                 
-                if (isEditMode) {
-                    const barangLama = orderData.find(o => 
-                        (o.idcustomer === isEditMode || o.idCustomer === isEditMode) && 
-                        o.sarimbit === meta.sarimbit && 
-                        o.barang === meta.barang && 
-                        o.varian === meta.varian && 
-                        o.size === meta.size
-                    );
-                    if (barangLama && barangLama.tanggal) {
-                        tanggalBarang = barangLama.tanggal;
-                    }
-                }
+                // REVISI: KUNCI TANGGAL ASLI AGAR TIDAK PERNAH BERUBAH SAAT DIEDIT
+                let tanggalBarang = isEditMode ? (document.getElementById('o-tanggal-asli').value || waktuSekarang) : waktuSekarang;
 
                 items.push({
     idcustomer: idToSave, customer: customer, telepon: telepon, alamat: alamat, toko: toko,
     pusat: meta.pusat, sarimbit: meta.sarimbit, barang: meta.barang, varian: meta.varian, 
     size: meta.size, harga: meta.harga, berat: meta.berat, jumlah: qty, 
-    total: meta.harga * qty, cicilan1: cicilan1, 
+    total: meta.harga * qty, 
+    cicilan1: cicilan1, cicilan2: cicilan2, cicilan3: cicilan3, // Data Keuangan Aman
+    ongkir: ongkir, resi: resi, // Data Ongkir dan Resi Aman
     ekspedisi: ekspedisi, 
-    asal_order: asal_order, // PENAMBAHAN: Menyimpan sumber ke database
+    asal_order: asal_order,
     diskonTipe: document.getElementById('o-tipe-diskon').value,
     diskonNilai: Number(document.getElementById('o-nilai-diskon').value) || 0,
-    tanggal: new Date().toISOString(),
+    tanggal: tanggalBarang, // Memperbaiki bug tanggal reset saat edit
     resi: ""
 });
             }
         });
 
-        if (items.length === 0) return showToast("⚠️ Pesanan tidak boleh kosong!");
+        if (items.length === 0) {
+            btnSave.disabled = false;
+            btnSave.innerHTML = originalBtnContent;
+            return showToast("⚠️ Pesanan tidak boleh kosong!");
+        }
 
         // Kalkulasi Total yang baru diinput oleh Admin
         const totalPcsLog = items.reduce((sum, it) => sum + it.jumlah, 0);
@@ -1369,64 +1535,55 @@
         else if (tipeDiskonLog === 'angka') diskonFinalLog = nilaiDiskonLog;
         const grandTotalLog = subtotalLog - diskonFinalLog;
 
-        google.script.run.withSuccessHandler(() => {
-            form.reset(); 
-            document.getElementById('order-items-list').innerHTML = '';
-            document.getElementById('o-tanggal-asli').value = ''; 
-            
-            // =====================================================================
-            // LOGIKA PENYUSUNAN KALIMAT LOG (Mencatat perubahannya saja)
-            // =====================================================================
-            let pesanLog = "";
-            if (isEditMode) {
-                let perubahan = [];
-                // Cek apakah ada perubahan kuantitas
-                if (oldTotalPcs !== totalPcsLog) {
-                    perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
-                }
-                // Cek apakah ada perubahan nilai uang / tagihan
-                if (oldGrandTotal !== grandTotalLog) {
-                    perubahan.push(`Tagihan: Rp ${oldGrandTotal.toLocaleString('id-ID')} ➔ Rp ${grandTotalLog.toLocaleString('id-ID')}`);
-                }
-                
-                // Jika terjadi perubahan Qty atau Uang
-                if (perubahan.length > 0) {
-                    pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')}`;
-                } else {
-                    // Jika harganya tetap, berarti admin hanya mengubah alamat / kurir / varian warna yang harganya sama
-                    pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian Barang diubah)`;
-                }
-                
-                delete form.dataset.editMode; 
-                const btnSave = document.getElementById('btn-save-order');
-                btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
-                btnSave.classList.replace('bg-orange-500', 'bg-blue-600');
-                btnSave.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
-                
-                // PERBAIKAN: Pindah otomatis ke menu Rincian Customer setelah update selesai
-                switchTab('slip');
-                
-            } else {
-                pesanLog = `Pesanan Baru ${customer} (${toko}) - ${totalPcsLog} Pcs | Total: Rp ${grandTotalLog.toLocaleString('id-ID')}`;
-                
-                // PERBAIKAN: Fokuskan kembali kursor ke kolom nama HANYA jika ini pesanan baru
-                document.getElementById('o-nama').focus(); 
-            }
+        window.DatabaseAPI.saveOrders(
+            items,
+            () => { // onSuccess
+                const btnSimpan = document.getElementById('btn-save-order');
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
 
-            // Bersiap menambahkan baris kosong di menu order untuk input selanjutnya
-            addOrderRow(); 
-            calculateOrderTotal();
-             
-            showToast("✅ Pesanan Berhasil Disimpan!");
-            
-            // EKSEKUSI PENCATATAN LOG KE RIWAYAT
-            catatLog(isEditMode ? 'UPDATE' : 'CREATE', 'ORDER', pesanLog);
-            
-            loadAllData();
-        }).saveOrders(items);
+                form.reset(); 
+                document.getElementById('order-items-list').innerHTML = '';
+                document.getElementById('o-tanggal-asli').value = ''; 
+                
+                let pesanLog = "";
+                if (isEditMode) {
+                    let perubahan = [];
+                    if (oldTotalPcs !== totalPcsLog) perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
+                    if (oldGrandTotal !== grandTotalLog) perubahan.push(`Tagihan: Rp ${oldGrandTotal.toLocaleString('id-ID')} ➔ Rp ${grandTotalLog.toLocaleString('id-ID')}`);
+                    
+                    if (perubahan.length > 0) pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')}`;
+                    else pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian Barang diubah)`;
+                    
+                    delete form.dataset.editMode; 
+                    btnSimpan.classList.replace('bg-orange-500', 'bg-blue-600');
+                    btnSimpan.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
+                    
+                    switchTab('slip');
+                } else {
+                    pesanLog = `Pesanan Baru ${customer} (${toko}) - ${totalPcsLog} Pcs | Total: Rp ${grandTotalLog.toLocaleString('id-ID')}`;
+                    document.getElementById('o-nama').focus(); 
+                }
+
+                addOrderRow(); 
+                calculateOrderTotal();
+                 
+                showToast("✅ Pesanan Berhasil Disimpan!");
+                catatLog(isEditMode ? 'UPDATE' : 'CREATE', 'ORDER', pesanLog);
+                loadAllData();
+            },
+            () => { // onFailure
+                const btnSimpan = document.getElementById('btn-save-order');
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
+                showToast("❌ Gagal menyimpan pesanan!");
+            }
+        );
     }
     function updateDataDirect(idCustomer, field, nilai) {
-        if(typeof google === 'undefined' || !idCustomer) return;
+        // HAPUS PENGECEKAN GOOGLE! Biarkan fungsi berjalan walau bukan di server Google
+        if(!idCustomer) return; 
+        
         let fieldLabel = field;
         let nilaiBersih = nilai;
 
@@ -1454,27 +1611,30 @@
         const teksBaru = formatNilai(nilaiBersih);
         // =========================================================================
 
-        // Update ke memori lokal browser (agar tampilan langsung berubah)
-        orderData.forEach(o => { if ((o.idcustomer || o.idCustomer) === idCustomer) o[field] = nilaiBersih; });
+      // Update ke memori lokal browser (agar tampilan langsung berubah)
+      orderData.forEach(o => { if ((o.idcustomer || o.idCustomer) === idCustomer) o[field] = nilaiBersih; });
         
-        google.script.run.withSuccessHandler(() => {
-            showToast(`✅ ${fieldLabel} Berhasil Diperbarui!`);
-            
-            // PENCATATAN LOG KE RIWAYAT (Hanya mencatat jika nilainya memang berubah)
-            if (teksLama !== teksBaru) {
-                catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru})`);
-            }
-            
-        }).updateFieldKeSheet(idCustomer, field, nilaiBersih);
+        window.DatabaseAPI.updateFieldKeSheet(
+            idCustomer, field, nilaiBersih,
+            () => { // onSuccess
+                showToast(`✅ ${fieldLabel} Berhasil Diperbarui!`);
+                if (teksLama !== teksBaru) catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru})`);
+            },
+            (e) => showToast("❌ Gagal memperbarui status!") // onFailure
+        );
     }
 
     function hapusSatuCustomer(idCustomer) {
         if (confirm(`Apakah Anda yakin ingin menghapus SELURUH pesanan customer ini?`)) {
             showToast("Menghapus data pesanan...");
-            google.script.run.withSuccessHandler((pesan) => { showToast("✅ " + pesan); 
-            catatLog('DELETE', 'ORDER', `Menghapus seluruh pesanan Customer ID: ${idCustomer}`);
-    loadAllData();
-         }).hapusDataCustomer(idCustomer); 
+            window.DatabaseAPI.hapusDataCustomer(
+                idCustomer,
+                (pesan) => { // onSuccess
+                    showToast("✅ " + pesan); 
+                    catatLog('DELETE', 'ORDER', `Menghapus seluruh pesanan Customer ID: ${idCustomer}`);
+                    loadAllData();
+                }
+            );
         }
     }
 
@@ -1483,7 +1643,7 @@
         showToast("Menghapus...");
         const targetRow = orderData.find(o => (o.idcustomer || o.idCustomer) === idCustomer && o.sarimbit === sarimbit && o.barang === barang && o.varian === varian && o.size === size);
         if(targetRow && targetRow.id) {
-            google.script.run.withSuccessHandler(() => { showToast("Berhasil dihapus!"); loadAllData(); }).hapusSatuBaris(targetRow.id); 
+            window.DatabaseAPI.hapusSatuBaris(targetRow.id, () => { showToast("Berhasil dihapus!"); loadAllData(); });
         }
     }
 
@@ -1491,8 +1651,7 @@
         e.preventDefault();
         const form = e.target;
         const editInfo = form.dataset.editMode ? JSON.parse(form.dataset.editMode) : null;
-        const now = new Date().toISOString();
-
+        
         const payload = {
             pusat: document.getElementById('m-pusat').value, sarimbit: document.getElementById('m-sarimbit').value,
             barang: document.getElementById('m-barang').value, varian: document.getElementById('m-varian').value,
@@ -1500,38 +1659,27 @@
             berat: Number(document.getElementById('m-berat').value)
         };
 
-        try {
-            if (editInfo) {
-                const dataLama = masterData.find(m => m.pusat === editInfo.pusat && m.sarimbit === editInfo.sarimbit && m.barang === editInfo.barang && m.varian === editInfo.varian && m.size === editInfo.size);
-                if (dataLama && dataLama.id) {
-                    await dbLokal.master.update(dataLama.id, { ...payload, updated_at: now });
-                    if (navigator.onLine) await supabaseFetch(`/rest/v1/master?id=eq.${dataLama.id}`, { method: 'PATCH', body: JSON.stringify({ ...payload, updated_at: now }) });
+        window.DatabaseAPI.simpanMasterBaru(
+            payload, editInfo,
+            () => { // onSuccess
+                if (editInfo) {
+                    showToast("✅ Master Diperbarui!");
+                    const btn = form.querySelector('button[type="submit"]');
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> SIMPAN BARANG`;
+                    btn.classList.replace('bg-orange-500', 'bg-slate-800');
+                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-slate-900');
+                    catatLog('UPDATE', 'MASTER', `Edit Katalog: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size}) menjadi Rp ${payload.harga.toLocaleString('id-ID')}`);
+                } else {
+                    showToast("✅ Master Baru Tersimpan!");
+                    catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size})`);
                 }
-                showToast("✅ Master Diperbarui!");
                 form.reset(); delete form.dataset.editMode;
-                const btn = form.querySelector('button[type="submit"]');
-                btn.innerHTML = `<i class="fa-solid fa-check"></i> SIMPAN BARANG`;
-                btn.classList.replace('bg-orange-500', 'bg-slate-800');
-                btn.classList.replace('hover:bg-orange-600', 'hover:bg-slate-900');
-                
-                // PENCATATAN LOG EDIT MASTER
-                catatLog('UPDATE', 'MASTER', `Edit Katalog: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size}) menjadi Rp ${payload.harga.toLocaleString('id-ID')}`);
-            } else {
-                const newId = Date.now() + Math.floor(Math.random() * 1000);
-                const newData = { id: newId, ...payload, updated_at: now };
-                
-                await dbLokal.master.add(newData);
-                if (navigator.onLine) await supabaseFetch(`/rest/v1/master`, { method: 'POST', body: JSON.stringify(newData) });
-                
-                showToast("✅ Master Baru Tersimpan!");
-                form.reset();
-                
-                // PENCATATAN LOG BUAT MASTER
-                catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size})`);
-            }
-            loadAllData();
-        } catch(e) { showToast("Gagal menyimpan master."); }
+                loadAllData();
+            },
+            (e) => { showToast("Gagal menyimpan master."); }
+        );
     }
+    
     async function importMasterExcel(input) {
         const file = input.files[0];
         if (!file) return;
@@ -1549,64 +1697,40 @@
                 const waktuDasar = Date.now(); 
                 
                 const payloadMassal = jsonData.map((row, index) => {
-                    const rawId = row["ID_SISTEM"];
-                    const rowId = rawId ? Number(rawId) : (waktuDasar + index);
-                    
+                    const rowId = row["ID_SISTEM"] ? Number(row["ID_SISTEM"]) : (waktuDasar + index);
                     let hargaBersih = row["Harga Jual"] || row["Harga"] || 0;
                     if (typeof hargaBersih === 'string') hargaBersih = Number(hargaBersih.replace(/[^0-9]/g, ''));
-                    
                     let beratBersih = row["Berat (gr)"] || row["Berat"] || 0;
                     if (typeof beratBersih === 'string') beratBersih = Number(beratBersih.replace(/[^0-9]/g, ''));
 
                     return {
-                        id: rowId,
-                        pusat: row["Nama Pusat"] || row["Pusat"] || "", 
-                        sarimbit: row["Koleksi Sarimbit"] || row["Sarimbit"] || "",
-                        barang: row["Nama Barang"] || row["Barang"] || "", 
-                        varian: row["Warna"] || row["Varian"] || "",
-                        size: String(row["Size"] || row["Ukuran"] || ""),
-                        harga: Number(hargaBersih),
-                        berat: Number(beratBersih), 
-                        updated_at: now
+                        id: rowId, pusat: row["Nama Pusat"] || row["Pusat"] || "", sarimbit: row["Koleksi Sarimbit"] || row["Sarimbit"] || "",
+                        barang: row["Nama Barang"] || row["Barang"] || "", varian: row["Warna"] || row["Varian"] || "",
+                        size: String(row["Size"] || row["Ukuran"] || ""), harga: Number(hargaBersih), berat: Number(beratBersih), updated_at: now
                     };
                 });
 
                 const penyaringUnik = new Map();
-                payloadMassal.forEach(item => {
-                    penyaringUnik.set(item.id, item); 
-                });
+                payloadMassal.forEach(item => penyaringUnik.set(item.id, item));
                 const dataSiapKirim = Array.from(penyaringUnik.values());
 
                 showToast(`🚀 Memproses ${dataSiapKirim.length} data. Mohon tunggu...`);
-                await dbLokal.master.bulkPut(dataSiapKirim); 
                 
-                if(navigator.onLine) {
-                    showToast("☁️ Mengirim data ke Cloud secara bertahap...");
-                    const chunkSize = 500;
-                    for (let i = 0; i < dataSiapKirim.length; i += chunkSize) {
-                        const chunk = dataSiapKirim.slice(i, i + chunkSize);
-                        await supabaseFetch('/rest/v1/master', { 
-                            method: "POST", 
-                            headers: { "Prefer": "resolution=merge-duplicates" },
-                            body: JSON.stringify(chunk) 
-                        });
-                    }
-                }
-                
-                showToast("✅ Import Master Berhasil 100%!");
-                input.value = null; 
-                
-                // CATAT LOG IMPORT EXCEL
-                catatLog('CREATE', 'MASTER', `Mengimpor Excel Master Barang secara massal (${dataSiapKirim.length} Item)`);
-                
-                loadAllData();
-                
-            } catch (err) { 
-                alert("Gagal memproses file: " + err); 
-            }
+                window.DatabaseAPI.importMasterMassal(
+                    dataSiapKirim,
+                    () => {
+                        showToast("✅ Import Master Berhasil 100%!");
+                        input.value = null; 
+                        catatLog('CREATE', 'MASTER', `Mengimpor Excel Master Barang secara massal (${dataSiapKirim.length} Item)`);
+                        loadAllData();
+                    },
+                    (e) => { alert("Gagal menyimpan ke database lokal: " + e); }
+                );
+            } catch (err) { alert("Gagal memproses file: " + err); }
         };
         reader.readAsArrayBuffer(file);
     }
+    
     function hapusSarimbitTerpilih() {
         const sarimbit = document.getElementById('filter-sarimbit-master').value;
         if (!sarimbit) return showToast("Pilih salah satu Sarimbit dulu!");
@@ -1614,17 +1738,18 @@
         if (confirm(`⚠️ PERINGATAN VITAL!\n\nAnda akan menghapus SELURUH varian, ukuran, dan harga untuk koleksi: "${sarimbit.toUpperCase()}".\n\nData yang dihapus tidak bisa dikembalikan. Lanjutkan?`)) {
             showToast(`⏳ Menghapus koleksi ${sarimbit}...`);
             
-            google.script.run.withSuccessHandler((pesan) => {
-                showToast("✅ " + pesan);
-                
-                // Matikan sakelar setelah berhasil agar aman
-                appSettings.allowDeleteMaster = false;
-                localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
-                document.getElementById('set-allow-delete-master').checked = false;
-                
-                document.getElementById('filter-sarimbit-master').value = ""; // Reset filter
-                loadAllData(); // Refresh data
-            }).hapusSarimbitMaster(sarimbit);
+            window.DatabaseAPI.hapusSarimbitMaster(
+                sarimbit,
+                (pesan) => { // onSuccess
+                    showToast("✅ " + pesan);
+                    appSettings.allowDeleteMaster = false;
+                    localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
+                    document.getElementById('set-allow-delete-master').checked = false;
+                    document.getElementById('filter-sarimbit-master').value = ""; 
+                    loadAllData(); 
+                },
+                (e) => showToast("❌ Gagal menghapus koleksi.")
+            );
         }
     }
     function updateGlobalFilters() {
@@ -1964,8 +2089,29 @@
         document.getElementById('o-telp').value = head.telepon;
         document.getElementById('o-alamat').value = head.alamat;
         document.getElementById('o-toko').value = head.toko || "";
-        document.getElementById('o-ekspedisi').value = head.ekspedisi || ""; // DATA EKSPEDISI OTOMATIS TERISI SAAT FORM EDIT TERBUKA
-        document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || 0;
+        document.getElementById('o-sumber').value = head.asal_order || ""; 
+        
+        // Membaca Ekspedisi dengan aman dari perbedaan huruf besar/kecil
+        const dropdownEkspedisi = document.getElementById('o-ekspedisi');
+        const opsiEkspedisi = Array.from(dropdownEkspedisi.options).map(opt => opt.value.toLowerCase());
+        const ekspedisiAsli = (head.ekspedisi || "").toLowerCase();
+        if (opsiEkspedisi.includes(ekspedisiAsli)) {
+            dropdownEkspedisi.value = Array.from(dropdownEkspedisi.options).find(opt => opt.value.toLowerCase() === ekspedisiAsli).value;
+        } else {
+            dropdownEkspedisi.value = "";
+        }
+
+        // DP / Cicilan 1
+        document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || head.cicilan1 || 0;
+        
+        // =========================================================================
+        // REVISI UTAMA: AMBIL DAN KUNCI KEUANGAN LAMA KE INPUT HIDDEN DENGAN AMAN
+        // =========================================================================
+        document.getElementById('o-cicilan2').value = Number(head.cicilan2) || 0;
+        document.getElementById('o-cicilan3').value = Number(head.cicilan3) || 0;
+        document.getElementById('o-ongkir').value = Number(head.ongkir) || 0;
+        document.getElementById('o-resi').value = head.resi || "";
+        // =========================================================================
         
         // MENARIK DATA DISKON SAAT EDIT
         document.getElementById('o-tipe-diskon').value = head.diskonTipe || "none";
@@ -1984,8 +2130,6 @@
             if (masterData.length > 0) {
                 const sarimbits = [...new Set(masterData.map(m => m.sarimbit))].sort();
                 selectFilter.innerHTML = `<option value="">-- Sarimbit --</option>` + sarimbits.map(s => `<option value="${s}">${s}</option>`).join('');
-                
-                // BARIS REVISI: Mengatur nilai dropdown sesuai dengan sarimbit yang tersimpan di database
                 selectFilter.value = it.sarimbit; 
             }
 
@@ -1999,7 +2143,6 @@
             input.dataset.meta = JSON.stringify(metaDataPesanan);
             qtyInput.value = it.jumlah;
             
-            // KODE ASLI TETAP UTUH (Logic merubah text abu-abu saat mode edit)
             if (textDisplay) {
                 textDisplay.textContent = `${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang} (${metaDataPesanan.varian}/${metaDataPesanan.size})`;
                 textDisplay.classList.remove('text-slate-400');
@@ -2355,7 +2498,7 @@
         XLSX.writeFile(wb, `REKAP_${fSarimbit || "SEMUA"}.xlsx`); 
         showToast("Excel Berhasil Diunduh!");
         
-        catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan Excel Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
+        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan Excel Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
     }
     function exportRekapPDF() {
         if (!orderData.length) return showToast("Data kosong!");
@@ -2368,21 +2511,14 @@
         orderData.forEach(o => {
             if (fTglMulai || fTglAkhir) { const tglOrder = new Date(o.tanggal); if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; }
             if(fSarimbit && o.sarimbit !== fSarimbit) return; if(fVarian && o.varian !== fVarian) return; if(fBarang && o.barang !== fBarang) return; if(fSize && o.size !== fSize) return;
-         // Tarik memori setoran untuk dicocokkan dengan barang
-         const memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
-            const filterEkspor = document.getElementById('export-rekap-filter') ? document.getElementById('export-rekap-filter').value : 'semua';
+         
             const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
-            
-            // Kumpulkan total murni terlebih dahulu
             summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
-        }); // <-- Batas akhir perulangan pengumpulan data
+        });
 
-        // ====================================================================
-        // REVISI PENYARINGAN PDF BERDASARKAN STATUS SETORAN PUSAT
-        // ====================================================================
         const memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
         const filterSetoran = document.getElementById('export-rekap-filter') ? document.getElementById('export-rekap-filter').value : 'semua';
-        grandTotalQty = 0; // Reset total agar dihitung ulang dari hasil filter
+        grandTotalQty = 0; 
 
         for (const k in summary) {
             const disetor = memoriSetoran[k] || 0;
@@ -2395,9 +2531,9 @@
 
             if (qtyValid > 0) {
                 summary[k] = qtyValid; 
-                grandTotalQty += qtyValid; // Tambahkan ke total akhir di bagian bawah PDF
+                grandTotalQty += qtyValid; 
             } else {
-                delete summary[k]; // Buang dari tabel PDF jika tidak lolos filter
+                delete summary[k]; 
             }
         }
         
@@ -2421,9 +2557,11 @@
         doc.setFontSize(16); doc.text("LAPORAN REKAP BARANG", 14, 15); 
         doc.setFontSize(10); doc.text(`Periode: ${fTglMulai || 'Semua'} s/d ${fTglAkhir || 'Sekarang'}`, 14, 22); doc.text(`Total Qty Keseluruhan: ${grandTotalQty}`, 14, 27);
         doc.autoTable({ startY: 32, head: [['No', 'Nama Barang', 'Varian & Size', 'Total Qty']], body: bodyData, theme: 'grid', headStyles: { fillColor: [225, 29, 72], halign: 'center' }, columnStyles: { 0: { halign: 'center', cellWidth: 10 }, 3: { halign: 'center', fontStyle: 'bold' } } });
-        doc.save(`REKAP_${fSarimbit || "SEMUA"}.pdf`); showToast("PDF Rekap Berhasil Diunduh!");
         
-        catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan PDF Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
+        window.saveAs(doc.output('blob'), `REKAP_${fSarimbit || "SEMUA"}.pdf`);
+        showToast("PDF Rekap Berhasil Diunduh!");
+        
+        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'REKAP', `Mengunduh Laporan PDF Rekap Kuantitas (${fSarimbit || "Semua Koleksi"})`);
     }
 
     async function printOneSlip(idCustomer) {
@@ -2813,7 +2951,7 @@
         doc.text(catatanSplit, 105, yInfo, { align: "center" });
 
         const cleanName = (head.customer || "Nota").replace(/[^a-zA-Z0-9]/g, '_');
-        doc.save(`NOTA_${cleanName}.pdf`);
+        window.saveAs(doc.output('blob'), `NOTA_${cleanName}.pdf`);
         showToast("✅ PDF Nota Berhasil Diunduh!");
         
         catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Nota Transparan untuk: ${head.customer.toUpperCase()}`);
@@ -2978,12 +3116,22 @@
             columnStyles: { 0: { cellWidth: 8, halign: 'center' }, 1: { cellWidth: 22 }, 2: { cellWidth: 28 }, 3: { cellWidth: 42 }, 4: { cellWidth: 22 }, 5: { cellWidth: 'auto' }, 6: { cellWidth: 18, halign: 'right' }, 7: { cellWidth: 18, halign: 'right' }, 8: { cellWidth: 18, halign: 'right' }, 9: { cellWidth: 24, halign: 'right' } } 
         });
         
-        doc.save(getDynamicFilename('RINCIAN_CUSTOMER') + '.pdf'); showToast("PDF Berhasil Diunduh!");
+        const namaFileRincian = getDynamicFilename('RINCIAN_CUSTOMER') + '.pdf';
         
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Rincian Database Pelanggan`);
+        if (window.__TAURI__) {
+            const arrayBuffer = doc.output('arraybuffer');
+            const uint8Array = new Uint8Array(arrayBuffer);
+            window.simpanKeTauriData(uint8Array, namaFileRincian);
+        } else {
+            doc.save(namaFileRincian); 
+            showToast("PDF Berhasil Diunduh!");
+        }
+        
+        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Rincian Database Pelanggan`);
     }
     async function arsipPerSarimbit() {
         if (!appSettings.allowArchive) return showToast("⚠️ Izin Pengarsipan belum diaktifkan!");
+        if (!navigator.onLine) return showToast("⛔ PENGARSIPAN DITOLAK: Anda sedang Offline! Fitur ini membutuhkan internet agar aman.");
         
         const fSarimbit = document.getElementById('filter-sarimbit-slip').value;
         if (!fSarimbit) return showToast("⚠️ Pilih satu Sarimbit di filter pencarian!");
@@ -2996,7 +3144,6 @@
         showToast("⏳ Mengunci Omset & Qty ke Pembukuan...");
         
         try {
-            // HITUNG TOTAL QTY & OMSET SEBELUM DIHAPUS (AGAR DASHBOARD TIDAK 0)
             const orderTarget = orderData.filter(o => o.sarimbit === fSarimbit);
             const totalQtyTerjual = orderTarget.reduce((sum, o) => sum + Number(o.jumlah || 0), 0);
             
@@ -3011,59 +3158,32 @@
                 totalOmsetTerjual += (gross - diskon);
             });
 
-            // 1. KUNCI DATA ARSIP DI PEMBUKUAN 
             const archivePayload = { 
-                sarimbit: fSarimbit, 
-                isarchived: true, 
-                total: totalQtyTerjual, // Kunci Qty permanen
-                omset: totalOmsetTerjual, // Kunci Omset permanen
+                sarimbit: fSarimbit, isarchived: true, 
+                total: totalQtyTerjual, omset: totalOmsetTerjual, 
                 updated_at: new Date().toISOString() 
             };
 
-            const existing = await dbLokal.pembukuan.where('sarimbit').equals(fSarimbit).first();
-            const headersJSON = { "Content-Type": "application/json", "Prefer": "return=representation" };
-
-            if (navigator.onLine) {
-                let resBuku;
-                if (existing) {
-                    resBuku = await supabaseFetch(`/rest/v1/pembukuan?id=eq.${existing.id}`, { method: 'PATCH', headers: headersJSON, body: JSON.stringify(archivePayload) });
-                } else {
-                    archivePayload.id = Date.now();
-                    resBuku = await supabaseFetch('/rest/v1/pembukuan', { method: 'POST', headers: headersJSON, body: JSON.stringify([archivePayload]) });
-                }
-                if (resBuku === null) throw new Error("Gagal mengunci status arsip ke Supabase pembukuan!");
-            } else {
-                if (!existing) archivePayload.id = Date.now();
-            }
-
-            if (existing) await dbLokal.pembukuan.update(existing.id, archivePayload);
-            else await dbLokal.pembukuan.add(archivePayload);
-
-            showToast("🧹 Melakukan Soft-Delete rincian pesanan...");
-
-            // 2. SOFT-DELETE RINCIAN CUSTOMER (DI TABEL ORDERS)
-            if (navigator.onLine) {
-                await supabaseFetch(`/rest/v1/orders?sarimbit=eq.${encodeURIComponent(fSarimbit)}`, { method: 'PATCH', headers: headersJSON, body: JSON.stringify({ isarchived: true, updated_at: new Date().toISOString() }) });
-            }
-            // TAMBAHAN: Kita sisipkan syncstatus: 0 agar mesin 30 detik otomatis menyodoknya ke server jika internet mati saat proses arsip
-await dbLokal.orders.where('sarimbit').equals(fSarimbit).modify({ isarchived: true, syncstatus: 0, updated_at: new Date().toISOString() });
-
-            // 3. HARD-DELETE MASTER BARANG
-            if (navigator.onLine) await supabaseFetch(`/rest/v1/master?sarimbit=eq.${encodeURIComponent(fSarimbit)}`, { method: 'DELETE' });
-            await dbLokal.master.where('sarimbit').equals(fSarimbit).delete();
+            showToast("🧹 Melakukan pengarsipan di belakang layar...");
             
-            orderData = orderData.filter(o => o.sarimbit !== fSarimbit);
-            masterData = masterData.filter(m => m.sarimbit !== fSarimbit);
+            window.DatabaseAPI.prosesArsipSarimbit(
+                archivePayload, fSarimbit,
+                () => { // onSuccess
+                    orderData = orderData.filter(o => o.sarimbit !== fSarimbit);
+                    masterData = masterData.filter(m => m.sarimbit !== fSarimbit);
 
-            showToast(`✅ Sukses! Orderan disembunyikan. Target Omset aman di Dashboard Pembukuan.`);
-            appSettings.allowArchive = false;
-            localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
-            document.getElementById('set-allow-archive').checked = false;
-            document.getElementById('filter-sarimbit-slip').value = "";
-            
-            updateGlobalFilters();
-            renderMaster(); renderRekap(); renderSlip(); 
-        } catch (e) { console.error(e); showToast("❌ Gagal melakukan proses arsip. Cek koneksi!"); }
+                    showToast(`✅ Sukses! Orderan disembunyikan. Target Omset aman di Dashboard Pembukuan.`);
+                    appSettings.allowArchive = false;
+                    localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
+                    document.getElementById('set-allow-archive').checked = false;
+                    document.getElementById('filter-sarimbit-slip').value = "";
+                    
+                    updateGlobalFilters();
+                    renderMaster(); renderRekap(); renderSlip(); 
+                },
+                (e) => { showToast("❌ Gagal melakukan proses arsip. Cek koneksi!"); }
+            );
+        } catch (e) { console.error(e); showToast("❌ Terjadi kesalahan pada kalkulasi awal arsip."); }
     }
 
     function isiOtomatisWA() {
@@ -3128,7 +3248,9 @@ await dbLokal.orders.where('sarimbit').equals(fSarimbit).modify({ isarchived: tr
             dateFilterWrapper.classList.remove('hidden');
         }
         
-        updateConnectionStatus();
+        // Panggil status sinyal seketika saat web terbuka (tanpa jeda)
+        periksaSinyal();
+        
         addOrderRow(); 
         if (typeof loadAllData === 'function') loadAllData();
     };
@@ -3245,12 +3367,12 @@ async function eksekusiDorongDataPaksa() {
                     close: b.close || "",
                     ready: b.ready || "",
                     
-                    // PERBAIKAN FATAL: Memaksa kolom uang menjadi ANGKA (0), bukan teks kosong ("")
-                    c1: Number(b.c1) || 0,
-                    c2: Number(b.c2) || 0,
-                    bayar: Number(b.bayar) || 0,
-                    dp: Number(b.dp) || 0,
-                    Lunas: Number(b.Lunas || b.lunas) || 0,
+                  // PERBAIKAN FATAL: Sesuaikan dengan tipe data asli dari Supabase
+                  c1: b.c1 || "", // Kolom TEXT, JANGAN diubah jadi Number
+                    c2: b.c2 || "", // Kolom TEXT, JANGAN diubah jadi Number
+                    bayar: Number(b.bayar) || 0, // Kolom NUMERIC, dipaksa jadi Angka
+                    dp: Number(b.dp) || 0,       // Kolom NUMERIC, dipaksa jadi Angka
+                    Lunas: b.Lunas || b.lunas || "", // Kolom TEXT, KEMBALIKAN KE STRING
                     
                     statusKirim: b.statusKirim || "",
                     statusAlamat: b.statusAlamat || "",
@@ -3346,9 +3468,9 @@ window.simpanSetoranLokal = function(key, val, total, laciId) {
     memoriSetoran[key] = nilai;
     localStorage.setItem('DataSetoranPusat', JSON.stringify(memoriSetoran));
     
-    // 2. TEMBAKKAN KE SUPABASE VIA DATABASE ENGINE (Tanpa Refresh)
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.simpanSetoranCloud(key, nilai);
+   // 2. TEMBAKKAN KE SUPABASE VIA DATABASE ENGINE
+   if (typeof DatabaseAPI !== 'undefined' && DatabaseAPI.simpanSetoranPusat) {
+        DatabaseAPI.simpanSetoranPusat(key, nilai);
     }
     
     // Update visual angka "Antre (Belum Disetor)" secara seketika (real-time)
@@ -3418,9 +3540,9 @@ window.setorSemuaFilter = function() {
             adaPerubahan = true;
             countItems++;
             
-            // Tembakkan ke Supabase agar sinkron dengan database pusat
-            if (typeof google !== 'undefined' && google.script && google.script.run) {
-                google.script.run.simpanSetoranCloud(k, summary[k]);
+         // Tembakkan ke Supabase agar sinkron dengan database pusat
+         if (typeof DatabaseAPI !== 'undefined' && DatabaseAPI.simpanSetoranPusat) {
+                DatabaseAPI.simpanSetoranPusat(k, summary[k]);
             }
         }
     }
@@ -3447,25 +3569,60 @@ async function renderDashboardSumber() {
         let totalItemBulan = 0;
 
         // Tentukan batas waktu mulai 21 Agustus 2026 (jam 00:00)
-        const batasTanggal = new Date(2026, 7, 21); // Di JavaScript, bulan dimulai dari 0, sehingga 7 adalah Agustus
+        const batasTanggal = new Date(2026, 7, 21);
         batasTanggal.setHours(0, 0, 0, 0);
+
+        const opsiHari = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const opsiBulan = { year: 'numeric', month: 'long' };
+
+        // 1. Kumpulkan daftar Bulan Unik untuk Dropdown
+        const setBulan = new Set();
+        orders.forEach(o => {
+            const d = o.tanggal ? new Date(o.tanggal) : new Date();
+            if (d.getTime() >= batasTanggal.getTime()) {
+                setBulan.add(d.toLocaleDateString('id-ID', opsiBulan));
+            }
+        });
+
+        // 2. Update Elemen Dropdown Bulan secara dinamis
+        const elFilterBulan = document.getElementById('filter-bulan-sumber');
+        const filterBulan = elFilterBulan ? elFilterBulan.value : "";
+        if (elFilterBulan) {
+            let optionsHTML = `<option value="">Semua Bulan</option>`;
+            Array.from(setBulan).forEach(b => {
+                const selected = (b === filterBulan) ? "selected" : "";
+                optionsHTML += `<option value="${b}" ${selected}>${b}</option>`;
+            });
+            elFilterBulan.innerHTML = optionsHTML;
+        }
+
+        // Ambil Nilai dari Filter Tanggal
+        const elTglMulai = document.getElementById('filter-tgl-mulai-sumber');
+        const elTglAkhir = document.getElementById('filter-tgl-akhir-sumber');
+        const filterTglMulai = elTglMulai ? elTglMulai.value : "";
+        const filterTglAkhir = elTglAkhir ? elTglAkhir.value : "";
 
         orders.forEach(o => {
             const dateObj = o.tanggal ? new Date(o.tanggal) : new Date();
             const objWaktu = new Date(dateObj);
             objWaktu.setHours(0,0,0,0);
 
-            // Filter: Abaikan pesanan jika tanggalnya sebelum 21 Agustus 2026
+            // Format nama Hari & Bulan
+            const namaHari = dateObj.toLocaleDateString('id-ID', opsiHari);
+            const namaBulan = dateObj.toLocaleDateString('id-ID', opsiBulan);
+
+            // Filter 1: Abaikan pesanan jika tanggalnya sebelum 21 Agustus 2026
             if (objWaktu.getTime() < batasTanggal.getTime()) return;
+
+            // Filter 2: Filter Bulan Spesifik dari Dropdown
+            if (filterBulan && namaBulan !== filterBulan) return;
+
+            // Filter 3: Rentang Tanggal (Mulai - Akhir)
+            if (filterTglMulai && objWaktu.getTime() < new Date(filterTglMulai).setHours(0,0,0,0)) return;
+            if (filterTglAkhir && objWaktu.getTime() > new Date(filterTglAkhir).setHours(23,59,59,999)) return;
 
             const sumber = o.asal_order && o.asal_order.trim() !== "" ? o.asal_order : "Tidak Diketahui";
             const qty = Number(o.jumlah) || 0;
-            
-            // Setup Format Hari & Bulan
-            const opsiHari = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const namaHari = dateObj.toLocaleDateString('id-ID', opsiHari);
-            const opsiBulan = { year: 'numeric', month: 'long' };
-            const namaBulan = dateObj.toLocaleDateString('id-ID', opsiBulan);
 
             // Rekap Per Hari
             const keyHari = `${namaHari}|${sumber}`;
@@ -3485,45 +3642,59 @@ async function renderDashboardSumber() {
             totalItemBulan += qty;
         });
 
-        // Fungsi Render Dinamis
+        // Fungsi Render Dinamis dengan Baris Subtotal
         const renderKeTabel = (dataRekap, elemenTbodyId, fieldWaktu) => {
             const tbody = document.getElementById(elemenTbodyId);
             tbody.innerHTML = '';
             
             if (Object.keys(dataRekap).length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400">Belum ada data dari tanggal 21 Agustus 2026 ke depan</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 font-bold">Data tidak ditemukan pada filter ini.</td></tr>`;
                 return;
             }
             
-            // Urutkan (Ascending: tanggal sekarang lalu ke depan) lalu nama sumber
+            // Urutkan Ascending (tanggal sekarang lalu ke depan) lalu nama sumber
             const sortedData = Object.values(dataRekap).sort((a, b) => {
                 if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
                 return a.sumber.localeCompare(b.sumber);
             });
             
-            // Hitung jumlah kemunculan baris untuk setiap tanggal/bulan agar nilai rowspan dinamis
-            const countByWaktu = {};
-            sortedData.forEach(d => {
-                countByWaktu[d[fieldWaktu]] = (countByWaktu[d[fieldWaktu]] || 0) + 1;
-            });
+            // Kelompokkan data per waktu (Hari/Bulan)
+            const groupData = {};
+            const urutanWaktu = [];
             
-            let waktuSebelumnya = ""; // Variabel untuk melacak tanggal/bulan sebelumnya
-
-            sortedData.forEach((data) => {
-                let tdWaktuHTML = "";
-                
-                // Jika waktu baris ini berbeda dengan baris sebelumnya, buat elemen <td> khusus yang merangkul semua baris
-                if (data[fieldWaktu] !== waktuSebelumnya) {
-                    const rowspanCount = countByWaktu[data[fieldWaktu]];
-                    tdWaktuHTML = `<td rowspan="${rowspanCount}" class="p-4 font-bold text-slate-800 border-r border-slate-200 align-middle bg-white/40">${data[fieldWaktu]}</td>`;
-                    waktuSebelumnya = data[fieldWaktu];
+            sortedData.forEach(d => {
+                if (!groupData[d[fieldWaktu]]) {
+                    groupData[d[fieldWaktu]] = { items: [], subtotal: 0 };
+                    urutanWaktu.push(d[fieldWaktu]);
                 }
+                groupData[d[fieldWaktu]].items.push(d);
+                groupData[d[fieldWaktu]].subtotal += d.qty;
+            });
 
+            // Render baris tabel dan baris subtotal
+            urutanWaktu.forEach(waktu => {
+                const dataGroup = groupData[waktu];
+                const rowspanCount = dataGroup.items.length;
+
+                dataGroup.items.forEach((data, index) => {
+                    let tdWaktuHTML = "";
+                    if (index === 0) {
+                        tdWaktuHTML = `<td rowspan="${rowspanCount}" class="p-4 font-bold text-slate-800 border-r border-slate-200 align-middle bg-white/40">${waktu}</td>`;
+                    }
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                            ${tdWaktuHTML}
+                            <td class="p-4 font-semibold text-violet-700">${data.sumber}</td>
+                            <td class="p-4 text-center font-bold text-blue-600 text-lg">${data.qty}</td>
+                        </tr>
+                    `;
+                });
+
+                // Baris Subtotal untuk setiap hari/bulan tersebut
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
-                        ${tdWaktuHTML}
-                        <td class="p-4 font-semibold text-violet-700">${data.sumber}</td>
-                        <td class="p-4 text-center font-bold text-blue-600 text-lg">${data.qty}</td>
+                    <tr class="bg-violet-50/50 border-b-[3px] border-slate-200/80">
+                        <td colspan="2" class="p-3 pr-4 text-right font-bold text-slate-500 uppercase text-[10px] tracking-widest">Subtotal ${waktu}</td>
+                        <td class="p-3 text-center font-black text-violet-700 text-lg">${dataGroup.subtotal}</td>
                     </tr>
                 `;
             });
@@ -3533,7 +3704,7 @@ async function renderDashboardSumber() {
         renderKeTabel(rekapBulan, 'tabel-dashboard-sumber-bulan', 'bulan');
         renderKeTabel(rekapHari, 'tabel-dashboard-sumber-hari', 'tanggal');
 
-        // Update Total
+        // Update Total Keseluruhan
         document.getElementById('total-item-sumber-bulan').innerText = totalItemBulan;
         document.getElementById('total-item-sumber-hari').innerText = totalItemHari;
 
@@ -3609,7 +3780,7 @@ function unduhPdfSumber(tipe) {
         }
     });
 
-    doc.save(namaFile);
+    window.saveAs(doc.output('blob'), namaFile);
     if (typeof showToast === 'function') showToast("✅ PDF Berhasil Diunduh!");
 }
   </script>
