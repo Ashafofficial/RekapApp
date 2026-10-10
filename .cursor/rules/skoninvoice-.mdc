@@ -1,0 +1,29 @@
+---
+alwaysApply: true
+---
+
+skonInvoice = 0;
+                    if (dTipe === 'persen') diskonInvoice = (grossInvoice * dNilai) / 100;
+                    else if (dTipe === 'angka') diskonInvoice = dNilai;
+                    
+                    let netInvoice = grossInvoice - diskonInvoice;
+                    if (netInvoice < 0) netInvoice = 0;
+
+                   , bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap",
+                        waktuPembuatan: Date.now() + Math.random()
+                    };
+                }
+                
+                summaryMap[sarimbit].totalOrder = qtyAktif;
+                summaryMap[sarimbit].totalOmset = omsetAktif;
+                if (!summaryMap[sarimbit].brand) summaryMap[sarimbit].brand = namaBrand;
+                if (!summaryMap[sarimbit].waktuPembuatan) summaryMap[sarimbit].waktuPembuatan = summaryMap[sarimbit].id || 0;
+            });
+
+            let mergedSummary = Object.values(summaryMap);
+            mergedSummary.sort((a, b) => b.waktuPembuatan - a.waktuPembuatan);
+            
+            renderPembukuan(mergedSummary);
+            showToast(navigator.onLine ? "✅ Data Pembukuan tersinkronisasi." : "✅ Berhasil memuat data lokal (Offline).");
+
+        } catch(e) {

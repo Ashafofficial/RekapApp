@@ -24,6 +24,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <!-- PLUGIN KALENDER RENTANG TANGGAL (TIKTOK SELLER STYLE) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+  
+  <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
   
   <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
   <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
@@ -186,7 +193,18 @@
     
     .fade-update { animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes fadeInScale { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-  </style>
+
+/* Animasi Keluar Halaman */
+.fade-keluar { 
+animation: fadeOutZoom 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+pointer-events: none; 
+}
+
+@keyframes fadeOutZoom { 
+from { opacity: 1; transform: scale(1); filter: blur(0px); } 
+to { opacity: 0; transform: scale(0.95); filter: blur(4px); } 
+}
+</style>
 </head>
 <body class="p-2 md:p-6 pb-24 text-slate-800">
 
@@ -194,9 +212,9 @@
 
   <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
     <div>
-      <a href="index.html" class="text-blue-600 font-bold text-[11px] flex items-center gap-1.5 mb-3 hover:text-blue-800 transition-all drop-shadow-sm w-fit px-3 py-1.5 bg-blue-50/50 rounded-lg border border-blue-100 hover:bg-blue-100 active:scale-95">
+      <button onclick="pindahHalaman('index.html')" class="text-blue-600 font-bold text-[11px] flex items-center gap-1.5 mb-3 hover:text-blue-800 transition-all drop-shadow-sm w-fit px-3 py-1.5 bg-blue-50/50 rounded-lg border border-blue-100 hover:bg-blue-100 active:scale-95 cursor-pointer">
         <i class="fa-solid fa-arrow-left"></i> KEMBALI KE PANEL UTAMA
-      </a>
+      </button>
       <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm">DASHBOARD PEMBUKUAN</h1>
       <p class="text-slate-500 font-semibold mt-1 text-xs md:text-sm">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
     </div>
@@ -212,14 +230,27 @@
   </div>
 
   <div class="max-w-[98%] mx-auto mb-6 space-y-3">
-    <div class="glass p-4 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 shadow-sm">
+    <!-- REVISI: Mengubah grid menjadi 3 kolom untuk menampung Filter Arsip -->
+    <div class="glass p-4 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4 border border-slate-200 shadow-sm">
       <div class="relative group">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base"></i>
           <input type="text" id="filter-sarimbit" onkeyup="filterTable()" placeholder="Cari Koleksi Sarimbit..." class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-slate-800">
       </div>
       <div class="relative group">
-          <i class="fa-solid fa-building absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base"></i>
-          <input type="text" id="filter-pusat" onkeyup="filterTable()" placeholder="Cari Nama Pusat/Brand..." class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-slate-800">
+        <i class="fa-solid fa-building absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base pointer-events-none z-10"></i>
+        <!-- Mengubah dari teks input menjadi dropdown otomatis dengan background solid -->
+        <select id="filter-pusat" onchange="filterTable()" style="background-color: #ffffff !important;" class="w-full pl-10 pr-8 py-3 rounded-xl font-bold text-xs text-slate-800 cursor-pointer border border-slate-200 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all relative z-20">
+            <option value="">Semua Pusat/Brand</option>
+        </select>
+        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none z-30"></i>
+      </div>
+      <div class="relative group">
+          <i class="fa-solid fa-filter absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors text-base pointer-events-none z-10"></i>
+          <select id="filter-status-arsip" onchange="filterTable()" class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-indigo-700 cursor-pointer shadow-sm outline-none bg-indigo-50/30 border-indigo-200">
+              <option value="semua">Tampilkan Semua (Aktif & Arsip)</option>
+              <option value="aktif">Hanya Sarimbit Aktif</option>
+              <option value="arsip">Hanya Sarimbit Arsip</option>
+          </select>
       </div>
     </div>
     
@@ -279,39 +310,23 @@
         return Number(value.toString().replace(/\./g, '')) || 0;
     }
 
-   // SENSOR SINYAL ANTI MACET
-   async function periksaSinyal() {
-        const banner = document.getElementById('connection-banner');
-        const dot = document.getElementById('connection-dot');
-        const txt = document.getElementById('connection-text');
-        const statusSync = document.getElementById('status-sync'); // Khusus pembukuan
-        const statusDot = document.getElementById('status-dot');   // Khusus pembukuan
-        const statusTxt = document.getElementById('status-text');  // Khusus pembukuan
+  // SENSOR SINYAL ANTI MACET
+async function periksaSinyal() {
+const statusSync = document.getElementById('status-sync'); // Khusus pembukuan
+const statusDot = document.getElementById('status-dot'); // Khusus pembukuan
+const statusTxt = document.getElementById('status-text'); // Khusus pembukuan
 
-        // Pengecekan Paling Akurat via Fetch Bantuan
-        let isOnline = false;
-        if (navigator.onLine) {
-            try {
-                await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
-                isOnline = true;
-            } catch (e) { isOnline = false; }
-        }
+// Pengecekan Paling Akurat via Fetch Bantuan
+let isOnline = false;
+if (navigator.onLine) {
+try {
+await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
+isOnline = true;
+} catch (e) { isOnline = false; }
+}
 
-        // Terapkan Gaya untuk index.html
-        if (banner && txt) {
-            if (isOnline) {
-                banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
-                dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                txt.innerText = "ONLINE";
-            } else {
-                banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
-                dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
-                txt.innerText = "OFFLINE";
-            }
-        }
-
-        // Terapkan Gaya untuk pembukuan.html
-        if (statusSync && statusTxt) {
+// Terapkan Gaya untuk pembukuan.html
+if (statusSync && statusTxt) {
             if (isOnline) {
                 statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
                 statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
@@ -429,6 +444,7 @@
                 let qtyAktif = 0;
                 let omsetAktif = 0;
                 let namaBrand = "";
+                let waktuTerbaru = 0; // Tambahan untuk merekam waktu order paling baru masuk
 
                 Object.values(orderGroup[sarimbit]).forEach(items => {
                     if (!namaBrand && items[0].pusat) namaBrand = items[0].pusat;
@@ -445,7 +461,12 @@
                     if (netInvoice < 0) netInvoice = 0;
 
                     omsetAktif += netInvoice;
-                    items.forEach(it => qtyAktif += (Number(it.jumlah)||0));
+                    items.forEach(it => {
+                        qtyAktif += (Number(it.jumlah)||0);
+                        // Cari tanggal pesanan paling baru untuk koleksi sarimbit ini
+                        let tglOrder = new Date(it.tanggal).getTime();
+                        if (tglOrder > waktuTerbaru) waktuTerbaru = tglOrder;
+                    });
                 });
 
                 if (!summaryMap[sarimbit]) {
@@ -453,23 +474,41 @@
                         sarimbit: sarimbit, isArchived: false, isPrinted: false, isInformed: false,
                         brand: namaBrand, close: "", ready: "", c1: "", c2: "", lunas: "", 
                         dp: 0, bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap",
-                        waktuPembuatan: Date.now() + Math.random()
+                        waktuPembuatan: waktuTerbaru
                     };
                 }
                 
                 summaryMap[sarimbit].totalOrder = qtyAktif;
                 summaryMap[sarimbit].totalOmset = omsetAktif;
+                
+                // Kunci waktu dengan tanggal order terakhir agar tabel stabil dan tidak lompat-lompat saat diedit
+                if (!summaryMap[sarimbit].waktuPembuatan || summaryMap[sarimbit].waktuPembuatan < waktuTerbaru) {
+                    summaryMap[sarimbit].waktuPembuatan = waktuTerbaru; 
+                }
+                
                 if (!summaryMap[sarimbit].brand) summaryMap[sarimbit].brand = namaBrand;
-                if (!summaryMap[sarimbit].waktuPembuatan) summaryMap[sarimbit].waktuPembuatan = summaryMap[sarimbit].id || 0;
             });
 
             let mergedSummary = Object.values(summaryMap);
-            mergedSummary.sort((a, b) => b.waktuPembuatan - a.waktuPembuatan);
+            
+            // PERBAIKAN 1: Kembalikan urutan, posisikan Sarimbit yang paling baru diupload/dipesan di paling atas
+            mergedSummary.sort((a, b) => (b.waktuPembuatan || 0) - (a.waktuPembuatan || 0));
+            
+            // PERBAIKAN 2: Tangkap posisi scroll di pembungkus tabel yang benar
+            const tableElement = document.getElementById('table-pembukuan');
+            const scrollContainer = tableElement ? tableElement.parentElement : null;
+            const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
             
             renderPembukuan(mergedSummary);
-            showToast(navigator.onLine ? "✅ Data Pembukuan tersinkronisasi." : "✅ Berhasil memuat data lokal (Offline).");
+            
+            // PERBAIKAN 3: Kembalikan layar ke posisi semula tanpa lompat ke atas
+            if (scrollContainer) {
+                setTimeout(() => {
+                    scrollContainer.scrollTop = currentScroll;
+                }, 15); // Beri jeda 15 milidetik agar filter sempat membuang baris yang tidak perlu sebelum di-scroll
+            }
 
-        } catch(e) { 
+        } catch(e) {
             console.error("Gagal memuat pembukuan:", e);
             showToast("❌ Gagal memuat data.");
             document.getElementById('pembukuan-body').innerHTML = `<tr><td colspan="10" class="p-10 text-center font-bold text-rose-500">Gagal memuat data. Periksa sistem penyimpanan.</td></tr>`;
@@ -509,186 +548,355 @@
     }
 
     function renderPembukuan(summaryArray) {
-      rawSummary = summaryArray; 
-      const tbody = document.getElementById('pembukuan-body');
+        rawSummary = summaryArray;
+        const tbody = document.getElementById('pembukuan-body');
 
-      if (!summaryArray || summaryArray.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-16 text-center text-slate-400 font-bold bg-white/40">Belum ada data pesanan masuk.</td></tr>`;
-        return;
-      }
+        if (!summaryArray || summaryArray.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="p-16 text-center text-slate-400 font-bold bg-white/40">Belum ada data pesanan masuk.</td></tr>`;
+            return;
+        }
 
-      tbody.innerHTML = summaryArray.map((item, index) => {
-        const sarimbitName = item.sarimbit || "Tanpa Nama";
-        // Mencegah error jika ada tanda kutip tunggal (') pada nama Sarimbit
-        const safeSarimbitName = sarimbitName.replace(/'/g, "\\'");
-        // Menambahkan respon tombol "Enter" agar data langsung tersimpan tanpa harus klik di luar kotak
-        const autoSave = `onchange="simpanRow(${index}, '${safeSarimbitName}')" onkeypress="if(event.key === 'Enter') this.blur();"`;
+        // === MENGISI PILIHAN NAMA BRAND OTOMATIS ===
+        const filterPusat = document.getElementById('filter-pusat');
+        if (filterPusat) {
+            const brandSebelumnya = filterPusat.value;
+            const kumpulanBrand = [...new Set(summaryArray.map(item => item.brand || item.pusat).filter(Boolean))].sort();
+            let htmlOpsi = `<option value="">Semua Pusat/Brand</option>`;
+            kumpulanBrand.forEach(b => {
+                const safeValue = String(b).replace(/"/g, '&quot;');
+                htmlOpsi += `<option value="${safeValue}" ${b === brandSebelumnya ? 'selected' : ''}>${String(b).replace(/</g, '&lt;')}</option>`;
+            });
+            filterPusat.innerHTML = htmlOpsi;
+        }
+
+        // Kosongkan indikator loading jika baru pertama kali dimuat
+        if (tbody.innerHTML.includes('animate-pulse') || tbody.innerHTML.includes('Belum ada data')) {
+            tbody.innerHTML = '';
+        }
+
+        const amanTgl = (val) => {
+            if (!val) return '';
+            const cek = String(val).toLowerCase();
+            if (cek.includes('cancel') || cek.includes('belum') || cek === '-' || cek.includes('nanti')) return '';
+            return val;
+        };
+
+        const dataAktif = [];
+        const dataArsip = [];
         
-        // 1. AMBIL TOTAL TERAKHIR (Jika order aktif 0 karena diarsip, pakai data 'total' yang sudah terkunci di Supabase)
-        const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
+        summaryArray.forEach((item, index) => {
+            item.originalIndex = index;
+            if (item.isarchived || item.isArchived) dataArsip.push(item);
+            else dataAktif.push(item);
+        });
+
+        const idYangDibutuhkan = new Set();
+        let urutanVisual = 1;
+
+        // =========================================================================
+        // 1. FUNGSI UPDATE DATA CERDAS (MENGUBAH ISI TANPA MERESET LAYAR)
+        // =========================================================================
+        const updateRowCerdas = (item, isArsip) => {
+            const idAman = btoa(encodeURIComponent(item.sarimbit || "")).replace(/[^a-zA-Z0-9]/g, '');
+            const rowEl = document.getElementById(`row-${idAman}`);
+            
+            if (!rowEl) return false; 
+
+            idYangDibutuhkan.add(`row-${idAman}`);
+
+            const noUrutEl = rowEl.querySelector('.no-urut');
+            if (noUrutEl && noUrutEl.innerText !== String(urutanVisual)) noUrutEl.innerText = urutanVisual;
+            urutanVisual++;
+
+            const beriBlink = (el) => {
+                const parent = el.closest('div') || el.closest('td');
+                parent.classList.add('bg-blue-100', 'transition-all', 'duration-500');
+                setTimeout(() => parent.classList.remove('bg-blue-100'), 1500);
+            };
+
+            const updateVal = (id, newVal) => {
+                const el = document.getElementById(id);
+                // JANGAN menimpa data jika admin sedang fokus mengetik di kolom tersebut!
+                if (el && el.value !== String(newVal) && document.activeElement !== el) {
+                    // Perlakuan khusus agar Plugin Kalender tidak error saat data disuntik dari server
+                    if (el._flatpickr) {
+                        el._flatpickr.setDate(newVal, false); 
+                    } else {
+                        el.value = newVal;
+                    }
+                    beriBlink(el);
+                }
+            };
+
+            const updateChecked = (id, newChecked) => {
+                const el = document.getElementById(id);
+                if (el && el.checked !== newChecked) {
+                    el.checked = newChecked;
+                    beriBlink(el);
+                }
+            };
+
+            const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
+            const qtyEl = rowEl.querySelector('.val-total-pcs');
+            if (qtyEl && qtyEl.innerText !== String(finalQty)) {
+                qtyEl.innerText = finalQty;
+                beriBlink(qtyEl);
+            }
+
+            updateVal(`close-${idAman}`, item.close || '');
+            updateVal(`ready-${idAman}`, item.ready || '');
+            updateVal(`c1-${idAman}`, amanTgl(item.c1));
+            updateVal(`c2-${idAman}`, amanTgl(item.c2));
+            updateVal(`lunas-${idAman}`, amanTgl(item.Lunas || item.lunas));
+            updateVal(`dp-${idAman}`, item.dp || '');
+            updateVal(`bayar-${idAman}`, item.bayar || '');
+            updateVal(`kirim-${idAman}`, item.statusKirim || 'Langsung');
+            updateVal(`alamat-${idAman}`, item.statusAlamat || 'Belum Lengkap');
+            
+            updateChecked(`print-${idAman}`, item.isPrinted === true);
+            updateChecked(`info-${idAman}`, item.isInformed === true);
+
+            return true;
+        };
+
+        // =========================================================================
+        // 2. FUNGSI PEMBUAT HTML (Hanya dieksekusi jika ada sarimbit baru masuk)
+        // =========================================================================
+        const buildRowHtml = (item, isArsip) => {
+            const nomorUrut = urutanVisual++;
+            const sarimbitName = item.sarimbit || "Tanpa Nama";
+            const safeSarimbitJS = sarimbitName.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            const safeSarimbitAttr = sarimbitName.replace(/"/g, '&quot;');
+            const idAman = btoa(encodeURIComponent(sarimbitName)).replace(/[^a-zA-Z0-9]/g, '');
+            
+            idYangDibutuhkan.add(`row-${idAman}`);
+
+            const autoSave = `onchange="simpanRow('${idAman}', '${safeSarimbitJS}')" onkeypress="if(event.key === 'Enter') this.blur();"`;
+            const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
+
+            return `
+            <tr id="row-${idAman}" class="item-row hover:bg-blue-50/40 transition-colors border-b border-slate-200/80 ${isArsip ? 'opacity-60 bg-slate-50' : 'bg-white'}">
+                <td class="p-3 font-black text-slate-400 text-[10px] text-center no-urut">${nomorUrut}</td>
+                
+                <td class="p-3 sarimbit-name align-middle">
+                    <div class="font-black text-slate-800 text-[11px] leading-tight drop-shadow-sm mb-1">${sarimbitName}</div>
+                    ${isArsip ? '<span class="inline-block px-1.5 py-0.5 text-[8px] bg-slate-200 text-slate-600 rounded font-black uppercase tracking-widest shadow-inner"><i class="fa-solid fa-box-archive mr-1"></i>Arsip</span>' : ''}
+                </td>
+                
+                <td class="p-3 align-middle">
+                  <div class="brand-display font-bold text-slate-600 text-[9px] uppercase tracking-wider bg-slate-100 px-2 py-1 rounded shadow-inner w-fit">${item.brand || '-'}</div>
+                  <input type="hidden" id="brand-${idAman}" value="${item.brand || ''}" class="brand-name">
+                </td>
+                
+                <td class="p-3 text-center align-middle">
+                  <div class="inline-flex flex-col items-center justify-center bg-blue-50/80 px-3 py-1.5 rounded border border-blue-100">
+                      <span class="val-total-pcs text-sm font-black text-blue-700 leading-none drop-shadow-sm">${finalQty}</span>
+                      <span class="text-[7px] font-bold text-blue-400 mt-0.5 uppercase tracking-widest">Pcs</span>
+                  </div>
+                </td>
+                
+                <td class="p-3 align-middle">
+                  <div class="flex flex-col gap-1.5 w-full">
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-blue-300 focus-within:border-blue-500 transition-colors overflow-hidden">
+                          <span class="w-10 px-1.5 py-1.5 text-[8px] font-black text-slate-500 uppercase tracking-wider border-r border-slate-200 text-center">Close</span>
+                          <input type="date" id="close-${idAman}" value="${item.close || ''}" ${autoSave} class="flex-1 w-full bg-transparent px-2 text-[9px] font-bold text-slate-700 outline-none cursor-pointer">
+                      </div>
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-emerald-300 focus-within:border-emerald-500 transition-colors overflow-hidden">
+                          <span class="w-10 px-1.5 py-1.5 text-[8px] font-black text-slate-500 uppercase tracking-wider border-r border-slate-200 text-center">Ready</span>
+                          <input type="date" id="ready-${idAman}" value="${item.ready || ''}" ${autoSave} class="flex-1 w-full bg-transparent px-2 text-[9px] font-bold text-slate-700 outline-none cursor-pointer">
+                      </div>
+                  </div>
+                </td>
+                
+                <td class="p-3 align-middle">
+                  <div class="flex flex-col gap-1.5 w-full">
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-colors overflow-hidden">
+                          <span class="w-7 px-1.5 py-1.5 text-[8px] font-black text-slate-500 border-r border-slate-200 text-center">C1</span>
+                          <input type="text" id="c1-${idAman}" value="${amanTgl(item.c1)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pilih..." class="date-range-picker w-full bg-transparent pl-2 pr-1 text-[9px] font-bold text-slate-700 cursor-pointer outline-none" readonly>
+                      </div>
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-colors overflow-hidden">
+                          <span class="w-7 px-1.5 py-1.5 text-[8px] font-black text-slate-500 border-r border-slate-200 text-center">C2</span>
+                          <input type="text" id="c2-${idAman}" value="${amanTgl(item.c2)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pilih..." class="date-range-picker w-full bg-transparent pl-2 pr-1 text-[9px] font-bold text-slate-700 cursor-pointer outline-none" readonly>
+                      </div>
+                      <div class="flex items-center bg-emerald-50/50 hover:bg-white focus-within:bg-white rounded border border-emerald-200 hover:border-emerald-400 focus-within:border-emerald-500 transition-colors overflow-hidden">
+                          <i class="fa-solid fa-check text-emerald-500 text-[8px] w-7 text-center border-r border-emerald-200 py-1.5"></i>
+                          <input type="text" id="lunas-${idAman}" value="${amanTgl(item.Lunas || item.lunas)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pelunasan..." class="date-range-picker w-full bg-transparent pl-2 pr-1 text-[9px] font-bold text-emerald-700 cursor-pointer outline-none" readonly>
+                      </div>
+                  </div>
+                </td>
+                
+                <td class="p-3 align-middle">
+                  <div class="flex flex-col gap-1.5 w-full">
+                      <div class="flex items-center bg-blue-50/30 hover:bg-white focus-within:bg-white rounded border border-blue-200 hover:border-blue-400 focus-within:border-blue-500 transition-colors overflow-hidden">
+                          <span class="px-2 py-1.5 bg-blue-100/50 text-[8px] font-black text-blue-600 border-r border-blue-200">DP</span>
+                          <span class="pl-1.5 text-[8px] font-bold text-slate-400">Rp</span>
+                          <input type="number" id="dp-${idAman}" value="${item.dp || ''}" ${autoSave} class="input-dp w-full px-1.5 py-1.5 text-[10px] font-black text-blue-700 bg-transparent outline-none">
+                      </div>
+                      <div class="flex items-center bg-emerald-50/30 hover:bg-white focus-within:bg-white rounded border border-emerald-200 hover:border-emerald-400 focus-within:border-emerald-500 transition-colors overflow-hidden">
+                          <span class="px-2 py-1.5 bg-emerald-100/50 text-[8px] font-black text-emerald-600 border-r border-emerald-200">LUNAS</span>
+                          <span class="pl-1.5 text-[8px] font-bold text-slate-400">Rp</span>
+                          <input type="number" id="bayar-${idAman}" value="${item.bayar || ''}" ${autoSave} class="input-bayar w-full px-1.5 py-1.5 text-[10px] font-black text-emerald-700 bg-transparent outline-none">
+                      </div>
+                  </div>
+                </td>
+                
+                <td class="p-3 align-middle">
+                    <div class="flex flex-col gap-1.5 w-full">
+                        <div class="relative bg-slate-50 hover:bg-white rounded border border-slate-200 hover:border-slate-300 transition-colors">
+                        <select id="kirim-${idAman}" ${autoSave} class="w-full pl-2 pr-5 py-1.5 text-[9px] font-bold rounded text-slate-700 cursor-pointer bg-transparent outline-none appearance-none">
+                            <option value="Langsung" ${item.statusKirim === 'Langsung' ? 'selected' : ''}>🚀 Langsung</option>
+                            <option value="DS" ${item.statusKirim === 'DS' ? 'selected' : ''}>📦 Drop Ship</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-[7px] text-slate-400 pointer-events-none"></i>
+                        </div>
+                        <div class="relative bg-slate-50 hover:bg-white rounded border border-slate-200 hover:border-slate-300 transition-colors">
+                        <select id="alamat-${idAman}" ${autoSave} class="w-full pl-2 pr-5 py-1.5 text-[9px] font-bold rounded ${item.statusAlamat === 'Sudah Lengkap' ? 'text-emerald-600' : 'text-rose-500'} cursor-pointer bg-transparent outline-none appearance-none">
+                            <option value="Belum Lengkap" ${item.statusAlamat === 'Belum Lengkap' ? 'selected' : ''}>❌ Alamat Kurang</option>
+                            <option value="Sudah Lengkap" ${item.statusAlamat === 'Sudah Lengkap' ? 'selected' : ''}>✅ Alamat Fix</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-[7px] text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+                </td>
+                
+                <td class="p-3 align-middle">
+                  <div class="flex flex-col gap-2.5">
+                      <label class="flex items-center gap-2 cursor-pointer group w-fit">
+                          <input type="checkbox" id="print-${idAman}" ${item.isPrinted ? 'checked' : ''} ${autoSave} class="w-4 h-4 rounded text-blue-500 border-slate-300 focus:ring-blue-500 cursor-pointer transition-all">
+                          <span class="text-[9px] font-bold text-slate-500 group-hover:text-blue-600 transition-colors">Di-Print</span>
+                      </label>
+                      <label class="flex items-center gap-2 cursor-pointer group w-fit">
+                          <input type="checkbox" id="info-${idAman}" ${item.isInformed ? 'checked' : ''} ${autoSave} class="w-4 h-4 rounded text-emerald-500 border-slate-300 focus:ring-emerald-500 cursor-pointer transition-all">
+                          <span class="text-[9px] font-bold text-slate-500 group-hover:text-emerald-600 transition-colors">Di-Info</span>
+                      </label>
+                  </div>
+                </td>
+                
+                <td class="p-3 text-center align-middle">
+                  <div class="h-6 w-6 mx-auto flex items-center justify-center bg-slate-50 rounded-full border border-slate-200 shadow-inner">
+                      <div id="loader-${idAman}" class="hidden text-blue-500 animate-spin text-[9px]"><i class="fa-solid fa-circle-notch"></i></div>
+                      <div id="check-${idAman}" class="hidden text-emerald-500 text-[9px] drop-shadow-sm"><i class="fa-solid fa-check"></i></div>
+                      <div id="idle-${idAman}" class="text-slate-300 text-[9px]"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                  </div>
+                </td>
+            </tr>
+            `;
+        };
+
+        // =========================================================================
+        // 3. SAPU BERSIH DOM LAMA YANG SUDAH TIDAK RELEVAN
+        // =========================================================================
+        dataAktif.forEach(item => idYangDibutuhkan.add(`row-${btoa(encodeURIComponent(item.sarimbit || "")).replace(/[^a-zA-Z0-9]/g, '')}`));
+        dataArsip.forEach(item => idYangDibutuhkan.add(`row-${btoa(encodeURIComponent(item.sarimbit || "")).replace(/[^a-zA-Z0-9]/g, '')}`));
+        if (dataArsip.length > 0) idYangDibutuhkan.add('garis-pembatas-arsip');
+
+        Array.from(tbody.children).forEach(tr => {
+            if (tr.id && !idYangDibutuhkan.has(tr.id)) {
+                // Matikan kalender dari memori browser agar performa tidak berat
+                tr.querySelectorAll('.date-range-picker').forEach(el => { if(el._flatpickr) el._flatpickr.destroy(); });
+                tr.remove();
+            }
+        });
+// =========================================================================
+        // 4. EKSEKUSI PEMASANGAN DATA
+        // =========================================================================
+        let tempHTML = ""; // PERBAIKAN: Gunakan String murni agar browser tidak menghancurkan struktur tabel
+        let adaBarisBaru = false;
         
-        // 2. CEK STATUS ARSIP (Mendukung pembacaan huruf kecil dari Supabase)
-        const statusArsip = item.isarchived || item.isArchived;
+        dataAktif.forEach(item => {
+            const suksesUpdate = updateRowCerdas(item, false);
+            if (!suksesUpdate) {
+                tempHTML += buildRowHtml(item, false);
+                adaBarisBaru = true;
+            }
+        });
 
-        return `
-          <tr class="item-row hover:bg-slate-50/80 transition-colors align-top border-b border-slate-200">
-            <td class="p-2.5 2xl:p-3 font-black text-slate-400 text-[10px] text-center border-r border-slate-100">${index + 1}</td>
-            
-            <td class="p-2.5 2xl:p-3 font-black text-slate-800 sarimbit-name text-[10px] leading-tight drop-shadow-sm border-r border-slate-100">
-                ${sarimbitName}
-                ${statusArsip ? '<br><span class="inline-block mt-1.5 px-2 py-1 text-[8px] bg-rose-100 text-rose-600 rounded font-black uppercase tracking-widest shadow-sm"><i class="fa-solid fa-box-archive mr-1"></i>Diarsip</span>' : ''}
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 border-r border-slate-100">
-              <div class="font-bold text-slate-700 text-[9px] uppercase tracking-wider bg-white px-1.5 py-1 rounded border border-slate-200 shadow-sm w-fit">${item.brand || '-'}</div>
-              <input type="hidden" id="brand-${index}" value="${item.brand || ''}" class="brand-name">
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 text-center border-r border-slate-100">
-              <div class="flex flex-col items-center justify-center bg-blue-50/80 py-1.5 rounded-lg border border-blue-100 h-full ${statusArsip ? 'opacity-80' : ''}">
-                <span class="val-total-pcs text-base font-black text-blue-600 leading-none drop-shadow-sm">${finalQty}</span>
-                <span class="text-[7px] font-bold text-slate-500 mt-0.5 uppercase tracking-widest">Pcs</span>
-              </div>
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 space-y-1.5 border-r border-slate-100">
-              <div class="flex flex-col gap-0.5">
-                <label class="text-[8px] font-bold text-slate-500 tracking-widest uppercase">CLOSE PO:</label>
-                <div class="flex flex-col xl:flex-row xl:items-center gap-1">
-                    <input type="date" id="close-${index}" value="${item.close || ''}" ${autoSave} class="glass-input flex-1 p-2 text-[10px] font-bold text-slate-700 rounded-md cursor-pointer">
-                    <span class="text-[7px] text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded border border-blue-100 w-fit whitespace-nowrap">${formatTanggalPanjang(item.close)}</span>
-                </div>
-              </div>
-              <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-100">
-                <label class="text-[8px] font-bold text-slate-500 tracking-widest uppercase">READY:</label>
-                <div class="flex flex-col xl:flex-row xl:items-center gap-1">
-                    <input type="date" id="ready-${index}" value="${item.ready || ''}" ${autoSave} class="glass-input flex-1 p-2 text-[10px] font-bold text-slate-700 rounded-md cursor-pointer">
-                    <span class="text-[7px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100 w-fit whitespace-nowrap">${formatTanggalPanjang(item.ready)}</span>
-                </div>
-              </div>
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 space-y-1.5 border-r border-slate-100 bg-slate-50/30">
-              <div class="flex flex-col gap-0.5">
-                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Jadwal C1</label>
-                  <input type="text" id="c1-${index}" value="${item.c1 || ''}" ${autoSave} placeholder="Ketik C1..." class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-800">
-              </div>
-              <div class="flex flex-col gap-0.5">
-                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Jadwal C2</label>
-                  <input type="text" id="c2-${index}" value="${item.c2 || ''}" ${autoSave} placeholder="Ketik C2..." class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-800">
-              </div>
-              <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-200">
-                  <label class="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">PELUNASAN</label>
-                  <input type="text" id="lunas-${index}" value="${item.Lunas || ''}" ${autoSave} placeholder="Jadwal Lunas..." class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-emerald-700 bg-emerald-50/50 border-emerald-200">
-              </div>
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 border-r border-slate-100">
-              <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm space-y-2.5">
-                <div class="flex flex-col gap-0.5">
-                  <label class="text-[8px] font-black text-blue-600 uppercase tracking-widest">Total Uang DP</label>
-                <div class="relative">
-                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[9px]">Rp</span>
-                    <input type="number" id="dp-${index}" value="${item.dp || ''}" ${autoSave} class="input-dp glass-input w-full pl-8 pr-1.5 py-2 text-[10px] rounded-md font-black text-blue-700 shadow-inner bg-blue-50/30">
-                 </div>
+        if (dataArsip.length > 0) {
+            let pembatas = document.getElementById('garis-pembatas-arsip');
+            if (!pembatas) {
+                tempHTML += `<tr id="garis-pembatas-arsip" class="bg-slate-200/50 border-y-2 border-slate-300/50"><td colspan="10" class="p-4 text-center"><div class="inline-flex items-center gap-3 px-6 py-2 bg-white rounded-full border border-slate-300 shadow-sm"><i class="fa-solid fa-box-archive text-slate-400"></i><span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">DATA ARSIP (KOLEKSI SELESAI)</span></div></td></tr>`;
+            }
+            dataArsip.forEach(item => {
+                const suksesUpdate = updateRowCerdas(item, true);
+                if (!suksesUpdate) {
+                    tempHTML += buildRowHtml(item, true);
+                    adaBarisBaru = true;
+                }
+            });
+        }
 
-                 <label class="text-[8px] font-black text-emerald-600 uppercase tracking-widest mt-2">Uang Pelunasan</label>
-                 <div class="relative">
-                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[9px]">Rp</span>
-                    <input type="number" id="bayar-${index}" value="${item.bayar || ''}" ${autoSave} class="input-bayar glass-input w-full pl-8 pr-1.5 py-2 text-[10px] rounded-md font-black text-emerald-700 shadow-inner bg-emerald-50/30">
-                 </div>
-                </div>
-              </div>
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 space-y-2 border-r border-slate-100 bg-slate-50/30">
-              <div>
-                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest block mb-0.5">Metode Kirim</label>
-                  <select id="kirim-${index}" ${autoSave} class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-700 cursor-pointer shadow-sm">
-                    <option value="Langsung" ${item.statusKirim === 'Langsung' ? 'selected' : ''}>🚀 Langsung</option>
-                    <option value="DS" ${item.statusKirim === 'DS' ? 'selected' : ''}>📦 Drop Ship</option>
-                  </select>
-              </div>
-              <div>
-                  <label class="text-[8px] font-bold text-slate-500 uppercase tracking-widest block mb-0.5">Status Alamat</label>
-                  <select id="alamat-${index}" ${autoSave} class="glass-input w-full p-2 text-[10px] font-bold rounded-md text-slate-700 cursor-pointer shadow-sm">
-                    <option value="Belum Lengkap" ${item.statusAlamat === 'Belum Lengkap' ? 'selected' : ''}>❌ Belum Lengkap</option>
-                    <option value="Sudah Lengkap" ${item.statusAlamat === 'Sudah Lengkap' ? 'selected' : ''}>✅ Lengkap</option>
-                  </select>
-              </div>
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 space-y-1.5 border-r border-slate-100">
-              <label class="flex items-center gap-1.5 cursor-pointer group bg-white p-1.5 rounded-lg border border-slate-200 hover:border-blue-300 shadow-sm transition-all active:scale-95">
-                <input type="checkbox" id="print-${index}" ${item.isPrinted ? 'checked' : ''} ${autoSave} class="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer">
-                <span class="text-[8px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors uppercase tracking-widest">Diprint</span>
-              </label>
-              <label class="flex items-center gap-1.5 cursor-pointer group bg-white p-1.5 rounded-lg border border-slate-200 hover:border-emerald-300 shadow-sm transition-all active:scale-95">
-                <input type="checkbox" id="info-${index}" ${item.isInformed ? 'checked' : ''} ${autoSave} class="w-3.5 h-3.5 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer">
-                <span class="text-[8px] font-bold text-slate-600 group-hover:text-emerald-600 transition-colors uppercase tracking-widest">Info Lunas</span>
-              </label>
-            </td>
-            
-            <td class="p-2.5 2xl:p-3 text-center align-middle">
-              <div class="h-8 w-8 mx-auto flex items-center justify-center bg-white rounded-full border border-slate-200 shadow-sm backdrop-blur-sm">
-                <div id="loader-${index}" class="hidden text-blue-500 animate-spin text-sm"><i class="fa-solid fa-circle-notch"></i></div>
-                <div id="check-${index}" class="hidden text-emerald-500 text-sm scale-110 drop-shadow-sm"><i class="fa-solid fa-check"></i></div>
-                <div id="idle-${index}" class="text-slate-300 text-xs"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-              </div>
-              <div class="text-[7px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Sync</div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+        // Jika ada baris baru, suntikkan ke HTML
+        if (adaBarisBaru) {
+            tbody.insertAdjacentHTML('beforeend', tempHTML);
+
+            // INISIALISASI KALENDER HANYA PADA INPUT YANG BARU DIBUAT
+            setTimeout(() => {
+                flatpickr(".date-range-picker:not(.flatpickr-input)", {
+                    mode: "range",
+                    dateFormat: "d M Y", 
+                    locale: "id", 
+                    showMonths: window.innerWidth > 768 ? 2 : 1, 
+                    errorHandler: function(e) { return; }, 
+                    onChange: function(selectedDates, dateStr, instance) {
+                        if (selectedDates.length === 2 || selectedDates.length === 0) {
+                            const idAman = instance.element.getAttribute('data-id');
+                            const sarimbit = instance.element.getAttribute('data-sarimbit');
+                            simpanRow(idAman, sarimbit);
+                        }
+                    }
+                });
+            }, 150);
+        }
+
+        // =========================================================================
+        // KUNCI PAMUNGKAS: Aktifkan ulang filter, layar DIJAMIN TIDAK akan lompat
+        // =========================================================================
+        if (typeof filterTable === 'function') filterTable();
     }
+    async function simpanRow(idAman, sarimbit) {
+      // PROTEKSI DOM: Pastikan inputnya memang benar-benar ada di layar sebelum data direkam
+      const c1El = document.getElementById(`c1-${idAman}`);
+      const c2El = document.getElementById(`c2-${idAman}`);
+      if (!c1El || !c2El) return; 
 
-    // KUNCI REVISI 2: Mengamankan properti isarchived saat auto-save
-    async function simpanRow(idx, sarimbit) {
-      const loader = document.getElementById(`loader-${idx}`);
-      const check = document.getElementById(`check-${idx}`);
-      const idle = document.getElementById(`idle-${idx}`);
+      const loader = document.getElementById(`loader-${idAman}`);
+      const check = document.getElementById(`check-${idAman}`);
+      const idle = document.getElementById(`idle-${idAman}`);
 
-      // PENARIKAN DATA INPUT DARI FORM
-      const valClose = document.getElementById(`close-${idx}`).value;
-      const valReady = document.getElementById(`ready-${idx}`).value;
-      const valC1 = document.getElementById(`c1-${idx}`).value;
-      const valC2 = document.getElementById(`c2-${idx}`).value;
-      const valLunas = document.getElementById(`lunas-${idx}`).value;
+      const valClose = document.getElementById(`close-${idAman}`).value;
+      const valReady = document.getElementById(`ready-${idAman}`).value;
+      const valC1 = c1El.value;
+      const valC2 = c2El.value;
+      const valLunas = document.getElementById(`lunas-${idAman}`).value;
 
-      const dpBersih = Number(document.getElementById(`dp-${idx}`).value) || 0;
-      const bayarBersih = Number(document.getElementById(`bayar-${idx}`).value) || 0;
+      const dpBersih = Number(document.getElementById(`dp-${idAman}`).value) || 0;
+      const bayarBersih = Number(document.getElementById(`bayar-${idAman}`).value) || 0;
 
-      const activeData = rawSummary[idx];
+      const activeData = rawSummary.find(item => item.sarimbit === sarimbit);
 
-      // MEMPERTAHANKAN STATUS ARSIP ASLI DARI DATABASE LOKAL AGAR TIDAK TERTELAN JADI FALSE
       let statusArsipAsli = false;
       try {
           const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
-          if (existingData) {
-              statusArsipAsli = existingData.isarchived || existingData.isArchived || false;
-          }
-      } catch (err) {
-          console.error("Gagal memeriksa status arsip lokal:", err);
-      }
+          if (existingData) statusArsipAsli = existingData.isarchived || existingData.isArchived || false;
+      } catch (err) { }
 
-   // DATA YANG DIKIRIM (Sudah disesuaikan 100% dengan skema Supabase)
-   const dataToSave = {
+      const dataToSave = {
         sarimbit: sarimbit || "",
-        brand: document.getElementById(`brand-${idx}`).value || "",
+        brand: document.getElementById(`brand-${idAman}`).value || "",
         total: activeData ? (Number(activeData.totalOrder) || 0) : 0, 
         close: valClose || "", 
         ready: valReady || "", 
         c1: valC1 || "",
         c2: valC2 || "",
-        Lunas: valLunas || "", // KEMBALIKAN KE L BESAR sesuai skema database
+        Lunas: valLunas || "",
         dp: dpBersih,
-        bayar: bayarBersih, // HARUS BERUPA ANGKA KARENA DB NUMERIC (Hapus .toString)
-        statusKirim: document.getElementById(`kirim-${idx}`).value || "",
-        statusAlamat: document.getElementById(`alamat-${idx}`).value || "",
-        isarchived: statusArsipAsli, // Mengunci nilai asli agar tidak berubah menjadi false saat diedit
-        isPrinted: document.getElementById(`print-${idx}`).checked,
-        isInformed: document.getElementById(`info-${idx}`).checked,
-        omset: activeData ? (Number(activeData.omset) || 0) : 0, // MENGUNCI OMSET AGAR TIDAK HANGUS MENJADI 0
+        bayar: bayarBersih,
+        statusKirim: document.getElementById(`kirim-${idAman}`).value || "",
+        statusAlamat: document.getElementById(`alamat-${idAman}`).value || "",
+        isarchived: statusArsipAsli,
+        isPrinted: document.getElementById(`print-${idAman}`).checked,
+        isInformed: document.getElementById(`info-${idAman}`).checked,
+        omset: activeData ? (Number(activeData.omset) || 0) : 0,
         updated_at: new Date().toISOString()
       };
 
@@ -697,21 +905,17 @@
       
       try {
         const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
-        
-        // Penguncian ID agar tidak undefined (Prioritas 1: Cloud, Prioritas 2: Lokal)
         let idValid = (activeData && activeData.id) ? activeData.id : (existingData ? existingData.id : null);
         let resServer = null;
 
         if (navigator.onLine) {
             if (idValid) {
-                // Update Data (PATCH) - Pastikan ID tidak undefined
                 resServer = await supabaseFetch(`/rest/v1/pembukuan?id=eq.${idValid}`, { 
                     method: 'PATCH', 
                     headers: { "Content-Type": "application/json", "Prefer": "return=representation" },
                     body: JSON.stringify(dataToSave) 
                 });
             } else {
-                // Bikin Data Baru (POST)
                 dataToSave.id = Date.now() + Math.floor(Math.random() * 1000);
                 idValid = dataToSave.id;
                 resServer = await supabaseFetch('/rest/v1/pembukuan', { 
@@ -720,25 +924,16 @@
                     body: JSON.stringify([dataToSave]) 
                 });
             }
-
-            // Jika gagal tembus Supabase, langsung lemparkan ke error lokal
-            if (resServer === null || resServer.error) {
-                throw new Error("Ditolak oleh Server Supabase");
-            }
+            if (resServer === null || resServer.error) throw new Error("Ditolak Server");
         } else {
-            // Jika Offline, buat ID baru untuk ditampung di lokal
             if (!idValid) {
                 dataToSave.id = Date.now() + Math.floor(Math.random() * 1000);
                 idValid = dataToSave.id;
             }
         }
 
-        // 3. SIMPAN KE DATABASE LOKAL (DEXIE)
-        dataToSave.id = idValid; // Pasang ID yang valid ke dalam data sebelum disimpan ke lokal
-        
-        // Pakai .put() (Upsert) agar lebih stabil dan tidak crash saat koneksi terputus
+        dataToSave.id = idValid; 
         await dbLokal.pembukuan.put(dataToSave);
-        catatLog(existingData ? 'UPDATE' : 'CREATE', 'PEMBUKUAN', `Simpan pembukuan sarimbit: ${sarimbit}`);
 
         if (loader) loader.classList.add('hidden');
         if (check) {
@@ -746,11 +941,7 @@
           setTimeout(() => { check.classList.add('hidden'); if (idle) idle.classList.remove('hidden'); }, 2500);
         }
         
-        // Panggil notifikasi eksplisit agar admin yakin data sudah terkunci
-        showToast(`✅ Data ${sarimbit} otomatis tersimpan!`);
-        
       } catch (e) {
-        console.error("Gagal simpan:", e);
         if (loader) loader.classList.add('hidden');
         if (idle) idle.classList.remove('hidden');
         showToast("⚠️ Gagal ke Cloud. Pastikan internet stabil!");
@@ -759,14 +950,48 @@
 
     function filterTable() {
       const sQuery = document.getElementById('filter-sarimbit').value.toLowerCase();
-      const bQuery = document.getElementById('filter-pusat').value.toLowerCase();
-      document.querySelectorAll('.item-row').forEach(row => {
-        const sName = row.querySelector('.sarimbit-name').innerText.toLowerCase();
-        const bName = row.querySelector('.brand-name').value.toLowerCase();
-        row.style.display = (sName.includes(sQuery) && bName.includes(bQuery)) ? "" : "none";
-      });
-    }
+      
+      const filterPusatEl = document.getElementById('filter-pusat');
+      const bQuery = filterPusatEl ? filterPusatEl.value.toLowerCase() : "";
+      
+      const filterStatusArsipEl = document.getElementById('filter-status-arsip');
+      const statusArsipQuery = filterStatusArsipEl ? filterStatusArsipEl.value : "semua";
+      
+      const pembatasArsip = document.getElementById('garis-pembatas-arsip');
+      let jumlahArsipTerlihat = 0;
 
+      document.querySelectorAll('.item-row').forEach(row => {
+        const elSarimbit = row.querySelector('.sarimbit-name');
+        const sName = elSarimbit ? elSarimbit.innerText.toLowerCase() : "";
+        
+        const elBrand = row.querySelector('.brand-name');
+        const bName = elBrand ? elBrand.value.toLowerCase() : "";
+        
+        const isArsip = sName.includes('arsip');
+        const cocokS = sName.includes(sQuery);
+        const cocokB = (bQuery === "") || (bName === bQuery);
+        const cocokTeks = cocokS && cocokB;
+        
+        let cocokStatus = true;
+        if (statusArsipQuery === "aktif" && isArsip) cocokStatus = false;
+        if (statusArsipQuery === "arsip" && !isArsip) cocokStatus = false;
+
+        if (cocokTeks && cocokStatus) {
+            row.style.display = "";
+            if (isArsip) jumlahArsipTerlihat++;
+        } else {
+            row.style.display = "none";
+        }
+      });
+
+      if (pembatasArsip) {
+          if (jumlahArsipTerlihat === 0 || statusArsipQuery === "aktif") {
+              pembatasArsip.style.display = "none";
+          } else {
+              pembatasArsip.style.display = "";
+          }
+      }
+    }
     function exportToExcel() {
       const rows = document.querySelectorAll('.item-row');
       const dataForExcel = [["No", "Koleksi Sarimbit", "Nama Pusat", "Total Pcs", "Tgl Close", "Tgl Ready", "Jadwal C1", "Jadwal C2", "Pelunasan", "Nominal DP", "Nominal Pelunasan", "Status Kirim", "Status Alamat", "Sudah Diprint", "Info Lunas"]];
@@ -843,6 +1068,17 @@
         
         catatLog('DOWNLOAD', 'PEMBUKUAN', `Mengunduh Laporan PDF Dashboard Pembukuan`);
       } catch (e) { alert("Gagal membuat PDF: " + e.message); }
+    }
+
+    // FUNGSI TRANSISI PINDAH FILE HTML
+    function pindahHalaman(url) {
+        // Putar animasi layar memudar ke belakang (zoom out blur)
+        document.body.classList.add('fade-keluar');
+        
+        // Tunggu 0.45 detik hingga animasi hampir selesai, lalu arahkan ke URL baru
+        setTimeout(() => {
+            window.location.href = url;
+        }, 450);
     }
   </script>
 </body>

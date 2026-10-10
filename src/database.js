@@ -184,7 +184,7 @@ window.DatabaseAPI = {
             await dbLokal.orders.bulkPut(dataWithId); 
             if (await cekInternetAktif()) {
                 const payloadCloud = dataWithId.map(item => { const { syncstatus, ...dataBersih } = item; return dataBersih; });
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?on_conflict=id`, {
                     method: "POST",
                     headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates", "x-sacha-token": tokenPerangkat },
                     body: JSON.stringify(payloadCloud)
@@ -210,7 +210,7 @@ window.DatabaseAPI = {
                 });
                 for (let i = 0; i < payloadCloud.length; i += 100) {
                     const chunk = payloadCloud.slice(i, i + 100);
-                    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, { 
+                    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?on_conflict=id`, { 
                         method: "POST", headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates", "x-sacha-token": tokenPerangkat }, body: JSON.stringify(chunk) 
                     });
                     if (res.ok) await dbLokal.orders.where('id').anyOf(chunk.map(d => d.id)).modify({ syncstatus: 1 });
@@ -255,7 +255,7 @@ window.DatabaseAPI = {
             await dbLokal.master.bulkPut(dataArray); 
             if(await cekInternetAktif()) {
                 for (let i = 0; i < dataArray.length; i += 500) {
-                    await supabaseFetch('/rest/v1/master', { method: "POST", headers: { "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify(dataArray.slice(i, i + 500)) });
+                    await supabaseFetch('/rest/v1/master?on_conflict=id', { method: "POST", headers: { "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify(dataArray.slice(i, i + 500)) });
                 }
             }
             if (onSuccess) onSuccess();
@@ -484,9 +484,8 @@ async function inisialisasiSupabaseRealtime() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'master' }, (payload) => {
             let pesan = "Perubahan pada Katalog Master";
             const namaBrg = payload.new?.barang || payload.old?.barang || "Barang";
-            
             if (payload.eventType === 'INSERT') {
-                pesan = `Katalog Baru: ${payload.new?.sarimbit} - ${namaBrg} ditambahkan`;
+            pesan = `Katalog Baru: ${payload.new?.sarimbit} ${namaBrg} ditambahkan`;
             } else if (payload.eventType === 'UPDATE') {
                 pesan = `Update Katalog: Detail/Harga ${namaBrg} diperbarui`;
             } else if (payload.eventType === 'DELETE') {
@@ -539,28 +538,31 @@ async function inisialisasiSupabaseRealtime() {
 
         function jalankanPenyegaranLayarWindows() {
             if (typeof DatabaseAPI !== 'undefined') {
-                DatabaseAPI.getAllData((res) => {
-                    const scrollSlip = document.getElementById('page-slip') ? document.getElementById('page-slip').scrollTop : 0;
-                    const scrollRekap = document.getElementById('page-rekap') ? document.getElementById('page-rekap').scrollTop : 0;
-                    
-                    if (typeof masterData !== 'undefined') masterData = res.master || []; 
-                    if (typeof orderData !== 'undefined') orderData = res.orders || [];
-                    
-                    if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
-                    if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
-                    if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
-                    if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
-
-                    if (document.getElementById('page-slip')) document.getElementById('page-slip').scrollTop = scrollSlip;
-                    if (document.getElementById('page-rekap')) document.getElementById('page-rekap').scrollTop = scrollRekap;
-                    
-                    if (typeof showToast === 'function') {
-                        // Notifikasi sukses setelah sinkronisasi selesai
-                        showToast(`⚡ ${window.lastSyncMessage || "Ada perubahan data"}. Layar telah diperbarui!`);
-                    }
-                });
+            DatabaseAPI.getAllData((res) => {
+            // REVISI: Tangkap posisi scroll dari elemen <main> yang merupakan wadah gulir sesungguhnya
+            const mainElement = document.querySelector('main');
+            const posisiScrollAsli = mainElement ? mainElement.scrollTop : 0;
+            
+            if (typeof masterData !== 'undefined') masterData = res.master || []; 
+            if (typeof orderData !== 'undefined') orderData = res.orders || [];
+            if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
+            if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
+            if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
+            if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
+            
+            // KEMBALIKAN POSISI LAYAR AGAR TIDAK LOMPAT KE ATAS
+            if (mainElement) {
+            setTimeout(() => {
+            mainElement.scrollTop = posisiScrollAsli;
+            }, 20);
             }
-        }
+            
+            if (typeof showToast === 'function') {
+            showToast(`⚡ ${window.lastSyncMessage || "Ada perubahan data"}. Layar telah diperbarui!`);
+            }
+            });
+            }
+            }
     } catch (e) {
         console.error("Gagal menginisialisasi Realtime:", e);
     }

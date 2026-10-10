@@ -203,30 +203,36 @@
         margin: 6px 16px;
         border-radius: 12px;
         width: calc(100% - 32px);
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
     }
     .nav-btn:hover:not(.active-link) {
-        background-color: rgba(241, 245, 249, 0.8);
+        background-color: rgba(248, 250, 252, 0.8);
         transform: translateX(4px);
     }
     .active-link { 
         background: #ffffff;
-        color: #2563eb !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 4px 0 0 #2563eb; 
-        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        color: #1e293b !important;
+        /* Cahaya pendar (glow) dipindahkan melingkupi seluruh tombol menu luar */
+        box-shadow: 0 0 20px 2px rgba(129, 140, 248, 0.25), inset 4px 0 0 #818cf8 !important; 
+        border: 1px solid rgba(129, 140, 248, 0.3) !important;
         font-weight: 700;
     }
-    .active-link i { color: #2563eb !important; }
+    .active-link .icon-box { 
+        background: linear-gradient(135deg, #818cf8, #a78bfa) !important; 
+        color: #ffffff !important; 
+        /* Matikan cahaya yang sebelumnya mengelilingi kotak ikon kecil */
+        box-shadow: none !important; 
+    }
 
     .page { display: none; }
     .page.active { 
         display: block; 
-        animation: pageSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        animation: pageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
     }
-    @keyframes pageSlideUp { 
-        from { opacity: 0; transform: translateY(20px); } 
+    @keyframes pageSlideIn { 
+        from { opacity: 0; transform: translateY(15px); } 
         to { opacity: 1; transform: translateY(0); } 
     }
 
@@ -278,9 +284,9 @@
 
   <div class="flex flex-1 overflow-hidden relative">
 
-    <aside id="main-sidebar" class="fixed inset-y-0 left-0 z-50 w-72 glass flex flex-col h-full transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static shrink-0 border-r border-slate-200/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] md:rounded-none rounded-r-[2rem]">
+    <aside id="main-sidebar" class="fixed inset-y-0 left-0 z-50 w-72 glass flex flex-col h-full transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static shrink-0 border-r border-slate-200/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] md:rounded-none rounded-r-[2rem] overflow-hidden">
       
-        <div class="px-10 pt-4 pb-8 border-b border-slate-200/50 flex justify-between items-center bg-white/30">
+        <div class="px-10 pt-4 pb-6 border-b border-slate-200/50 flex justify-between items-center bg-white/30 shrink-0">
             <div class="flex-1">
                 <img src="logo-toko.png" alt="Logo Toko" class="-mt-4 h-13 max-w-[180px] w-auto object-contain object-left drop-shadow-sm hover:scale-105 transition-transform duration-300">
                 
@@ -291,48 +297,49 @@
             </button>
           </div>
 
-      <nav class="flex-1 mt-6 overflow-y-auto px-2 pb-6">
+        <!-- Perbaikan overflow dan ukuran area navigasi -->
+      <nav class="flex-1 overflow-y-auto overflow-x-hidden px-2 pt-6 pb-24 relative w-full h-full">
         <div class="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Menu Utama</div>
         
-        <button onclick="switchTab('order')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold active-link" id="nav-order">
-            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500"><i class="fa-solid fa-cart-plus"></i></div>
+        <button onclick="switchTab('order')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium active-link" id="nav-order">
+            <div class="icon-box w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 transition-all duration-300"><i class="fa-solid fa-cart-plus"></i></div>
             <span>Input Order</span>
         </button>
         
-        <button onclick="switchTab('master')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold" id="nav-master">
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500"><i class="fa-solid fa-box-open"></i></div>
+        <button onclick="switchTab('master')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium" id="nav-master">
+            <div class="icon-box w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 transition-all duration-300"><i class="fa-solid fa-box-open"></i></div>
             <span>Master Barang</span>
         </button>
         
-        <button onclick="switchTab('rekap')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold" id="nav-rekap">
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500"><i class="fa-solid fa-list-check"></i></div>
+        <button onclick="switchTab('rekap')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium" id="nav-rekap">
+            <div class="icon-box w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 transition-all duration-300"><i class="fa-solid fa-list-check"></i></div>
             <span>Rekap Barang</span>
         </button>
         
-        <button onclick="switchTab('slip')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold" id="nav-slip">
-            <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500"><i class="fa-solid fa-users"></i></div>
+        <button onclick="switchTab('slip')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium" id="nav-slip">
+            <div class="icon-box w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 transition-all duration-300"><i class="fa-solid fa-users"></i></div>
             <span>Rincian Customer</span>
         </button>
 
         <div class="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mt-8 mb-3">Lainnya</div>
 
-        <a href="pembukuan.html" target="_top" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold hover:bg-orange-50/50 group border border-transparent hover:border-orange-100">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-rose-400 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform"><i class="fa-solid fa-chart-pie"></i></div>
+        <a href="pembukuan.html" target="_top" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium hover:bg-orange-50/50 group border border-transparent hover:border-orange-100">
+          <div class="icon-box w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center transition-all duration-300 group-hover:scale-105"><i class="fa-solid fa-chart-pie"></i></div>
           <span>Pembukuan</span>
         </a>
 
        <!-- PENAMBAHAN MENU AUDIT DATA GANDA -->
-       <a href="datadouble.html" target="_top" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold mt-2 hover:bg-rose-50/50 group border border-transparent hover:border-rose-100" id="nav-datadouble">
-        <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-clone"></i></div>
+       <a href="datadouble.html" target="_top" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium mt-1 hover:bg-rose-50/50 group border border-transparent hover:border-rose-100" id="nav-datadouble">
+        <div class="icon-box w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 transition-all duration-300 group-hover:scale-105"><i class="fa-solid fa-clone"></i></div>
         <span>Audit Data Ganda</span>
     </a>
 <!-- MENU BARU: DASHBOARD ANALITIK SUMBER -->
-<button onclick="switchTab('dashboardsumber')" class="nav-btn w-full flex text-left items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold mt-2 hover:bg-violet-50/50 group border border-transparent hover:border-violet-100" id="nav-dashboardsumber">
-    <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600 group-hover:scale-110 transition-transform"><i class="fa-solid fa-chart-pie"></i></div>
+<button onclick="switchTab('dashboardsumber')" class="nav-btn w-full flex text-left items-center gap-4 px-5 py-3.5 text-slate-600 font-medium mt-1 hover:bg-violet-50/50 group border border-transparent hover:border-violet-100" id="nav-dashboardsumber">
+    <div class="icon-box w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 transition-all duration-300"><i class="fa-solid fa-chart-pie"></i></div>
     <span>Sumber</span>
 </button>
-        <button onclick="switchTab('pengaturan')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-semibold mt-2" id="nav-pengaturan">
-            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-gear"></i></div>
+        <button onclick="switchTab('pengaturan')" class="nav-btn flex items-center gap-4 px-5 py-3.5 text-slate-600 font-medium mt-1" id="nav-pengaturan">
+            <div class="icon-box w-8 h-8 rounded-lg bg-slate-200 flex items-center justify-center text-slate-600 transition-all duration-300"><i class="fa-solid fa-gear"></i></div>
             <span>Pengaturan</span>
         </button>
         <!-- WIDGET KAPASITAS SERVER -->
@@ -363,157 +370,153 @@
             <span id="toast-msg" class="text-sm md:text-base font-semibold tracking-wide"></span>
         </div>
 
-    <!-- HALAMAN: INPUT ORDER -->
-    <!-- HALAMAN: INPUT ORDER -->
-    <div id="page-order" class="page active space-y-6 w-full">
-      <div class="mb-8">
-          <h2 class="text-3xl font-black tracking-tight text-slate-800">Formulir Pesanan</h2>
-      </div>
-      
-      <form onsubmit="handleOrderSubmit(event)" class="space-y-6">
-        <input type="hidden" id="o-tanggal-asli">
-        <!-- PENAMPUNG DATA KEUANGAN LAMA AGAR TIDAK HANGUS SAAT EDIT -->
-        <input type="hidden" id="o-cicilan2">
-        <input type="hidden" id="o-cicilan3">
-        <input type="hidden" id="o-ongkir">
-        <input type="hidden" id="o-resi">
-    
-        <div class="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/60 p-8 md:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-            
-            <div class="absolute -top-16 -right-16 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
-    
-            <div class="relative z-10 space-y-8">
-                
-                <div>
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
-                            <i class="fa-solid fa-file-invoice"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-black text-slate-800 tracking-tight">Data Pengiriman & Keuangan</h3>
-                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lengkapi detail pelanggan dan transaksi</p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white/50 p-6 rounded-2xl border border-white/50 shadow-sm space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Nama Penerima</label>
-                                <input type="text" id="o-nama" placeholder="Ketik nama lengkap..." required class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-white border border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Nomor WhatsApp</label>
-                                <input type="text" id="o-telp" placeholder="0812..." class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-white border border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Alamat Pengiriman</label>
-                            <textarea id="o-alamat" placeholder="Ketik alamat lengkap beserta RT/RW dan Kodepos..." class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-white border border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none h-24 resize-none transition-all"></textarea>
-                        </div>
-                        
-                        <div class="pt-4 border-t border-indigo-200/30">
-                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Kiri: Asal Orderan -->
-                            <div>
-                                <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Asal Orderan (Wajib)</label>
-                                <select id="o-sumber" required class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-indigo-50/50 border border-indigo-200 shadow-sm outline-none cursor-pointer focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                                    <option value="">-- Pilih Sumber --</option>
-                                    <option value="WhatsApp">🟢 WhatsApp</option>
-                                    <option value="TikTok">🎵 TikTok</option>
-                                    <option value="Instagram">📷 Instagram</option>
-                                    <option value="Reseller">🤝 Reseller</option>
-                                </select>
-                            </div>
-
-                            <!-- Kanan: Asal Toko -->
-                            <div>
-                                <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Asal Toko</label>
-                                <select id="o-toko" required class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-white border border-slate-200 shadow-sm outline-none cursor-pointer focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                                    <option value="">-- Pilih Toko --</option>
-                                    <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
-                                    <option value="MASARA.HIJAB">MASARA.HIJAB</option>
-                                </select>
-                            </div>
-
-                            <!-- Kiri: Kurir Ekspedisi -->
-                            <div>
-                                <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Kurir Ekspedisi</label>
-                                <select id="o-ekspedisi" class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-white border border-slate-200 shadow-sm outline-none cursor-pointer focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                                    <option value="">-- Pilih Ekspedisi --</option>
-                                    <option value="JNE">JNE</option>
-                                    <option value="JNT">JNT</option>
-                                    <option value="POS">POS</option>
-                                    <option value="LION">LION</option>
-                                    <option value="Ambil Sendiri">Ambil Sendiri</option>
-                                </select>
-                            </div>
-
-                            <!-- Kanan: DP / Pembayaran Awal -->
-                            <div>
-                                <label class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 block">DP / Pembayaran Awal</label>
-                                <input type="number" id="o-cicilan1" placeholder="Rp 0" class="w-full px-4 py-3.5 rounded-2xl text-base font-black text-blue-700 bg-blue-50/50 border border-blue-200 shadow-sm focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 outline-none text-right transition-all">
-                            </div>
-                        </div>
-
-                        <!-- Bawah: Blok Diskon -->
-                        <div class="mt-6 pt-6 border-t border-slate-100">
-                            <div class="flex gap-3 md:w-1/2">
-                                <div class="w-1/3">
-                                    <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Diskon</label>
-                                    <select id="o-tipe-diskon" onchange="calculateOrderTotal()" class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-700 bg-white border border-slate-200 shadow-sm outline-none text-center focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
-                                        <option value="none">Diskon</option>
-                                        <option value="persen">%</option>
-                                        <option value="angka">Rp</option>
-                                    </select>
-                                </div>
-                                <div class="w-2/3">
-                                    <label class="text-[10px] font-bold text-indigo-800/70 uppercase tracking-widest mb-2 block">Nilai Diskon</label>
-                                    <input type="number" id="o-nilai-diskon" oninput="calculateOrderTotal()" placeholder="0" class="w-full px-4 py-3.5 rounded-2xl text-sm font-black text-rose-600 bg-rose-50/50 border border-rose-200 shadow-sm focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 outline-none text-right transition-all">
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-    
-                <div class="border-t border-indigo-200/30 pt-8">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
-                            <i class="fa-solid fa-cart-shopping"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-black text-slate-800 tracking-tight">Daftar Belanja</h3>
-                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pilih produk dan tentukan jumlah</p>
-                        </div>
-                    </div>
-    
-                    <div id="order-items-list" class="space-y-4"></div>
-                    
-                    <button type="button" onclick="addOrderRow()" class="w-full py-4 border-2 border-dashed border-slate-300 rounded-2xl text-slate-500 font-bold text-sm hover:bg-white hover:text-indigo-600 hover:border-indigo-300 transition-all active:scale-[0.99] flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus"></i> TAMBAH BARANG LAIN
-                    </button>
-                </div>
-    
-                <div class="pt-4 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-indigo-200/30">
-                    <div class="w-full md:w-auto bg-white/50 p-4 rounded-2xl border border-white/50 flex justify-center items-center shadow-sm">
-                        <div class="px-3 text-center min-w-[70px]">
-                            <span class="font-bold text-slate-400 uppercase tracking-widest text-[9px] block mb-1">Total Pcs</span>
-                            <span id="total-pcs-order" class="text-2xl font-black text-indigo-500 leading-none">0</span>
-                        </div>
-                        <div class="h-10 w-px bg-slate-300 mx-2"></div> 
-                        <div class="pl-3 pr-2 text-left">
-                            <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px] block mb-1">Total Belanja</span>
-                            <span id="grand-total" class="text-3xl font-black text-blue-600 leading-none">Rp 0</span>
-                        </div>
-                    </div>
-                    <button type="submit" id="btn-save-order" class="w-full md:w-auto flex-1 bg-indigo-600 text-white py-4 px-8 rounded-2xl font-black hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-500/30 text-base tracking-wide">
-                        <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN
-                    </button>
-                </div>
-            </div>
-        </div>
-    </form>
+   <!-- HALAMAN: INPUT ORDER -->
+   <div id="page-order" class="page active space-y-6 w-full">
+    <div class="mb-8">
+        <h2 class="text-3xl font-black tracking-tight text-slate-800">Formulir Pesanan</h2>
     </div>
+    
+    <form onsubmit="handleOrderSubmit(event)" class="space-y-6">
+      <input type="hidden" id="o-tanggal-asli">
+      <!-- PENAMPUNG DATA KEUANGAN LAMA AGAR TIDAK HANGUS SAAT EDIT -->
+      <input type="hidden" id="o-cicilan2">
+      <input type="hidden" id="o-cicilan3">
+      <input type="hidden" id="o-ongkir">
+      <input type="hidden" id="o-resi">
+  
+      <div class="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/60 p-8 md:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+          
+          <div class="absolute -top-16 -right-16 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+  
+          <div class="relative z-10 space-y-8">
+              
+              <!-- BAGIAN 1: PENGIRIMAN & KEUANGAN -->
+              <div>
+                  <div class="flex items-center gap-4 mb-6">
+                      <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
+                          <i class="fa-solid fa-file-invoice"></i>
+                      </div>
+                      <div>
+                          <h3 class="text-lg font-black text-slate-800 tracking-tight">Data Pengiriman & Keuangan</h3>
+                          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lengkapi detail pelanggan dan transaksi</p>
+                      </div>
+                  </div>
+                  
+                  <div class="bg-white/50 p-6 rounded-2xl border border-white/50 shadow-sm space-y-6">
+                      
+                      <!-- Baris 1: Kontak Pribadi -->
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nama Penerima</label>
+                              <input type="text" id="o-nama" placeholder="Ketik nama lengkap..." required class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
+                          </div>
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nomor WhatsApp</label>
+                              <input type="text" id="o-telp" placeholder="0812..." class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
+                          </div>
+                      </div>
+                      
+                      <!-- Baris 2: Tujuan Pengiriman -->
+                      <div>
+                          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Alamat Pengiriman</label>
+                          <textarea id="o-alamat" placeholder="Ketik alamat lengkap beserta RT/RW dan Kodepos..." class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none h-24 resize-none transition-all"></textarea>
+                      </div>
+                      
+                      <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom) -->
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Kurir Ekspedisi</label>
+                              <select id="o-ekspedisi" class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer transition-all">
+                                  <option value="">-- Pilih Ekspedisi --</option>
+                                  <option value="JNE">JNE</option>
+                                  <option value="JNT">JNT</option>
+                                  <option value="POS">POS</option>
+                                  <option value="LION">LION</option>
+                                  <option value="Ambil Sendiri">Ambil Sendiri</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Asal Orderan (Wajib)</label>
+                              <select id="o-sumber" required class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer transition-all">
+                                  <option value="">-- Pilih Sumber --</option>
+                                  <option value="WhatsApp">🟢 WhatsApp</option>
+                                  <option value="TikTok">🎵 TikTok</option>
+                                  <option value="Instagram">📷 Instagram</option>
+                                  <option value="Reseller">🤝 Reseller</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Asal Toko</label>
+                              <select id="o-toko" required class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer transition-all">
+                                  <option value="">-- Pilih Toko --</option>
+                                  <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
+                                  <option value="MASARA.HIJAB">MASARA.HIJAB</option>
+                              </select>
+                          </div>
+                      </div>
+
+                      <!-- Baris 4: Keuangan (Diskon & DP digabung 1 baris) -->
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Tipe Diskon</label>
+                              <select id="o-tipe-diskon" onchange="calculateOrderTotal()" class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none text-center cursor-pointer transition-all">
+                                  <option value="none">-- Tanpa Diskon --</option>
+                                  <option value="persen">Potongan Persen (%)</option>
+                                  <option value="angka">Potongan Tunai (Rp)</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nilai Diskon</label>
+                              <input type="number" id="o-nilai-diskon" oninput="calculateOrderTotal()" placeholder="0" class="w-full px-4 py-3.5 rounded-2xl text-sm font-black text-rose-600 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none text-right transition-all">
+                          </div>
+                          <div>
+                              <label class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 block">DP / Pembayaran Awal</label>
+                              <input type="number" id="o-cicilan1" placeholder="Rp 0" class="w-full px-4 py-3.5 rounded-2xl text-base font-black text-blue-700 bg-blue-50 border border-blue-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none text-right transition-all">
+                          </div>
+                      </div>
+                  </div> <!-- Penutup kotak bg-white/50 (Data Pengiriman & Keuangan) -->
+              </div>
+
+              <!-- BAGIAN 2: DAFTAR BELANJA -->
+              <div class="border-t border-indigo-200/30 pt-8">
+                  <div class="flex items-center gap-4 mb-6">
+                      <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
+                          <i class="fa-solid fa-cart-shopping"></i>
+                      </div>
+                      <div>
+                          <h3 class="text-lg font-black text-slate-800 tracking-tight">Daftar Belanja</h3>
+                          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pilih produk dan tentukan jumlah</p>
+                      </div>
+                  </div>
+  
+                  <div id="order-items-list" class="space-y-4"></div>
+                  
+                  <button type="button" onclick="addOrderRow()" class="w-full py-4 border-2 border-dashed border-slate-300 rounded-2xl text-slate-500 font-bold text-sm hover:bg-white hover:text-indigo-600 hover:border-indigo-300 transition-all active:scale-[0.99] flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-plus"></i> TAMBAH BARANG LAIN
+                  </button>
+              </div>
+  
+              <!-- BAGIAN 3: TOTAL & SUBMIT -->
+              <div class="pt-4 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-indigo-200/30">
+                  <div class="w-full md:w-auto bg-white/50 p-4 rounded-2xl border border-white/50 flex justify-center items-center shadow-sm">
+                      <div class="px-3 text-center min-w-[70px]">
+                          <span class="font-bold text-slate-400 uppercase tracking-widest text-[9px] block mb-1">Total Pcs</span>
+                          <span id="total-pcs-order" class="text-2xl font-black text-indigo-500 leading-none">0</span>
+                      </div>
+                      <div class="h-10 w-px bg-slate-300 mx-2"></div> 
+                      <div class="pl-3 pr-2 text-left">
+                          <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px] block mb-1">Total Belanja</span>
+                          <span id="grand-total" class="text-3xl font-black text-blue-600 leading-none">Rp 0</span>
+                      </div>
+                  </div>
+                  <button type="submit" id="btn-save-order" class="w-full md:w-auto flex-1 bg-indigo-600 text-white py-4 px-8 rounded-2xl font-black hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-500/30 text-base tracking-wide">
+                      <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN
+                  </button>
+              </div>
+          </div> <!-- Penutup relative z-10 space-y-8 -->
+      </div> <!-- Penutup relative overflow-hidden bg-gradient... -->
+  </form>
+  </div>
    <!-- HALAMAN: MASTER BARANG -->
    <div id="page-master" class="page space-y-6 w-full">
       <div class="mb-8">
@@ -612,7 +615,7 @@
     </div>
 
     <!-- HALAMAN: REKAP BARANG -->
-    <div id="page-rekap" class="page space-y-6 max-w-7xl mx-auto">
+    <div id="page-rekap" class="page space-y-6 max-w-7xl mx-auto w-full">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-slate-200 pb-5">
             <div>
                 <h2 class="text-3xl font-black tracking-tight text-slate-800">Rekapitulasi Order</h2>
@@ -625,36 +628,39 @@
             </div>
           </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-        <div class="md:col-span-4 space-y-4">
-            <div class="glass p-5 rounded-3xl shadow-sm border border-slate-200">
-                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Rentang Waktu</h4>
-                <div class="space-y-3">
+      <!-- REVISI GRID: Panel Kiri 3 Porsi (Lebih Ramping), Panel Kanan 9 Porsi (Lebih Lega) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+        
+        <!-- PANEL KIRI (FILTER) -->
+        <div class="lg:col-span-3 space-y-5">
+            <div class="glass p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 bg-white/60">
+                <h4 class="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-regular fa-calendar text-blue-500"></i> Rentang Waktu</h4>
+                <div class="space-y-4">
                   <div>
-                      <label class="text-[10px] font-semibold text-slate-600 block mb-1">Dari Tanggal</label>
-                      <input type="date" id="filter-tgl-mulai-rekap" onchange="updateRekapOptions(); renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700">
+                      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Dari Tanggal</label>
+                      <input type="date" id="filter-tgl-mulai-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer shadow-inner">
                   </div>
                   <div>
-                      <label class="text-[10px] font-semibold text-slate-600 block mb-1">Sampai Tanggal</label>
-                      <input type="date" id="filter-tgl-akhir-rekap" onchange="updateRekapOptions(); renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700">
+                      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Sampai Tanggal</label>
+                      <input type="date" id="filter-tgl-akhir-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer shadow-inner">
                   </div>
                 </div>
             </div>
             
-            <div class="glass p-5 rounded-3xl shadow-sm border border-slate-200">
-                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Filter Spesifik</h4>
-                <div class="space-y-3">
-                  <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700 cursor-pointer"><option value="">Semua Sarimbit</option></select>
-                  <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700 cursor-pointer"><option value="">Semua Varian</option></select>
-                  <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700 cursor-pointer"><option value="">Semua Nama Barang</option></select>
-                  <select id="filter-size-rekap" onchange="renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700 cursor-pointer"><option value="">Semua Size</option></select>
+            <div class="glass p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 bg-white/60">
+                <h4 class="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</h4>
+                <div class="space-y-3.5">
+                  <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-inner"><option value="">Semua Sarimbit</option></select>
+                  <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-inner"><option value="">Semua Varian</option></select>
+                  <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-inner"><option value="">Semua Nama Barang</option></select>
+                  <select id="filter-size-rekap" onchange="renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-inner"><option value="">Semua Size</option></select>
                 </div>
             </div>
 
             <!-- BLOK BARU: STATUS SETORAN PUSAT -->
-            <div class="glass p-5 rounded-3xl shadow-sm border border-slate-200">
-                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Status Pusat</h4>
-                <select id="export-rekap-filter" onchange="renderRekap()" class="glass-input w-full p-2.5 rounded-lg text-xs font-bold text-slate-700 cursor-pointer focus:border-blue-400">
+            <div class="glass p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 bg-white/60">
+                <h4 class="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-server text-emerald-500"></i> Status Pusat</h4>
+                <select id="export-rekap-filter" onchange="renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10 transition-all cursor-pointer shadow-inner">
                     <option value="semua">Semua Status (Total)</option>
                     <option value="disetor">Hanya Sudah Disetor</option>
                     <option value="antre">Hanya Antre (Belum Disetor)</option>
@@ -662,36 +668,42 @@
             </div>
         </div>
 
-          <div class="md:col-span-8 flex flex-col gap-4">
-              <div class="bg-blue-600 p-6 rounded-3xl shadow-[0_8px_30px_rgba(37,99,235,0.2)] flex items-center justify-between border border-blue-500 relative overflow-hidden">
-                  <div class="absolute right-0 top-0 opacity-10 text-9xl -mt-4 -mr-4 pointer-events-none"><i class="fa-solid fa-chart-bar"></i></div>
+          <!-- PANEL KANAN (TABEL & TOTAL) -->
+          <div class="lg:col-span-9 flex flex-col gap-6">
+              
+              <!-- REVISI WIDGET TOTAL: Menggunakan gradien halus dan efek kedalaman -->
+              <div class="bg-gradient-to-br from-blue-500 via-indigo-500 to-indigo-600 p-6 md:p-8 rounded-[2rem] shadow-xl shadow-indigo-500/20 flex items-center justify-between border border-white/20 relative overflow-hidden">
+                  <div class="absolute right-0 top-0 opacity-10 text-9xl -mt-6 -mr-4 pointer-events-none"><i class="fa-solid fa-chart-pie"></i></div>
+                  <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-2xl pointer-events-none"></div>
+                  
                   <div class="relative z-10">
-                      <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Total Kuantitas Filter</p>
-                      <div class="flex items-baseline gap-2">
-                          <h3 id="total-qty-rekap" class="text-5xl font-black text-white leading-none">0</h3>
-                          <span class="text-blue-200 font-semibold text-lg">Pcs</span>
+                      <p class="text-blue-100 text-[11px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-white/70"></i> Total Kuantitas Filter</p>
+                      <div class="flex items-baseline gap-2.5">
+                          <h3 id="total-qty-rekap" class="text-5xl md:text-6xl font-black text-white leading-none tracking-tight drop-shadow-md">0</h3>
+                          <span class="text-indigo-200 font-bold text-xl">Pcs</span>
                       </div>
                   </div>
               </div>
 
-              <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/40 flex-1 flex flex-col">
+              <!-- REVISI TABEL: Header memiliki warna latar abu terang untuk memperjelas batas judul kolom -->
+              <div class="glass rounded-[2rem] overflow-hidden shadow-sm border border-slate-200/60 bg-white/60 flex-1 flex flex-col relative">
                   <div class="overflow-x-auto flex-1">
-                      <table class="w-full text-sm text-left min-w-[400px]">
-                          <thead>
-                              <tr class="text-slate-500 uppercase text-[10px] tracking-wider font-bold">
-                                  <th class="px-5 py-4 w-1/2">Koleksi & Barang</th>
-                                  <th class="px-5 py-4">Varian / Size</th>
-                                  <th class="px-5 py-4 text-center">Jumlah Qty</th>
+                      <table class="w-full text-sm text-left min-w-[500px]">
+                          <thead class="bg-slate-50/80 border-b border-slate-200">
+                              <tr class="text-slate-500 uppercase text-[10px] tracking-widest font-bold">
+                                  <th class="px-6 py-5 w-[45%]">Koleksi & Barang</th>
+                                  <th class="px-6 py-5">Varian / Size</th>
+                                  <th class="px-6 py-5 text-center">Jumlah Qty</th>
                               </tr>
                           </thead>
                           <tbody id="tbody-rekap" class="divide-y divide-slate-100"></tbody>
                       </table>
                   </div>
-                  <div id="pagination-rekap" class="border-t border-slate-100 bg-white/30 p-2"></div>
+                  <div id="pagination-rekap" class="border-t border-slate-200/60 bg-white/50 p-2 relative z-10"></div>
               </div>
           </div>
       </div>
-    </div> 
+    </div>
 
     <!-- HALAMAN: RINCIAN CUSTOMER -->
     <div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
@@ -1015,9 +1027,14 @@
                 </button>
             </div>
             
-            <div class="flex items-center bg-slate-50 border border-slate-300 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10 transition-all p-1">
-                <i class="fa-solid fa-search text-slate-400 text-lg ml-4 mr-3"></i>
-                <input type="text" id="inputPencarianBesar" onkeyup="cariProdukBesar()" placeholder="Ketik nama sarimbit, produk, warna..." class="w-full bg-transparent p-3 text-base md:text-lg font-bold text-slate-800 outline-none placeholder:text-slate-400 placeholder:font-medium">
+            <div class="flex flex-col md:flex-row gap-3">
+                <div class="flex-1 flex items-center bg-slate-50 border border-slate-300 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10 transition-all p-1">
+                    <i class="fa-solid fa-search text-slate-400 text-lg ml-4 mr-3"></i>
+                    <input type="text" id="inputPencarianBesar" onkeyup="cariProdukBesar()" placeholder="Ketik nama produk, warna..." class="w-full bg-transparent p-3 text-base md:text-lg font-bold text-slate-800 outline-none placeholder:text-slate-400 placeholder:font-medium">
+                </div>
+                <select id="filterWarnaModal" onchange="updateWarnaPencarian()" class="md:w-1/3 bg-white border border-slate-200 rounded-full px-5 py-3 text-sm font-semibold text-slate-600 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer shadow-sm">
+                    <option value="">-- Semua Warna --</option>
+                </select>
             </div>
         </div>
 
@@ -1030,18 +1047,42 @@
   </div>
 
   <script>
-    // =======================================================
+   // =======================================================
     // LOGIKA MODAL PENCARIAN & QTY STEPPER (FULL SCREEN)
     // =======================================================
     let rowAktifPencarian = null;
+    let warnaAktifPencarian = ""; // Variabel pengingat warna terakhir
 
     function bukaModalPencarian(elemenTrigger) {
         rowAktifPencarian = elemenTrigger.closest('.order-row');
         document.getElementById('modalPencarian').classList.remove('hidden');
         document.getElementById('inputPencarianBesar').value = "";
-        setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 100);
         
+        // Setup dropdown warna berdasarkan sarimbit yang dipilih pada baris
+        let filterSarimbit = "";
+        if (rowAktifPencarian) {
+            filterSarimbit = rowAktifPencarian.querySelector('.row-filter-sarimbit').value;
+        }
+        
+        const selectWarna = document.getElementById('filterWarnaModal');
+        if (masterData && masterData.length > 0) {
+            // Kumpulkan varian unik dari katalog
+            const listWarna = [...new Set(masterData.filter(m => !filterSarimbit || m.sarimbit === filterSarimbit).map(m => m.varian))].sort();
+            selectWarna.innerHTML = `<option value="">Semua Warna</option>` + listWarna.map(w => `<option value="${w}">${w}</option>`).join('');
+        } else {
+            selectWarna.innerHTML = `<option value="">Semua Warna</option>`;
+        }
+        
+        // Kembalikan ke warna yang terakhir dipilih pada modal (untuk item berikutnya)
+        selectWarna.value = warnaAktifPencarian;
+
+        setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 100);
         renderProdukModal("");
+    }
+
+    function updateWarnaPencarian() {
+        warnaAktifPencarian = document.getElementById('filterWarnaModal').value;
+        cariProdukBesar();
     }
 
     function tutupModalPencarian() {
@@ -1080,6 +1121,8 @@
 
         const hasil = masterData.filter(m => {
             if (filterSarimbit && m.sarimbit !== filterSarimbit) return false;
+            // Menambahkan saringan berdasarkan variabel warnaAktifPencarian
+            if (warnaAktifPencarian && m.varian !== warnaAktifPencarian) return false;
             const namaLengkap = `${m.pusat} ${m.sarimbit} ${m.barang} ${m.varian} ${m.size}`.toLowerCase();
             return namaLengkap.includes(query);
         }).slice(0, 300);
@@ -1361,24 +1404,37 @@
         }, 6000);
     };
 
-  // LOGIKA TAB & SIDEBAR
-  function switchTab(t) { 
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
+ // LOGIKA TAB & SIDEBAR
+ function switchTab(t) { 
+        const newActive = document.getElementById('page-'+t);
+        if (!newActive || newActive.classList.contains('active')) return;
+
+        // Reset tombol navigasi
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link')); 
-        document.getElementById('page-'+t).classList.add('active'); 
         if(document.getElementById('nav-'+t)) document.getElementById('nav-'+t).classList.add('active-link'); 
         
         const sidebar = document.getElementById('main-sidebar');
-        // Tutup sidebar otomatis di mobile setelah klik
         if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
             toggleSidebar();
         }
 
-        // Panggil fungsi render berdasarkan parameter 't'
+        // Sembunyikan semua halaman seketika agar tidak terjadi bug tumpang tindih
+        document.querySelectorAll('.page').forEach(p => {
+            p.classList.remove('active');
+        });
+        
+        // Munculkan halaman target (animasi CSS pageSlideIn otomatis berjalan)
+        newActive.classList.add('active');
+        
+        // Eksekusi render data sesuai menu
         if(t === 'master') renderMaster(); 
         if(t === 'rekap') renderRekap(); 
         if(t === 'slip') renderSlip(); 
-        if(t === 'dashboardsumber') renderDashboardSumber(); // Diperbaiki: Masuk ke dalam fungsi dan ubah tabId menjadi t
+        if(t === 'dashboardsumber') renderDashboardSumber();
+        
+        // Reset posisi scroll ke paling atas dengan aman
+        const mainElement = document.querySelector('main');
+        if(mainElement) mainElement.scrollTop = 0;
     }
     function toggleSidebar() { 
         const sidebar = document.getElementById('main-sidebar'); const overlay = document.getElementById('sidebar-overlay');
