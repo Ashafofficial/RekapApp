@@ -181,7 +181,7 @@
         transform: scale(1) translateY(-50%);
     }
     @keyframes slideMasukNotif {
-        0% { opacity: 0; transform: translate(30px, -10px) scale(0.95); }
+        0% { opacity: 0; transform: translate(30px, 15px) scale(0.95); }
         100% { opacity: 1; transform: translate(0, 0) scale(1); }
     }
     
@@ -316,8 +316,8 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
     
-   <!-- WADAH NOTIFIKASI PRODUKSI (SMART ALARM) MENGAMBANG DI POJOK KANAN -->
-   <div id="wadah-notif-produksi" class="fixed top-20 right-4 md:right-6 z-[120] flex flex-col gap-1.5 w-40 md:w-[170px] pointer-events-none"></div>
+  <!-- WADAH NOTIFIKASI PRODUKSI (SMART ALARM) MENGAMBANG DI POJOK KANAN BAWAH -->
+  <div id="wadah-notif-produksi" class="fixed bottom-8 right-4 md:right-6 z-[120] flex flex-col justify-end gap-1.5 w-40 md:w-[170px] pointer-events-none"></div>
   
     <!-- INDIKATOR SINYAL PERMANEN ANTI HANCUR (Pojok Kanan Atas) -->
     <div id="connection-banner" style="position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 10px 20px; border-radius: 12px; font-size: 11px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; background-color: #eff6ff; color: #1d4ed8;">
