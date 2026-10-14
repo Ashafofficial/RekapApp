@@ -69,14 +69,18 @@ window.DatabaseAPI = {
     getAllData: async function(onSuccess, onFailure) {
         try {
             // 1. RENDER LOKAL TERLEBIH DAHULU (INSTAN!)
-            let localMaster = await dbLokal.master.toArray();
-            let localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
-            let localPembukuan = await dbLokal.pembukuan.toArray(); 
+            let localMasterRaw = await dbLokal.master.toArray();
+            let localOrdersRaw = await dbLokal.orders.toArray();
+            let localPembukuanRaw = await dbLokal.pembukuan.toArray();
             
+            let localMaster = [...localMasterRaw];
+            let localOrders = localOrdersRaw.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true);
+            let localPembukuan = [...localPembukuanRaw]; 
+            
+            // PERCEPATAN SORTING: Waktu instan
+            localOrders.forEach(o => { o._wkt = o.tanggal ? new Date(o.tanggal).getTime() : 0; });
             localOrders.sort((a, b) => {
-                const dateA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
-                const dateB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
-                return dateA === dateB ? a.id - b.id : dateB - dateA;
+                return a._wkt === b._wkt ? a.id - b.id : b._wkt - a._wkt;
             });
             
             if (onSuccess) onSuccess({ master: localMaster, orders: localOrders, pembukuan: localPembukuan });

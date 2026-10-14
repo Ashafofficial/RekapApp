@@ -1704,14 +1704,17 @@ function switchTab(t) {
                 orderData = semuaOrder.filter(o => o.isarchived !== true && o.isArchived !== true);
 
                 if (orderData.length > 0 && masterData.length > 0) {
+                    // PERCEPATAN EKSTREM: Gunakan pemetaan Hash Map untuk mencocokkan berat gram seketika
+                    const mapBerat = new Map();
+                    masterData.forEach(m => {
+                        const key = `${String(m.sarimbit).trim().toLowerCase()}|${String(m.barang).trim().toLowerCase()}|${String(m.varian).trim().toLowerCase()}|${String(m.size).trim().toLowerCase()}`;
+                        mapBerat.set(key, m.berat);
+                    });
+
                     orderData.forEach(order => {
-                        const matchingMaster = masterData.find(m => 
-                            String(m.sarimbit).trim().toLowerCase() === String(order.sarimbit).trim().toLowerCase() && 
-                            String(m.barang).trim().toLowerCase() === String(order.barang).trim().toLowerCase() && 
-                            String(m.varian).trim().toLowerCase() === String(order.varian).trim().toLowerCase() && 
-                            String(m.size).trim().toLowerCase() === String(order.size).trim().toLowerCase()
-                        );
-                        if (matchingMaster) order.berat = matchingMaster.berat; 
+                        const key = `${String(order.sarimbit).trim().toLowerCase()}|${String(order.barang).trim().toLowerCase()}|${String(order.varian).trim().toLowerCase()}|${String(order.size).trim().toLowerCase()}`;
+                        const beratMaster = mapBerat.get(key);
+                        if (beratMaster !== undefined) order.berat = beratMaster;
                     });
                 }
                 updateGlobalFilters();
