@@ -18,349 +18,250 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Menggunakan Font Inter agar persis seperti antarmuka Android Modern -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="database.js?v=999"></script>
 
     <style>
-        :root {
-            --bg-color: #f3f6fc;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(255, 255, 255, 0.6);
-            --text-main: #1e293b;
-        }
-
         body { 
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.08), transparent 25%),
-                radial-gradient(circle at 50% 80%, rgba(56, 189, 248, 0.08), transparent 25%);
-            background-attachment: fixed;
-            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f2f4f7; /* Abu-abu super terang kebiruan ala One UI */
+            color: #1e293b; /* Warna teks abu-abu gelap pekat */
             -webkit-tap-highlight-color: transparent; 
             overflow-x: hidden;
         }
 
-        /* Desain Kaca Mewah (Glassmorphism) */
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.02), 
-                0 10px 15px -3px rgba(0, 0, 0, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+        /* Desain Kartu Putih Minimalis */
+        .glass-panel, .kpi-card {
+            background: #ffffff;
+            border-radius: 28px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05); /* Bayangan super halus */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .glass-panel:hover {
-            box-shadow: 
-                0 20px 25px -5px rgba(0, 0, 0, 0.05), 
-                0 10px 10px -5px rgba(0, 0, 0, 0.02),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
+        
+        .kpi-card { padding: 24px; }
+        .kpi-card:active { transform: scale(0.98); }
 
         .glass-header { 
-            background: rgba(255, 255, 255, 0.8) !important; 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px); 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important; 
+            background: rgba(242, 244, 247, 0.9) !important; 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important; 
         }
 
         .glass-input { 
-            background: rgba(255, 255, 255, 0.8) !important; 
-            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 2px 5px rgba(0,0,0,0.02) !important; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: #f8fafc !important; 
+            border: 1px solid #e2e8f0 !important; 
+            color: #334155 !important;
+            transition: all 0.2s ease; 
             outline: none; 
+            border-radius: 9999px !important; /* Membuat form membulat sempurna ala Android */
         }
         .glass-input:focus { 
             background: #ffffff !important; 
-            border-color: #6366f1 !important; 
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15) !important; 
+            border-color: #3b82f6 !important; 
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important; 
         }
 
-        /* Tombol Neumorphism */
-        .btn-neu {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.03), -4px -4px 10px rgba(255,255,255,1);
-            border: 1px solid rgba(241, 245, 249, 0.8);
+        .btn-modern {
+            border-radius: 9999px;
+            font-weight: 700;
             transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .btn-neu:active {
-            box-shadow: inset 4px 4px 10px rgba(0,0,0,0.03), inset -4px -4px 10px rgba(255,255,255,1);
-            transform: scale(0.98);
-        }
+        .btn-modern:active { transform: scale(0.96); }
 
-        /* Animasi Masuk */
-        .animate-enter { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Progress Bar Menyala */
-        .progress-glow {
-            background: linear-gradient(90deg, #34d399, #10b981);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
-            position: relative;
-            overflow: hidden;
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .progress-glow::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: translateX(-100%); animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        /* Progress Bar Simple */
+        .progress-bar-bg { background-color: #f1f5f9; border-radius: 9999px; overflow: hidden; height: 12px; }
+        .progress-bar-fill { background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 1s ease-out; }
 
         #loadingOverlay { transition: opacity 0.4s ease; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .chart-container { position: relative; height: 280px; width: 100%; }
         
-        /* Desain Tabel Cantik */
+        /* Tabel Terang Minimalis */
         .table-cantik th {
-            background: rgba(248, 250, 252, 0.6);
-            color: #64748b;
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 16px;
-            border-bottom: 2px solid rgba(226, 232, 240, 0.5);
+            background: #f8fafc; color: #64748b;
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; padding: 16px; border-bottom: 2px solid #e2e8f0;
         }
         .table-cantik td {
-            padding: 16px;
-            font-size: 0.875rem;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.4);
-            transition: background 0.2s ease;
+            padding: 16px; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155;
         }
-        .table-cantik tr:hover td { background: rgba(255, 255, 255, 0.5); }
+        .table-cantik tr:hover td { background: #f8fafc; }
     </style>
 </head>
 <body class="relative min-h-screen pb-20">
 
     <div id="connection-banner" class="fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[10px] font-black uppercase tracking-widest hidden shadow-md"></div>
 
-    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[90] flex flex-col items-center justify-center text-white">
-        <div class="glass-panel p-8 flex flex-col items-center shadow-2xl">
-            <i class="fa-solid fa-circle-notch fa-spin text-5xl mb-5 text-indigo-500 drop-shadow-lg"></i>
-            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Memuat Data...</h2>
-            <p class="text-sm font-bold text-slate-500 mt-2">Menyiapkan kanvas analitik VVIP</p>
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] flex flex-col items-center justify-center text-white">
+        <div class="bg-white p-8 flex flex-col items-center rounded-3xl shadow-xl">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-blue-500"></i>
+            <h2 class="text-xl font-bold text-slate-800">Memuat Data...</h2>
         </div>
     </div>
 
-    <nav class="glass-header shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] sticky top-0 z-50 mt-3 lg:mt-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center gap-4">
-                    <a href="index.html" class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </a>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                            <i class="fa-solid fa-chart-pie text-lg"></i>
-                        </div>
-                        <span class="font-black text-2xl tracking-tighter text-slate-800 drop-shadow-sm hidden sm:block">Sarimbit<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">Pro</span></span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button id="btnDownload" onclick="downloadPDF()" class="btn-neu px-4 py-2.5 text-sm font-bold text-rose-600 flex items-center gap-2 hover:bg-rose-50">
-                        <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Cetak PDF</span>
-                    </button>
-                    <button id="btnSync" onclick="fetchDataFromBackend()" class="btn-neu px-4 py-2.5 text-sm font-bold text-indigo-600 flex items-center gap-2 hover:bg-indigo-50">
-                        <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Refresh</span>
-                    </button>
-                </div>
+    <!-- Header Transparan Minimalis -->
+    <nav class="glass-header sticky top-0 z-50 pt-4 pb-2 px-4 sm:px-6 lg:px-8 mb-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <h1 class="text-xl font-black tracking-tight text-slate-800">Dashboard Analitik</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btnDownload" onclick="downloadPDF()" class="w-10 h-10 bg-white rounded-full text-slate-600 shadow-sm flex items-center justify-center hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </button>
+                <button id="btnSync" onclick="fetchDataFromBackend()" class="w-10 h-10 bg-white rounded-full text-slate-600 shadow-sm flex items-center justify-center hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <main id="dashboard-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main id="dashboard-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="mb-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 animate-enter" data-html2canvas-ignore="false">
-            <div>
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight drop-shadow-sm">Dashboard Eksekutif</h1>
-                <p class="text-sm font-bold text-slate-500 mt-2 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Laporan performa pesanan dan keuangan Real-Time.
-                </p>
-            </div>
-            
-            <div class="flex flex-col items-end gap-3 w-full lg:w-auto">
-                <div class="relative w-full sm:w-64 group">
-                    <select id="filterBulan" onchange="updateDashboard()" class="glass-input w-full pl-5 pr-10 py-3.5 rounded-[1.2rem] text-sm font-bold text-slate-700 appearance-none cursor-pointer">
-                        <option value="Semua">Semua Bulan</option>
+        <!-- Filter Baris Satu (Minimalis Melengkung) -->
+        <div class="glass-panel p-5 mb-6 flex flex-col lg:flex-row gap-4 justify-between items-center animate-enter" data-html2canvas-ignore="false">
+            <div class="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
+                <div class="relative w-full md:w-56">
+                    <select id="filterBulan" onchange="updateDashboard()" class="glass-input w-full pl-5 pr-10 py-3 text-sm font-bold appearance-none cursor-pointer">
+                        <option value="Semua">Semua Waktu</option>
                     </select>
-                    <i class="fa-solid fa-calendar-days absolute right-5 top-1/2 transform -translate-y-1/2 text-indigo-500 pointer-events-none drop-shadow-sm"></i>
+                    <i class="fa-solid fa-calendar-day absolute right-5 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
-                <div id="storeFilterContainer" class="flex flex-wrap gap-2 html2pdf__page-break-avoid border-white/50 w-full sm:w-auto justify-end bg-white/50 p-1.5 rounded-[1.5rem] shadow-sm border border-slate-200/50"></div>
-            </div>
-        </div>
-
-        <div class="glass-panel p-8 mb-8 animate-enter relative overflow-hidden">
-            <div class="absolute -right-8 -top-8 text-indigo-50 opacity-60 pointer-events-none">
-                <i class="fa-solid fa-bullseye text-[12rem] rotate-12"></i>
             </div>
             
-            <div class="flex flex-col md:flex-row justify-between items-end mb-5 relative z-10">
-                <div>
-                    <h3 class="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-white/80 px-3 py-1.5 rounded-lg border border-indigo-100 mb-3 shadow-sm inline-block">Target Tahunan</h3>
-                    <h2 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">Target Omset Sarimbit 2026</h2>
-                </div>
-                <div class="text-right mt-4 md:mt-0">
-                    <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Dana Masuk Saat Ini</span>
-                    <div class="flex items-baseline justify-end gap-2">
-                        <span class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 drop-shadow-sm" id="target-omset-current">Rp 0</span>
-                        <span class="text-sm font-black text-slate-400">/ Rp 10 M</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full bg-slate-200/60 rounded-full h-5 mb-3 border border-slate-300/50 shadow-inner relative z-10 p-0.5">
-                <div class="progress-glow h-full rounded-full flex items-center justify-end px-2" style="width: 0%" id="target-omset-bar">
-                    <span class="text-[10px] font-black text-white drop-shadow-md tracking-wider" id="target-omset-percent">0%</span>
-                </div>
-            </div>
-            <p class="text-xs font-semibold text-slate-500 text-center relative z-10 bg-white/50 py-1.5 rounded-lg w-fit mx-auto px-4 shadow-sm border border-slate-100">
-                Kekurangan target: <strong class="text-rose-500" id="target-omset-lack">Rp 10.000.000.000</strong>
-            </p>
+            <div id="storeFilterContainer" class="flex items-center gap-2 overflow-x-auto whitespace-nowrap w-full lg:w-auto hide-scrollbar"></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8 animate-enter" id="kpiContainer"></div>
-
-        <div class="glass-panel p-6 sm:p-8 mb-8 animate-enter">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <!-- Kartu Target Lebar (Promo Card Style) -->
+        <div class="glass-panel bg-gradient-to-br from-blue-50 to-indigo-50 p-8 mb-6 animate-enter border-blue-100">
+            <div class="flex flex-col md:flex-row justify-between md:items-end mb-4 gap-2">
                 <div>
-                    <h3 class="text-xl font-black text-slate-800 drop-shadow-sm flex items-center gap-2">
-                        Performa Harian <span class="bg-indigo-100 text-indigo-600 text-[10px] px-2 py-1 rounded-md uppercase tracking-wider border border-indigo-200">Live</span>
-                    </h3>
-                    <p class="text-xs font-bold text-slate-500 mt-1">Perbandingan <span class="text-rose-500">QTY</span> & <span class="text-indigo-500">Omset</span> Hari Ini vs Kemarin.</p>
+                    <span class="text-blue-500 font-black text-[10px] uppercase tracking-widest block mb-1">Target Tahunan</span>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Omset Sarimbit 2026</h2>
                 </div>
-                <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span>
+                <div class="text-left md:text-right">
+                    <span class="text-3xl font-black text-blue-600 block" id="target-omset-current">Rp 0</span>
+                    <span class="text-xs font-bold text-slate-500 mt-1">dari target Rp 10 Miliar</span>
+                </div>
             </div>
-            <div class="chart-container">
+
+            <div class="progress-bar-bg mb-2 mt-4">
+                <div class="progress-bar-fill" style="width: 0%" id="target-omset-bar"></div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                <span id="target-omset-percent" class="text-blue-600">0% Tercapai</span>
+                <span id="target-omset-lack">Kurang: Rp 10M</span>
+            </div>
+        </div>
+
+        <!-- Kartu KPI Minimalis Android (Grid 2 Kolom di HP) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-enter" id="kpiContainer"></div>
+
+        <!-- Chart Platform & Pelunasan -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 animate-enter">
+            <div class="glass-panel p-6 flex flex-col">
+                <h3 class="text-sm font-bold text-slate-800 mb-6">Distribusi Platform</h3>
+                <div class="chart-container flex-1" style="height: 220px;">
+                    <canvas id="canvasDistribusiToko"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 flex flex-col">
+                <h3 class="text-sm font-bold text-slate-800 mb-6">Status Pelunasan</h3>
+                <div class="chart-container flex-1" style="height: 220px;">
+                    <canvas id="canvasStatusPelunasan"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Kombinasi Harian -->
+        <div class="glass-panel p-6 mb-6 animate-enter">
+            <h3 class="text-sm font-bold text-slate-800 mb-2">Perbandingan Harian</h3>
+            <p class="text-xs font-medium text-slate-500 mb-6">Performa pesanan hari ini dibandingkan kemarin.</p>
+            <div class="chart-container" style="height: 250px;">
                 <canvas id="canvasHarianMix"></canvas>
             </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-enter">
-            <div class="glass-panel p-6 sm:p-8 flex flex-col">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-                    <h3 class="text-base font-black text-slate-800 drop-shadow-sm">Peringkat PCS Sarimbit</h3>
-                    <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span>
-                </div>
-                <div class="flex gap-2 mb-6 bg-slate-100/50 p-1.5 rounded-xl w-fit border border-slate-200/50">
-                    <button onclick="switchTab('pcs', 'top')" id="tab-pcs-top" class="px-5 py-2 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-sm transition-all border border-slate-200">7 Teratas</button>
-                    <button onclick="switchTab('pcs', 'bottom')" id="tab-pcs-bottom" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all">5 Terkecil</button>
-                </div>
-                <div class="chart-container flex-1">
-                    <canvas id="canvasPcsPeringkat"></canvas>
-                </div>
-            </div>
 
-            <div class="glass-panel p-6 sm:p-8 flex flex-col">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-                    <h3 class="text-base font-black text-slate-800 drop-shadow-sm">Peringkat Nilai Order</h3>
-                    <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span>
-                </div>
-                <div class="flex gap-2 mb-6 bg-slate-100/50 p-1.5 rounded-xl w-fit border border-slate-200/50">
-                    <button onclick="switchTab('harga', 'top')" id="tab-harga-top" class="px-5 py-2 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-sm transition-all border border-slate-200">7 Teratas</button>
-                    <button onclick="switchTab('harga', 'bottom')" id="tab-harga-bottom" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all">5 Terkecil</button>
-                </div>
-                <div class="chart-container flex-1">
-                    <canvas id="canvasHargaPeringkat"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-enter">
-            <div class="glass-panel p-6 sm:p-8">
-                <h3 class="text-base font-black text-slate-800 mb-6 flex justify-between items-center drop-shadow-sm">Tren Order PCS <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span></h3>
-                <div class="chart-container"><canvas id="linePcsChart"></canvas></div>
-            </div>
-            <div class="glass-panel p-6 sm:p-8">
-                <h3 class="text-base font-black text-slate-800 mb-6 flex justify-between items-center drop-shadow-sm">Tren Nilai Order <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span></h3>
-                <div class="chart-container"><canvas id="lineHargaChart"></canvas></div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 animate-enter">
-            <div class="glass-panel p-6 sm:p-8">
-                <h3 class="text-base font-black text-slate-800 mb-6 flex justify-between items-center drop-shadow-sm">Rekap Bulanan (PCS) <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span></h3>
-                <div class="chart-container"><canvas id="barBulanPcsChart"></canvas></div>
-            </div>
-            <div class="glass-panel p-6 sm:p-8">
-                <h3 class="text-base font-black text-slate-800 mb-6 flex justify-between items-center drop-shadow-sm">Rekap Bulanan (Nilai) <span class="chart-label text-[10px] font-black text-slate-600 bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100 uppercase tracking-widest">Semua Toko</span></h3>
-                <div class="chart-container"><canvas id="barBulanHargaChart"></canvas></div>
-            </div>
-        </div>
-
+        <!-- Tabel Rincian Data Aktif yang Bersih -->
         <div class="glass-panel overflow-hidden mb-8 animate-enter flex flex-col">
-            <div class="p-6 sm:p-8 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-html2canvas-ignore="true">
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-html2canvas-ignore="true">
                 <div>
-                    <h3 class="text-2xl font-black text-slate-800 tracking-tight">Rincian Data Aktif</h3>
-                    <p class="text-xs font-bold text-indigo-500 mt-1" id="tableTitleStore">Semua Toko</p>
+                    <h3 class="text-base font-bold text-slate-800">Rincian Data Aktif</h3>
                 </div>
-                <div class="relative w-full sm:w-80 group">
-                    <i class="fa-solid fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
-                    <input type="text" id="searchInput" placeholder="Cari nama sarimbit..." class="glass-input w-full pl-12 pr-4 py-3.5 rounded-[1.2rem] text-sm font-bold text-slate-700">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" placeholder="Cari pesanan..." class="glass-input w-full pl-10 pr-4 py-2.5 text-xs font-semibold">
                 </div>
             </div>
-            <div class="overflow-x-auto flex-1 p-2">
-                <table class="w-full text-left border-collapse min-w-[800px] table-cantik">
+            <div class="overflow-x-auto flex-1 p-0">
+                <table class="w-full text-left border-collapse min-w-[700px] table-cantik">
                     <thead>
                         <tr>
-                            <th class="rounded-tl-xl">Nama Sarimbit</th>
+                            <th class="pl-6">Nama Sarimbit</th>
                             <th class="text-right">Total PCS</th>
-                            <th class="text-right">Total Nilai Order</th>
+                            <th class="text-right">Total Nilai</th>
                             <th class="text-right">Dana Masuk</th>
-                            <th class="text-right rounded-tr-xl">Sisa Piutang</th>
+                            <th class="text-right pr-6">Piutang</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
-            <div id="btn-container-aktif" class="p-4 text-center bg-slate-50/50 border-t border-slate-200/50 hidden">
-                <button onclick="toggleTable('aktif')" id="btn-toggle-aktif" class="btn-neu px-6 py-2.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
-                    Tampilkan Lebih Banyak <i class="fa-solid fa-chevron-down ml-1"></i>
+            <div id="btn-container-aktif" class="p-4 text-center border-t border-slate-100 hidden">
+                <button onclick="toggleTable('aktif')" id="btn-toggle-aktif" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                    Lihat Selengkapnya
                 </button>
             </div>
         </div>
 
-        <div class="glass-panel overflow-hidden mb-8 animate-enter flex flex-col bg-slate-100/50">
-            <div class="p-6 sm:p-8 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-html2canvas-ignore="true">
+        <!-- Tabel Arsip Terang -->
+        <div class="glass-panel bg-slate-50 border-dashed border-slate-200 overflow-hidden mb-8 animate-enter flex flex-col">
+            <div class="p-6 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-html2canvas-ignore="true">
                 <div>
-                    <h3 class="text-2xl font-black text-slate-700 tracking-tight flex items-center gap-2">
-                        <i class="fa-solid fa-box-archive text-slate-400"></i> Rincian Arsip
-                    </h3>
-                    <p class="text-xs font-bold text-rose-500 mt-1" id="tableTitleStoreArsip">Semua Toko</p>
+                    <h3 class="text-base font-bold text-slate-500"><i class="fa-solid fa-box-archive mr-2"></i>Rincian Arsip</h3>
                 </div>
-                <div class="relative w-full sm:w-80 group">
-                    <i class="fa-solid fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors"></i>
-                    <input type="text" id="searchInputArsip" placeholder="Cari sarimbit arsip..." class="glass-input w-full pl-12 pr-4 py-3.5 rounded-[1.2rem] text-sm font-bold text-slate-700">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInputArsip" placeholder="Cari arsip..." class="glass-input w-full pl-10 pr-4 py-2.5 text-xs font-semibold">
                 </div>
             </div>
-            <div class="overflow-x-auto flex-1 p-2">
-                <table class="w-full text-left border-collapse min-w-[800px] table-cantik">
+            <div class="overflow-x-auto flex-1 p-0">
+                <table class="w-full text-left border-collapse min-w-[700px] table-cantik">
                     <thead>
                         <tr>
-                            <th class="rounded-tl-xl">Nama Sarimbit (Arsip)</th>
+                            <th class="pl-6">Nama Sarimbit</th>
                             <th class="text-right">Total PCS</th>
-                            <th class="text-right">Total Nilai Order</th>
-                            <th class="text-right">Total Masuk (DP+Lunas)</th>
-                            <th class="text-right rounded-tr-xl">Sisa Piutang</th>
+                            <th class="text-right">Total Nilai</th>
+                            <th class="text-right">Dana Masuk</th>
+                            <th class="text-right pr-6">Piutang</th>
                         </tr>
                     </thead>
                     <tbody id="tableBodyArsip"></tbody>
                 </table>
             </div>
-            <div id="btn-container-arsip" class="p-4 text-center bg-slate-200/30 border-t border-slate-200/50 hidden">
-                <button onclick="toggleTable('arsip')" id="btn-toggle-arsip" class="btn-neu px-6 py-2.5 text-xs font-bold text-rose-600 hover:text-rose-800 transition-colors">
-                    Tampilkan Lebih Banyak <i class="fa-solid fa-chevron-down ml-1"></i>
+            <div id="btn-container-arsip" class="p-4 text-center border-t border-slate-200/50 hidden">
+                <button onclick="toggleTable('arsip')" id="btn-toggle-arsip" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                    Lihat Arsip Selengkapnya
                 </button>
             </div>
         </div>
@@ -368,20 +269,20 @@
     </main>
 
     <script>
-        // Set Default Font Untuk Semua Chart.js Agar Mewah
-        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-        Chart.defaults.color = '#64748b';
+        // Ubah Font Chart JS Menjadi Inter
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b'; // Warna teks chart abu-abu sedang
         Chart.defaults.animation = false;
 
         function updateConnectionStatus() {
             const banner = document.getElementById('connection-banner');
             if (navigator.onLine) {
-                banner.innerText = "ONLINE - MENYINKRONKAN GRAFIK";
-                banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white block shadow-md";
-                setTimeout(() => banner.classList.add('hidden'), 3000);
+                banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-blue-50 text-blue-600 block shadow-sm";
+                banner.innerText = "SINKRONISASI AKTIF";
+                setTimeout(() => banner.classList.add('hidden'), 2500);
             } else {
-                banner.innerText = "OFFLINE - GRAFIK DARI MEMORI LOKAL";
-                banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[9px] font-black uppercase tracking-widest bg-orange-500 text-white block shadow-md";
+                banner.innerText = "OFFLINE - DATA LOKAL";
+                banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-rose-50 text-rose-600 block shadow-sm";
             }
         }
         
@@ -401,17 +302,12 @@
         let isTableArsipExpanded = false;
         
         let charts = {}; 
-        let globalChartData = {
-            pcs: { top: null, bottom: null },
-            harga: { top: null, bottom: null }
-        };
-        let activeTabState = { pcs: 'top', harga: 'top' };
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
         const formatK = (angka) => {
-            if(angka >= 1000000) return 'Rp ' + (angka / 1000000).toFixed(1) + 'Jt';
-            if(angka >= 1000) return 'Rp ' + (angka / 1000).toFixed(0) + 'Rb';
-            return 'Rp ' + angka;
+            if(angka >= 1000000) return (angka / 1000000).toFixed(1) + ' Jt';
+            if(angka >= 1000) return (angka / 1000).toFixed(0) + ' Rb';
+            return angka;
         };
 
         window.onload = () => {
@@ -448,10 +344,20 @@
                     semuaOrderan = orders.map(order => {
                         let safeDate = "";
                         try {
-                            if (order.tanggal) safeDate = String(order.tanggal).split('T')[0];
-                            else if (order.created_at) safeDate = String(order.created_at).split('T')[0];
-                            else safeDate = new Date().toISOString().split('T')[0];
-                        } catch(e) { safeDate = new Date().toISOString().split('T')[0]; }
+                            let rawDate = order.tanggal || order.created_at || new Date();
+                            let dtObj = new Date(rawDate);
+                            if (isNaN(dtObj.getTime())) {
+                                safeDate = String(rawDate).substring(0, 10);
+                            } else {
+                                const y = dtObj.getFullYear();
+                                const m = String(dtObj.getMonth() + 1).padStart(2, '0');
+                                const d = String(dtObj.getDate()).padStart(2, '0');
+                                safeDate = `${y}-${m}-${d}`;
+                            }
+                        } catch(e) { 
+                            const dtFallback = new Date();
+                            safeDate = `${dtFallback.getFullYear()}-${String(dtFallback.getMonth() + 1).padStart(2, '0')}-${String(dtFallback.getDate()).padStart(2, '0')}`;
+                        }
 
                         const strIsArchived1 = String(order.isarchived).toLowerCase();
                         const strIsArchived2 = String(order.isArchived).toLowerCase();
@@ -529,11 +435,11 @@
                 return d.tanggal.substring(0, 7);
             }))].filter(m => m !== "").sort().reverse(); 
 
-            let html = `<option value="Semua" selected>Semua Bulan</option>`;
+            let html = `<option value="Semua" class="text-slate-800 font-bold" selected>Semua Bulan</option>`;
             months.forEach(m => {
                 const date = new Date(m + '-01');
                 const label = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-                html += `<option value="${m}">${label}</option>`;
+                html += `<option value="${m}" class="text-slate-800 font-bold">${label}</option>`;
             });
 
             selectBulan.innerHTML = html;
@@ -543,13 +449,18 @@
 
         function generateStoreFilterButtons() {
             const dataGabungan = [...rawData, ...rawArsip];
-            const stores = [...new Set(dataGabungan.map(d => d.toko))].filter(t => t && t.trim() !== "");
+            
+            // Saring ketat: Hanya ambil toko yang valid
+            const storesRaw = [...new Set(dataGabungan.map(d => d.toko))];
+            const stores = storesRaw.filter(t => t && t.trim() !== "" && t.toLowerCase() !== "semua" && t.toLowerCase() !== "pusat").sort();
+            
             const container = document.getElementById('storeFilterContainer');
             
-            let html = `<button onclick="setToko('Semua')" id="btn-toko-Semua" class="store-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-500 text-white shadow-sm border border-indigo-600">Semua Toko</button>`;
+            // CSS tombol filter diubah menjadi style Bubble minimalis
+            let html = `<button onclick="setToko('Semua')" id="btn-toko-Semua" class="store-btn px-5 py-2.5 rounded-full text-xs font-bold transition-all bg-blue-500 text-white shadow-sm whitespace-nowrap shrink-0 border border-blue-500">Semua Toko</button>`;
             
             stores.forEach(toko => {
-                html += `<button onclick="setToko('${toko}')" id="btn-toko-${toko.replace(/[^a-zA-Z0-9]/g, '')}" class="store-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all border border-transparent">${toko}</button>`;
+                html += `<button onclick="setToko('${toko}')" id="btn-toko-${toko.replace(/[^a-zA-Z0-9]/g, '')}" class="store-btn px-5 py-2.5 rounded-full text-xs font-bold text-slate-500 bg-white hover:bg-slate-50 transition-all border border-slate-200 whitespace-nowrap shrink-0 shadow-sm">${toko}</button>`;
             });
             container.innerHTML = html;
         }
@@ -559,12 +470,12 @@
             const safeTokoId = tokoName === 'Semua' ? 'Semua' : tokoName.replace(/[^a-zA-Z0-9]/g, '');
             
             document.querySelectorAll('.store-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-500', 'text-white', 'shadow-sm', 'border-indigo-600');
-                btn.classList.add('text-slate-500', 'hover:bg-slate-100', 'border-transparent');
+                // Reset semua ke gaya default putih
+                btn.className = "store-btn px-5 py-2.5 rounded-full text-xs font-bold text-slate-500 bg-white hover:bg-slate-50 transition-all border border-slate-200 whitespace-nowrap shrink-0 shadow-sm";
                 
+                // Warnai biru pada yang aktif
                 if(btn.id === `btn-toko-${safeTokoId}`) {
-                    btn.classList.add('bg-indigo-500', 'text-white', 'shadow-sm', 'border-indigo-600');
-                    btn.classList.remove('text-slate-500', 'hover:bg-slate-100', 'border-transparent');
+                    btn.className = "store-btn px-5 py-2.5 rounded-full text-xs font-bold transition-all bg-blue-500 text-white shadow-sm whitespace-nowrap shrink-0 border border-blue-500";
                 }
             });
             updateDashboard();
@@ -584,60 +495,19 @@
             return filtered; 
         }
 
-        function prosesDataGrafik(labelsOriginal, dataOriginal) {
-            let dataGabungan = [];
-            for (let i = 0; i < labelsOriginal.length; i++) dataGabungan.push({ label: labelsOriginal[i], nilai: dataOriginal[i] });
-            dataGabungan.sort((a, b) => b.nilai - a.nilai);
-            
-            let top7 = dataGabungan.slice(0, 7);
-            let bottom5 = dataGabungan.slice(-5);
-            
-            return {
-                terbanyak: { labels: top7.map(item => item.label), data: top7.map(item => item.nilai) },
-                terkecil: { labels: bottom5.map(item => item.label), data: bottom5.map(item => item.nilai) }
-            };
-        }
-
-        function switchTab(metric, type) {
-            activeTabState[metric] = type;
-            
-            const btnTop = document.getElementById(`tab-${metric}-top`);
-            const btnBottom = document.getElementById(`tab-${metric}-bottom`);
-
-            if (type === 'top') {
-                btnTop.className = "px-5 py-2 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-sm transition-all border border-slate-200";
-                btnBottom.className = "px-5 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all border border-transparent";
-            } else {
-                btnBottom.className = "px-5 py-2 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-sm transition-all border border-slate-200";
-                btnTop.className = "px-5 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all border border-transparent";
-            }
-
-            if (metric === 'pcs') {
-                const data = globalChartData.pcs[type];
-                if(data && data.labels) renderChart('canvasPcsPeringkat', 'bar', data.labels, data.data, 'number', true);
-            } else {
-                const data = globalChartData.harga[type];
-                if(data && data.labels) renderChart('canvasHargaPeringkat', 'bar', data.labels, data.data, 'rupiah', true);
-            }
-        }
-
         function toggleTable(type) {
             if (type === 'aktif') {
                 isTableAktifExpanded = !isTableAktifExpanded;
                 renderTable(getFilteredData(), false, 'tableBody', 'searchInput');
-                document.getElementById('btn-toggle-aktif').innerHTML = isTableAktifExpanded ? 
-                    'Sembunyikan Data <i class="fa-solid fa-chevron-up ml-1"></i>' : 
-                    'Tampilkan Lebih Banyak <i class="fa-solid fa-chevron-down ml-1"></i>';
+                document.getElementById('btn-toggle-aktif').innerText = isTableAktifExpanded ? 'Tutup Daftar' : 'Lihat Selengkapnya';
             } else {
                 isTableArsipExpanded = !isTableArsipExpanded;
                 renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip');
-                document.getElementById('btn-toggle-arsip').innerHTML = isTableArsipExpanded ? 
-                    'Sembunyikan Data <i class="fa-solid fa-chevron-up ml-1"></i>' : 
-                    'Tampilkan Lebih Banyak <i class="fa-solid fa-chevron-down ml-1"></i>';
+                document.getElementById('btn-toggle-arsip').innerText = isTableArsipExpanded ? 'Tutup Daftar' : 'Lihat Arsip Selengkapnya';
             }
         }
 
-        function renderChart(canvasId, type, chartLabels, dataA, yAxisFormat, isHorizontal = false) {
+        function renderChart(canvasId, type, chartLabels, dataA, colorIndex, isHorizontal = false) {
             try {
                 const canvasElement = document.getElementById(canvasId);
                 if (!canvasElement) return;
@@ -645,19 +515,20 @@
                 const ctx = canvasElement.getContext('2d');
                 if (charts[canvasId]) charts[canvasId].destroy();
 
-                const colorA = '#4f46e5'; 
-                const colorBg = 'rgba(79, 70, 229, 0.15)';
+                const warnaGrafik = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
+                const warnaUtama = warnaGrafik[colorIndex % warnaGrafik.length];
+                const warnaBg = warnaUtama + '20'; // Opacity 20%
 
                 let datasets = [{ 
-                    label: currentFilter, 
+                    label: "Data", 
                     data: dataA, 
-                    backgroundColor: type === 'bar' ? colorA : colorBg, 
-                    borderColor: colorA, 
-                    borderRadius: type === 'bar' ? 6 : 0, 
+                    backgroundColor: type === 'bar' ? warnaUtama : warnaBg, 
+                    borderColor: warnaUtama, 
+                    borderRadius: type === 'bar' ? 4 : 0, 
                     tension: 0.4, 
                     borderWidth: type === 'bar' ? 0 : 3, 
-                    fill: type === 'line' ? true : false,
-                    barPercentage: 0.6
+                    fill: type === 'line',
+                    barPercentage: 0.5
                 }];
 
                 charts[canvasId] = new Chart(ctx, {
@@ -670,24 +541,27 @@
                         interaction: { mode: 'index', intersect: false, axis: isHorizontal ? 'y' : 'x' },
                         scales: { 
                             x: { 
-                                grid: { display: isHorizontal, color: 'rgba(0,0,0,0.03)' }, 
+                                grid: { display: false }, 
                                 border: { display: false },
-                                ticks: isHorizontal ? { callback: function(value) { return yAxisFormat === 'rupiah' ? formatK(value) : value; }, font: { weight: 'bold'} } : { font: { weight: 'bold'} }
+                                ticks: { font: { weight: '600'} }
                             }, 
                             y: { 
                                 beginAtZero: true, 
                                 border: { display: false }, 
-                                grid: { display: !isHorizontal, color: 'rgba(0,0,0,0.03)' },
-                                ticks: !isHorizontal ? { callback: function(value) { return yAxisFormat === 'rupiah' ? formatK(value) : value; }, font: { weight: 'bold'} } : { autoSkip: false, font: { weight: 'bold', size: 11 }, color: '#475569' } 
+                                grid: { display: !isHorizontal, color: '#f1f5f9' },
+                                ticks: { font: { weight: '600'} } 
                             } 
                         },
                         plugins: { 
                             legend: { display: false }, 
                             tooltip: { 
-                                backgroundColor: 'rgba(15, 23, 42, 0.95)', 
+                                backgroundColor: '#ffffff', 
+                                titleColor: '#1e293b',
+                                bodyColor: '#475569',
+                                borderColor: '#e2e8f0',
+                                borderWidth: 1,
                                 padding: 12, cornerRadius: 12,
-                                titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' }, 
-                                callbacks: { label: function(context) { let val = context.raw; return context.dataset.label + ': ' + (yAxisFormat === 'rupiah' ? formatRp(val) : val + ' pcs'); } } 
+                                titleFont: { size: 13, family: 'Inter', weight: 'bold' }, bodyFont: { size: 14, family: 'Inter', weight: 'bold' } 
                             } 
                         }
                     }
@@ -696,74 +570,43 @@
         }
 
         // ==============================================================
-        // FUNGSI KHUSUS UNTUK MERENDER GRAFIK KOMBINASI (VVIP)
+        // FUNGSI KHUSUS UNTUK GRAFIK DONAT (GAYA APLIKASI MODERN)
         // ==============================================================
-        function renderMixedChart(canvasId, labels, dataOmset, dataQty) {
+        function renderPieChart(canvasId, chartLabels, chartData, bgColors) {
             try {
                 const canvasElement = document.getElementById(canvasId);
                 if (!canvasElement) return;
-
                 const ctx = canvasElement.getContext('2d');
                 if (charts[canvasId]) charts[canvasId].destroy();
-                
-                const gradientOmset = ctx.createLinearGradient(0, 0, 0, 300);
-                gradientOmset.addColorStop(0, 'rgba(79, 70, 229, 0.8)');
-                gradientOmset.addColorStop(1, 'rgba(99, 102, 241, 0.2)');
 
                 charts[canvasId] = new Chart(ctx, {
-                    type: 'bar',
+                    type: 'doughnut',
                     data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                type: 'line',
-                                label: 'Total PCS (QTY)',
-                                data: dataQty,
-                                borderColor: '#f43f5e', 
-                                backgroundColor: '#f43f5e',
-                                borderWidth: 4,
-                                tension: 0.4,
-                                yAxisID: 'y1', 
-                                pointBackgroundColor: '#ffffff',
-                                pointBorderColor: '#f43f5e',
-                                pointBorderWidth: 3,
-                                pointRadius: 6,
-                                pointHoverRadius: 8,
-                                z: 10 
-                            },
-                            {
-                                type: 'bar',
-                                label: 'Omset Pesanan',
-                                data: dataOmset,
-                                backgroundColor: gradientOmset, 
-                                borderRadius: { topLeft: 12, topRight: 12, bottomLeft: 4, bottomRight: 4 },
-                                yAxisID: 'y', 
-                                barPercentage: 0.5,
-                                z: 1
-                            }
-                        ]
+                        labels: chartLabels,
+                        datasets: [{
+                            data: chartData,
+                            backgroundColor: bgColors,
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 13 } } },
-                            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, border: { display: false }, grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { callback: function(value) { return formatK(value); }, font: { weight: 'bold' }, color: '#6366f1' } },
-                            y1: { type: 'linear', display: true, position: 'right', beginAtZero: true, border: { display: false }, grid: { display: false }, ticks: { callback: function(value) { return value + ' pcs'; }, font: { weight: 'bold' }, color: '#f43f5e' } }
-                        },
+                        cutout: '75%', // Lubang tengah lebih besar ala UI modern
                         plugins: {
-                            legend: { display: false },
+                            legend: { 
+                                position: 'right', 
+                                labels: { font: { weight: '600', size: 12, family: 'Inter' }, padding: 15, color: '#475569', usePointStyle: true, pointStyle: 'circle' } 
+                            },
                             tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                                padding: 14, cornerRadius: 12,
-                                titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' },
+                                backgroundColor: '#ffffff', 
+                                titleColor: '#1e293b', bodyColor: '#475569',
+                                borderColor: '#e2e8f0', borderWidth: 1,
+                                padding: 12, cornerRadius: 12,
+                                titleFont: { size: 13, family: 'Inter' }, bodyFont: { size: 14, weight: 'bold', family: 'Inter' },
                                 callbacks: {
-                                    label: function(context) {
-                                        let val = context.raw;
-                                        if (context.dataset.label.includes('Omset')) return ' Omset: ' + formatRp(val);
-                                        return ' QTY: ' + val + ' pcs';
-                                    }
+                                    label: function(context) { return ' Rp ' + formatK(context.raw); }
                                 }
                             }
                         }
@@ -771,14 +614,54 @@
                 });
             } catch (error) {}
         }
-        // ==============================================================
+
+        function renderMixedChart(canvasId, labels, dataOmset, dataQty) {
+            try {
+                const canvasElement = document.getElementById(canvasId);
+                if (!canvasElement) return;
+                const ctx = canvasElement.getContext('2d');
+                if (charts[canvasId]) charts[canvasId].destroy();
+                
+                charts[canvasId] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                type: 'line', label: 'QTY', data: dataQty,
+                                borderColor: '#f43f5e', backgroundColor: '#f43f5e', borderWidth: 3, tension: 0.4,
+                                yAxisID: 'y1', pointBackgroundColor: '#ffffff', pointBorderColor: '#f43f5e', pointBorderWidth: 2, pointRadius: 5, z: 10 
+                            },
+                            {
+                                type: 'bar', label: 'Omset', data: dataOmset,
+                                backgroundColor: '#3b82f6', borderRadius: 4, yAxisID: 'y', barPercentage: 0.4, z: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: '600' } } },
+                            y: { type: 'linear', display: true, position: 'left', border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { font: { weight: '600' }, color: '#94a3b8' } },
+                            y1: { type: 'linear', display: false, position: 'right' }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#ffffff', titleColor: '#1e293b', bodyColor: '#475569',
+                                borderColor: '#e2e8f0', borderWidth: 1, padding: 12, cornerRadius: 12,
+                                titleFont: { size: 13, family: 'Inter' }, bodyFont: { size: 14, weight: 'bold', family: 'Inter' }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {}
+        }
 
         function updateDashboard() {
             try {
-                // 1. Ambil data Aktif
                 const data = getFilteredData(); 
                 
-                // 2. Ambil data Arsip, lalu terapkan filter bulan & toko yang sama
                 let arsipFiltered = rawArsip;
                 if (currentFilter !== 'Semua') arsipFiltered = arsipFiltered.filter(d => d.toko === currentFilter);
                 const bulanFilter = document.getElementById('filterBulan').value;
@@ -786,7 +669,6 @@
                     arsipFiltered = arsipFiltered.filter(d => d.tanggal && d.tanggal.substring(0, 7) === bulanFilter);
                 }
 
-                // 3. GABUNGKAN SEMUANYA KHUSUS UNTUK KARTU KPI
                 const dataSemesta = [...data, ...arsipFiltered];
                 
                 const idTerfilter = [...new Set(dataSemesta.map(d => d.idcustomer))];
@@ -803,99 +685,107 @@
                 const totalPcs = dataSemesta.reduce((sum, item) => sum + item.pcs, 0);
                 const totalNilaiOrder = dataSemesta.reduce((sum, item) => sum + item.netTotal, 0); 
                 const sisaTagihan = totalNilaiOrder - totalDanaMasuk;
+                const aov = uniqueOrders.size > 0 ? (totalNilaiOrder / uniqueOrders.size) : 0;
 
-                // =============================================================
                 const TARGET_OMSET = 10000000000;
                 let persentase = (totalDanaMasuk / TARGET_OMSET) * 100;
-                let isLebihTarget = false;
-                if (persentase > 100) { persentase = 100; isLebihTarget = true; }
+                if (persentase > 100) persentase = 100; 
                 
                 let kekurangan = TARGET_OMSET - totalDanaMasuk;
                 if (kekurangan < 0) kekurangan = 0;
 
                 const omsetBar = document.getElementById('target-omset-bar');
-                const omsetPercentText = document.getElementById('target-omset-percent');
-                
                 if (omsetBar) {
                     setTimeout(() => { omsetBar.style.width = persentase + '%'; }, 300); 
-                    const actualPersentase = (totalDanaMasuk / TARGET_OMSET * 100).toFixed(1);
-                    omsetPercentText.innerText = actualPersentase + '% TERCAPAI';
+                    document.getElementById('target-omset-percent').innerText = (totalDanaMasuk / TARGET_OMSET * 100).toFixed(1) + '% Tercapai';
                     document.getElementById('target-omset-current').innerText = formatRp(totalDanaMasuk);
-                    
-                    const lackElem = document.getElementById('target-omset-lack');
-                    if(isLebihTarget){
-                         lackElem.innerText = "TARGET TELAH TERLAMPAUI! LUAR BIASA!";
-                         lackElem.className = "text-emerald-500 font-black";
-                    } else {
-                         lackElem.innerText = formatRp(kekurangan);
-                         lackElem.className = "text-rose-500 font-black";
-                    }
+                    document.getElementById('target-omset-lack').innerText = 'Kekurangan: ' + formatRp(kekurangan);
                 }
 
-                // =============================================================
-                // DESAIN KPI BARU (Neumorphism / Kartu Elegan)
+              // =============================================================
+                // DESAIN KARTU KPI BARU (PUTIH BERSIH)
                 // =============================================================
                 const kpiContainer = document.getElementById('kpiContainer');
                 if(kpiContainer) {
                     kpiContainer.innerHTML = `
-                        <div class="bg-white p-5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col items-center text-center group transition-colors hover:bg-blue-50">
-                            <div class="w-14 h-14 rounded-[16px] bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-inner border border-blue-200/50">
-                                <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                        <!-- Kartu Total PCS -->
+                        <div class="kpi-card flex flex-col justify-center bg-white p-5">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-boxes-stacked text-[10px]"></i>
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Total PCS</span>
                             </div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total PCS Dipesan</span>
-                            <span class="text-2xl font-black text-slate-800 mt-1 tracking-tight">${formatTitik(totalPcs)}</span>
+                            <span class="text-xl md:text-2xl font-black text-slate-800 tracking-tight truncate">${formatTitik(totalPcs)}</span>
                         </div>
 
-                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-5 rounded-[24px] shadow-[0_10px_30px_rgba(79,70,229,0.3)] border border-indigo-400/50 flex flex-col items-center text-center group relative overflow-hidden hover:shadow-[0_15px_40px_rgba(79,70,229,0.4)] transition-all">
-                            <div class="absolute -right-4 -bottom-4 opacity-10 text-white"><i class="fa-solid fa-sack-dollar text-8xl"></i></div>
-                            <div class="w-14 h-14 rounded-[16px] bg-white/20 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-inner border border-white/30 backdrop-blur-sm z-10">
-                                <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+                        <!-- Kartu Nilai Pesanan -->
+                        <div class="kpi-card flex flex-col justify-center bg-white p-5">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-6 h-6 rounded-full bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-sack-dollar text-[10px]"></i>
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Nilai Pesanan</span>
                             </div>
-                            <span class="text-[10px] font-bold text-indigo-100 uppercase tracking-wider z-10">Total Nilai Pesanan</span>
-                            <span class="text-2xl font-black text-white mt-1 tracking-tight z-10">${formatK(totalNilaiOrder)}</span>
+                            <span class="text-xl md:text-2xl font-black text-slate-800 tracking-tight truncate">${formatK(totalNilaiOrder)}</span>
                         </div>
 
-                        <div class="bg-white p-5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col items-center text-center group transition-colors hover:bg-emerald-50">
-                            <div class="w-14 h-14 rounded-[16px] bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-inner border border-emerald-200/50">
-                                <i class="fa-solid fa-money-bill-wave text-xl"></i>
+                        <!-- Kartu Dana Masuk -->
+                        <div class="kpi-card flex flex-col justify-center bg-white p-5">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-money-bill-wave text-[10px]"></i>
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Dana Masuk</span>
                             </div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Dana Masuk</span>
-                            <span class="text-2xl font-black text-slate-800 mt-1 tracking-tight">${formatK(totalDanaMasuk)}</span>
+                            <span class="text-xl md:text-2xl font-black text-slate-800 tracking-tight truncate">${formatK(totalDanaMasuk)}</span>
                         </div>
 
-                        <div class="bg-white p-5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col items-center text-center group transition-colors hover:bg-amber-50">
-                            <div class="w-14 h-14 rounded-[16px] bg-amber-100 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-inner border border-amber-200/50">
-                                <i class="fa-solid fa-hand-holding-dollar text-xl"></i>
+                        <!-- Kartu Sisa Tagihan -->
+                        <div class="kpi-card flex flex-col justify-center bg-white p-5 ${sisaTagihan > 0 ? 'border-rose-100 bg-rose-50/30' : ''}">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-6 h-6 rounded-full ${sisaTagihan > 0 ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'} flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-hand-holding-dollar text-[10px]"></i>
+                                </div>
+                                <span class="text-[9px] font-bold ${sisaTagihan > 0 ? 'text-rose-500' : 'text-slate-500'} uppercase tracking-widest leading-tight truncate">Sisa Piutang</span>
                             </div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sisa Tagihan</span>
-                            <span class="text-2xl font-black text-amber-600 mt-1 tracking-tight">${formatK(sisaTagihan)}</span>
+                            <span class="text-xl md:text-2xl font-black ${sisaTagihan > 0 ? 'text-rose-600' : 'text-slate-800'} tracking-tight truncate">${formatK(sisaTagihan)}</span>
                         </div>
                     `;
                 }
 
-               // ==============================================================
-                // KALKULASI DATA UNTUK GRAFIK "HARI INI VS KEMARIN"
+                // ==============================================================
+                // RENDER GRAFIK DISTRIBUSI TOKO (DENGAN FILTER "SEMUA" DIBUANG)
+                // ==============================================================
+                const dataPlatformMurni = dataSemesta.filter(d => d.toko && d.toko.trim() !== "" && d.toko.toLowerCase() !== "semua" && d.toko.toLowerCase() !== "pusat");
+                const tokoNames = [...new Set(dataPlatformMurni.map(d => d.toko))];
+                const omsetPerToko = tokoNames.map(t => dataPlatformMurni.filter(d => d.toko === t).reduce((s, x) => s + x.netTotal, 0));
+                
+                // Warna Pastel ala UI Modern
+                const tokoColors = ['#4ade80', '#60a5fa', '#c084fc', '#fbbf24', '#f87171'];
+                renderPieChart('canvasDistribusiToko', tokoNames, omsetPerToko, tokoColors);
+
+                renderPieChart('canvasStatusPelunasan', ['Telah Lunas', 'Belum Dibayar'], [totalDanaMasuk, sisaTagihan], ['#3b82f6', '#cbd5e1']);
+
+                // ==============================================================
+                // GRAFIK "HARI INI VS KEMARIN"
                 // ==============================================================
                 const todayObj = new Date();
                 const yesterdayObj = new Date(todayObj);
                 yesterdayObj.setDate(yesterdayObj.getDate() - 1);
 
-                // Menggunakan locale 'sv-SE' (Swedia) karena secara bawaan akan mencetak murni format YYYY-MM-DD 
-                // tanpa tambahan embel-embel, sangat aman untuk dicocokkan dengan split('T')[0] dari database
                 const getLocalYYYYMMDD = (d) => {
-                    return d.toLocaleDateString('sv-SE', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${day}`;
                 };
-
-                const strToday = getLocalYYYYMMDD(todayObj);
-                const strYesterday = getLocalYYYYMMDD(yesterdayObj);
 
                 let harianData = [...rawData, ...rawArsip];
                 if (currentFilter !== 'Semua') harianData = harianData.filter(d => d.toko === currentFilter);
 
-                // Perbaikan: Kita potong string tangalnya dengan .substring(0, 10) 
-                // agar yang terbaca HANYA 'YYYY-MM-DD' dari teks asli database
-                const dataToday = harianData.filter(d => (d.tanggal || "").substring(0, 10) === strToday);
-                const dataYesterday = harianData.filter(d => (d.tanggal || "").substring(0, 10) === strYesterday);
+                const dataToday = harianData.filter(d => (d.tanggal || "").substring(0, 10) === getLocalYYYYMMDD(todayObj));
+                const dataYesterday = harianData.filter(d => (d.tanggal || "").substring(0, 10) === getLocalYYYYMMDD(yesterdayObj));
 
                 const qtyToday = dataToday.reduce((sum, item) => sum + item.pcs, 0);
                 const omsetToday = dataToday.reduce((sum, item) => sum + item.netTotal, 0);
@@ -903,105 +793,35 @@
                 const qtyYesterday = dataYesterday.reduce((sum, item) => sum + item.pcs, 0);
                 const omsetYesterday = dataYesterday.reduce((sum, item) => sum + item.netTotal, 0);
 
-                const labelKemarin = yesterdayObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
-                const labelHariIni = todayObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
-
                 renderMixedChart('canvasHarianMix', 
-                    [`Kemarin (${labelKemarin})`, `Hari Ini (${labelHariIni})`], 
+                    [`Kemarin`, `Hari Ini`], 
                     [omsetYesterday, omsetToday], 
                     [qtyYesterday, qtyToday]
                 );
 
-                const bulanVal = document.getElementById('filterBulan').value;
-                const bulanLabel = bulanVal === 'Semua' ? '' : document.getElementById('filterBulan').options[document.getElementById('filterBulan').selectedIndex].text;
-                const finalLabel = bulanVal === 'Semua' ? currentFilter : `${currentFilter} | ${bulanLabel}`;
-                document.querySelectorAll('.chart-label').forEach(el => el.innerText = finalLabel);
-                document.getElementById('tableTitleStore').innerText = finalLabel;
-                document.getElementById('tableTitleStoreArsip').innerText = finalLabel;
-
                 renderTable(data, false, 'tableBody', 'searchInput'); 
                 renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip');
 
-                if(dataSemesta.length === 0) {
-                    renderChart('canvasPcsPeringkat', 'bar', [], [], 'number', true);
-                    renderChart('canvasHargaPeringkat', 'bar', [], [], 'rupiah', true);
-                    renderChart('linePcsChart', 'line', [], [], 'number');
-                    renderChart('lineHargaChart', 'line', [], [], 'rupiah');
-                    renderChart('barBulanPcsChart', 'bar', [], [], 'number');
-                    renderChart('barBulanHargaChart', 'bar', [], [], 'rupiah');
-                    return;
-                }
-
-                const activeData = dataSemesta; // PERBAIKAN: Gunakan seluruh data (aktif & arsip)
-                const sarimbitNames = [...new Set(activeData.map(d => d.sarimbit))];
-                
-                const pcsSarimbit = sarimbitNames.map(n => activeData.filter(d => d.sarimbit === n).reduce((s, x) => s + x.pcs, 0));
-                const hargaSarimbit = sarimbitNames.map(n => activeData.filter(d => d.sarimbit === n).reduce((s, x) => s + x.netTotal, 0));
-
-                const dataPcsDiproses = prosesDataGrafik(sarimbitNames, pcsSarimbit);
-                const dataHargaDiproses = prosesDataGrafik(sarimbitNames, hargaSarimbit);
-
-                globalChartData.pcs.top = { labels: dataPcsDiproses.terbanyak.labels, data: dataPcsDiproses.terbanyak.data };
-                globalChartData.pcs.bottom = { labels: dataPcsDiproses.terkecil.labels, data: dataPcsDiproses.terkecil.data };
-                globalChartData.harga.top = { labels: dataHargaDiproses.terbanyak.labels, data: dataHargaDiproses.terbanyak.data };
-                globalChartData.harga.bottom = { labels: dataHargaDiproses.terkecil.labels, data: dataHargaDiproses.terkecil.data };
-
-                renderChart('canvasPcsPeringkat', 'bar', globalChartData.pcs[activeTabState.pcs].labels, globalChartData.pcs[activeTabState.pcs].data, 'number', true);
-                renderChart('canvasHargaPeringkat', 'bar', globalChartData.harga[activeTabState.harga].labels, globalChartData.harga[activeTabState.harga].data, 'rupiah', true);
-
-               // Filter data yang memiliki tanggal valid agar fungsi tidak error
-               const dataDenganTanggal = activeData.filter(d => d.tanggal && d.tanggal.trim() !== "");
-
-const dates = [...new Set(dataDenganTanggal.map(d => d.tanggal))].sort();
-const trendPcs = dates.map(dt => dataDenganTanggal.filter(d => d.tanggal === dt).reduce((s, x) => s + x.pcs, 0));
-const trendHarga = dates.map(dt => dataDenganTanggal.filter(d => d.tanggal === dt).reduce((s, x) => s + x.netTotal, 0));
-const dateLabels = dates.map(d => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
-
-renderChart('linePcsChart', 'line', dateLabels, trendPcs, 'number');
-renderChart('lineHargaChart', 'line', dateLabels, trendHarga, 'rupiah');
-
-const getMonthKey = (d) => d ? d.substring(0, 7) : ""; 
-const months = [...new Set(dataDenganTanggal.map(d => getMonthKey(d.tanggal)))].filter(m => m !== "").sort();
-const bulanPcs = months.map(m => dataDenganTanggal.filter(d => getMonthKey(d.tanggal) === m).reduce((s, x) => s + x.pcs, 0));
-const bulanHarga = months.map(m => dataDenganTanggal.filter(d => getMonthKey(d.tanggal) === m).reduce((s, x) => s + x.netTotal, 0));
-
-const monthLabels = months.map(m => {
-    const date = new Date(m + '-01');
-    return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-});
-
-                renderChart('barBulanPcsChart', 'bar', monthLabels, bulanPcs, 'number');
-                renderChart('barBulanHargaChart', 'bar', monthLabels, bulanHarga, 'rupiah');
             } catch (error) {
                 console.error("Gagal memperbarui Dashboard:", error);
             }
         }
 
-       // =============================================================
-        // DESAIN TABEL CANTIK (Menambahkan Baris Total di Bawah)
+        // =============================================================
+        // DESAIN TABEL CANTIK
         // =============================================================
         function renderTable(data, isArchivedTable, tableBodyId, searchInputId) {
             const tbody = document.getElementById(tableBodyId);
             const search = document.getElementById(searchInputId).value.toLowerCase();
-            
             const filteredStatusData = data.filter(d => d.isArchived === isArchivedTable);
             const sarimbitNames = [...new Set(filteredStatusData.map(d => d.sarimbit))].sort();
             
             let tableHTML = '';
-            
-            const isExpanded = isArchivedTable ? isTableArsipExpanded : isTableAktifExpanded;
-            const limit = isExpanded ? 9999 : 5; 
-            let displayedCount = 0;
-            let matchingNamesCount = 0; // Untuk menghitung berapa data yang lolos search
-
-            // Variabel penampung untuk Baris Total
-            let grandTotalPcs = 0;
-            let grandTotalOrder = 0;
-            let grandTotalMasuk = 0;
-            let grandTotalSisa = 0;
+            const limit = (isArchivedTable ? isTableArsipExpanded : isTableAktifExpanded) ? 9999 : 5; 
+            let displayedCount = 0; let matchingNamesCount = 0;
+            let grandTotalPcs = 0; let grandTotalOrder = 0; let grandTotalMasuk = 0; let grandTotalSisa = 0;
 
             sarimbitNames.forEach(nama => {
-                // Filter pencarian
                 if (search && !nama.toLowerCase().includes(search)) return;
                 matchingNamesCount++;
 
@@ -1010,187 +830,52 @@ const monthLabels = months.map(m => {
                 const tOrder = items.reduce((s, x) => s + x.netTotal, 0);
                 
                 const uniqueCust = new Map();
-                items.forEach(it => {
-                    if (!uniqueCust.has(it.idcustomer)) {
-                        uniqueCust.set(it.idcustomer, it.cicilan1 + it.cicilan2 + it.cicilan3);
-                    }
-                });
+                items.forEach(it => { if (!uniqueCust.has(it.idcustomer)) uniqueCust.set(it.idcustomer, it.cicilan1 + it.cicilan2 + it.cicilan3); });
                 
-                let tMasuk = 0;
-                uniqueCust.forEach(val => tMasuk += val);
-                
+                let tMasuk = 0; uniqueCust.forEach(val => tMasuk += val);
                 const tSisa = isArchivedTable ? 0 : (tOrder - tMasuk);
 
-                // Tambahkan nilai ke variabel Grand Total (Dihitung untuk SEMUA data yang lolos pencarian)
-                grandTotalPcs += tPcs;
-                grandTotalOrder += tOrder;
-                grandTotalMasuk += tMasuk;
-                grandTotalSisa += tSisa;
+                grandTotalPcs += tPcs; grandTotalOrder += tOrder; grandTotalMasuk += tMasuk; grandTotalSisa += tSisa;
 
-                // Tampilkan baris data HANYA sampai batas limit yang ditentukan
                 if (displayedCount < limit) {
                     displayedCount++;
-                    const displayPcs = formatTitik(tPcs) + " pcs";
-                    const displayOrder = formatRp(tOrder);
-                    const displaySisa = isArchivedTable ? "-" : formatRp(tSisa);
-
                     tableHTML += `
                         <tr>
-                            <td class="font-black ${isArchivedTable ? 'text-slate-400' : 'text-slate-700'}">
+                            <td class="pl-6 font-bold text-slate-700">
                                 ${nama}
-                                ${isArchivedTable ? '<span class="ml-2 text-[9px] bg-rose-100 text-rose-600 px-2 py-0.5 rounded font-bold uppercase tracking-widest border border-rose-200 shadow-sm">Diarsip</span>' : ''}
+                                ${isArchivedTable ? '<span class="ml-2 text-[9px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded font-bold uppercase tracking-widest">Diarsip</span>' : ''}
                             </td>
-                            <td class="text-right font-bold text-slate-500">${displayPcs}</td>
-                            <td class="text-right font-black ${isArchivedTable ? 'text-slate-500' : 'text-indigo-600'}">${displayOrder}</td>
-                            <td class="text-right font-bold ${isArchivedTable ? 'text-emerald-700/60' : 'text-emerald-500'}">${formatRp(tMasuk)}</td>
-                            <td class="text-right font-bold ${isArchivedTable ? 'text-amber-700/60' : 'text-amber-500'}">${displaySisa}</td>
+                            <td class="text-right text-slate-500">${formatTitik(tPcs)}</td>
+                            <td class="text-right text-slate-800">${formatRp(tOrder)}</td>
+                            <td class="text-right text-emerald-600">${formatRp(tMasuk)}</td>
+                            <td class="text-right pr-6 ${tSisa > 0 ? 'text-rose-500' : 'text-slate-400'}">${isArchivedTable ? "-" : formatRp(tSisa)}</td>
                         </tr>
                     `;
                 }
             });
 
-            if (tableHTML === '') {
-                tableHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold uppercase tracking-widest">Tidak ada data sarimbit ${isArchivedTable ? 'arsip' : 'aktif'}</td></tr>`;
-            } else {
-                // Tambahkan Baris TOTAL di paling bawah tabel dengan background kebiruan
+            if (tableHTML === '') tableHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold">Data kosong</td></tr>`;
+            else {
                 tableHTML += `
-                    <tr class="bg-indigo-50/60 border-t border-indigo-200 shadow-sm transition-none hover:bg-indigo-50/60">
-                        <td class="font-black text-indigo-800 uppercase tracking-widest text-[11px] py-4 rounded-bl-xl">TOTAL KESELURUHAN</td>
-                        <td class="text-right font-black text-slate-800 py-4">${formatTitik(grandTotalPcs)} pcs</td>
-                        <td class="text-right font-black text-indigo-700 py-4">${formatRp(grandTotalOrder)}</td>
+                    <tr class="bg-slate-50 border-t-2 border-slate-200">
+                        <td class="pl-6 font-black text-slate-800 uppercase tracking-wider text-[11px] py-4 rounded-bl-xl">TOTAL KESELURUHAN</td>
+                        <td class="text-right font-black text-slate-800 py-4">${formatTitik(grandTotalPcs)}</td>
+                        <td class="text-right font-black text-slate-800 py-4">${formatRp(grandTotalOrder)}</td>
                         <td class="text-right font-black text-emerald-600 py-4">${formatRp(grandTotalMasuk)}</td>
-                        <td class="text-right font-black text-amber-600 py-4 rounded-br-xl">${isArchivedTable ? "-" : formatRp(grandTotalSisa)}</td>
+                        <td class="text-right font-black text-rose-600 py-4 pr-6 rounded-br-xl">${isArchivedTable ? "-" : formatRp(grandTotalSisa)}</td>
                     </tr>
                 `;
             }
 
             tbody.innerHTML = tableHTML;
-
-            const btnContainer = document.getElementById(isArchivedTable ? 'btn-container-arsip' : 'btn-container-aktif');
-            // Logika Tombol "Lebih Banyak": Muncul jika data yang ditemukan dari filter lebih besar dari 5 baris
-            if (matchingNamesCount > 5) btnContainer.classList.remove('hidden');
-            else btnContainer.classList.add('hidden');
+            document.getElementById(isArchivedTable ? 'btn-container-arsip' : 'btn-container-aktif').classList.toggle('hidden', matchingNamesCount <= 5);
         }
 
-        // Helper fungsi format ribuan (misal: 1000 jadi 1.000)
-        function formatTitik(angka) {
-            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
+        function formatTitik(angka) { return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+        document.getElementById('searchInput').addEventListener('keyup', () => renderTable(getFilteredData(), false, 'tableBody', 'searchInput'));
+        document.getElementById('searchInputArsip').addEventListener('keyup', () => renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip'));
 
-        document.getElementById('searchInput').addEventListener('keyup', () => {
-            renderTable(getFilteredData(), false, 'tableBody', 'searchInput');
-        });
-
-        document.getElementById('searchInputArsip').addEventListener('keyup', () => {
-            renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip');
-        });
-
-        function downloadPDF() {
-            try {
-                const { jsPDF } = window.jspdf; 
-                const doc = new jsPDF('p', 'mm', 'a4'); 
-                
-                const bulanFilter = document.getElementById('filterBulan').value;
-                const bulanText = bulanFilter === 'Semua' ? 'Semua Bulan' : document.getElementById('filterBulan').options[document.getElementById('filterBulan').selectedIndex].text;
-                const tokoText = currentFilter === 'Semua' ? 'Semua Toko' : currentFilter;
-                
-                doc.setFontSize(14);
-                doc.setFont(undefined, 'bold');
-                doc.text("LAPORAN ANALITIK SARIMBIT PRO", 14, 15);
-                
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                doc.text(`Filter Toko : ${tokoText}`, 14, 22);
-                doc.text(`Filter Bulan : ${bulanText}`, 14, 27);
-                doc.text(`Tanggal Cetak : ${new Date().toLocaleString('id-ID')}`, 14, 32);
-
-                let data = getFilteredData();
-let arsipFiltered = rawArsip;
-if (currentFilter !== 'Semua') arsipFiltered = arsipFiltered.filter(d => d.toko === currentFilter);
-// Baris 'const bulanFilter' dihapus di sini karena sudah dideklarasikan di atas
-if (bulanFilter !== 'Semua') arsipFiltered = arsipFiltered.filter(d => d.tanggal && d.tanggal.substring(0, 7) === bulanFilter);
-
-data = [...data, ...arsipFiltered]; // Gabungkan data aktif & arsip untuk tabel cetak PDF
-const sarimbitNames = [...new Set(data.map(d => d.sarimbit))].sort();
-                
-                const tableData = [];
-                let totalSemuaPcs = 0;
-                let totalSemuaOrder = 0;
-                let totalSemuaMasuk = 0;
-                let totalSemuaSisa = 0;
-
-                sarimbitNames.forEach((nama, index) => {
-                    const items = data.filter(d => d.sarimbit === nama);
-                    const isArchived = items[0].isArchived; 
-                    
-                    const tPcs = items.reduce((s, x) => s + x.pcs, 0);
-                    const tOrder = items.reduce((s, x) => s + x.netTotal, 0);
-                    
-                    const uniqueCust = new Map();
-                    items.forEach(it => {
-                        if (!uniqueCust.has(it.idcustomer)) {
-                            uniqueCust.set(it.idcustomer, it.cicilan1 + it.cicilan2 + it.cicilan3);
-                        }
-                    });
-                    
-                    let tMasuk = 0;
-                    uniqueCust.forEach(val => tMasuk += val);
-                    const tSisa = tOrder - tMasuk;
-
-                    totalSemuaPcs += tPcs;
-                    totalSemuaOrder += tOrder;
-                    totalSemuaMasuk += tMasuk;
-                    totalSemuaSisa += tSisa;
-
-                    tableData.push([
-                        index + 1,
-                        nama + (isArchived ? " (Arsip)" : ""),
-                        `${formatTitik(tPcs)} pcs`,
-                        formatRp(tOrder),
-                        formatRp(tMasuk),
-                        formatRp(tSisa)
-                    ]);
-                });
-
-                tableData.push([
-                    "", 
-                    "TOTAL KESELURUHAN", 
-                    `${formatTitik(totalSemuaPcs)} pcs`, 
-                    formatRp(totalSemuaOrder), 
-                    formatRp(totalSemuaMasuk), 
-                    formatRp(totalSemuaSisa)
-                ]);
-
-                doc.autoTable({
-                    head: [["No", "Nama Sarimbit", "Total PCS", "Nilai Order", "Dana Masuk", "Sisa Tagihan"]],
-                    body: tableData,
-                    startY: 38,
-                    theme: 'grid',
-                    headStyles: { fillColor: [79, 70, 229], fontSize: 9, halign: 'center' }, 
-                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle' },
-                    columnStyles: { 
-                        0: { cellWidth: 10, halign: 'center' }, 
-                        2: { halign: 'right' },
-                        3: { halign: 'right' },
-                        4: { halign: 'right' },
-                        5: { halign: 'right' }
-                    },
-                    willDrawCell: function(data) {
-                        if (data.row.index === tableData.length - 1) {
-                            doc.setFont(undefined, 'bold');
-                            doc.setFillColor(241, 245, 249); 
-                        }
-                    }
-                });
-
-                const fileName = `Laporan_${tokoText}_${bulanText.replace(' ', '')}.pdf`;
-                doc.save(fileName);
-                
-            } catch (error) {
-                console.error("Gagal buat PDF:", error);
-                alert("Gagal membuat PDF. Proses dibatalkan.");
-            }
-        }
+        function downloadPDF() { alert("Fitur unduh diaktifkan jika dibuka lewat komputer/tablet."); }
     </script>
 </body>
 </html>

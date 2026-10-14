@@ -8,7 +8,7 @@ const SUPABASE_KEY = "sb_publishable_I0ehNCjUO9Y-FULSmMVPAg_3VlsLqL6";
 const tokenPerangkat = localStorage.getItem('sarimbit_vip_token') || 'TIDAK-ADA-SERTIFIKAT';
 
 const dbLokal = new Dexie("SarimbitPro_DB");
-dbLokal.version(11).stores({
+dbLokal.version(125).stores({
     orders: '++id, idcustomer, customer, sarimbit, syncstatus, isArchived, updated_at',
     master: '++id, pusat, sarimbit, barang, updated_at',
     pembukuan: '++id, sarimbit, isArchived, isPrinted, isInformed, updated_at',
@@ -81,92 +81,95 @@ window.DatabaseAPI = {
             
             if (onSuccess) onSuccess({ master: localMaster, orders: localOrders, pembukuan: localPembukuan });
 
-            // 2. SINKRONISASI CLOUD DIBELAKANG LAYAR (JIKA ONLINE NYATA)
-            const isOnline = await cekInternetAktif();
-            if (isOnline) {
-                await this.syncOfflineData();
+          // SINKRONISASI CLOUD DIBELAKANG LAYAR (JIKA ONLINE NYATA)
+          const isOnline = await cekInternetAktif();
+          if (isOnline) {
+              await this.syncOfflineData();
 
-                const lastSyncMaster = (await dbLokal.metadata.get("last_sync_master"))?.value || "1970-01-01T00:00:00Z";
-                let cloudMaster = [];
-                let offsetMaster = 0;
-                let keepFetchingMaster = true;
-                
-                while (keepFetchingMaster) {
-                    const batchMaster = await supabaseFetch(`/rest/v1/master?select=*&updated_at=gt.${encodeURIComponent(lastSyncMaster)}&order=updated_at.asc&limit=1000&offset=${offsetMaster}`);
-                    if (batchMaster && batchMaster.length > 0) {
-                        cloudMaster = cloudMaster.concat(batchMaster);
-                        if (batchMaster.length < 1000) keepFetchingMaster = false;
-                        else offsetMaster += 1000;
-                    } else keepFetchingMaster = false;
-                }
-
-                if (cloudMaster.length > 0) {
-                    await dbLokal.master.bulkPut(cloudMaster);
-                    const maxM = cloudMaster.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncMaster);
-                    await dbLokal.metadata.put({ key: "last_sync_master", value: maxM });
-                }
-
-                const lastSyncOrder = (await dbLokal.metadata.get("last_sync_order"))?.value || "1970-01-01T00:00:00Z";
-                let cloudOrders = [];
-                let offsetOrder = 0;
-                let keepFetchingOrder = true;
-                
-                while (keepFetchingOrder) {
-                    const batch = await supabaseFetch(`/rest/v1/orders?select=*&updated_at=gt.${encodeURIComponent(lastSyncOrder)}&order=updated_at.asc&limit=1000&offset=${offsetOrder}`);
-                    if (batch && batch.length > 0) {
-                        cloudOrders = cloudOrders.concat(batch);
-                        if (batch.length < 1000) keepFetchingOrder = false;
-                        else offsetOrder += 1000;
-                    } else keepFetchingOrder = false;
-                }
-
-                if (cloudOrders.length > 0) {
-                    const dataAktif = cloudOrders.filter(o => o.syncstatus !== -1);
-                    const dataDihapusPusat = cloudOrders.filter(o => o.syncstatus === -1);
-                    const pendingLokal = await dbLokal.orders.filter(o => o.syncstatus === 0 || o.syncstatus === -1).toArray();
-                    const idPendingLokal = pendingLokal.map(o => o.id);
-
-                    if (dataAktif.length > 0) {
-                        const dataAktifAman = dataAktif.filter(o => !idPendingLokal.includes(o.id));
-                        if (dataAktifAman.length > 0) await dbLokal.orders.bulkPut(dataAktifAman.map(o => ({...o, syncstatus: 1})));
-                    }
-
-                    if (dataDihapusPusat.length > 0) {
-                        const idsToDel = dataDihapusPusat.map(o => o.id);
-                        await dbLokal.orders.where('id').anyOf(idsToDel).delete();
-                    }
-                    const maxO = cloudOrders.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncOrder);
-                    await dbLokal.metadata.put({ key: "last_sync_order", value: maxO });
-                }
-
-                const lastSyncPembukuan = (await dbLokal.metadata.get("last_sync_pembukuan"))?.value || "1970-01-01T00:00:00Z";
-                const cloudPembukuan = await supabaseFetch(`/rest/v1/pembukuan?select=*&updated_at=gt.${encodeURIComponent(lastSyncPembukuan)}`);
-                if (cloudPembukuan && cloudPembukuan.length > 0) {
-                    await dbLokal.pembukuan.bulkPut(cloudPembukuan);
-                    const maxP = cloudPembukuan.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncPembukuan);
-                    await dbLokal.metadata.put({ key: "last_sync_pembukuan", value: maxP });
-                }
-
-                // TARIK DATA SETORAN PUSAT DARI SUPABASE
-                const cloudSetoran = await supabaseFetch(`/rest/v1/setoran_pusat`);
-                if (cloudSetoran && cloudSetoran.length > 0) {
-                    await dbLokal.setoran_pusat.bulkPut(cloudSetoran);
-                    let memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
-                    cloudSetoran.forEach(s => memoriSetoran[s.id] = s.disetor);
-                    localStorage.setItem('DataSetoranPusat', JSON.stringify(memoriSetoran));
-                }
-
-                // 3. RENDER ULANG JIKA ADA PERUBAHAN DARI CLOUD
-                localMaster = await dbLokal.master.toArray();
-                localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
-                localPembukuan = await dbLokal.pembukuan.toArray(); 
-                localOrders.sort((a, b) => {
-                    const dateA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
-                    const dateB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
-                    return dateA === dateB ? a.id - b.id : dateB - dateA;
-                });
-                if (onSuccess) onSuccess({ master: localMaster, orders: localOrders, pembukuan: localPembukuan });
+            // --- SINKRONISASI MASTER ---
+            const lastSyncMaster = (await dbLokal.metadata.get("last_sync_master"))?.value || "1970-01-01T00:00:00Z";
+            let cloudMaster = []; let offsetMaster = 0; let keepFetchingMaster = true;
+            while (keepFetchingMaster) {
+                const batchMaster = await supabaseFetch(`/rest/v1/master?select=*&updated_at=gt.${encodeURIComponent(lastSyncMaster)}&order=updated_at.asc&limit=1000&offset=${offsetMaster}`);
+                if (batchMaster && batchMaster.length > 0) { cloudMaster = cloudMaster.concat(batchMaster); if (batchMaster.length < 1000) keepFetchingMaster = false; else offsetMaster += 1000; } else keepFetchingMaster = false;
             }
+            if (cloudMaster.length > 0) {
+                // PERCEPATAN EKSTREM: Gunakan Map agar pencocokan instan O(1), bebas lagging!
+                const mapMaster = new Map();
+                localMasterRaw.forEach(l => mapMaster.set(String(l.id), l));
+
+                const toPutMaster = cloudMaster.filter(cm => {
+                    const lm = mapMaster.get(String(cm.id));
+                    if (!lm) return true; return new Date(cm.updated_at).getTime() > new Date(lm.updated_at).getTime();
+                });
+                if (toPutMaster.length > 0) await dbLokal.master.bulkPut(toPutMaster);
+                const maxM = cloudMaster.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncMaster); await dbLokal.metadata.put({ key: "last_sync_master", value: maxM });
+            }
+
+            // --- SINKRONISASI ORDER ---
+            const lastSyncOrder = (await dbLokal.metadata.get("last_sync_order"))?.value || "1970-01-01T00:00:00Z";
+            let cloudOrders = []; let offsetOrder = 0; let keepFetchingOrder = true;
+            while (keepFetchingOrder) {
+                const batch = await supabaseFetch(`/rest/v1/orders?select=*&updated_at=gt.${encodeURIComponent(lastSyncOrder)}&order=updated_at.asc&limit=1000&offset=${offsetOrder}`);
+                if (batch && batch.length > 0) { cloudOrders = cloudOrders.concat(batch); if (batch.length < 1000) keepFetchingOrder = false; else offsetOrder += 1000; } else keepFetchingOrder = false;
+            }
+            if (cloudOrders.length > 0) {
+                const dataAktif = cloudOrders.filter(o => o.syncstatus !== -1);
+                const dataDihapusPusat = cloudOrders.filter(o => o.syncstatus === -1);
+                
+                if (dataAktif.length > 0) {
+                    // PERCEPATAN EKSTREM: Gunakan Map untuk mempercepat jutaan perhitungan menjadi 0 detik
+                    const mapOrder = new Map();
+                    localOrdersRaw.forEach(l => mapOrder.set(String(l.id), l));
+
+                    const toPutOrders = dataAktif.filter(co => {
+                        const lo = mapOrder.get(String(co.id));
+                        if (!lo) return true;
+                        if (lo.syncstatus === 0 || lo.syncstatus === -1) return false; 
+                        return new Date(co.updated_at).getTime() > new Date(lo.updated_at).getTime();
+                    });
+                    if (toPutOrders.length > 0) await dbLokal.orders.bulkPut(toPutOrders.map(o => ({...o, syncstatus: 1})));
+                }
+                if (dataDihapusPusat.length > 0) { const idsToDel = dataDihapusPusat.map(o => o.id); await dbLokal.orders.where('id').anyOf(idsToDel).delete(); }
+                const maxO = cloudOrders.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncOrder); await dbLokal.metadata.put({ key: "last_sync_order", value: maxO });
+            }
+
+            // --- SINKRONISASI PEMBUKUAN ---
+            const lastSyncPembukuan = (await dbLokal.metadata.get("last_sync_pembukuan"))?.value || "1970-01-01T00:00:00Z";
+            const cloudPembukuan = await supabaseFetch(`/rest/v1/pembukuan?select=*&updated_at=gt.${encodeURIComponent(lastSyncPembukuan)}`);
+            if (cloudPembukuan && cloudPembukuan.length > 0) {
+                const mapBuku = new Map();
+                localPembukuanRaw.forEach(l => mapBuku.set(String(l.id), l));
+
+                const toPutBuku = cloudPembukuan.filter(cb => {
+                    const lb = mapBuku.get(String(cb.id));
+                    if (!lb) return true;
+                    return new Date(cb.updated_at).getTime() > new Date(lb.updated_at).getTime();
+                });
+                if (toPutBuku.length > 0) await dbLokal.pembukuan.bulkPut(toPutBuku);
+                const maxP = cloudPembukuan.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSyncPembukuan); await dbLokal.metadata.put({ key: "last_sync_pembukuan", value: maxP });
+            }
+
+            // TARIK DATA SETORAN PUSAT DARI SUPABASE
+            const cloudSetoran = await supabaseFetch(`/rest/v1/setoran_pusat`);
+            if (cloudSetoran && cloudSetoran.length > 0) {
+                await dbLokal.setoran_pusat.bulkPut(cloudSetoran);
+                let memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
+                cloudSetoran.forEach(s => memoriSetoran[s.id] = s.disetor);
+                localStorage.setItem('DataSetoranPusat', JSON.stringify(memoriSetoran));
+            }
+
+            // 3. RENDER ULANG JIKA ADA PERUBAHAN DARI CLOUD
+            localMaster = await dbLokal.master.toArray();
+            localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
+            localPembukuan = await dbLokal.pembukuan.toArray(); 
+            localOrders.sort((a, b) => {
+                const dateA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+                const dateB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+                return dateA === dateB ? a.id - b.id : dateB - dateA;
+            });
+            if (onSuccess) onSuccess({ master: localMaster, orders: localOrders, pembukuan: localPembukuan });
+        }
         } catch(e) { console.error("Sinkronisasi gagal, menggunakan data lokal:", e); }
     },
 
@@ -376,8 +379,42 @@ async function bersihkanLogLama() {
 
 window.catatLog = async function(action, module, detail) {
     try {
-        const logData = { id: generateNumericID(), action, module, detail, device: initDeviceId(), time: new Date().toISOString(), syncstatus: 0 };
-        await dbLokal.logs.add(logData);
+        // 1. Data untuk memori lokal browser (Dexie tetap pakai 'syncstatus')
+        const logDataLokal = { 
+            id: generateNumericID(), 
+            action: action, 
+            module: module, 
+            detail: detail, 
+            device: initDeviceId(), 
+            time: new Date().toISOString(), 
+            syncstatus: 1 
+        };
+        
+        await dbLokal.logs.add(logDataLokal);
+        
+        // 2. Data khusus untuk dikirim ke Supabase (Mengikuti typo 'synstatus')
+        if (navigator.onLine) {
+            const logDataSupabase = {
+                id: logDataLokal.id,
+                action: logDataLokal.action,
+                module: logDataLokal.module,
+                detail: logDataLokal.detail,
+                device: logDataLokal.device,
+                time: logDataLokal.time,
+                synstatus: 1 // Disengaja tanpa huruf 'c' menyesuaikan tabel Supabase
+            };
+
+            fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+                method: "POST",
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${SUPABASE_KEY}`,
+                    "Content-Type": "application/json",
+                    "x-sacha-token": tokenPerangkat
+                },
+                body: JSON.stringify([logDataSupabase])
+            }).catch(e => console.warn("Kirim log ke server tertunda."));
+        }
     } catch (e) {}
 };
 
@@ -501,68 +538,59 @@ async function inisialisasiSupabaseRealtime() {
             }
         });
 
-   function handleSmartRefresh(payload, pesanKhusus) {
-            const elemenAktif = document.activeElement;
-            const adminSedangNgetik = elemenAktif && ['INPUT', 'TEXTAREA', 'SELECT'].includes(elemenAktif.tagName);
-            const formOrder = document.querySelector('form');
-            const adminSedangEdit = formOrder && formOrder.dataset.editMode;
+// PERBAIKAN: Sync Senyap (Tanpa Notif/Toast Sama Sekali) & Anti-Lag
+let debounceTimer;
+function handleSmartRefresh() {
+    const elemenAktif = document.activeElement;
+    const adminSedangNgetik = elemenAktif && ['INPUT', 'TEXTAREA', 'SELECT'].includes(elemenAktif.tagName);
+    const formOrder = document.querySelector('form');
+    const adminSedangEdit = formOrder && formOrder.dataset.editMode;
 
-            // Simpan pesan terakhir ke memori global
-            window.lastSyncMessage = pesanKhusus || "Ada perubahan data";
-
-            if (adminSedangNgetik || adminSedangEdit) {
-                window.pendingSyncFromAndroid = true;
-                if (typeof showToast === 'function') {
-                    // Notifikasi saat admin sedang mengetik
-                    showToast(`🔄 ${window.lastSyncMessage} (Layar akan direfresh otomatis nanti)`);
-                }
-
-                if (!window._listenerSelesaiNgetik) {
-                    window._listenerSelesaiNgetik = () => {
-                        setTimeout(() => {
-                            const masihNgetik = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
-                            if (!masihNgetik && window.pendingSyncFromAndroid) {
-                                window.pendingSyncFromAndroid = false;
-                                window._listenerSelesaiNgetik = null;
-                                document.removeEventListener('focusout', window._listenerSelesaiNgetik);
-                                jalankanPenyegaranLayarWindows();
-                            }
-                        }, 500);
-                    };
-                    document.addEventListener('focusout', window._listenerSelesaiNgetik);
-                }
-            } else {
-                jalankanPenyegaranLayarWindows();
-            }
+    if (adminSedangNgetik || adminSedangEdit) {
+        window.pendingSyncFromAndroid = true;
+        if (!window._listenerSelesaiNgetik) {
+            window._listenerSelesaiNgetik = () => {
+                setTimeout(() => {
+                    const masihNgetik = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+                    if (!masihNgetik && window.pendingSyncFromAndroid) {
+                        window.pendingSyncFromAndroid = false;
+                        window._listenerSelesaiNgetik = null;
+                        document.removeEventListener('focusout', window._listenerSelesaiNgetik);
+                        clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(() => { jalankanPenyegaranLayarWindows(); }, 800);
+                    }
+                }, 500);
+            };
+            document.addEventListener('focusout', window._listenerSelesaiNgetik);
         }
+    } else {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            jalankanPenyegaranLayarWindows();
+        }, 800); 
+    }
+}
 
-        function jalankanPenyegaranLayarWindows() {
-            if (typeof DatabaseAPI !== 'undefined') {
-            DatabaseAPI.getAllData((res) => {
-            // REVISI: Tangkap posisi scroll dari elemen <main> yang merupakan wadah gulir sesungguhnya
+function jalankanPenyegaranLayarWindows() {
+    if (typeof DatabaseAPI !== 'undefined') {
+        DatabaseAPI.getAllData((res) => {
             const mainElement = document.querySelector('main');
             const posisiScrollAsli = mainElement ? mainElement.scrollTop : 0;
             
             if (typeof masterData !== 'undefined') masterData = res.master || []; 
             if (typeof orderData !== 'undefined') orderData = res.orders || [];
             if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
+            
             if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
             if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
             if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
             
-            // KEMBALIKAN POSISI LAYAR AGAR TIDAK LOMPAT KE ATAS
             if (mainElement) {
-            setTimeout(() => {
-            mainElement.scrollTop = posisiScrollAsli;
-            }, 20);
+                setTimeout(() => { mainElement.scrollTop = posisiScrollAsli; }, 20);
             }
-            
-            if (typeof showToast === 'function') {
-            showToast(`⚡ ${window.lastSyncMessage || "Ada perubahan data"}. Layar telah diperbarui!`);
-            }
-            });
-            }
-            }
+        });
+    }
+}
     } catch (e) {
         console.error("Gagal menginisialisasi Realtime:", e);
     }

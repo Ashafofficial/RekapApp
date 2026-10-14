@@ -28,7 +28,7 @@
   <!-- PLUGIN KALENDER RENTANG TANGGAL (TIKTOK SELLER STYLE) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/id.min.js"></script>
   
   <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
   
@@ -400,16 +400,66 @@ if (statusSync && statusTxt) {
         }
     }
 
- // ==============================================================
-    // FUNGSI TARIK DATA UTAMA (MENGGUNAKAN DATABASE.JS BARU)
-    // ==============================================================
     async function muatDataPembukuan() {
         try {
-            // Ambil data langsung dari Dexie lokal (sangat cepat)
             const orders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
             let localPembukuan = await dbLokal.pembukuan.toArray();
 
-            // SINKRONISASI PEMBUKUAN DENGAN SUPABASE (JIKA ONLINE)
+            const olahDanGambarTabel = (bukuData) => {
+                const summaryMap = {};
+                bukuData.forEach(p => {
+                    summaryMap[p.sarimbit] = { totalOrder: Number(p.total) || 0, totalOmset: Number(p.omset) || 0, isPrinted: p.isPrinted || false, isInformed: p.isInformed || false, ...p };
+                });
+
+                const orderGroup = {};
+                orders.forEach(o => {
+                    if(!orderGroup[o.sarimbit]) orderGroup[o.sarimbit] = {};
+                    if(!orderGroup[o.sarimbit][o.idcustomer]) orderGroup[o.sarimbit][o.idcustomer] = [];
+                    orderGroup[o.sarimbit][o.idcustomer].push(o);
+                });
+
+                Object.keys(orderGroup).forEach(sarimbit => {
+                    let qtyAktif = 0; let omsetAktif = 0; let namaBrand = ""; let waktuTerbaru = 0; 
+                    Object.values(orderGroup[sarimbit]).forEach(items => {
+                        if (!namaBrand && items[0].pusat) namaBrand = items[0].pusat;
+                        const grossInvoice = items.reduce((sum, it) => sum + ((Number(it.jumlah)||0) * (Number(it.harga)||0)), 0);
+                        const dTipe = items[0].diskonTipe || 'none'; const dNilai = Number(items[0].diskonNilai) || 0;
+                        let diskonInvoice = 0;
+                        if (dTipe === 'persen') diskonInvoice = (grossInvoice * dNilai) / 100;
+                        else if (dTipe === 'angka') diskonInvoice = dNilai;
+                        let netInvoice = grossInvoice - diskonInvoice;
+                        if (netInvoice < 0) netInvoice = 0;
+
+                        omsetAktif += netInvoice;
+                        items.forEach(it => {
+                            qtyAktif += (Number(it.jumlah)||0);
+                            let tglOrder = new Date(it.tanggal).getTime();
+                            if (tglOrder > waktuTerbaru) waktuTerbaru = tglOrder;
+                        });
+                    });
+
+                    if (!summaryMap[sarimbit]) {
+                        summaryMap[sarimbit] = { sarimbit: sarimbit, isArchived: false, isPrinted: false, isInformed: false, brand: namaBrand, close: "", ready: "", c1: "", c2: "", lunas: "", dp: 0, bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap", waktuPembuatan: waktuTerbaru };
+                    }
+                    summaryMap[sarimbit].totalOrder = qtyAktif;
+                    summaryMap[sarimbit].totalOmset = omsetAktif;
+                    if (!summaryMap[sarimbit].waktuPembuatan || summaryMap[sarimbit].waktuPembuatan < waktuTerbaru) summaryMap[sarimbit].waktuPembuatan = waktuTerbaru; 
+                    if (!summaryMap[sarimbit].brand) summaryMap[sarimbit].brand = namaBrand;
+                });
+
+                let mergedSummary = Object.values(summaryMap);
+                mergedSummary.sort((a, b) => (b.waktuPembuatan || 0) - (a.waktuPembuatan || 0));
+                
+                const tableElement = document.getElementById('table-pembukuan');
+                const scrollContainer = tableElement ? tableElement.parentElement : null;
+                const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
+                
+                renderPembukuan(mergedSummary);
+                if (scrollContainer) setTimeout(() => { scrollContainer.scrollTop = currentScroll; }, 15); 
+            };
+
+            olahDanGambarTabel(localPembukuan);
+
             if (navigator.onLine) {
                 const lastSync = (await dbLokal.metadata.get("last_sync_pembukuan"))?.value || "1970-01-01T00:00:00Z";
                 const cloudData = await supabaseFetch(`/rest/v1/pembukuan?select=*&updated_at=gt.${encodeURIComponent(lastSync)}`);
@@ -417,100 +467,12 @@ if (statusSync && statusTxt) {
                     await dbLokal.pembukuan.bulkPut(cloudData);
                     const maxUpdate = cloudData.reduce((max, p) => p.updated_at > max ? p.updated_at : max, lastSync);
                     await dbLokal.metadata.put({ key: "last_sync_pembukuan", value: maxUpdate });
-                    localPembukuan = await dbLokal.pembukuan.toArray(); 
+                    const newLocalPembukuan = await dbLokal.pembukuan.toArray(); 
+                    olahDanGambarTabel(newLocalPembukuan);
                 }
             }
-
-            const summaryMap = {};
-            
-            localPembukuan.forEach(p => {
-                summaryMap[p.sarimbit] = { 
-                    totalOrder: Number(p.total) || 0,
-                    totalOmset: Number(p.omset) || 0,
-                    isPrinted: p.isPrinted || false, 
-                    isInformed: p.isInformed || false, 
-                    ...p 
-                };
-            });
-
-            const orderGroup = {};
-            orders.forEach(o => {
-                if(!orderGroup[o.sarimbit]) orderGroup[o.sarimbit] = {};
-                if(!orderGroup[o.sarimbit][o.idcustomer]) orderGroup[o.sarimbit][o.idcustomer] = [];
-                orderGroup[o.sarimbit][o.idcustomer].push(o);
-            });
-
-            Object.keys(orderGroup).forEach(sarimbit => {
-                let qtyAktif = 0;
-                let omsetAktif = 0;
-                let namaBrand = "";
-                let waktuTerbaru = 0; // Tambahan untuk merekam waktu order paling baru masuk
-
-                Object.values(orderGroup[sarimbit]).forEach(items => {
-                    if (!namaBrand && items[0].pusat) namaBrand = items[0].pusat;
-                    
-                    const grossInvoice = items.reduce((sum, it) => sum + ((Number(it.jumlah)||0) * (Number(it.harga)||0)), 0);
-                    const dTipe = items[0].diskonTipe || 'none';
-                    const dNilai = Number(items[0].diskonNilai) || 0;
-                    
-                    let diskonInvoice = 0;
-                    if (dTipe === 'persen') diskonInvoice = (grossInvoice * dNilai) / 100;
-                    else if (dTipe === 'angka') diskonInvoice = dNilai;
-                    
-                    let netInvoice = grossInvoice - diskonInvoice;
-                    if (netInvoice < 0) netInvoice = 0;
-
-                    omsetAktif += netInvoice;
-                    items.forEach(it => {
-                        qtyAktif += (Number(it.jumlah)||0);
-                        // Cari tanggal pesanan paling baru untuk koleksi sarimbit ini
-                        let tglOrder = new Date(it.tanggal).getTime();
-                        if (tglOrder > waktuTerbaru) waktuTerbaru = tglOrder;
-                    });
-                });
-
-                if (!summaryMap[sarimbit]) {
-                    summaryMap[sarimbit] = {
-                        sarimbit: sarimbit, isArchived: false, isPrinted: false, isInformed: false,
-                        brand: namaBrand, close: "", ready: "", c1: "", c2: "", lunas: "", 
-                        dp: 0, bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap",
-                        waktuPembuatan: waktuTerbaru
-                    };
-                }
-                
-                summaryMap[sarimbit].totalOrder = qtyAktif;
-                summaryMap[sarimbit].totalOmset = omsetAktif;
-                
-                // Kunci waktu dengan tanggal order terakhir agar tabel stabil dan tidak lompat-lompat saat diedit
-                if (!summaryMap[sarimbit].waktuPembuatan || summaryMap[sarimbit].waktuPembuatan < waktuTerbaru) {
-                    summaryMap[sarimbit].waktuPembuatan = waktuTerbaru; 
-                }
-                
-                if (!summaryMap[sarimbit].brand) summaryMap[sarimbit].brand = namaBrand;
-            });
-
-            let mergedSummary = Object.values(summaryMap);
-            
-            // PERBAIKAN 1: Kembalikan urutan, posisikan Sarimbit yang paling baru diupload/dipesan di paling atas
-            mergedSummary.sort((a, b) => (b.waktuPembuatan || 0) - (a.waktuPembuatan || 0));
-            
-            // PERBAIKAN 2: Tangkap posisi scroll di pembungkus tabel yang benar
-            const tableElement = document.getElementById('table-pembukuan');
-            const scrollContainer = tableElement ? tableElement.parentElement : null;
-            const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
-            
-            renderPembukuan(mergedSummary);
-            
-            // PERBAIKAN 3: Kembalikan layar ke posisi semula tanpa lompat ke atas
-            if (scrollContainer) {
-                setTimeout(() => {
-                    scrollContainer.scrollTop = currentScroll;
-                }, 15); // Beri jeda 15 milidetik agar filter sempat membuang baris yang tidak perlu sebelum di-scroll
-            }
-
         } catch(e) {
             console.error("Gagal memuat pembukuan:", e);
-            showToast("❌ Gagal memuat data.");
             document.getElementById('pembukuan-body').innerHTML = `<tr><td colspan="10" class="p-10 text-center font-bold text-rose-500">Gagal memuat data. Periksa sistem penyimpanan.</td></tr>`;
         }
     }
@@ -825,27 +787,35 @@ if (statusSync && statusTxt) {
             });
         }
 
-        // Jika ada baris baru, suntikkan ke HTML
-        if (adaBarisBaru) {
+      // Jika ada baris baru, suntikkan ke HTML
+      if (adaBarisBaru) {
             tbody.insertAdjacentHTML('beforeend', tempHTML);
+        }
 
-            // INISIALISASI KALENDER HANYA PADA INPUT YANG BARU DIBUAT
-            setTimeout(() => {
-                flatpickr(".date-range-picker:not(.flatpickr-input)", {
-                    mode: "range",
-                    dateFormat: "d M Y", 
-                    locale: "id", 
-                    showMonths: window.innerWidth > 768 ? 2 : 1, 
-                    errorHandler: function(e) { return; }, 
-                    onChange: function(selectedDates, dateStr, instance) {
-                        if (selectedDates.length === 2 || selectedDates.length === 0) {
-                            const idAman = instance.element.getAttribute('data-id');
-                            const sarimbit = instance.element.getAttribute('data-sarimbit');
-                            simpanRow(idAman, sarimbit);
+        // KUNCI ANTI-LAG: Jangan menyiksa CPU dengan memuat ratusan kalender saat loading layar!
+        // Muat kalender secara instan "HANYA" saat admin mengklik kolom inputnya saja (Lazy Load).
+        if (!window.flatpickrLazyLoader) {
+            window.flatpickrLazyLoader = true;
+            document.addEventListener('focusin', function(e) {
+                if (e.target.classList.contains('date-range-picker') && !e.target._flatpickr) {
+                    flatpickr(e.target, {
+                        mode: "range",
+                        dateFormat: "d M Y", 
+                        locale: "id", 
+                        showMonths: window.innerWidth > 768 ? 2 : 1, 
+                        errorHandler: function(e) { return; }, 
+                        onChange: function(selectedDates, dateStr, instance) {
+                            if (selectedDates.length === 2 || selectedDates.length === 0) {
+                                const idAman = instance.element.getAttribute('data-id');
+                                const sarimbit = instance.element.getAttribute('data-sarimbit');
+                                simpanRow(idAman, sarimbit);
+                            }
                         }
-                    }
-                });
-            }, 150);
+                    });
+                    // Buka kalendernya secara otomatis setelah diaktifkan
+                    e.target._flatpickr.open();
+                }
+            });
         }
 
         // =========================================================================
