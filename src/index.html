@@ -157,33 +157,171 @@
         100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-  /* ANIMASI & STYLE NOTIFIKASI PRODUKSI (POJOK KANAN ATAS) */
-  .glass-notif {
-        background: rgba(255, 255, 255, 0.25) !important; /* Opasitas diturunkan drastis jadi 25% (Super Bening) */
+/* ANIMASI & STYLE NOTIFIKASI PRODUKSI (POJOK KANAN BAWAH) */
+.glass-notif {
+        background: rgba(255, 255, 255, 0.95) !important; /* Dibuat solid agar tumpukan tidak saling tembus/blur */
         backdrop-filter: blur(12px) saturate(160%);
         -webkit-backdrop-filter: blur(12px) saturate(160%);
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.08) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important; /* Efek melayang 3D */
     }
+
+    /* KONTROL WADAH UTAMA (SMART STACK) */
+    #wadah-notif-produksi {
+        pointer-events: auto !important; 
+        transition: gap 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 70vh; 
+        overflow-y: visible; /* Biarkan tumpukan menyembul ke atas */
+        overflow-x: visible;
+        padding-top: 30px; /* Ruang untuk tumpukan mengintip */
+    }
+    #wadah-notif-produksi::-webkit-scrollbar { width: 0px; }
+
+    /* EFEK TUMPUKAN KARTU JELAS (DECK OF CARDS) */
+    #wadah-notif-produksi:not(:hover) { gap: 0px !important; }
+    
+    /* Kartu Ke-2 dari bawah mengintip jelas di atas kartu pertama */
+    #wadah-notif-produksi:not(:hover) .notif-item:nth-last-child(2) {
+        margin-bottom: -50px; 
+        transform: scale(0.92) translateY(-14px); /* Mengintip ke ATAS */
+        opacity: 0.95; 
+        pointer-events: none;
+        filter: brightness(0.95); /* Sedikit digelapkan agar terkesan di belakang */
+    }
+    
+    /* Kartu Ke-3 dari bawah mengintip lebih tinggi lagi */
+    #wadah-notif-produksi:not(:hover) .notif-item:nth-last-child(3) {
+        margin-bottom: -55px; 
+        transform: scale(0.85) translateY(-28px); 
+        opacity: 0.85; 
+        pointer-events: none;
+        filter: brightness(0.85);
+    }
+
+    /* Kartu ke-4 dst disembunyikan agar tumpukan tidak tembus atap */
+    #wadah-notif-produksi:not(:hover) .notif-item:nth-last-child(n+4) {
+        opacity: 0; margin-bottom: -60px; transform: scale(0.8) translateY(0); pointer-events: none;
+    }
+
+    /* KARTU NOTIFIKASI INDIVIDUAL */
     .notif-item {
         pointer-events: auto;
         animation: slideMasukNotif 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 120px;
+        overflow: hidden; 
+        flex-shrink: 0;
+        transform-origin: bottom center;
     }
-    .notif-item .btn-close {
-        opacity: 0;
-        transform: scale(0.8) translateY(-50%);
-        transition: all 0.2s ease;
-        top: 50%;
+
+    .notif-item .btn-close { opacity: 0; transform: scale(0.8) translateY(-50%); transition: all 0.2s ease; top: 50%; }
+    .notif-item:hover .btn-close { opacity: 1; transform: scale(1) translateY(-50%); }
+    @keyframes slideMasukNotif { 0% { opacity: 0; transform: translate(30px, 15px) scale(0.95); } 100% { opacity: 1; transform: translate(0, 0) scale(1); } }
+    
+   /* ==========================================
+       TEMA GELAP (DARK MODE) OVERRIDES LENGKAP & SEMPURNA
+       ========================================== */
+       body.theme-dark {
+        background-color: #0f172a !important;
+        background-image: none !important;
+        color: #f8fafc !important;
     }
-    .notif-item:hover .btn-close {
-        opacity: 1;
-        transform: scale(1) translateY(-50%);
+    
+    /* TRIK SULAP LOGO: Mengubah Logo Gelap Menjadi Putih Bersih di Dark Mode */
+    body.theme-dark #logo-utama, 
+    body.theme-dark #logo-mobile {
+        filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        opacity: 0.9;
     }
-    @keyframes slideMasukNotif {
-        0% { opacity: 0; transform: translate(30px, 15px) scale(0.95); }
-        100% { opacity: 1; transform: translate(0, 0) scale(1); }
+    
+  /* Latar Belakang Kartu dan Tabel Utama (Sapu Bersih) */
+  body.theme-dark main .bg-white, body.theme-dark aside .bg-white,
+    body.theme-dark .bg-\[\#F2F2F7\], body.theme-dark .bg-slate-50, body.theme-dark .bg-slate-100,
+    body.theme-dark .bg-slate-50\/80, body.theme-dark .bg-white\/40, body.theme-dark .bg-white\/60,
+    body.theme-dark .glass-header, body.theme-dark .glass,
+    body.theme-dark [id^="modal"] .bg-white, body.theme-dark [id^="modal"] .bg-slate-50 {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
     }
+
+    /* 1. HILANGKAN KOTAK PEMBUNGKUS LOGO DI SIDEBAR */
+    body.theme-dark aside .bg-white\/30 {
+        background-color: transparent !important;
+        border-bottom: none !important; /* Menghilangkan garis bawah di bawah logo */
+    }
+
+    /* 2. HILANGKAN GARIS PEMBATAS (BORDER) ANTARA MENU KIRI DAN LAYAR UTAMA */
+    body.theme-dark aside#main-sidebar {
+        border-right: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Teks Gelap Menjadi Terang */
+    body.theme-dark main .text-slate-800, body.theme-dark aside .text-slate-800, body.theme-dark [id^="modal"] .text-slate-800,
+    body.theme-dark main .text-slate-700, body.theme-dark aside .text-slate-700, body.theme-dark [id^="modal"] .text-slate-700,
+    body.theme-dark .text-\[\#1C1C1E\] {
+        color: #f1f5f9 !important;
+    }
+    body.theme-dark main .text-slate-600, body.theme-dark main .text-slate-500, body.theme-dark main .text-slate-400,
+    body.theme-dark aside .text-slate-600, body.theme-dark aside .text-slate-500, body.theme-dark aside .text-slate-400,
+    body.theme-dark [id^="modal"] .text-slate-600, body.theme-dark [id^="modal"] .text-slate-500 {
+        color: #94a3b8 !important;
+    }
+    body.theme-dark .text-violet-700 { color: #c4b5fd !important; } /* Ungu Sumber Lebih Terang */
+    body.theme-dark .text-blue-600, body.theme-dark .text-blue-700 { color: #60a5fa !important; }
+    body.theme-dark .text-orange-500 { color: #fb923c !important; }
+    body.theme-dark .text-orange-600 { color: #fdba74 !important; }
+    body.theme-dark .text-emerald-400, body.theme-dark .text-emerald-500 { color: #34d399 !important; }
+    
+    /* Border & Garis Tepi */
+    body.theme-dark main .border-slate-200, body.theme-dark aside .border-slate-200, body.theme-dark [id^="modal"] .border-slate-200,
+    body.theme-dark main .border-slate-100, body.theme-dark aside .border-slate-100, body.theme-dark [id^="modal"] .border-slate-100,
+    body.theme-dark .border-emerald-100, body.theme-dark .border-orange-100 {
+        border-color: #334155 !important;
+    }
+
+    /* Input Kolom, Dropdown Umum */
+    body.theme-dark input, body.theme-dark select, body.theme-dark textarea, body.theme-dark .glass-input {
+        background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important;
+    }
+
+    /* ==========================================
+       PERBAIKAN KOLOM KEUANGAN RINCIAN CUSTOMER 
+       ========================================== */
+    body.theme-dark input.bg-transparent {
+        background-color: transparent !important; /* Pertahankan sifat tembus pandang */
+        border-color: transparent !important;
+    }
+    /* Wadah Pembungkus Uang (Cicilan, Lunas, Ongkir) */
+    body.theme-dark .bg-slate-100\/70, body.theme-dark .bg-blue-50\/70, body.theme-dark .bg-orange-50\/70 {
+        background-color: #0f172a !important; 
+        border: 1px solid #334155 !important;
+    }
+    /* Teks Angka di dalam kolom keuangan */
+    body.theme-dark input.text-slate-700 { color: #f8fafc !important; }
+    body.theme-dark input.text-blue-700 { color: #60a5fa !important; }
+    body.theme-dark input.text-orange-600 { color: #fb923c !important; }
+
+    /* Tabel dan Navigasi */
+    body.theme-dark th { background-color: #0f172a !important; border-color: #334155 !important; color: #94a3b8 !important; }
+    body.theme-dark tbody tr:hover { background-color: #0f172a !important; }
+    body.theme-dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+    body.theme-dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+    body.theme-dark .divide-slate-200\/80 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
+    
+    body.theme-dark .nav-btn:hover:not(.active-link) { background-color: #334155 !important; }
+    body.theme-dark .active-link {
+        background-color: #0f172a !important; color: #38bdf8 !important; border-color: #38bdf8 !important;
+        box-shadow: 0 0 20px 2px rgba(56, 189, 248, 0.15), inset 4px 0 0 #38bdf8 !important; 
+    }
+    
+    /* Penyesuaian Latar Notifikasi Keras agar solid & elegan di Dark Mode */
+    body.theme-dark .glass-notif { background: #1e293b !important; border-color: #334155 !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important; }
+    body.theme-dark .glass-notif .text-slate-800 { color: #f1f5f9 !important; }
+    body.theme-dark .glass-notif .text-slate-500 { color: #94a3b8 !important; }
+    
+    /* Dashboard Sumber Latar Baris Subtotal */
+    body.theme-dark .bg-violet-50\/50 { background-color: rgba(139, 92, 246, 0.1) !important; border-color: #334155 !important; }
     
     .glass {
         background: rgba(255, 255, 255, 0.7) !important;
@@ -341,7 +479,7 @@
           <i class="fa-solid fa-bars text-xl"></i>
         </button>
         <div class="ml-4 flex items-center gap-2">
-          <img src="logo-toko.png" alt="Logo Toko" class="h-6 w-auto object-contain drop-shadow-sm">
+          <img src="logo-toko.png" alt="Logo Toko" id="logo-mobile" class="h-5 max-w-[100px] w-auto object-contain drop-shadow-sm transition-all duration-300">
         </div>
       </header>
 
@@ -351,7 +489,8 @@
       
         <div class="px-10 pt-4 pb-6 border-b border-slate-200/50 flex justify-between items-center bg-white/30 shrink-0">
             <div class="flex-1">
-                <img src="logo-toko.png" alt="Logo Toko" class="-mt-4 h-13 max-w-[180px] w-auto object-contain object-left drop-shadow-sm hover:scale-105 transition-transform duration-300">
+                <!-- Ukuran disetel 160px dan tinggi dibebaskan agar logo kembali proporsional & gagah -->
+                <img src="logo-toko.png" alt="Logo Toko" id="logo-utama" class="-mt-3 h-auto max-w-[160px] w-auto object-contain object-left drop-shadow-sm hover:scale-105 transition-all duration-300">
                 
                 <h1 id="app-title-side" class="hidden">SARIMBIT PRO</h1>
             </div>
@@ -438,13 +577,14 @@
 
     <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 relative bg-white/40 backdrop-blur-3xl">
 
-        <!-- HALAMAN: INPUT ORDER -->
-   <div id="page-order" class="page active space-y-6 w-full">
-    <div class="mb-8">
-        <h2 class="text-3xl font-black tracking-tight text-slate-800">Formulir Pesanan</h2>
+<!-- HALAMAN: INPUT ORDER -->
+<div id="page-order" class="page active w-full">
+    <div class="mb-8 pl-2">
+        <h2 class="text-[28px] md:text-3xl font-black tracking-tighter text-slate-800">Formulir Pesanan</h2>
+        <p class="text-xs font-semibold text-slate-500 mt-1">Isi data pengiriman dan pilih sarimbit dengan mudah.</p>
     </div>
     
-    <form onsubmit="handleOrderSubmit(event)" class="space-y-6">
+    <form onsubmit="handleOrderSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <input type="hidden" id="o-tanggal-asli">
       <!-- PENAMPUNG DATA KEUANGAN LAMA AGAR TIDAK HANGUS SAAT EDIT -->
       <input type="hidden" id="o-cicilan2">
@@ -452,49 +592,41 @@
       <input type="hidden" id="o-ongkir">
       <input type="hidden" id="o-resi">
   
-      <div class="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/60 p-8 md:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-          
-          <div class="absolute -top-16 -right-16 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
-  
-          <div class="relative z-10 space-y-8">
-              
+      <!-- KOTAK KIRI (DOMINAN): FORM INPUT DATA (8 Kolom) -->
+      <div class="lg:col-span-8 space-y-6">
+          <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-7 relative overflow-hidden">
+              <div class="absolute -top-16 -right-16 w-64 h-64 bg-blue-50 rounded-full blur-3xl pointer-events-none"></div>
+
               <!-- BAGIAN 1: PENGIRIMAN & KEUANGAN -->
-              <div>
-                  <div class="flex items-center gap-4 mb-6">
-                      <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
-                          <i class="fa-solid fa-file-invoice"></i>
+              <div class="relative z-10">
+                  <h3 class="text-base font-black text-slate-800 tracking-tight flex items-center gap-2 mb-5">
+                      <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-address-book"></i></div> Data Penerima
+                  </h3>
+                  
+                  <!-- Baris 1: Kontak Pribadi -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                      <div>
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Nama Penerima</label>
+                          <input type="text" id="o-nama" list="saran-nama" oninput="updateLiveStruk()" placeholder="Ketik nama lengkap..." required class="w-full px-4 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[15px] font-semibold text-[#1C1C1E] outline-none transition-all placeholder:text-[#8E8E93]">
                       </div>
                       <div>
-                          <h3 class="text-lg font-black text-slate-800 tracking-tight">Data Pengiriman & Keuangan</h3>
-                          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lengkapi detail pelanggan dan transaksi</p>
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Nomor WhatsApp</label>
+                          <input type="text" id="o-telp" list="saran-telp" oninput="updateLiveStruk()" placeholder="Contoh: 08123456789" class="w-full px-4 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[15px] font-semibold text-[#1C1C1E] outline-none transition-all placeholder:text-[#8E8E93]">
                       </div>
                   </div>
                   
-                  <div class="bg-white/50 p-6 rounded-2xl border border-white/50 shadow-sm space-y-6">
-                      
-                      <!-- Baris 1: Kontak Pribadi -->
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nama Penerima</label>
-                              <input type="text" id="o-nama" placeholder="Ketik nama lengkap..." required class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                          </div>
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nomor WhatsApp</label>
-                              <input type="text" id="o-telp" placeholder="0812..." class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                          </div>
-                      </div>
-                      
-                      <!-- Baris 2: Tujuan Pengiriman -->
+                  <!-- Baris 2: Tujuan Pengiriman -->
+                  <div class="mb-5">
+                      <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Alamat Pengiriman</label>
+                      <textarea id="o-alamat" list="saran-alamat" oninput="updateLiveStruk()" placeholder="Ketik alamat lengkap beserta RT/RW dan Kodepos..." class="w-full px-4 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[16px] text-[15px] font-semibold text-[#1C1C1E] outline-none h-24 resize-none transition-all placeholder:text-[#8E8E93]"></textarea>
+                  </div>
+                  
+                  <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom) -->
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
                       <div>
-                          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Alamat Pengiriman</label>
-                          <textarea id="o-alamat" placeholder="Ketik alamat lengkap beserta RT/RW dan Kodepos..." class="w-full px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none h-24 resize-none transition-all"></textarea>
-                      </div>
-                      
-                      <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom) -->
-                      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Kurir Ekspedisi</label>
-                              <select id="o-ekspedisi" class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer transition-all">
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Kurir Ekspedisi</label>
+                          <div class="relative">
+                              <select id="o-ekspedisi" onchange="updateLiveStruk()" class="w-full pl-4 pr-10 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[14px] font-bold text-[#1C1C1E] outline-none appearance-none cursor-pointer transition-all">
                                   <option value="">-- Pilih Ekspedisi --</option>
                                   <option value="JNE">JNE</option>
                                   <option value="JNT">JNT</option>
@@ -502,87 +634,151 @@
                                   <option value="LION">LION</option>
                                   <option value="Ambil Sendiri">Ambil Sendiri</option>
                               </select>
+                              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
                           </div>
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Asal Orderan (Wajib)</label>
-                              <select id="o-sumber" required class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer transition-all">
+                      </div>
+                      <div>
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Orderan</label>
+                          <div class="relative">
+                              <select id="o-sumber" required onchange="updateLiveStruk()" class="w-full pl-4 pr-10 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[14px] font-bold text-[#1C1C1E] outline-none appearance-none cursor-pointer transition-all">
                                   <option value="">-- Pilih Sumber --</option>
                                   <option value="WhatsApp">🟢 WhatsApp</option>
                                   <option value="TikTok">🎵 TikTok</option>
                                   <option value="Instagram">📷 Instagram</option>
                                   <option value="Reseller">🤝 Reseller</option>
                               </select>
+                              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
                           </div>
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Asal Toko</label>
-                              <select id="o-toko" required class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none cursor-pointer transition-all">
+                      </div>
+                      <div>
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Toko</label>
+                          <div class="relative">
+                              <select id="o-toko" required onchange="updateLiveStruk()" class="w-full pl-4 pr-10 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[14px] font-bold text-[#1C1C1E] outline-none appearance-none cursor-pointer transition-all">
                                   <option value="">-- Pilih Toko --</option>
                                   <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
                                   <option value="MASARA.HIJAB">MASARA.HIJAB</option>
                               </select>
+                              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
                           </div>
                       </div>
+                  </div>
 
-                      <!-- Baris 4: Keuangan (Diskon & DP digabung 1 baris) -->
-                      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Tipe Diskon</label>
-                              <select id="o-tipe-diskon" onchange="calculateOrderTotal()" class="w-full px-4 py-3.5 rounded-2xl text-sm font-bold text-slate-800 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none text-center cursor-pointer transition-all">
-                                  <option value="none">-- Tanpa Diskon --</option>
-                                  <option value="persen">Potongan Persen (%)</option>
-                                  <option value="angka">Potongan Tunai (Rp)</option>
+                  <h3 class="text-base font-black text-slate-800 tracking-tight flex items-center gap-2 mb-5 pt-5 border-t border-slate-100">
+                      <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-wallet"></i></div> Detail Keuangan
+                  </h3>
+
+                  <!-- Baris 4: Keuangan -->
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      <div>
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Tipe Diskon</label>
+                          <div class="relative">
+                              <select id="o-tipe-diskon" onchange="updateLiveStruk()" class="w-full pl-4 pr-10 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[14px] font-bold text-[#1C1C1E] outline-none appearance-none cursor-pointer transition-all text-center">
+                                  <option value="none">Tanpa Diskon</option>
+                                  <option value="persen">Persen (%)</option>
+                                  <option value="angka">Tunai (Rp)</option>
                               </select>
+                              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
                           </div>
-                          <div>
-                              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nilai Diskon</label>
-                              <input type="number" id="o-nilai-diskon" oninput="calculateOrderTotal()" placeholder="0" class="w-full px-4 py-3.5 rounded-2xl text-sm font-black text-rose-600 bg-slate-50 border border-slate-200 shadow-sm focus:bg-white focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none text-right transition-all">
-                          </div>
-                          <div>
-                              <label class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 block">DP / Pembayaran Awal</label>
-                              <input type="number" id="o-cicilan1" placeholder="Rp 0" class="w-full px-4 py-3.5 rounded-2xl text-base font-black text-blue-700 bg-blue-50 border border-blue-200 shadow-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none text-right transition-all">
-                          </div>
-                      </div>
-                  </div> <!-- Penutup kotak bg-white/50 (Data Pengiriman & Keuangan) -->
-              </div>
-
-              <!-- BAGIAN 2: DAFTAR BELANJA -->
-              <div class="border-t border-indigo-200/30 pt-8">
-                  <div class="flex items-center gap-4 mb-6">
-                      <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
-                          <i class="fa-solid fa-cart-shopping"></i>
                       </div>
                       <div>
-                          <h3 class="text-lg font-black text-slate-800 tracking-tight">Daftar Belanja</h3>
-                          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pilih produk dan tentukan jumlah</p>
+                          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Nilai Diskon</label>
+                          <input type="number" id="o-nilai-diskon" oninput="updateLiveStruk()" placeholder="0" class="w-full px-4 py-3.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] focus:bg-white border-2 border-transparent focus:border-rose-500 rounded-[14px] text-[15px] font-black text-rose-600 outline-none transition-all text-right placeholder:font-medium placeholder:text-slate-400">
+                      </div>
+                      <div>
+                          <label class="text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-1.5 ml-1 block">DP Masuk</label>
+                          <input type="number" id="o-cicilan1" oninput="updateLiveStruk()" placeholder="Rp 0" class="w-full px-4 py-3.5 bg-blue-50/50 hover:bg-blue-100/50 focus:bg-white border-2 border-transparent focus:border-[#007AFF] rounded-[14px] text-[15px] font-black text-[#007AFF] outline-none transition-all text-right placeholder:font-medium placeholder:text-blue-300">
                       </div>
                   </div>
-  
-                  <div id="order-items-list" class="space-y-4"></div>
-                  
-                  <button type="button" onclick="addOrderRow()" class="w-full py-4 border-2 border-dashed border-slate-300 rounded-2xl text-slate-500 font-bold text-sm hover:bg-white hover:text-indigo-600 hover:border-indigo-300 transition-all active:scale-[0.99] flex items-center justify-center gap-2">
-                      <i class="fa-solid fa-plus"></i> TAMBAH BARANG LAIN
-                  </button>
               </div>
-  
-              <!-- BAGIAN 3: TOTAL & SUBMIT -->
-              <div class="pt-4 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-indigo-200/30">
-                  <div class="w-full md:w-auto bg-white/50 p-4 rounded-2xl border border-white/50 flex justify-center items-center shadow-sm">
-                      <div class="px-3 text-center min-w-[70px]">
-                          <span class="font-bold text-slate-400 uppercase tracking-widest text-[9px] block mb-1">Total Pcs</span>
-                          <span id="total-pcs-order" class="text-2xl font-black text-indigo-500 leading-none">0</span>
-                      </div>
-                      <div class="h-10 w-px bg-slate-300 mx-2"></div> 
-                      <div class="pl-3 pr-2 text-left">
-                          <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px] block mb-1">Total Belanja</span>
-                          <span id="grand-total" class="text-3xl font-black text-blue-600 leading-none">Rp 0</span>
-                      </div>
+          </div> <!-- Penutup Kotak Formulir -->
+
+          <!-- KOTAK DAFTAR BELANJA -->
+          <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h3 class="text-base font-black text-slate-800 tracking-tight flex items-center gap-2 mb-5">
+                  <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-basket-shopping"></i></div> Daftar Belanja
+              </h3>
+
+              <div id="order-items-list" class="space-y-3 mb-5">
+                  <!-- Item yang diklik dari Pop-up akan masuk ke sini sebagai Card kecil -->
+              </div>
+              
+              <button type="button" onclick="bukaModalPencarian(this)" class="w-full py-4 bg-[#F2F2F7] hover:bg-[#E5E5EA] rounded-[16px] text-[#007AFF] font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 border-2 border-dashed border-[#C7C7CC] hover:border-[#007AFF]">
+                  <i class="fa-solid fa-plus"></i> PILIH BARANG SARIMBIT
+              </button>
+          </div>
+      </div>
+
+      <!-- KOTAK KANAN (KECIL): LIVE STRUK & TOMBOL SIMPAN (4 Kolom) -->
+      <div class="lg:col-span-4 relative h-full">
+        <!-- KUNCI STICKY: Kotak ini akan menempel saat di-scroll -->
+        <div class="sticky top-24 bg-white p-6 rounded-[2rem] border border-slate-200/80 shadow-xl shadow-slate-200/40 flex flex-col h-fit max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-none">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4 shrink-0">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-receipt"></i> RANGKUMAN NOTA</span>
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            </div>
+              
+              <!-- Info Penerima Struk -->
+              <div class="mb-4">
+                  <div id="struk-nama" class="font-black text-slate-800 text-[15px] leading-tight mb-1 uppercase">NAMA PELANGGAN</div>
+                  <div id="struk-telp" class="text-[11px] font-bold text-slate-500 mb-2"><i class="fa-brands fa-whatsapp text-emerald-500"></i> -</div>
+                  <div id="struk-alamat" class="text-[11px] font-medium text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">Alamat belum diisi</div>
+                  <div class="mt-2.5 flex justify-between items-center">
+                      <span class="text-[10px] font-bold text-slate-400">Kurir: <span id="struk-kurir" class="text-blue-600 font-black">-</span></span>
+                      <span class="text-[10px] font-bold text-slate-400">Toko: <span id="struk-toko" class="text-indigo-600 font-black">-</span></span>
                   </div>
-                  <button type="submit" id="btn-save-order" class="w-full md:w-auto flex-1 bg-indigo-600 text-white py-4 px-8 rounded-2xl font-black hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-500/30 text-base tracking-wide">
-                      <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN
+              </div>
+
+              <!-- Daftar Barang Struk -->
+              <div class="border-t border-slate-100 pt-4 mb-4">
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Item Pesanan (<span id="struk-total-pcs">0</span> Pcs)</div>
+                <!-- KUNCI: Menghapus batas tinggi (max-h-...) dan scrollbar internal agar daftar tampil penuh -->
+                <div id="struk-list-barang" class="space-y-2.5 min-h-[50px]">
+                    <div class="text-[10px] text-slate-400 italic text-center py-2">Belum ada barang dipilih</div>
+                </div>
+            </div>
+
+            <!-- PERINGATAN BEDA WARNA (DISMBUNYIKAN BY DEFAULT) -->
+              <div id="struk-warning-warna" class="hidden mb-4 p-3 bg-orange-50 border border-orange-200 rounded-xl items-start gap-2 animate-fade-in-up">
+                  <!-- Konten disuntik via JS -->
+              </div>
+
+              <!-- Kalkulasi Keuangan Struk -->
+              <div class="border-t border-slate-100 pt-4 space-y-2">
+                  <div class="flex justify-between text-[11px] font-bold text-slate-500">
+                      <span>Subtotal Barang</span>
+                      <span id="struk-subtotal">Rp 0</span>
+                  </div>
+                  <div class="flex justify-between text-[11px] font-bold text-rose-500">
+                      <span>Potongan Diskon</span>
+                      <span id="struk-diskon">- Rp 0</span>
+                  </div>
+                  <div class="flex justify-between text-[11px] font-bold text-slate-500">
+                      <span>Ongkos Kirim</span>
+                      <span id="struk-ongkir">+ Rp 0</span>
+                  </div>
+                  <div class="flex justify-between text-[13px] font-black text-slate-800 pt-2 border-t border-slate-100">
+                      <span>GRAND TOTAL</span>
+                      <span id="struk-grandtotal">Rp 0</span>
+                  </div>
+                  <div class="flex justify-between text-[11px] font-bold text-blue-600 pt-1">
+                      <span>DP / Uang Masuk</span>
+                      <span id="struk-dp">- Rp 0</span>
+                  </div>
+              </div>
+
+              <!-- Sisa Tagihan & Tombol Simpan -->
+              <div class="mt-6 bg-[#F2F2F7] p-4 rounded-2xl">
+                  <div class="flex justify-between items-end mb-4">
+                      <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Sisa Tagihan</span>
+                      <span id="struk-sisa" class="text-xl font-black text-rose-600 leading-none">Rp 0</span>
+                  </div>
+                  <button type="submit" id="btn-save-order" class="w-full bg-[#007AFF] hover:bg-[#0056b3] text-white py-4 rounded-[14px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(0,122,255,0.3)] text-[15px] flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-floppy-disk"></i> SIMPAN PESANAN
                   </button>
               </div>
-          </div> <!-- Penutup relative z-10 space-y-8 -->
-      </div> <!-- Penutup relative overflow-hidden bg-gradient... -->
+
+          </div>
+      </div>
   </form>
   </div>
    <!-- HALAMAN: MASTER BARANG -->
@@ -966,6 +1162,18 @@
             </div>
 
             <div class="pt-6 border-t border-slate-200 space-y-4">
+                <!-- SAKELAR DARK MODE -->
+                <label class="flex items-center justify-between cursor-pointer bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+                  <div>
+                      <span class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-moon text-indigo-500"></i> MODE GELAP (DARK MODE)</span>
+                      <p class="text-[11px] text-slate-500 mt-1 font-medium max-w-md">Menggelapkan seluruh latar aplikasi tanpa mengubah warna asli pop-up notifikasi.</p>
+                  </div>
+                  <div class="relative ml-4">
+                      <input type="checkbox" id="set-dark-mode" onchange="toggleDarkModeSeketika(this.checked)" class="sr-only peer">
+                      <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+                  </div>
+                </label>
+
                 <label class="flex items-center justify-between cursor-pointer bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
                   <div>
                       <span class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-regular fa-calendar-days text-blue-500"></i> MUNCULKAN FILTER TANGGAL RINCIAN</span>
@@ -1024,52 +1232,42 @@
         </div>
       </div>
     </div>
-    </main> 
-  </div> <datalist id="master-list-options"></datalist>
+</main> 
+</div> 
 
-  <template id="order-row-tmpl">
-    <div class="order-row group p-5 bg-white rounded-2xl shadow-sm border border-slate-200 relative mb-4 transition-all hover:border-blue-300 hover:shadow-md">
-        <div class="mb-4">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Katalog Sarimbit</label>
-            <select class="row-filter-sarimbit w-full p-3 mb-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-colors cursor-pointer" onchange="resetPencarianRow(this)">
-              <option value="">-- Sarimbit --</option>
-            </select>
-  
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block mt-2">Cari Produk</label>
-            <div onclick="bukaModalPencarian(this)" class="flex items-center w-full p-3 bg-white border border-slate-300 rounded-xl cursor-pointer hover:border-blue-500 transition-colors shadow-sm group/search">
-                <div class="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 group-hover/search:text-blue-500 transition-colors mr-3">
-                    <i class="fa-solid fa-search text-sm"></i>
-                </div>
-                <input type="hidden" class="row-input" data-meta="" required>
-                <div class="teks-produk-terpilih w-full bg-transparent text-sm font-semibold text-slate-400 truncate pr-2 select-none">
-                    Ketuk untuk mencari...
-                </div>
+<!-- PENAMPUNG SARAN AUTO-FILL KETIK CEPAT -->
+<datalist id="saran-nama"></datalist>
+<datalist id="saran-telp"></datalist>
+<datalist id="saran-alamat"></datalist>
+
+<datalist id="master-list-options"></datalist>
+
+<template id="order-row-tmpl">
+    <div class="order-row group p-4 bg-white rounded-2xl shadow-sm border border-slate-200 relative mb-3 transition-all hover:border-[#007AFF] flex justify-between items-center">
+        <!-- Input Tersembunyi Penyimpan Data -->
+        <input type="hidden" class="row-input" data-meta="">
+        
+        <div class="flex flex-col flex-1 pr-4">
+            <div class="text-[13px] font-bold text-slate-800 leading-tight mb-1 row-nama-tampil">Nama Barang</div>
+            <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[9px] font-black text-slate-500 bg-[#F2F2F7] px-2 py-0.5 rounded uppercase row-warna-tampil">Warna</span>
+                <span class="text-[9px] font-black text-slate-500 bg-[#F2F2F7] px-2 py-0.5 rounded uppercase row-size-tampil">Size</span>
             </div>
+            <div class="text-[11px] font-black text-blue-600 row-harga-tampil">Rp 0</div>
         </div>
         
-        <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
-            <div class="flex items-center gap-3">
-                <div class="flex flex-col">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Kuantitas</label>
-                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 shadow-inner w-max">
-                        <button type="button" onclick="ubahQtyRow(this, -1)" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-rose-500 hover:shadow-sm transition-all">
-                            <i class="fa-solid fa-minus text-xs"></i>
-                        </button>
-                        <input type="number" min="1" value="1" onchange="calculateOrderTotal()" class="row-qty w-12 text-center font-black text-lg text-slate-800 bg-transparent outline-none border-none">
-                        <button type="button" onclick="ubahQtyRow(this, 1)" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-emerald-500 hover:shadow-sm transition-all">
-                            <i class="fa-solid fa-plus text-xs"></i>
-                        </button>
-                    </div>
-                </div>
+        <div class="flex flex-col items-end">
+            <div class="flex items-center bg-[#F2F2F7] rounded-[10px] p-1 mb-1">
+                <button type="button" onclick="ubahQtyRow(this, -1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-rose-500 transition-all active:scale-95"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                <input type="number" min="1" value="1" oninput="updateLiveStruk()" class="row-qty w-8 text-center font-black text-sm text-[#1C1C1E] bg-transparent outline-none border-none p-0 m-0">
+                <button type="button" onclick="ubahQtyRow(this, 1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-emerald-500 transition-all active:scale-95"><i class="fa-solid fa-plus text-[10px]"></i></button>
             </div>
-            <div class="text-right">
-                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Subtotal Item</label>
-                <span class="row-subtotal font-black text-xl text-slate-800">Rp 0</span>
-            </div>
+            <span class="row-subtotal font-black text-xs text-slate-800">Rp 0</span>
         </div>
         
-        <button type="button" onclick="this.closest('.order-row').remove(); calculateOrderTotal();" class="absolute -top-3 -right-3 bg-white text-slate-400 w-8 h-8 rounded-full flex items-center justify-center shadow-md border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all z-10 opacity-0 group-hover:opacity-100">
-            <i class="fa-solid fa-xmark text-sm font-bold"></i>
+        <!-- Tombol Hapus Pojok -->
+        <button type="button" onclick="this.closest('.order-row').remove(); updateLiveStruk();" class="absolute -top-2 -right-2 w-6 h-6 bg-white text-slate-400 rounded-full flex items-center justify-center shadow-md border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all z-10 opacity-0 group-hover:opacity-100">
+            <i class="fa-solid fa-xmark text-[10px] font-black"></i>
         </button>
     </div>
   </template>
@@ -1103,48 +1301,77 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <div id="kontenInfoTagihan" class="p-6 space-y-4 max-h-[60vh] overflow-y-auto bg-slate-50 relative">
-            <!-- Konten info otomatis masuk ke sini dari Javascript -->
-        </div>
+        <div id="kontenInfoTagihan" class="p-6 space-y-4 max-h-[60vh] overflow-y-auto bg-slate-50 relative"></div>
         <div class="p-4 bg-white border-t border-slate-200 flex justify-end">
             <button onclick="tutupModalTagihan()" class="px-5 py-2.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-300 transition-colors active:scale-95">Tutup</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL PENCARIAN -->
-<div id="modalPencarian" class="hidden fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-start justify-center pt-8 md:pt-16 px-4 pb-10">
-    <div class="bg-slate-50 w-full max-w-3xl h-[85vh] md:h-[75vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-fade-in-up border border-white">
+<!-- MODAL PENCARIAN & MULTI-SELECT -->
+<div id="modalPencarian" class="hidden fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-start justify-center pt-8 md:pt-12 px-4 pb-10">
+    <div class="bg-slate-50 w-full max-w-4xl h-[88vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-fade-in-up border border-white">
         
-        <div class="p-6 md:p-8 border-b border-slate-200 bg-white relative z-10 shadow-sm">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-sm"><i class="fa-solid fa-box-open"></i></div>
-                    Katalog Barang
+        <div class="p-6 border-b border-slate-200 bg-white relative z-10 shadow-sm shrink-0">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#E5E5EA] text-[#007AFF] rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-box-open"></i></div>
+                    Katalog Sarimbit
                 </h3>
-                <button type="button" onclick="tutupModalPencarian()" class="w-10 h-10 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 rounded-full flex items-center justify-center text-slate-500 transition-colors border border-slate-200">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button type="button" onclick="tutupModalPencarian()" class="w-8 h-8 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 rounded-full flex items-center justify-center text-slate-500 transition-colors border border-slate-200">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             
-            <div class="flex flex-col md:flex-row gap-3">
-                <div class="flex-1 flex items-center bg-slate-50 border border-slate-300 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10 transition-all p-1">
-                    <i class="fa-solid fa-search text-slate-400 text-lg ml-4 mr-3"></i>
-                    <input type="text" id="inputPencarianBesar" onkeyup="cariProdukBesar()" placeholder="Ketik nama produk, warna..." class="w-full bg-transparent p-3 text-base md:text-lg font-bold text-slate-800 outline-none placeholder:text-slate-400 placeholder:font-medium">
+            <div class="flex flex-col md:flex-row gap-2.5">
+                <!-- Kotak Pencarian Manual -->
+                <div class="flex-1 flex items-center bg-[#F2F2F7] border border-transparent rounded-[14px] focus-within:border-[#007AFF] focus-within:bg-white transition-all p-1">
+                    <i class="fa-solid fa-search text-slate-400 text-sm ml-3 mr-2"></i>
+                    <input type="text" id="inputPencarianBesar" oninput="cariProdukBesar()" placeholder="Ketik ukuran atau keyword..." class="w-full bg-transparent py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-[#8E8E93]">
                 </div>
-                <select id="filterWarnaModal" onchange="updateWarnaPencarian()" class="md:w-1/3 bg-white border border-slate-200 rounded-full px-5 py-3 text-sm font-semibold text-slate-600 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer shadow-sm">
-                    <option value="">-- Semua Warna --</option>
-                </select>
+                
+                <!-- Filter Dinamis Nama Sarimbit -->
+                <div class="relative md:w-[22%]">
+                    <select id="filterSarimbitModal" onchange="cariProdukBesar()" class="w-full bg-[#F2F2F7] border border-transparent rounded-[14px] pl-3 pr-8 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#007AFF] focus:bg-white transition-all cursor-pointer appearance-none">
+                        <option value="">-- Semua Sarimbit --</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                </div>
+                
+                <!-- Filter Dinamis Nama Barang -->
+                <div class="relative md:w-[22%]">
+                    <select id="filterBarangModal" onchange="cariProdukBesar()" class="w-full bg-[#F2F2F7] border border-transparent rounded-[14px] pl-3 pr-8 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#007AFF] focus:bg-white transition-all cursor-pointer appearance-none">
+                        <option value="">-- Semua Barang --</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                </div>
+
+                <!-- Filter Dinamis Warna -->
+                <div class="relative md:w-[20%]">
+                    <select id="filterWarnaModal" onchange="cariProdukBesar()" class="w-full bg-[#F2F2F7] border border-transparent rounded-[14px] pl-3 pr-8 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#007AFF] focus:bg-white transition-all cursor-pointer appearance-none">
+                        <option value="">-- Semua Warna --</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                </div>
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
-            <div id="hasilPencarianBesar" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- Area List Barang -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-[#F2F2F7]">
+            <div id="hasilPencarianBesar" class="grid grid-cols-1 md:grid-cols-2 gap-3 pb-6">
+                <!-- Data Katalog Masuk Sini -->
             </div>
         </div>
         
+        <!-- Footer Modal: Sticky Button Simpan -->
+        <div class="p-4 bg-white border-t border-slate-200 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] shrink-0 flex justify-between items-center">
+            <div class="text-[11px] font-black text-slate-500 uppercase tracking-widest"><span id="modal-total-item-dipilih" class="text-lg text-[#007AFF]">0</span> Item Terpilih</div>
+            <button onclick="terapkanProdukTerpilih()" class="bg-[#007AFF] hover:bg-[#0056b3] text-white px-6 py-3.5 rounded-[14px] font-bold text-[13px] tracking-wide shadow-md active:scale-95 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-check"></i> MASUKKAN KE PESANAN
+            </button>
+        </div>
     </div>
-  </div>
+</div>
 
   <!-- MODAL FILTER LANJUTAN SLIP -->
   <div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
@@ -1675,49 +1902,259 @@
     let rowAktifPencarian = null;
     let warnaAktifPencarian = ""; // Variabel pengingat warna terakhir
 
-    function bukaModalPencarian(elemenTrigger) {
-        rowAktifPencarian = elemenTrigger.closest('.order-row');
+  // =========================================================================
+    // MESIN LIVE STRUK (REAL-TIME NOTA) & PERINGATAN WARNA
+    // =========================================================================
+    function updateLiveStruk() {
+        // 1. Tarik Data Penerima
+        const nama = document.getElementById('o-nama').value.trim();
+        document.getElementById('struk-nama').innerText = nama ? nama.toUpperCase() : "NAMA PELANGGAN";
+        document.getElementById('struk-telp').innerHTML = `<i class="fa-brands fa-whatsapp text-emerald-500"></i> ${document.getElementById('o-telp').value || "-"}`;
+        document.getElementById('struk-alamat').innerText = document.getElementById('o-alamat').value || "Alamat belum diisi";
+        
+        // Ekspedisi & Toko
+        document.getElementById('struk-kurir').innerText = document.getElementById('o-ekspedisi').value || "-";
+        document.getElementById('struk-toko').innerText = document.getElementById('o-toko').value || "-";
+
+        // 2. Kalkulasi Daftar Belanja & Cek Warna Ganda
+        let subtotal = 0;
+        let totalPcs = 0;
+        let htmlListBarang = "";
+        const trackerWarna = {}; // { "NAMA_SARIMBIT": Set("Merah", "Biru") }
+
+        document.querySelectorAll('.order-row').forEach(row => {
+            const inputHidden = row.querySelector('.row-input');
+            const qtyInput = row.querySelector('.row-qty');
+            if (inputHidden && inputHidden.dataset.meta && qtyInput) {
+                const qty = parseInt(qtyInput.value) || 0;
+                if (qty > 0) {
+                    const meta = JSON.parse(inputHidden.dataset.meta);
+                    const subItem = meta.harga * qty;
+                    subtotal += subItem;
+                    totalPcs += qty;
+
+                    // Mengisi Tampilan List di Struk Kanan
+                    htmlListBarang += `
+                        <div class="flex justify-between text-[11px] mb-1.5 pb-1.5 border-b border-slate-50 last:border-0">
+                            <span class="text-slate-600 font-medium pr-2 leading-tight">
+                                <span class="font-black text-blue-600">${qty}x</span> ${meta.sarimbit} - ${meta.barang} <span class="text-[9px] text-slate-400">(${meta.varian}/${meta.size})</span>
+                            </span>
+                            <span class="font-black text-slate-800 whitespace-nowrap">${formatRp(subItem)}</span>
+                        </div>
+                    `;
+
+                    // Update Subtotal di Row Kiri
+                    const subRowEl = row.querySelector('.row-subtotal');
+                    if (subRowEl) subRowEl.innerText = formatRp(subItem);
+
+                    // Menyimpan warna untuk dicek
+                    if (!trackerWarna[meta.sarimbit]) trackerWarna[meta.sarimbit] = new Set();
+                    trackerWarna[meta.sarimbit].add(meta.varian);
+                }
+            }
+        });
+
+        if (htmlListBarang === "") {
+            htmlListBarang = `<div class="text-[10px] text-slate-400 italic text-center py-2">Belum ada barang dipilih</div>`;
+        }
+        document.getElementById('struk-list-barang').innerHTML = htmlListBarang;
+        document.getElementById('struk-total-pcs').innerText = totalPcs;
+
+        // Cek apakah ada sarimbit yang memiliki lebih dari 1 warna
+        let pesanPeringatan = "";
+        for (const srm in trackerWarna) {
+            if (trackerWarna[srm].size > 1) {
+                pesanPeringatan = `Koleksi <b>${srm}</b> memiliki campuran warna (${[...trackerWarna[srm]].join(', ')}). Pastikan bukan karena salah klik varian!`;
+                break;
+            }
+        }
+        
+        const boxWarning = document.getElementById('struk-warning-warna');
+        if (pesanPeringatan !== "") {
+            boxWarning.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-500 mt-0.5"></i> <span class="text-[10px] leading-tight text-orange-700">${pesanPeringatan}</span>`;
+            boxWarning.classList.remove('hidden');
+            boxWarning.classList.add('flex');
+        } else {
+            boxWarning.classList.add('hidden');
+            boxWarning.classList.remove('flex');
+        }
+
+        // 3. Kalkulasi Keuangan Akhir
+        let tipeDiskon = document.getElementById('o-tipe-diskon').value;
+        let nilaiDiskon = Number(document.getElementById('o-nilai-diskon').value) || 0;
+        let totalDiskon = 0;
+
+        if (tipeDiskon === 'persen') totalDiskon = (subtotal * nilaiDiskon) / 100;
+        else if (tipeDiskon === 'angka') totalDiskon = nilaiDiskon;
+
+        let grandTotal = subtotal - totalDiskon;
+        if (grandTotal < 0) grandTotal = 0;
+
+        // DP Masuk
+        let dpMasuk = Number(document.getElementById('o-cicilan1').value) || 0;
+        // Asumsi Ongkir tidak ditagihkan di awal (Sesuai struk lama, sisa = GT - DP)
+        let sisaTagihan = grandTotal - dpMasuk;
+
+        // Print ke layar
+        document.getElementById('struk-subtotal').innerText = formatRp(subtotal);
+        document.getElementById('struk-diskon').innerText = `- ${formatRp(totalDiskon)}`;
+        document.getElementById('struk-grandtotal').innerText = formatRp(grandTotal);
+        document.getElementById('struk-dp').innerText = `- ${formatRp(dpMasuk)}`;
+        document.getElementById('struk-sisa').innerText = formatRp(sisaTagihan);
+    }
+
+    // Ubah fungsi lawas calculateOrderTotal agar nyambung ke sistem Struk Baru
+    function calculateOrderTotal() { updateLiveStruk(); }
+
+    function ubahQtyRow(btn, perubahan) {
+        const row = btn.closest('.order-row');
+        const input = row.querySelector('.row-qty');
+        let nilaiSekarang = parseInt(input.value) || 0;
+        let nilaiBaru = nilaiSekarang + perubahan;
+        if (nilaiBaru < 1) nilaiBaru = 1; 
+        input.value = nilaiBaru;
+        updateLiveStruk();
+    }
+
+   // =========================================================================
+    // MESIN DATALIST (SARAN AUTO-FILL)
+    // =========================================================================
+    function perbaruiDatalistSaran() {
+        const setNama = new Set();
+        const setTelp = new Set();
+        const setAlamat = new Set();
+
+        if (typeof orderData !== 'undefined') {
+            orderData.forEach(o => {
+                if (o.customer && o.customer.length > 2) setNama.add(o.customer.trim());
+                if (o.telepon && o.telepon.length > 5) setTelp.add(o.telepon.trim());
+                if (o.alamat && o.alamat.length > 5) setAlamat.add(o.alamat.trim());
+            });
+        }
+
+        // PENGAMAN (SAFETY CHECK): Cek apakah elemennya ada sebelum diisi, mencegah Crash!
+        const elNama = document.getElementById('saran-nama');
+        const elTelp = document.getElementById('saran-telp');
+        const elAlamat = document.getElementById('saran-alamat');
+
+        if (elNama) elNama.innerHTML = [...setNama].map(v => `<option value="${v}">`).join('');
+        if (elTelp) elTelp.innerHTML = [...setTelp].map(v => `<option value="${v}">`).join('');
+        if (elAlamat) elAlamat.innerHTML = [...setAlamat].map(v => `<option value="${v}">`).join('');
+    }
+
+ // =========================================================================
+    // MESIN MULTI-SELECT POP-UP KATALOG (DENGAN FILTER DINAMIS)
+    // =========================================================================
+    let keranjangModal = {}; // Menampung item yang sedang dipilih di dalam pop-up
+
+    function bukaModalPencarian() {
         document.getElementById('modalPencarian').classList.remove('hidden');
         document.getElementById('inputPencarianBesar').value = "";
         
-        // Setup dropdown warna berdasarkan sarimbit yang dipilih pada baris
-        let filterSarimbit = "";
-        if (rowAktifPencarian) {
-            filterSarimbit = rowAktifPencarian.querySelector('.row-filter-sarimbit').value;
-        }
-        
+        keranjangModal = {}; // Reset Keranjang Pop-up setiap dibuka baru
+
+        const selectSarimbit = document.getElementById('filterSarimbitModal');
+        const selectBarang = document.getElementById('filterBarangModal');
         const selectWarna = document.getElementById('filterWarnaModal');
+        
         if (masterData && masterData.length > 0) {
-            // Kumpulkan varian unik dari katalog
-            const listWarna = [...new Set(masterData.filter(m => !filterSarimbit || m.sarimbit === filterSarimbit).map(m => m.varian))].sort();
-            selectWarna.innerHTML = `<option value="">Semua Warna</option>` + listWarna.map(w => `<option value="${w}">${w}</option>`).join('');
-        } else {
-            selectWarna.innerHTML = `<option value="">Semua Warna</option>`;
+            // Isi dropdown Sarimbit di awal
+            const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
+            selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
         }
         
-        // Kembalikan ke warna yang terakhir dipilih pada modal (untuk item berikutnya)
-        selectWarna.value = warnaAktifPencarian;
-
+        selectSarimbit.value = "";
+        selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
+        selectBarang.value = "";
+        selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
+        selectWarna.value = "";
+        
         setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 100);
-        renderProdukModal("");
-    }
-
-    function updateWarnaPencarian() {
-        warnaAktifPencarian = document.getElementById('filterWarnaModal').value;
-        cariProdukBesar();
+        cariProdukBesar(); // Pancing pencarian awal agar filter ikut menyesuaikan
     }
 
     function tutupModalPencarian() {
         document.getElementById('modalPencarian').classList.add('hidden');
-        rowAktifPencarian = null;
     }
 
     function cariProdukBesar() {
         const query = document.getElementById('inputPencarianBesar').value.toLowerCase();
-        renderProdukModal(query);
+        const filterSarimbit = document.getElementById('filterSarimbitModal').value;
+        const filterBarangEl = document.getElementById('filterBarangModal');
+        const filterWarnaEl = document.getElementById('filterWarnaModal');
+        
+        const barangAktif = filterBarangEl.value;
+        const warnaAktif = filterWarnaEl.value;
+
+        let hasilSaringanAwal = masterData || [];
+
+        // 1. Saring Data berdasarkan Teks Input Manual & Dropdown Sarimbit
+        if (hasilSaringanAwal.length > 0) {
+            hasilSaringanAwal = hasilSaringanAwal.filter(m => {
+                if (filterSarimbit && m.sarimbit !== filterSarimbit) return false;
+                const namaLengkap = `${m.pusat} ${m.sarimbit} ${m.barang} ${m.varian} ${m.size}`.toLowerCase();
+                return namaLengkap.includes(query);
+            });
+        }
+
+        // 2. Dinamisasi Dropdown Barang berdasarkan hasil saringan (Sarimbit & Pencarian Manual)
+        if (hasilSaringanAwal.length > 0) {
+            const barangTersedia = [...new Set(hasilSaringanAwal.map(m => m.barang))].sort();
+            let opsiBarang = `<option value="">-- Semua Barang --</option>`;
+            barangTersedia.forEach(b => { opsiBarang += `<option value="${b}">${b}</option>`; });
+            
+            filterBarangEl.innerHTML = opsiBarang;
+            if (barangTersedia.includes(barangAktif)) filterBarangEl.value = barangAktif;
+            else filterBarangEl.value = "";
+        } else {
+            filterBarangEl.innerHTML = `<option value="">-- Semua Barang --</option>`;
+        }
+
+        // --- Saring lagi menggunakan filter barang terpilih untuk mencari warnanya ---
+        const barangFinal = filterBarangEl.value;
+        let saringanWarna = hasilSaringanAwal;
+        if (barangFinal) {
+            saringanWarna = saringanWarna.filter(m => m.barang === barangFinal);
+        }
+
+        // 3. Dinamisasi Dropdown Warna berdasarkan saringan barang
+        if (saringanWarna.length > 0) {
+            const warnaTersedia = [...new Set(saringanWarna.map(m => m.varian))].sort();
+            let opsiWarna = `<option value="">-- Semua Warna --</option>`;
+            warnaTersedia.forEach(w => { opsiWarna += `<option value="${w}">${w}</option>`; });
+            
+            filterWarnaEl.innerHTML = opsiWarna;
+            if (warnaTersedia.includes(warnaAktif)) filterWarnaEl.value = warnaAktif;
+            else filterWarnaEl.value = "";
+        } else {
+            filterWarnaEl.innerHTML = `<option value="">-- Semua Warna --</option>`;
+        }
+
+        // 4. Terapkan Saringan Final Mutlak (Saringan Awal + Barang + Warna) untuk memunculkan kotak kardus produk
+        const warnaFinal = filterWarnaEl.value;
+        let hasilRender = saringanWarna;
+        if (warnaFinal) {
+            hasilRender = saringanWarna.filter(m => m.varian === warnaFinal);
+        }
+
+        renderProdukModal(hasilRender.slice(0, 100)); // Render maksimal 100 item agar tidak berat
     }
 
-    function renderProdukModal(query) {
+    function ubahQtyModal(metaKey, perubahan) {
+        if (!keranjangModal[metaKey]) keranjangModal[metaKey] = 0;
+        keranjangModal[metaKey] += perubahan;
+        if (keranjangModal[metaKey] < 0) keranjangModal[metaKey] = 0;
+
+        // Update angka di layar pop-up
+        const inputDisplay = document.getElementById(`qty-modal-${btoa(metaKey).replace(/[^a-zA-Z0-9]/g, '')}`);
+        if (inputDisplay) inputDisplay.innerText = keranjangModal[metaKey];
+
+        // Update Total Item di Footer Modal
+        const totalPcs = Object.values(keranjangModal).reduce((sum, val) => sum + val, 0);
+        document.getElementById('modal-total-item-dipilih').innerText = totalPcs;
+    }
+
+    function renderProdukModal(hasil) {
         const boxHasil = document.getElementById('hasilPencarianBesar');
         
         if (!masterData || masterData.length === 0) {
@@ -1725,108 +2162,159 @@
             return;
         }
 
-        // KUMPULKAN BARANG YANG SUDAH DIPILIH DI FORM (Mencegah Double Item)
-        const barangSudahDipilih = new Set();
-        document.querySelectorAll('.order-row').forEach(r => {
-            const inp = r.querySelector('.row-input');
-            // Abaikan baris yang sedang aktif agar bisa diubah produknya
-            if (inp && inp.dataset.meta && r !== rowAktifPencarian) { 
-                const meta = JSON.parse(inp.dataset.meta);
-                barangSudahDipilih.add(`${meta.sarimbit}|${meta.barang}|${meta.varian}|${meta.size}`);
-            }
-        });
-
-        let filterSarimbit = "";
-        if (rowAktifPencarian) {
-            filterSarimbit = rowAktifPencarian.querySelector('.row-filter-sarimbit').value;
-        }
-
-        const hasil = masterData.filter(m => {
-            if (filterSarimbit && m.sarimbit !== filterSarimbit) return false;
-            // Menambahkan saringan berdasarkan variabel warnaAktifPencarian
-            if (warnaAktifPencarian && m.varian !== warnaAktifPencarian) return false;
-            const namaLengkap = `${m.pusat} ${m.sarimbit} ${m.barang} ${m.varian} ${m.size}`.toLowerCase();
-            return namaLengkap.includes(query);
-        }).slice(0, 300);
-
-        if (hasil.length > 0) {
+        if (hasil && hasil.length > 0) {
             let html = '';
             hasil.forEach(m => {
                 const hargaItem = Number(m.harga) || 0;
-                const metaAman = encodeURIComponent(JSON.stringify(m)).replace(/'/g, "%27");
+                // Kunci unik untuk keranjang (harus aman dari petik)
+                const metaAsli = { pusat: m.pusat, sarimbit: m.sarimbit, barang: m.barang, varian: m.varian, size: m.size, harga: m.harga, berat: m.berat };
+                const metaString = encodeURIComponent(JSON.stringify(metaAsli)).replace(/'/g, "%27");
+                const idAman = btoa(metaString).replace(/[^a-zA-Z0-9]/g, '');
                 
-                const itemKey = `${m.sarimbit}|${m.barang}|${m.varian}|${m.size}`;
-                const isDipilih = barangSudahDipilih.has(itemKey);
+                const currentQty = keranjangModal[metaString] || 0;
 
-                if (isDipilih) {
-                    // TAMPILAN TERKUNCI (REdup & Ada Tanda "Sudah Terpilih")
-                    html += `
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm opacity-50 cursor-not-allowed flex justify-between items-center relative">
-                            <div class="absolute inset-0 z-10" title="Sudah dipilih di daftar belanja, silakan tambahkan jumlah Qty-nya saja"></div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-slate-500 text-sm mb-1">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)} <span class="text-rose-500 text-[10px] ml-1 font-black italic">(Sudah Terpilih)</span></span>
-                                <div class="flex gap-1.5">
-                                    <span class="text-[9px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded uppercase border border-slate-300">${escapeHTML(m.varian)}</span>
-                                    <span class="text-[9px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded uppercase border border-slate-300">Size: ${escapeHTML(m.size)}</span>
-                                </div>
+                html += `
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-[#007AFF] transition-all">
+                        <div class="flex flex-col mb-3">
+                            <span class="font-bold text-slate-700 text-xs leading-tight mb-1">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
+                            <div class="flex gap-1.5 mb-1.5">
+                                <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase border border-slate-200">${escapeHTML(m.varian)}</span>
+                                <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase border border-slate-200">Size: ${escapeHTML(m.size)}</span>
                             </div>
-                            <span class="font-black text-slate-400 text-sm md:text-base">${formatRp(hargaItem)}</span>
+                            <span class="font-black text-blue-600 text-sm">${formatRp(hargaItem)}</span>
                         </div>
-                    `;
-                } else {
-                    // TAMPILAN NORMAL
-                    html += `
-                        <div onclick="pilihProdukBesar('${metaAman}')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer flex justify-between items-center group transition-all active:scale-[0.98]">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-slate-700 group-hover:text-blue-700 text-sm mb-1">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
-                                <div class="flex gap-1.5">
-                                    <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase border border-slate-200">${escapeHTML(m.varian)}</span>
-                                    <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase border border-slate-200">Size: ${escapeHTML(m.size)}</span>
-                                </div>
-                            </div>
-                            <span class="font-black text-slate-400 group-hover:text-blue-600 text-sm md:text-base">${formatRp(hargaItem)}</span>
+                        
+                        <div class="flex items-center justify-between bg-[#F2F2F7] rounded-xl p-1">
+                            <button type="button" onclick="ubahQtyModal('${metaString}', -1)" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-rose-500 shadow-sm transition-all"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <span id="qty-modal-${idAman}" class="font-black text-base text-[#1C1C1E] w-8 text-center">${currentQty}</span>
+                            <button type="button" onclick="ubahQtyModal('${metaString}', 1)" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-emerald-500 shadow-sm transition-all"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             });
             boxHasil.innerHTML = html;
         } else {
-            boxHasil.innerHTML = `
-                <div class="col-span-full py-16 flex flex-col items-center justify-center bg-transparent">
-                    <i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i>
-                    <h4 class="text-lg font-bold text-slate-400">Produk tidak ditemukan</h4>
-                </div>`;
+            boxHasil.innerHTML = `<div class="col-span-full py-16 flex flex-col items-center justify-center"><i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i><h4 class="text-sm font-bold text-slate-400">Produk tidak ditemukan</h4></div>`;
         }
     }
 
-    function pilihProdukBesar(metaAman) {
-        if (!rowAktifPencarian) return;
+    function terapkanProdukTerpilih() {
+        const container = document.getElementById('order-items-list');
         
-        const m = JSON.parse(decodeURIComponent(metaAman));
-        
-        const textDisplay = rowAktifPencarian.querySelector('.teks-produk-terpilih');
-        textDisplay.textContent = `${m.sarimbit} - ${m.barang} (${m.varian}/${m.size})`;
-        textDisplay.classList.remove('text-slate-400');
-        textDisplay.classList.add('text-slate-800');
-        
-        const inputHidden = rowAktifPencarian.querySelector('.row-input');
-        inputHidden.dataset.meta = JSON.stringify(m);
-        inputHidden.value = `${m.pusat} - ${m.sarimbit} - ${m.barang} (${m.varian}/${m.size})`; 
+        // Loop isi keranjang pop-up
+        for (const metaString in keranjangModal) {
+            const qty = keranjangModal[metaString];
+            if (qty > 0) {
+                const metaData = JSON.parse(decodeURIComponent(metaString));
+                
+                // Buat card row baru menggunakan template
+                const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
+                const row = clone.querySelector('.order-row');
+                
+                // Isi data ke elemen
+                row.querySelector('.row-input').dataset.meta = JSON.stringify(metaData);
+                row.querySelector('.row-qty').value = qty;
+                
+                row.querySelector('.row-nama-tampil').innerText = `${metaData.sarimbit} - ${metaData.barang}`;
+                row.querySelector('.row-warna-tampil').innerText = metaData.varian;
+                row.querySelector('.row-size-tampil').innerText = metaData.size;
+                row.querySelector('.row-harga-tampil').innerText = formatRp(metaData.harga);
+                
+                // Masukkan ke daftar belanja kiri
+                container.appendChild(clone);
+            }
+        }
         
         tutupModalPencarian();
-        calculateOrderTotal();
+        updateLiveStruk();
     }
+
+    // Pastikan Datalist otomatis terisi saat data utama selesai dimuat
+    const oldUpdateGlobalFilters = updateGlobalFilters;
+    updateGlobalFilters = function() {
+        oldUpdateGlobalFilters();
+        perbaruiDatalistSaran(); 
+    };
+
+    // Fungsi tambahan untuk menekan Edit Mode agar tidak pecah
+    function editOrderan(idCustomer) {
+        const itemsToEdit = orderData.filter(o => o.idcustomer === idCustomer || o.idCustomer === idCustomer);
+        if (itemsToEdit.length === 0) return showToast("Data tidak ditemukan");
+
+        const mainElement = document.querySelector('main');
+        window.posisiLayarSebelumEdit = mainElement ? mainElement.scrollTop : 0;
+
+        switchTab('order');
+        const head = itemsToEdit[0];
+        document.getElementById('o-nama').value = head.customer;
+        document.getElementById('o-telp').value = head.telepon;
+        document.getElementById('o-alamat').value = head.alamat;
+        document.getElementById('o-toko').value = head.toko || "";
+        document.getElementById('o-sumber').value = head.asal_order || ""; 
+        
+        const dropdownEkspedisi = document.getElementById('o-ekspedisi');
+        const opsiEkspedisi = Array.from(dropdownEkspedisi.options).map(opt => opt.value.toLowerCase());
+        const ekspedisiAsli = (head.ekspedisi || "").toLowerCase();
+        if (opsiEkspedisi.includes(ekspedisiAsli)) {
+            dropdownEkspedisi.value = Array.from(dropdownEkspedisi.options).find(opt => opt.value.toLowerCase() === ekspedisiAsli).value;
+        } else {
+            dropdownEkspedisi.value = "";
+        }
+
+        document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || head.cicilan1 || 0;
+        document.getElementById('o-cicilan2').value = Number(head.cicilan2) || 0;
+        document.getElementById('o-cicilan3').value = Number(head.cicilan3) || 0;
+        document.getElementById('o-ongkir').value = Number(head.ongkir) || 0;
+        document.getElementById('o-resi').value = head.resi || "";
+        document.getElementById('o-tipe-diskon').value = head.diskonTipe || "none";
+        document.getElementById('o-nilai-diskon').value = head.diskonNilai || "";
+        document.getElementById('o-tanggal-asli').value = head.tanggal || "";
+
+        const container = document.getElementById('order-items-list');
+        container.innerHTML = '';
+
+        itemsToEdit.forEach(it => {
+            const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
+            const row = clone.querySelector('.order-row');
+            const metaDataPesanan = { pusat: it.pusat || "", sarimbit: it.sarimbit || "", barang: it.barang || "", varian: it.varian || "", size: it.size || "", harga: it.harga || 0, berat: it.berat || 0 };
+
+            row.querySelector('.row-input').dataset.meta = JSON.stringify(metaDataPesanan);
+            row.querySelector('.row-qty').value = it.jumlah;
+            row.querySelector('.row-nama-tampil').innerText = `${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang}`;
+            row.querySelector('.row-warna-tampil').innerText = metaDataPesanan.varian;
+            row.querySelector('.row-size-tampil').innerText = metaDataPesanan.size;
+            row.querySelector('.row-harga-tampil').innerText = formatRp(metaDataPesanan.harga);
+
+            container.appendChild(clone);
+        });
+
+        updateLiveStruk(); // PANGGIL UPDATE STRUK SEKALIGUS KALKULASI TOTAL
+
+        const btnSave = document.getElementById('btn-save-order');
+        btnSave.innerHTML = `<i class="fa-solid fa-pen"></i> UPDATE PESANAN`;
+        btnSave.classList.replace('bg-[#007AFF]', 'bg-orange-500');
+        btnSave.classList.replace('hover:bg-[#0056b3]', 'hover:bg-orange-600');
+        
+        document.querySelector('form').dataset.editMode = idCustomer;
+        showToast("✍️ Mode Edit Aktif");
+    }
+
+    // Supaya fungsi kosong addOrderRow() lama tidak error kalau masih nyangkut
+    function addOrderRow() { bukaModalPencarian(); }
 
     function ubahQtyRow(btn, perubahan) {
         const row = btn.closest('.order-row');
         const input = row.querySelector('.row-qty');
         let nilaiSekarang = parseInt(input.value) || 0;
         let nilaiBaru = nilaiSekarang + perubahan;
-        
         if (nilaiBaru < 1) nilaiBaru = 1; 
         input.value = nilaiBaru;
         
-        calculateOrderTotal();
+        if (typeof updateLiveStruk === 'function') {
+            updateLiveStruk();
+        } else {
+            calculateOrderTotal();
+        }
     }
 
     function resetPencarianRow(selectElem) {
@@ -2272,75 +2760,93 @@ function cekNotifikasiProduksi() {
     const wadah = document.getElementById('wadah-notif-produksi');
     if (!wadah || !pembukuanData || pembukuanData.length === 0) return;
 
-    // Bersihkan wadah dulu jika dipanggil ulang
     wadah.innerHTML = '';
     let htmlNotif = '';
     
     const sekarang = new Date();
     sekarang.setHours(0,0,0,0);
 
-    // Looping semua data pembukuan dari memori Supabase
+    // FUNGSI PINTAR: Mengakali format tanggal apapun yang masuk dari Supabase/Excel
+    const parsingTanggalAman = (tglString) => {
+        if (!tglString) return null;
+        let str = String(tglString).trim();
+        // Jika pakai garis miring atau titik (contoh: 15/10/2026 atau 15.10.2026)
+        if (str.includes('/') || str.includes('.')) {
+            const pemisah = str.includes('/') ? '/' : '.';
+            const bagian = str.split(pemisah);
+            // Susun paksa menjadi format Internasional (YYYY-MM-DD)
+            if (bagian[0].length <= 2 && bagian[2].length === 4) {
+                str = `${bagian[2]}-${bagian[1]}-${bagian[0]}`; 
+            }
+        }
+        const hasilTgl = new Date(str);
+        if (isNaN(hasilTgl.getTime())) return null; // Jika masih gagal terbaca
+        hasilTgl.setHours(0,0,0,0);
+        return hasilTgl;
+    };
+
     pembukuanData.forEach(b => {
-        if (b.isArchived || b.isarchived) return; // Abaikan yang sudah diarsipkan
+        if (b.isArchived || b.isarchived) return; 
 
-    // 1. CEK JADWAL CLOSE (H-1 dan Hari H)
-    if (b.close && b.close.trim() !== "") {
-            const tglClose = new Date(b.close);
-            tglClose.setHours(0,0,0,0);
-            const selisihClose = Math.ceil((tglClose - sekarang) / 86400000);
-            
-            if (selisihClose >= 0 && selisihClose <= 1) {
-                const teksHari = selisihClose === 0 ? "HARI INI" : "BESOK";
-                const warnaLed = selisihClose === 0 ? "bg-rose-500 shadow-rose-400" : "bg-orange-500 shadow-orange-400";
-                const warnaTeks = selisihClose === 0 ? "text-rose-700" : "text-orange-700";
+        // 1. CEK JADWAL CLOSE (H-1 dan Hari H)
+        if (b.close && b.close.trim() !== "") {
+            const tglClose = parsingTanggalAman(b.close);
+            if (tglClose) {
+                const selisihClose = Math.round((tglClose.getTime() - sekarang.getTime()) / 86400000);
+                
+                if (selisihClose >= 0 && selisihClose <= 1) {
+                    const teksHari = selisihClose === 0 ? "HARI INI" : "BESOK";
+                    const warnaLed = selisihClose === 0 ? "bg-rose-500 shadow-rose-400" : "bg-orange-500 shadow-orange-400";
+                    const warnaTeks = selisihClose === 0 ? "text-rose-700" : "text-orange-700";
 
-                htmlNotif += `
-                <div class="notif-item glass-notif relative px-2.5 py-1.5 rounded-xl flex items-center gap-2.5 w-full cursor-default overflow-hidden group">
-                    <div class="w-1.5 h-1.5 rounded-full ${warnaLed} shadow-sm shrink-0 ml-0.5"></div>
-                    <div class="flex-1 pr-4 min-w-0 py-0.5">
-                        <div class="flex items-center gap-1.5 mb-0.5">
-                            <span class="text-[7px] font-black ${warnaTeks} uppercase tracking-wider">CLOSE ${teksHari}</span>
+                    htmlNotif += `
+                    <div class="notif-item glass-notif relative px-3 py-2 rounded-xl flex items-center gap-3 w-full cursor-default overflow-hidden group shadow-lg border border-slate-200">
+                        <div class="w-2 h-2 rounded-full ${warnaLed} shadow-sm shrink-0"></div>
+                        <div class="flex-1 pr-5 min-w-0">
+                            <div class="flex items-center gap-1.5 mb-1">
+                                <span class="text-[8px] font-black ${warnaTeks} uppercase tracking-wider">CLOSE ${teksHari}</span>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-800 truncate leading-tight">${b.sarimbit}</p>
+                            <p class="text-[8px] font-semibold text-slate-500 truncate leading-tight">${formatTanggalPanjang(tglClose.toISOString())}</p>
                         </div>
-                        <p class="text-[9px] font-bold text-slate-800 truncate leading-none mb-0.5">${b.sarimbit}</p>
-                        <p class="text-[7px] font-semibold text-slate-500 truncate leading-none">${formatTanggalPanjang(b.close)}</p>
-                    </div>
-                    <button onclick="this.closest('.notif-item').remove()" class="btn-close absolute right-1.5 w-4 h-4 bg-slate-200/50 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
-                        <i class="fa-solid fa-xmark text-[7px] font-black"></i>
-                    </button>
-                </div>`;
+                        <button onclick="this.closest('.notif-item').remove()" class="btn-close absolute right-2 w-5 h-5 bg-slate-100 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-xmark text-[9px] font-black"></i>
+                        </button>
+                    </div>`;
+                }
             }
         }
 
         // 2. CEK JADWAL READY (H-3 sampai Hari H)
         if (b.ready && b.ready.trim() !== "") {
-            const tglReady = new Date(b.ready);
-            tglReady.setHours(0,0,0,0);
-            const selisihReady = Math.ceil((tglReady - sekarang) / 86400000);
-            
-            if (selisihReady >= 0 && selisihReady <= 3) {
-                const teksHari = selisihReady === 0 ? "HARI INI" : `H-${selisihReady}`;
-                const warnaLed = selisihReady === 0 ? "bg-emerald-500 shadow-emerald-400" : "bg-blue-500 shadow-blue-400";
-                const warnaTeks = selisihReady === 0 ? "text-emerald-700" : "text-blue-700";
+            const tglReady = parsingTanggalAman(b.ready);
+            if (tglReady) {
+                const selisihReady = Math.round((tglReady.getTime() - sekarang.getTime()) / 86400000);
+                
+                if (selisihReady >= 0 && selisihReady <= 3) {
+                    const teksHari = selisihReady === 0 ? "HARI INI" : `H-${selisihReady}`;
+                    const warnaLed = selisihReady === 0 ? "bg-emerald-500 shadow-emerald-400" : "bg-blue-500 shadow-blue-400";
+                    const warnaTeks = selisihReady === 0 ? "text-emerald-700" : "text-blue-700";
 
-                htmlNotif += `
-                <div class="notif-item glass-notif relative px-2.5 py-1.5 rounded-xl flex items-center gap-2.5 w-full cursor-default overflow-hidden group">
-                    <div class="w-1.5 h-1.5 rounded-full ${warnaLed} shadow-sm shrink-0 ml-0.5"></div>
-                    <div class="flex-1 pr-4 min-w-0 py-0.5">
-                        <div class="flex items-center gap-1.5 mb-0.5">
-                            <span class="text-[7px] font-black ${warnaTeks} uppercase tracking-wider">READY ${teksHari}</span>
+                    htmlNotif += `
+                    <div class="notif-item glass-notif relative px-3 py-2 rounded-xl flex items-center gap-3 w-full cursor-default overflow-hidden group shadow-lg border border-slate-200 mt-2">
+                        <div class="w-2 h-2 rounded-full ${warnaLed} shadow-sm shrink-0"></div>
+                        <div class="flex-1 pr-5 min-w-0">
+                            <div class="flex items-center gap-1.5 mb-1">
+                                <span class="text-[8px] font-black ${warnaTeks} uppercase tracking-wider">READY ${teksHari}</span>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-800 truncate leading-tight">${b.sarimbit}</p>
+                            <p class="text-[8px] font-semibold text-slate-500 truncate leading-tight">${formatTanggalPanjang(tglReady.toISOString())}</p>
                         </div>
-                        <p class="text-[9px] font-bold text-slate-800 truncate leading-none mb-0.5">${b.sarimbit}</p>
-                        <p class="text-[7px] font-semibold text-slate-500 truncate leading-none">${formatTanggalPanjang(b.ready)}</p>
-                    </div>
-                    <button onclick="this.closest('.notif-item').remove()" class="btn-close absolute right-1.5 w-4 h-4 bg-slate-200/50 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
-                        <i class="fa-solid fa-xmark text-[7px] font-black"></i>
-                    </button>
-                </div>`;
+                        <button onclick="this.closest('.notif-item').remove()" class="btn-close absolute right-2 w-5 h-5 bg-slate-100 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-xmark text-[9px] font-black"></i>
+                        </button>
+                    </div>`;
+                }
             }
         }
     });
 
-   // Suntikkan semua HTML notifikasi sekaligus
    if (htmlNotif !== '') {
         wadah.innerHTML = htmlNotif;
     }
@@ -2800,73 +3306,16 @@ let pesanLog = "";
     }
 
     function addOrderRow() {
-    const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
-    const selectFilter = clone.querySelector('.row-filter-sarimbit');
-    
-    // 1. Ambil nama Sarimbit dari baris pertama (jika sudah ada orderan sebelumnya)
-    const container = document.getElementById('order-items-list');
-    let sarimbitPilihanPertama = "";
-    if (container.children.length > 0) {
-        const selectPertama = container.children[0].querySelector('.row-filter-sarimbit');
-        if (selectPertama) {
-            sarimbitPilihanPertama = selectPertama.value;
-        }
+        // Fungsi ini sengaja dikosongkan agar tidak ada lagi baris "Ghaib/Kosong" 
+        // yang muncul otomatis di layar. Admin cukup menekan tombol 
+        // "PILIH BARANG SARIMBIT" untuk menambahkan barang secara rapi dari Pop-up Katalog.
     }
 
-    // 2. Render pilihan Sarimbit seperti biasa
-    if (masterData && masterData.length > 0) {
-        const sarimbits = [...new Set(masterData.map(m => m.sarimbit))].sort();
-        selectFilter.innerHTML = `<option value="">-- Sarimbit --</option>` + sarimbits.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-    
-    // 3. Masukkan baris baru tersebut ke layar
-    container.appendChild(clone);
-    
-    // 4. Jika ada pilihan dari baris pertama, otomatis samakan dropdown ini dengan baris pertama
-    if (sarimbitPilihanPertama !== "") {
-        const barisBaru = container.lastElementChild;
-        const selectBaru = barisBaru.querySelector('.row-filter-sarimbit');
-        if (selectBaru) {
-            selectBaru.value = sarimbitPilihanPertama;
-            // Pancing event 'change' agar dropdown barang di sebelahnya ikut terbuka otomatis
-            selectBaru.dispatchEvent(new Event('change')); 
+  // Ubah fungsi lawas calculateOrderTotal agar nyambung ke sistem Struk Baru
+  function calculateOrderTotal() { 
+        if (typeof updateLiveStruk === 'function') {
+            updateLiveStruk(); 
         }
-    }
-}
-
-    function calculateOrderTotal() {
-        let subtotal = 0;
-        let totalPcs = 0; 
-        
-        document.querySelectorAll('.order-row').forEach(row => {
-            const input = row.querySelector('.row-input');
-            const qty = Number(row.querySelector('.row-qty').value);
-            if(input.dataset.meta) {
-                const meta = JSON.parse(input.dataset.meta);
-                const sub = meta.harga * qty;
-                row.querySelector('.row-subtotal').innerText = formatRp(sub);
-                subtotal += sub;      
-                totalPcs += qty;   
-            }
-        });
-
-        // Logika Diskon
-        let tipeDiskon = document.getElementById('o-tipe-diskon').value;
-        let nilaiDiskon = Number(document.getElementById('o-nilai-diskon').value) || 0;
-        let totalDiskon = 0;
-
-        if (tipeDiskon === 'persen') {
-            totalDiskon = (subtotal * nilaiDiskon) / 100;
-        } else if (tipeDiskon === 'angka') {
-            totalDiskon = nilaiDiskon;
-        }
-
-        let grandTotal = subtotal - totalDiskon;
-        if (grandTotal < 0) grandTotal = 0;
-
-        document.getElementById('grand-total').innerText = formatRp(grandTotal);
-        const txtPcs = document.getElementById('total-pcs-order');
-        if (txtPcs) txtPcs.innerText = totalPcs; 
     }
     
 
@@ -4424,6 +4873,12 @@ Array.from(tbody.children).forEach(tr => {
         if (toko === "Habibacollections") kontak.value = "082320419977"; else if (toko === "Masara.Hijab") kontak.value = "082123846261"; else kontak.value = "";
     }
 
+   // Mesin Pengganti Tema
+   function toggleDarkModeSeketika(isDark) {
+        if (isDark) document.body.classList.add('theme-dark');
+        else document.body.classList.remove('theme-dark');
+    }
+
     function handleSettingsSubmit(e) {
         e.preventDefault();
         appSettings = { 
@@ -4432,7 +4887,8 @@ Array.from(tbody.children).forEach(tr => {
             catatan: document.getElementById('set-catatan').value, 
             allowArchive: document.getElementById('set-allow-archive').checked,
             showSlipDate: document.getElementById('set-show-slip-date').checked,
-            allowDeleteMaster: document.getElementById('set-allow-delete-master').checked
+            allowDeleteMaster: document.getElementById('set-allow-delete-master').checked,
+            darkMode: document.getElementById('set-dark-mode').checked
         };
         localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
         document.getElementById('app-title-side').innerText = appSettings.nama;
@@ -4466,7 +4922,12 @@ Array.from(tbody.children).forEach(tr => {
         // Amankan agar variabel setting baru tidak error kalau belum ada di memori lama
         if (typeof appSettings.showSlipDate === 'undefined') appSettings.showSlipDate = false;
         if (typeof appSettings.allowDeleteMaster === 'undefined') appSettings.allowDeleteMaster = false;
+        if (typeof appSettings.darkMode === 'undefined') appSettings.darkMode = false;
         
+        // Kembalikan tema sesuai memori
+        document.getElementById('set-dark-mode').checked = appSettings.darkMode || false;
+        toggleDarkModeSeketika(appSettings.darkMode);
+
         document.getElementById('set-allow-archive').checked = appSettings.allowArchive || false;
         document.getElementById('set-show-slip-date').checked = appSettings.showSlipDate || false;
         document.getElementById('set-allow-delete-master').checked = appSettings.allowDeleteMaster || false;
