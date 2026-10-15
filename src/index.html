@@ -437,13 +437,8 @@
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden md:hidden fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-sm transition-opacity cursor-pointer"></div>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 relative bg-white/40 backdrop-blur-3xl">
-    
-        <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
-            <span id="toast-icon" class="text-2xl drop-shadow-md"></span>
-            <span id="toast-msg" class="text-sm md:text-base font-semibold tracking-wide"></span>
-        </div>
 
-   <!-- HALAMAN: INPUT ORDER -->
+        <!-- HALAMAN: INPUT ORDER -->
    <div id="page-order" class="page active space-y-6 w-full">
     <div class="mb-8">
         <h2 class="text-3xl font-black tracking-tight text-slate-800">Formulir Pesanan</h2>
@@ -778,56 +773,64 @@
       </div>
     </div>
 
-    <!-- HALAMAN: RINCIAN CUSTOMER -->
-    <div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-slate-200 pb-5">
-        <div>
-            <h2 class="text-3xl font-black tracking-tight text-slate-800">Database Pelanggan</h2>
-            <p class="text-slate-500 font-medium mt-1">Manajemen data invoice, pembayaran, dan cetak slip pesanan.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="arsipPerSarimbit()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-slate-900 active:scale-95 transition-all text-xs flex items-center gap-2"><i class="fa-solid fa-box-archive text-slate-400"></i>ARSIP</button>
+   <!-- HALAMAN: RINCIAN CUSTOMER -->
+   <div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-slate-200 pb-5">
+      <div>
+          <h2 class="text-3xl font-black tracking-tight text-slate-800">Database Pelanggan</h2>
+          <p class="text-slate-500 font-medium mt-1">Manajemen data invoice, pembayaran, dan cetak slip pesanan.</p>
+      </div>
+      <div class="flex flex-col items-start md:items-end gap-2">
+        <button onclick="arsipPerSarimbit()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-slate-900 active:scale-95 transition-all text-xs flex items-center gap-2"><i class="fa-solid fa-box-archive text-slate-400"></i>ARSIP</button>
+        <div class="flex items-center gap-2">
+          <button onclick="document.getElementById('modalFilterLanjutan').classList.remove('hidden')" class="px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-sliders"></i> Filter Extra
+          </button>
+          <button onclick="bukaModalStatistik()" class="px-3.5 py-2 rounded-xl text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-chart-pie"></i> Statistik
+          </button>
         </div>
       </div>
+    </div>
+    
+    <div class="glass p-3 md:p-4 rounded-2xl flex flex-wrap gap-4 shadow-sm border border-slate-200 items-center justify-between">
+       
+      <div class="relative flex-auto min-w-[250px] max-w-md">
+          <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Cari pelanggan, nomor, atau sarimbit..." class="glass-input w-full pl-11 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800">
+      </div>
       
-      <div class="glass p-3 md:p-4 rounded-2xl flex flex-wrap gap-4 shadow-sm border border-slate-200 items-center justify-between">
-         
-        <div class="relative flex-auto min-w-[250px] max-w-md">
-            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Cari pelanggan, nomor, atau sarimbit..." class="glass-input w-full pl-11 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800">
-        </div>
-        
-        <div class="flex flex-wrap items-center gap-2 lg:gap-3 flex-auto justify-start md:justify-end">
-            
-            <select id="filter-toko-slip" onchange="renderSlip()" class="glass-input w-32 md:w-36 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200">
-                <option value="">Semua Toko</option><option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option><option value="MASARA.HIJAB">MASARA.HIJAB</option>
-            </select>
-            
-            <select id="filter-sarimbit-slip" onchange="renderSlip()" class="px-4 py-3 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm outline-none focus:border-blue-400 cursor-pointer transition-all min-w-[160px]">
-                <option value="">Semua Sarimbit</option>
-            </select>
-            
-            <!-- FILTER BARU: STATUS TAGIHAN -->
-            <select id="filter-tagihan-slip" onchange="renderSlip()" class="px-4 py-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 shadow-sm outline-none focus:border-rose-400 cursor-pointer transition-all min-w-[150px]">
-                <option value="">Semua Jadwal</option>
-                <option value="aktif">Waktunya Tagihan (!)</option>
-            </select>
-            
-            <div id="slip-date-filter-wrapper" class="hidden flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-                <input type="date" id="filter-tgl-mulai-slip" onchange="renderSlip()" class="glass-input w-32 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200" title="Dari Tanggal">
-                <input type="date" id="filter-tgl-akhir-slip" onchange="renderSlip()" class="glass-input w-32 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200" title="Sampai Tanggal">
-            </div>
+      <div class="flex flex-wrap items-center gap-2 lg:gap-3 flex-auto justify-start md:justify-end">
+          
+          <select id="filter-toko-slip" onchange="renderSlip()" class="glass-input w-32 md:w-36 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200">
+              <option value="">Semua Toko</option><option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option><option value="MASARA.HIJAB">MASARA.HIJAB</option>
+          </select>
+          
+          <select id="filter-sarimbit-slip" onchange="renderSlip()" class="px-4 py-3 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm outline-none focus:border-blue-400 cursor-pointer transition-all min-w-[160px]">
+              <option value="">Semua Sarimbit</option>
+          </select>
+          
+          <!-- FILTER BARU: STATUS TAGIHAN -->
+          <select id="filter-tagihan-slip" onchange="renderSlip()" class="px-4 py-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 shadow-sm outline-none focus:border-rose-400 cursor-pointer transition-all min-w-[150px]">
+              <option value="">Semua Jadwal</option>
+              <option value="aktif">Waktunya Tagihan (!)</option>
+          </select>
+          
+          <div id="slip-date-filter-wrapper" class="hidden flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+              <input type="date" id="filter-tgl-mulai-slip" onchange="renderSlip()" class="glass-input w-32 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200" title="Dari Tanggal">
+              <input type="date" id="filter-tgl-akhir-slip" onchange="renderSlip()" class="glass-input w-32 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200" title="Sampai Tanggal">
+          </div>
 
-            <div class="hidden xl:block w-px h-6 bg-slate-300 mx-1"></div>
+          <div class="hidden xl:block w-px h-6 bg-slate-300 mx-1"></div>
 
-            <div class="flex items-center gap-2">
-               <button onclick="downloadFilteredWord()" class="bg-blue-50 text-blue-600 px-3 py-2.5 rounded-xl font-bold border border-blue-200 hover:bg-blue-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-word text-sm"></i> Invoice</button>
-               <button onclick="downloadCustomerPDF()" class="bg-rose-50 text-rose-600 px-3 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-pdf text-sm"></i> Sarimbit</button> 
-               <button onclick="downloadCustomerExcel()" class="bg-emerald-50 text-emerald-600 px-3 py-2.5 rounded-xl font-bold border border-emerald-200 hover:bg-emerald-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-excel text-sm"></i> Sarimbit</button>
-            </div>
-        </div>
+          <div class="flex items-center gap-2">
+             <button onclick="downloadFilteredWord()" class="bg-blue-50 text-blue-600 px-3 py-2.5 rounded-xl font-bold border border-blue-200 hover:bg-blue-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-word text-sm"></i> Invoice</button>
+             <button onclick="downloadCustomerPDF()" class="bg-rose-50 text-rose-600 px-3 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-pdf text-sm"></i> Sarimbit</button> 
+             <button onclick="downloadCustomerExcel()" class="bg-emerald-50 text-emerald-600 px-3 py-2.5 rounded-xl font-bold border border-emerald-200 hover:bg-emerald-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-excel text-sm"></i> Sarimbit</button>
+          </div>
+      </div>
 
-     </div>
+   </div>
 
       <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/50">
         <div class="overflow-x-auto">
@@ -1143,7 +1146,529 @@
     </div>
   </div>
 
-  <script>
+  <!-- MODAL FILTER LANJUTAN SLIP -->
+  <div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
+      <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white">
+          <div class="p-5 bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex justify-between items-center shadow-md">
+              <h3 class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-filter"></i> Filter Lanjutan</h3>
+              <button onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors">
+                  <i class="fa-solid fa-xmark"></i>
+              </button>
+          </div>
+          <div class="p-6 max-h-[65vh] overflow-y-auto bg-slate-50 space-y-6">
+              <div>
+                  <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-money-bill-wave text-indigo-500 mr-1"></i> Status Keuangan</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmc2" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Cicilan 2</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmlunas" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Pelunasan</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmongkir" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Ongkir</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-sdhongkir" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Sudah Ongkir</span></label>
+                  </div>
+              </div>
+              <div>
+                  <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-truck text-blue-500 mr-1"></i> Logistik Ekspedisi</h4>
+                  <div class="grid grid-cols-3 gap-3">
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-blue-300 shadow-sm"><input type="checkbox" id="fc-jne" class="w-4 h-4 text-blue-600"> <span class="text-sm font-bold text-slate-700">Hanya JNE</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-rose-300 shadow-sm"><input type="checkbox" id="fc-jnt" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-slate-700">Hanya JNT</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-orange-300 shadow-sm"><input type="checkbox" id="fc-pos" class="w-4 h-4 text-orange-600"> <span class="text-sm font-bold text-slate-700">Hanya POS</span></label>
+                  </div>
+              </div>
+              <div>
+                  <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-map-location-dot text-emerald-500 mr-1"></i> Wilayah Pengiriman</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-sm"><input type="checkbox" id="fc-jawa" class="w-4 h-4 text-emerald-600"> <span class="text-sm font-bold text-slate-700">Hanya Pulau Jawa</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-sm"><input type="checkbox" id="fc-luarjawa" class="w-4 h-4 text-emerald-600"> <span class="text-sm font-bold text-slate-700">Hanya Luar Pulau Jawa</span></label>
+                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-rose-300 shadow-sm md:col-span-2"><input type="checkbox" id="fc-noalamat" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-rose-600">Belum Ada Alamat Lengkap (Kosong)</span></label>
+                  </div>
+              </div>
+          </div>
+          <div class="p-4 bg-white border-t border-slate-200 flex justify-between">
+            <button onclick="resetFilterLanjutan()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">Reset Pilihan</button>
+            <button onclick="terapkanFilterLanjutan()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-md transition-all"><i class="fa-solid fa-check mr-2"></i>Terapkan Filter</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL STATISTIK PROGRESS PELANGGAN -->
+<div id="modalStatistikProgress" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
+    <div class="bg-white rounded-[2rem] w-full max-w-3xl shadow-2xl overflow-hidden border border-white animate-fade-in-up">
+        <div class="p-5 md:p-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white flex justify-between items-center shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-sm shadow-inner">
+                    <i class="fa-solid fa-chart-simple text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-lg md:text-xl tracking-tight leading-none">Statistik Progress Pelanggan</h3>
+                    <p id="subjudul-statistik" class="text-[11px] text-blue-100 font-medium mt-1">Berdasarkan filter aktif saat ini</p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('modalStatistikProgress').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div class="p-6 md:p-8 max-h-[65vh] overflow-y-auto bg-slate-50/70">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                <!-- Garis Pemisah Tengah untuk Layar Lebar -->
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-200/80 -translate-x-1/2"></div>
+                
+                <!-- KOLOM KIRI: PROGRES SELESAI (HIJAU) -->
+                <div class="space-y-5 pr-0 md:pr-4">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Progres Selesai
+                    </h4>
+                    <div id="wadah-stat-selesai" class="space-y-4"></div>
+                </div>
+
+                <!-- KOLOM KANAN: KEKURANGAN (MERAH) -->
+                <div class="space-y-5 pl-0 md:pl-4">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Kekurangan / Belum
+                    </h4>
+                    <div id="wadah-stat-kurang" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER: PILIHAN UNDUHAN & TOMBOL EXCEL -->
+        <div class="p-4 md:p-5 bg-white border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap"><i class="fa-solid fa-list-check mr-1 text-indigo-500"></i> Pilih Data:</label>
+                <select id="pilihan-unduh-statistik" class="w-full sm:w-64 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-300 outline-none focus:bg-white focus:border-blue-500 cursor-pointer shadow-inner">
+                    <option value="ringkasan">📊 Ringkasan Persentase per Sarimbit</option>
+                    <option value="semua">📋 Semua Pelanggan (Sesuai Filter)</option>
+                    <optgroup label="Kategori Progres Selesai (Hijau)">
+                        <option value="sdh_c2">✅ Sudah Cicilan 2</option>
+                        <option value="sdh_lunas">✅ Sudah Pelunasan</option>
+                        <option value="sdh_ongkir">✅ Sudah Ongkir</option>
+                        <option value="sdh_alamat">✅ Alamat Lengkap</option>
+                    </optgroup>
+                    <optgroup label="Kategori Kekurangan / Belum (Merah)">
+                        <option value="blm_c2">❌ Belum Cicilan 2</option>
+                        <option value="blm_lunas">❌ Belum Pelunasan</option>
+                        <option value="blm_ongkir">❌ Belum Ongkir</option>
+                        <option value="blm_alamat">❌ Belum Ada Alamat</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button onclick="document.getElementById('modalStatistikProgress').classList.add('hidden')" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs md:text-sm hover:bg-slate-200 transition-colors">
+                    Kembali
+                </button>
+                <button onclick="unduhRekapStatistikExcel()" class="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-xs md:text-sm hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i> Unduh Rekap Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  // =======================================================
+  // MESIN STATISTIK PROGRESS PELANGGAN & UNDUH EXCEL
+  // =======================================================
+  let dataStatistikAktif = [];
+
+  function kumpulkanDataPelangganStatistik() {
+      const search = document.getElementById('search-customer') ? document.getElementById('search-customer').value.toLowerCase() : "";
+      const filterToko = document.getElementById('filter-toko-slip') ? document.getElementById('filter-toko-slip').value : "";
+      const filterSarimbit = document.getElementById('filter-sarimbit-slip') ? document.getElementById('filter-sarimbit-slip').value : "";
+      const filterTagihan = document.getElementById('filter-tagihan-slip') ? document.getElementById('filter-tagihan-slip').value : "";
+      const fTglMulai = document.getElementById('filter-tgl-mulai-slip') ? document.getElementById('filter-tgl-mulai-slip').value : "";
+      const fTglAkhir = document.getElementById('filter-tgl-akhir-slip') ? document.getElementById('filter-tgl-akhir-slip').value : "";
+      const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
+
+      let listMendesak = new Set();
+      if (filterTagihan === "aktif" && typeof pembukuanData !== 'undefined') {
+          pembukuanData.forEach(b => {
+              if (evaluasiTagihan(b.c1).mendesak || evaluasiTagihan(b.c2).mendesak || evaluasiTagihan(b.Lunas || b.lunas).mendesak) {
+                  listMendesak.add(b.sarimbit);
+              }
+          });
+      }
+
+      const groups = {};
+      orderData.forEach(o => {
+          if (o.isArchived === true || o.isarchived === true) return;
+          if (fTglMulai || fTglAkhir) {
+              const tglOrder = new Date(o.tanggal);
+              if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return;
+              if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return;
+          }
+          const cocokNama = (o.customer || "").toLowerCase().includes(search);
+          const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
+          if (search && !cocokNama && !cocokSarimbit) return;
+          if (filterSarimbit && o.sarimbit !== filterSarimbit) return;
+          if (filterToko && o.toko !== filterToko) return;
+          if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
+          if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
+
+          const idUnik = o.idcustomer || o.idCustomer || ("CUST-" + o.customer);
+          if (!groups[idUnik]) {
+              groups[idUnik] = {
+                  idCustomer: idUnik,
+                  nama: o.customer || "Tanpa Nama",
+                  telp: o.telepon || "-",
+                  alamat: o.alamat || "",
+                  toko: o.toko || "-",
+                  ekspedisi: o.ekspedisi || "-",
+                  cicilan1: Number(o.cicilan1) || 0,
+                  cicilan2: Number(o.cicilan2) || 0,
+                  cicilan3: Number(o.cicilan3) || 0,
+                  ongkir: Number(o.ongkir) || 0,
+                  sarimbitSet: new Set(),
+                  items: []
+              };
+          }
+          if (o.sarimbit) groups[idUnik].sarimbitSet.add(o.sarimbit);
+          groups[idUnik].items.push(o);
+      });
+
+      return Object.values(groups).map(g => {
+          const isNoAlamat = cekApakahBelumAdaAlamat(g.alamat);
+          const totalQty = g.items.reduce((sum, it) => sum + (Number(it.jumlah) || 0), 0);
+          const gross = g.items.reduce((sum, it) => sum + ((Number(it.jumlah) || 0) * (Number(it.harga) || 0)), 0);
+          const dTipe = g.items[0]?.diskonTipe || 'none';
+          const dNilai = Number(g.items[0]?.diskonNilai) || 0;
+          let diskon = 0;
+          if (dTipe === 'persen') diskon = (gross * dNilai) / 100;
+          else if (dTipe === 'angka') diskon = dNilai;
+          let netTagihan = (gross - diskon) + g.ongkir;
+          if (netTagihan < 0) netTagihan = 0;
+          const totalBayar = g.cicilan1 + g.cicilan2 + g.cicilan3;
+          const sisaTagihan = netTagihan - totalBayar;
+
+          return {
+              ...g,
+              daftarSarimbit: Array.from(g.sarimbitSet).join(', '),
+              rincianBarang: g.items.map(it => `${it.jumlah}x ${it.sarimbit} - ${it.barang} (${it.varian}/${it.size})`).join(' | '),
+              totalQty: totalQty,
+              netTagihan: netTagihan,
+              sisaTagihan: sisaTagihan,
+              sdhC2: g.cicilan2 > 0,
+              sdhLunas: g.cicilan3 > 0,
+              sdhOngkir: g.ongkir > 0,
+              sdhAlamat: !isNoAlamat
+          };
+      });
+  }
+
+  function buatItemGrafikStatistik(judul, jumlah, total, warnaTipe) {
+      const persen = total > 0 ? Math.round((jumlah / total) * 100) : 0;
+      const warnaUtama = warnaTipe === 'hijau' ? '#10b981' : '#e11d48';
+      const warnaBg = warnaTipe === 'hijau' ? '#d1fae5' : '#ffe4e6';
+      const classTeks = warnaTipe === 'hijau' ? 'text-emerald-600' : 'text-rose-600';
+      const classBar = warnaTipe === 'hijau' ? 'bg-emerald-500' : 'bg-rose-500';
+      const classTrack = warnaTipe === 'hijau' ? 'bg-emerald-100' : 'bg-rose-100';
+
+      return `
+      <div class="flex items-center gap-4 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative" style="background: conic-gradient(${warnaUtama} ${persen}%, ${warnaBg} 0);">
+              <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-black text-slate-700 shadow-inner">
+                  ${persen}%
+              </div>
+          </div>
+          <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-baseline mb-1.5">
+                  <span class="text-xs md:text-sm font-bold text-slate-800 truncate">${judul}</span>
+                  <span class="text-xs font-black ${classTeks} ml-2 whitespace-nowrap">(${persen}%) <span class="text-[10px] font-semibold text-slate-400">${jumlah}/${total}</span></span>
+              </div>
+              <div class="w-full h-2.5 ${classTrack} rounded-full overflow-hidden p-0.5">
+                  <div class="h-full ${classBar} rounded-full transition-all duration-700" style="width: ${persen}%"></div>
+              </div>
+          </div>
+      </div>`;
+  }
+
+  function bukaModalStatistik() {
+      dataStatistikAktif = kumpulkanDataPelangganStatistik();
+      const total = dataStatistikAktif.length;
+
+      const filterSarimbit = document.getElementById('filter-sarimbit-slip')?.value || "Semua Koleksi Sarimbit";
+      const filterToko = document.getElementById('filter-toko-slip')?.value || "Semua Toko";
+      document.getElementById('subjudul-statistik').innerText = `Filter: ${filterSarimbit} • ${filterToko} (Total: ${total} Pelanggan)`;
+
+      const jmlSdhC2 = dataStatistikAktif.filter(d => d.sdhC2).length;
+      const jmlBlmC2 = total - jmlSdhC2;
+
+      const jmlSdhLunas = dataStatistikAktif.filter(d => d.sdhLunas).length;
+      const jmlBlmLunas = total - jmlSdhLunas;
+
+      const jmlSdhOngkir = dataStatistikAktif.filter(d => d.sdhOngkir).length;
+      const jmlBlmOngkir = total - jmlSdhOngkir;
+
+      const jmlSdhAlamat = dataStatistikAktif.filter(d => d.sdhAlamat).length;
+      const jmlBlmAlamat = total - jmlSdhAlamat;
+
+      let htmlSelesai = "";
+      htmlSelesai += buatItemGrafikStatistik("Sudah Cicilan 2", jmlSdhC2, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("Sudah Pelunasan", jmlSdhLunas, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("Sudah Ongkir", jmlSdhOngkir, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("Alamat Lengkap", jmlSdhAlamat, total, 'hijau');
+
+      let htmlKurang = "";
+      htmlKurang += buatItemGrafikStatistik("Belum Cicilan 2", jmlBlmC2, total, 'merah');
+      htmlKurang += buatItemGrafikStatistik("Belum Pelunasan", jmlBlmLunas, total, 'merah');
+      htmlKurang += buatItemGrafikStatistik("Belum Ongkir", jmlBlmOngkir, total, 'merah');
+      htmlKurang += buatItemGrafikStatistik("Belum Ada Alamat", jmlBlmAlamat, total, 'merah');
+
+      document.getElementById('wadah-stat-selesai').innerHTML = htmlSelesai;
+      document.getElementById('wadah-stat-kurang').innerHTML = htmlKurang;
+      document.getElementById('modalStatistikProgress').classList.remove('hidden');
+  }
+
+  function unduhRekapStatistikExcel() {
+      if (!dataStatistikAktif || dataStatistikAktif.length === 0) {
+          dataStatistikAktif = kumpulkanDataPelangganStatistik();
+      }
+      if (dataStatistikAktif.length === 0) return showToast("⚠️ Tidak ada data pelanggan untuk diunduh!");
+
+      const pilihan = document.getElementById('pilihan-unduh-statistik').value;
+      const wb = XLSX.utils.book_new();
+      let namaFile = "REKAP_STATISTIK";
+
+      if (pilihan === 'ringkasan') {
+          // MODE 1: RINGKASAN PERSENTASE PER NAMA SARIMBIT
+          const statPerSarimbit = {};
+          dataStatistikAktif.forEach(cust => {
+              cust.sarimbitSet.forEach(srm => {
+                  if (!statPerSarimbit[srm]) {
+                      statPerSarimbit[srm] = { total: 0, sdhC2: 0, blmC2: 0, sdhLunas: 0, blmLunas: 0, sdhOngkir: 0, blmOngkir: 0, sdhAlamat: 0, blmAlamat: 0 };
+                  }
+                  const st = statPerSarimbit[srm];
+                  st.total++;
+                  if (cust.sdhC2) st.sdhC2++; else st.blmC2++;
+                  if (cust.sdhLunas) st.sdhLunas++; else st.blmLunas++;
+                  if (cust.sdhOngkir) st.sdhOngkir++; else st.blmOngkir++;
+                  if (cust.sdhAlamat) st.sdhAlamat++; else st.blmAlamat++;
+              });
+          });
+
+          const rows = [[
+              "No", "Koleksi Sarimbit", "Total Customer",
+              "Sudah C2", "Belum C2",
+              "Sudah Pelunasan", "Belum Pelunasan",
+              "Sudah Ongkir", "Belum Ongkir",
+              "Alamat Lengkap", "Belum Ada Alamat"
+          ]];
+
+          let no = 1;
+          const hitungPct = (jml, tot) => `${jml} (${tot > 0 ? Math.round((jml / tot) * 100) : 0}%)`;
+
+          Object.keys(statPerSarimbit).sort().forEach(srm => {
+              const st = statPerSarimbit[srm];
+              rows.push([
+                  no++, srm, st.total,
+                  hitungPct(st.sdhC2, st.total), hitungPct(st.blmC2, st.total),
+                  hitungPct(st.sdhLunas, st.total), hitungPct(st.blmLunas, st.total),
+                  hitungPct(st.sdhOngkir, st.total), hitungPct(st.blmOngkir, st.total),
+                  hitungPct(st.sdhAlamat, st.total), hitungPct(st.blmAlamat, st.total)
+              ]);
+          });
+
+          const ws = XLSX.utils.aoa_to_sheet(rows);
+          ws['!cols'] = [
+              { wch: 5 }, { wch: 28 }, { wch: 15 },
+              { wch: 16 }, { wch: 16 }, { wch: 18 }, { wch: 18 },
+              { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 18 }
+          ];
+          for (let i in ws) {
+              if (i[0] === '!') continue;
+              ws[i].s = { alignment: { horizontal: "center", vertical: "center", wrapText: true }, font: { name: "Arial", sz: 10 } };
+              if (i.replace(/[A-Z]/g, '') === "1") {
+                  ws[i].s.font.bold = true;
+                  ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } };
+              }
+          }
+          XLSX.utils.book_append_sheet(wb, ws, "Statistik_Per_Sarimbit");
+          namaFile = "STATISTIK_PERSENTASE_SARIMBIT";
+
+      } else {
+          // MODE 2: RINCIAN PELANGGAN SESUAI PILIHAN KATEGORI + NAMA SARIMBIT
+          let dataTersaring = dataStatistikAktif;
+          let labelKategori = "SEMUA";
+
+          if (pilihan === 'sdh_c2') { dataTersaring = dataStatistikAktif.filter(d => d.sdhC2); labelKategori = "SUDAH_CICILAN_2"; }
+          else if (pilihan === 'blm_c2') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhC2); labelKategori = "BELUM_CICILAN_2"; }
+          else if (pilihan === 'sdh_lunas') { dataTersaring = dataStatistikAktif.filter(d => d.sdhLunas); labelKategori = "SUDAH_PELUNASAN"; }
+          else if (pilihan === 'blm_lunas') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhLunas); labelKategori = "BELUM_PELUNASAN"; }
+          else if (pilihan === 'sdh_ongkir') { dataTersaring = dataStatistikAktif.filter(d => d.sdhOngkir); labelKategori = "SUDAH_ONGKIR"; }
+          else if (pilihan === 'blm_ongkir') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir); labelKategori = "BELUM_ONGKIR"; }
+          else if (pilihan === 'sdh_alamat') { dataTersaring = dataStatistikAktif.filter(d => d.sdhAlamat); labelKategori = "ALAMAT_LENGKAP"; }
+          else if (pilihan === 'blm_alamat') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhAlamat); labelKategori = "BELUM_ADA_ALAMAT"; }
+
+          if (dataTersaring.length === 0) return showToast("⚠️ Tidak ada pelanggan pada kategori pilihan ini!");
+
+          const rows = [[
+              "No", "Toko", "Nama Pelanggan", "No. WhatsApp", "Alamat Pengiriman",
+              "Koleksi Sarimbit", "Rincian Barang", "Total Pcs", "Kurir",
+              "DP / C1", "Cicilan 2", "Pelunasan", "Ongkir", "Sisa Tagihan", "Status Kategori"
+          ]];
+
+          dataTersaring.forEach((c, idx) => {
+              rows.push([
+                  idx + 1,
+                  c.toko,
+                  c.nama.toUpperCase(),
+                  c.telp,
+                  c.alamat,
+                  c.daftarSarimbit,
+                  c.rincianBarang,
+                  c.totalQty,
+                  c.ekspedisi || "-",
+                  c.cicilan1,
+                  c.cicilan2,
+                  c.cicilan3,
+                  c.ongkir,
+                  c.sisaTagihan,
+                  labelKategori.replace(/_/g, ' ')
+              ]);
+          });
+
+          const ws = XLSX.utils.aoa_to_sheet(rows);
+          ws['!cols'] = [
+              { wch: 5 }, { wch: 18 }, { wch: 25 }, { wch: 16 }, { wch: 38 },
+              { wch: 25 }, { wch: 45 }, { wch: 10 }, { wch: 12 },
+              { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 15 }, { wch: 20 }
+          ];
+          for (let i in ws) {
+              if (i[0] === '!') continue;
+              ws[i].s = { alignment: { horizontal: "center", vertical: "center", wrapText: true }, font: { name: "Arial", sz: 10 } };
+              if (i.replace(/[A-Z]/g, '') === "1") {
+                  ws[i].s.font.bold = true;
+                  ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } };
+              }
+          }
+          XLSX.utils.book_append_sheet(wb, ws, "Data_Rekap");
+          namaFile = `REKAP_${labelKategori}`;
+      }
+
+      const fSarimbit = document.getElementById('filter-sarimbit-slip')?.value;
+      if (fSarimbit) namaFile += `_${fSarimbit.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+      XLSX.writeFile(wb, `${namaFile}.xlsx`);
+      showToast("✅ Rekap Statistik Excel berhasil diunduh!");
+  }
+
+  // MESIN PENYARING FILTER LANJUTAN
+    function dapatkanKondisiFilterLanjutan() {
+        return {
+            blmC2: document.getElementById('fc-blmc2')?.checked, blmLunas: document.getElementById('fc-blmlunas')?.checked,
+            blmOngkir: document.getElementById('fc-blmongkir')?.checked, sdhOngkir: document.getElementById('fc-sdhongkir')?.checked,
+            jnt: document.getElementById('fc-jnt')?.checked, jne: document.getElementById('fc-jne')?.checked, pos: document.getElementById('fc-pos')?.checked,
+            jawa: document.getElementById('fc-jawa')?.checked, luarJawa: document.getElementById('fc-luarjawa')?.checked, noAlamat: document.getElementById('fc-noalamat')?.checked
+        };
+    }
+
+   // FUNGSI CERDAS DETEKSI ALAMAT KOSONG (KEBAL DARI KATA "SEBELUM")
+   function cekApakahBelumAdaAlamat(teksAlamat) {
+        if (!teksAlamat) return true;
+        const almt = String(teksAlamat).trim().toLowerCase();
+        
+        // 1. Jika kosong melompong, hanya tanda strip/titik, atau terlalu pendek (< 8 karakter)
+        const bersihSimbol = almt.replace(/[-_.,/\\?\s]/g, '');
+        if (bersihSimbol.length === 0 || almt.length < 8) return true;
+
+        // 2. Jika alamat sudah panjang (> 35 karakter) atau memiliki struktur alamat resmi, mutlak dianggap SUDAH ADA ALAMAT
+        const ciriAlamatValid = /\b(jl|jln|jalan|kec|kecamatan|kel|kelurahan|kab|kabupaten|rt|rw|desa|ds|kp|kampung|perum|perumahan|komp|komplek|blok|kota|prov|provinsi|kodepos)\b/i;
+        if (almt.length > 35 || ciriAlamatValid.test(almt)) return false;
+
+        // 3. Cek kamus kata kunci "belum ada alamat" dengan batas kata murni (\b) agar kata "sebelum" TIDAK ikut terjaring
+        const regexBelumAlamat = /\b(belum|blm|menyusul|nyusul|kosong| menyusul|tunggu|konfirmasi|tidak ada|tdk ada|no address|tba|n\/a)\b/i;
+        if (regexBelumAlamat.test(almt)) return true;
+
+        return false;
+    }
+
+    // =========================================================================
+    // MESIN DETEKSI PULAU JAWA VS LUAR PULAU JAWA (AKURASI TINGGI & ANTI BOCOR)
+    // =========================================================================
+    const REGEX_PROV_KOTA_LUAR_JAWA = /\b(sumatera|sumatra|sumut|sumbar|sumsel|aceh|nad|riau|kepri|jambi|bengkulu|lampung|bangka|belitung|babel|kalimantan|kalbar|kalteng|kalsel|kaltim|kaltara|sulawesi|sulut|sulteng|sulsel|sultra|sulbar|gorontalo|bali|ntb|ntt|lombok|sumbawa|flores|kupang|timor|sumba|maluku|malut|ambon|ternate|papua|irian|jayapura|sorong|merauke|timika|manokwari|nabire|biak|medan|binjai|pematangsiantar|siantar|tebing tinggi|sibolga|tanjungbalai|padangsidimpuan|gunungsitoli|deli serdang|karo|langkat|asahan|labuhanbatu|simalungun|tapanuli|toba|nias|mandailing|pekanbaru|dumai|bengkalis|kampar|rokan|siak|indragiri|pelalawan|kuantan|meranti|batam|tanjungpinang|tanjung pinang|bintan|karimun|natuna|anambas|padang|bukittinggi|payakumbuh|pariaman|solok|sawahlunto|agam|pasaman|tanah datar|lima puluh kota|dharmasraya|pesisir selatan|sijunjung|mentawai|palembang|prabumulih|lubuklinggau|pagaralam|banyuasin|ogan|muara enim|lahat|musi|empat lawang|penukal|pangkalpinang|pangkal pinang|sungailiat|tanjungpandan|bandar lampung|bandarlampung|metro|lampung selatan|lampung tengah|lampung timur|lampung utara|lampung barat|pesawaran|pringsewu|tanggamus|tulang bawang|way kanan|mesuji|pesisir barat|pontianak|singkawang|kubu raya|mempawah|sambas|bengkayang|landak|sanggau|sekadau|sintang|melawi|kapuas hulu|ketapang|kayong utara|palangkaraya|palangka raya|kotawaringin|sampit|pangkalan bun|kapuas|barito|katingan|seruyan|sukamara|lamandau|gunung mas|pulang pisau|murung raya|banjarmasin|banjarbaru|banjar baru|martapura|tanah laut|pelaihari|kotabaru|tanah bumbu|batulicin|balangan|hulu sungai|tabalong|tanjung|tapin|balikpapan|samarinda|bontang|kutai|tenggarong|sangatta|berau|paser|penajam|mahakam|tarakan|nunukan|malinau|bulungan|tanjung selor|makassar|ujungpandang|parepare|palopo|gowa|sungguminasa|maros|pangkep|barru|bone|watampone|soppeng|wajo|sengkang|sidrap|pinrang|enrekang|luwu|toraja|sinjai|bulukumba|bantaeng|jeneponto|takalar|selayar|manado|bitung|tomohon|kotamobagu|minahasa|bolaang|mongondow|sangihe|talaud|sitaro|palu|poso|donggala|toli-toli|buol|morowali|banggai|luwuk|parigi|moutong|tojo una-una|sigi|kendari|baubau|bau-bau|konawe|kolaka|muna|buton|wakatobi|bombana|mamuju|majene|polewali|mandar|mamasa|pasangkayu|denpasar|badung|gianyar|tabanan|klungkung|bangli|karangasem|buleleng|singaraja|jembrana|negare|kuta|ubud|mataram|bima|dompu|praya|selong|sumbawa besar|taliwang|ende|maumere|labuan bajo|ruteng|bajawa|waingapu|atambua|soe|kefamenanu|kalabahi|larantuka|lhokseumawe|langsa|sabang|subulussalam|banda aceh|meulaboh|bireuen|pidie|aceh besar|aceh utara|aceh timur|aceh tengah|takengon|aceh barat|aceh selatan|aceh tamiang|aceh tenggara|aceh jaya|aceh singkil|gayolues|bener meriah|simeulue|nagan raya|abdya|sungaipenuh|sungai penuh|muaro jambi|batanghari|bungo|tebo|sarolangun|merangin|kerinci|tanjung jabung|curup|rejang lebong|kepahiang|lebong|mukomuko|seluma|kaur|bengkulu utara|bengkulu selatan|bengkulu tengah)\b/i;
+
+    const REGEX_PROV_KOTA_KEC_JAWA = /\b(jawa|jabar|jateng|jatim|banten|dki|diy|jakarta|jakpus|jakbar|jaksel|jaktim|jakut|kepulauan seribu|yogyakarta|jogja|jogjakarta|sleman|bantul|kulon progo|kulonprogo|gunung kidul|gunungkidul|wonosari|wates|depok|bogor|tangerang|tangsel|ciputat|pamulang|serpong|bsd|bintaro|ciledug|karawaci|cikupa|balaraja|curug|legok|pagedangan|cisauk|kelapa dua|pasar kemis|rajeg|sepatan|teluknaga|kosambi|tigaraksa|panongan|jambe|cisoka|solear|mauk|kronjo|kresek|jayanti|sukadiri|pakuhaji|kemiri|mekar baru|gunung kaler|serang|cilegon|pandeglang|lebak|rangkasbitung|cikande|kragilan|ciruas|kramatwatu|anyer|cinangka|carita|labuan|menes|panimbang|cibalung|malingping|bayah|cibeber| Maja|bekasi|cikarang|cibitung|tambun|babelan|tarumajaya|setu|serang baru|cibarusah|bojongmangu|karangbahagia|pebayuran|sukatani|sukakarya|sukawangi|tambelang|cabangbungin|muaragembong|kedungwaringin|pondok gede|pondokgede|jatiasih|jatisampurna|bantargebang|mustikajaya|rawalumbu|medansatria| Cibinong|cileungsi|gunung putri|gunungputri|citeureup|bojong gede|bojonggede|parung|ciawi|cisarua|megamendung|caringin|cijeruk|cigombong|ciomas|dramaga|tamansari|ciampea|cibungbulang|pamijahan|leuwiliang|leuwisadeng|nanggung|rumpin|cigudeg|sukajaya|jasinga|tenjo|parung panjang|parungpanjang| gunung sindur|gunungsindur|kemang|rancabungur|iseeng|babakan madang|sentul|sukamakmur|cariu|tanjungsari|jonggol|klapanunggal|sukaraja|sawangan|bojongsari|pancoran mas|cipayung|sukmajaya|cilodong|cimanggis|tapos|beji|limo|cinere|bandung|cimahi|lembang|padalarang|ngamprah|batujajar|cihampelas|cililin|cipongkor|rongga|gununghalu|sindangkerta|parongpong|cisarua|cikalongwetan|cipeundeuy|cipatat|saguling|soreang|banjaran|baleendah|dayeuhkolot|bojongsoang|cileunyi|cimenyan|cilengkrang|rancaekek|cicalengka|nagreg|cikancung|majalaya|solokanjeruk|paseh|ibun|ciparay|pacet|kertasari|pangalengan|kertasari|cimaung|margahayu|margaasih|katapang|kutawaringin|ciwidey|rancabali|pasirjambu|sumedang|jatinangor|tanjungsari|cimanggung|sukasari|pamulihan|rantekalong|sumedang selatan|sumedang utara|gandoli|cimalaka|paseh|congeang|buahdua|surian|tanjungkerta|tanjungmedar|cikitu|tomo|ujungjaya|jatigede|darmaraja|cisitu|situraja|wado|jatunggal|garut|tarogong|leles|kadungora|blubur limbangan|selaawi|malangbong|kersamanah|cibatu|sukawening|karangpawitan|wanaraja|sucinaraja|pangtikan|cilawu|bayongbong|cigedug|cisurupan|sukaresmi|samarang|pasirwangi|cikajang|banjarwangi|singajaya|cihurip|peundeuy|pameungpeuk|cisompet|cikelet|cibalong|mekarmukti|bungbulang|pakemitan|pakenjeng|caringin|isewu|talegong|tasikmalaya|tasik|singaparna|ciawi|rajapolah|jamanis|sukahening|cisayong|sukaratu|indiang|leuwisari|sariwangi|padakembang|sukarame|mangunjaya|sukaraja|cibalong|parungponteng|bantarkalong|bojongasih|culamega|cipatujah|karangnunggal|cikalong|pancatengah|cikatomas|salopa|jatiwaras|cineam|manonjaya|gunungtanjung|salawu|puspahiang|taraju|sodonghilir|bojonggambir|ciamis|kawali|panumbangan|panjalu|sukamantri|cihaurbeuti|sindangkasih|cikoneng|cijingjing|bojongmengger|cisaga|rancah|tambaksari|lakbok|purwadadi|banjarsari|pamarican|cidolog|cimaragas|cipaku|jatinagara|rajadesa|sukadana|baregbeg|lumbung|pangandaran|parigi|cijulang|cimerak|cigugur|langkaplancar|mangunjaya|padaherang|kalipucang|sidamulih|kuningan|cilimus|ciawigebang|luragung|ciwaru|kadugede|darma|jalaksana|kramatmulya|sindangagung|cirebon|sumber|palimanan|plumbon|weru|kedawung|tengah tani|astana japura|pangenan|losari|ciledug|pabuaran|waled|babakan|gebang|karangsembung|karangwareng|lemahabang|susukan lebak|sedong|beber|greged|talun|dukunpuntang|depok|jamblang|klangenan|panguragan|arjawinangun|ciwaringin|gempol|susukan|gegesik|kaliwedi|kapetakan|suranenggala|gunung jati|mundu|majalengka|kadipaten|jatiwangi|dawuan|kasokandel|panyingkiran|majalengka|cigasong|sukahaji|sindang|rajagaluh|sindangwangi|leuwimunding|palasah|umber|ligung|jatitujuh|kertajati|bantarujeg|lemahsugih|malausma|cingambul|cikijing|talaga|banjaran|argapura|maya|indramayu|jatibarang|haurgeulis|patrol|sukra|anjatan|bongas|gabuswetan|kroya|gantar|terisi|cikedung|lelea|losarang|kandanghaur|karangampel|krangkeng|kedokan bunder|juntinyuat|sliyeg|kertasemaya|sukagumiwang|bangodua|tukdana|widasari|sindang|cantigi|arahan|lohbener|balongan|pasekan|subang|pamanukan|ciaiasem|pusakanagara|pusakajaya|compreng|binong|tambakdahan|pagaden|cipunagara|cikaum|purwadadi|pabuaran|patokbeusi|cipeundeuy|kalijati|dawuan|cibogo|cijambe|jalancagak|ciater|kasomalang|cisalak|tanjungsiang|sagalaherang|serangpanjang|blanakan|sukasari|legonkulon|purwakarta|cikampek|jatiluhur|plered|tegalwaru|manis|sukatani|darangdan|bojong|wanayasa|kiarapedes|pondoksalam|pasawahan|babakancikao|bungursari|campaka|cibatu|sukasari|karawang|klari|telukjambe|ciampel|pangkalan|tegalwaru|cikampek|kotabaru|jatisari|banyusari|cilamaya|lemahabang|telagasari|majalaya|karawang timur|karawang barat|rawamerta|kutawaluya|rengasdengklok|jayakerta|pedes|cilebar|cibuaya|tirtajaya|batujaya|pakisjaya|tirtamulya|purwasari|cianjur|cipanas|pacet|sukaresmi|cugenang|warungkondang|gekbrong|cilaku|cibeber|campaka|campakamulya|sukanagara|takokak|kadupandak|cijati|pagelaran|pasirkuda|tanggeung|cibinong|sindangbarang|agrabinta|leles|cidaun|naringgul|cikadu|karangtengah|mande|cikalongkulon|sukaluyu|bojongpicung|haurwangi|ciranjang|sukabumi|cisaat|cibadak|cicurug|parungkuda|cidahu|kalapanunggal|kabandungan|bojonggenteng|parakansalak|ciambar|nagrak|caringin|kadudampit|sukabumi|sukaraja|sukalarang|kebonpedes|ireunghas|gegerbitung|nyalindung|purabaya|jampangtengah|lengkong|pabuaran|sagaranten|cidolog|curugkembar|cidadap|simpenan|palabuhanratu|pelabuhanratu|cikakak|cisolok|cikidang|bantargadung|warungkiara|jampangkulon|cimanggu|kalibunder|surade|cibitung|ciracap|waluran|ciemas|tegalbuleud|semarang|ungaran|ambarawa|bawen|bergas|pringapus|tuntang|pabelan|bringin|bancak|suruh|susukan|kaliwungu|tengaran|getasan|banyubiru|jambu|sumowono|bandungan|salatiga|kendal|boja|kaliwungu|weleri|sukorejo|patean|pageruyung|plantungan|limbangan|singorojo|brangsong|pegandon|gemuh|ringinarum|ngampel|cepiring|patebon|kangkung|rowosari|demak|mranggen|karangawen|guntur|sayung|karangtengah|wonosalam|dempet|kebonagung|gajah|karanganyar|mijen|bonang|wedung|grobogan|purwodadi|gubug|godong|tegowanu|tanggungharjo|kedungjati|karangrayung|penawangan|toroh|geyer|pulokulon|kradenan|gabus|ngaringan|wirosari|tawangharjo|grobogan|brati|klambu|pati|juwana|tayu|kayen|winong|pucakwangi|jakén|jakenan|batangan|gabus|margorejo|gembong|tlogowungu|wedarijaksa|trangkil|margoyoso|gunungwungkal|cluwak|dukuhseti|tambakromo|sukolilo|kudus|jati|undaan|bae|gebog|kaliwungu|jekulo|mejobo|dawe|jepara|pecangaan|kalinyamatan|welahan|mayong|nalumsari|batealit|tahunan|kedung|mlonggo|pakis aji|bangsri|kembang|keling|donorojo|karimunjawa|rembang|lasem|pamotan|sulang|kaliori|sumber|bulu|gunem|sale|sarang|kragan|sluke|pancur|sedan|blora|cepu|randublatung|kedungtuban|kradenan|jati|doplang|banjarejo|tunjungan|japah|ngawen|kunduran|todanan|bogorejo|jepon|jiken|sambong|solo|surakarta|kartasura|sukoharjo|grogol|solo baru|solobaru|baki|gandekan|mojolaban|polokarto|bendosari|nguter|tawangsari|weru|bulu|karanganyar|colomadu|gondangrejo|kebakkramat|palur|jaten|tasikmadu|karangpandan|matesih|tawangmangu|ngargoyoso|jenawi|kerjo|mojogedang|jumantono|jumapolo|jatipuro|jatiyoso|sragen|gemolong|masaran|gondang|sambungmacan|ngrampal|karangmalang|kedawung|sidoharjo|tanon|plupuh|kalijambe|miri|sumberlawang|mondokan|sukodono|gesi|tangen|jenar|sambirejo|boyolali|ngemplak|banyudono|sawit|teras|mojosongo|musuk|tamansari|cepoko|selo|ampel|gladagsari|simo|nogosari|ambi|sambi|klego|andongsari|kemusu|wonoasri|wonosegoro|juwangi|karanggede|klaten|prambanan|gantiwarno|wedi|bayat|cawas|trucuk|kalikotes|kebonarum|jogonalan|manisrenggo|karangnongko|ceper|pedan|karangdowo|juwiring|wonosari|delanggu|polanharjo|karanganom|tulung|jatinom|kemalang|ngawen|wonogiri|selogiri|ngadirojo|sidoharjo|jatipurno|girimarto|wuryantoro|eromoko|manyaran|pracimantoro|giritontro|paranggupito|baturetno|batuwarno|karangtengah|tirtomoyo|nguntoronadi|jatisrono|jatirejo|slogohimo|bulukerto|puhpelem|purwantoro|kismantoro|magelang|muntilan|mertoyudan|mungkid|borobudur|salam|ngluwar|srumbung|dukun|sawangan|candimulyo|pakis|tegalrejo|secang|grabag|ngablak|bandongan|windusari|kaliangkrik|kajoran|salaman|tempuran|temanggung|parakan|kedu|ngadirejo|candiroto|joran|bansari|bulu|tlogomulyo|tembarak|selopampang|kranggan|pringsurat|kaloran|kandangan|gemawang|jumo|tretep|wonoboyo|bejen|wonosobo|kertek|kalikajar|sapuran|kepil|wadaslintang|kaliwiro|leksono|sukoharjo|selomerto|mojotengah|garung|kejajar|watulimo|watummalang|purworejo|kutoarjo|banyuurip|bagelen|purwodadi|ngombol|grabag|butuh|pituruh|kemiri|bruno|gebang|loano|bener|kaligesing|bayem|kebumen|gombong|karanganyar|pejagoan|sruweng|adimulyo|kuwarasan|buayan|ayah|rowokele|sempor|klirong|petanahan|puring|buluspesantren|ambal|mirit|bonorowo|prembun|kutowinangun|alian|poncowarno|karanggayam|karangsambung|padureso|sadang|banjarnegara|klampok|purwareja|mandiraja|purwanegara|bawang|sigaluh|madukara|banjarmangu|wanadadi|rakit|punggelan|karangkobar|pagentan|pejawaran|batur|wanayasa|kalibening|pandanarum|susukan|purbalingga|bobotsari|karangreja|mrebet|karanganyar|kertanegara|karangmoncol|rembang|kejobong|pengadegan|kaligondang|kalimanah|padamara|kutasari|bojongsari|kemangkon|bukateja|purwokerto|banyumas|sokaraja|ajibarang|wangon|jatilawang|rawalo|kebasen|kemranjen|sumpiuh|tambak|somagede|kalibagor|patikraja|karanglewas|cilongok|pekuncen|gumelar|lumbir|purwojati|kedungbanteng|baturraden|sumbang|kembaran|cilacap|majenang|kroya|sidareja|adipala|maos|sampang|kesugihan|jeruklegi|kawunganten|bantarsari|gandrungmangu|kedungreja|patimuan|cipari|wanareja|dayeuhluhur|cimanggu|karangpucung|binangun|nusawungu|kampung laut|pekalongan|kajen|wiradesa|kedungwuni|buaran|tirto|wonopringgo|karanganyar|bojong|sragi|siwalan|wonokerto|kesesi|user|doro|talun|karangdadap|petungkriyono|lebakbarang|paninggaran|kandangserang|batang|bandar|blado|reban|bawang|tersono|gringsing|limpung|banyuputih|subah|pecalungan|tulis|kandeman|warungasem|wonotunggal|pemalang|comal|ulujami|petarukan|taman|bantarbolang|randudongkal|moga|warungpring|pulosari|belik|watukumpul|bodeh|ampelgading|tegal|slawi|adiwerna|talang|dukuhturi|paguyangan|bumijawa|bojong|balapulang|margasari|lebaksiu|pangkah|kedungbanteng|jatinegara|warureja|suradadi|kramat|tarub|dukuhwaru|brebes|bumiayu|jatibarang|wanasari|bulakamba|tanjung|losari|kersana|ketanggungan|larangan|songgom|tonjong|sirampog|paguyangan|bantarkawung|salem|banjarharjo|surabaya|sidoarjo|waru|gedangan|sedati|buduran|candi|tanggulangin|porong|jabon|krembung|tulangan|wonoayu|sukodono|taman|sepanjang|krian|balongbendo|tarik|prambon|gresik|kebomas|manyar|bungah|sidayu|dukun|panceng|ujungpangkah|cerme|benjeng|balongpanggang|duduksampeyan|menganti|kedamean|wringinanom|driyorejo|sangkapura|tambak|bawean|lamongan|babat|paciran|brondong|solokuro|laren|maduran|sekaran|pucuk|sukodadi|turi|kalitengah|karangbinangun|glagah|deket|tikung|sarirejo|kembangbahu|mantup|sambeng|ngimbang|bluluk|sukorame|modo|kedungpring|sugio|karanggeneng|tuban|jenu|merakurak|semanding|palang|widang|plumpang|rengel|soko|parengan|senori|bangilan|jatirejo|kenduruan|tambakboyo|bancarr|kerek|montong|grabagan|singgahan|bojonegoro|kalitidu|padangan|cepu| sumberrejo|baureno|kanor|kapas|balen|sukosewu|dander|temayang|sugihwaras|kedungadem|kepohbaru|ngasem|gayam|purwosari|kasiman|kedewan|malo|trucuk|ngraho|margomulyo|tambakrejo|bubulan|gondang|sekar|mojokerto|mojosari|puri|sooko|trowulan|jatirejo|gondang|pacet|trawas|ngoro|pungging|kutorejo|dlangu|bangsal|mojoanyar|gedeg|kemlagi|jetis|dawarblandong|jombang|mojoagung|peterongan|jogoroto|sumobito|kesamben|tembelang|ploso|kudu|ngusikan|kabuh|plandaan|bandarkedungmulyo|perak|gudo|diwek|ngoro|mojowarno|bareng|wonosalam|megaluh|nganjuk|kertosono|warujayeng|tanjunganom|prambon|ngronggot|pace|loceret|berbek|sawahan|ngetos|bagor|wilangan|rejoso|gondang|ngluyu|lengkong|jatikalen|patianrowo|baron|sukomoro|madiun|caruban|mejayan|saradan|pilangkenceng|wonoasri|balerejo|madiun|nglames|jiwan|sawahan|kare|gemarang|wungu|dagangan|geger|kebonsari|dolopo|magetan|maospati|barat|kartoharjo|karangrejo|karangasri|kawedanan|lembeyan|parang|nguntoronadi|takeran|bendo|sukomoro|plaosan|sarangan|panekan|sidorejo|poncol|ngawi|karangjati|caruban|padangan|geneng|gerih|kendal|jogorogo|ngrambe|sine|widodaren|mantingan|kedunggalar|paron|pitu|kasreman|padas|bringin|karanganyar|ponorogo|sumoroto|kauman|sukorejo|sampung|badegan|balong|slahung|bungkal|ngrayun|sambit|sawoo|mlarak|siman|jetis|babadan|jenangan|ngebel|pudak|pulung|sooko|pacitan|arjosari|punung|donorojo|prkuku|kebonagung|tulakan|ngadirojo|sudimoro|tegalombo|bandar|nawangan|kediri|pare|ngasem|gampengrejo|gurah|pagu|kayenkidul|papar|purwoasri|kunjang|plemahan|pelemahan|badas|kepung|kandangan|puncu|plosoklaten|wates|ngancar|ringinrejo|kandat|kras|ngadiluwih|mojo|semen|banyakan|grogol|tarokan|blitar|wlingi|kanigoro|kademangan|sutojayan|lodoyo|bakung|wonotirto|panggungrejo|binangun|wates|kesamben|selorejo|doko|gandusari|garum|nglegok|sanankulon|ponggok|srengat|wonodadi|udanawu|tulungagung|ngunut|kauman|kedungwaru|boyolangu|gondang|pakel|bandung|besuki|campurdarat|tanggunggunung|kalidawir|pucanglaban|rejotangan|sumbergempol|sendang|pagerwojo|karangrejo|ngantru|trenggalek|pogalan|durenan|watulimo|prigi|munjungan|kampak|gandusari|karangan|suruh|tugu|bendungan|pule|dongko|panggul|malang|batu|kepanjen|singosari|lawang|karangploso|dau|pujon|ngantang|kasembon|pakis|jabung|tumpang|poncokusumo|wajik|wajak|bululawang|gondanglegi|pagelaran|turen|dampit|tirtoyudo|ampelgading|sumawe|sumbermanjing|gedangan|bantur|pagak|donomulyo|kalipare|sumberpucung|kromengan|ngajum|wonosari|wagir|pakisaji|tajinan|pasuruan|bangil|pandaan|prigen|sukorejo|purwosari|purwodadi|tutur|nongkojajar|puspo|tosari|lumbang|pasrepan|kejayan|wonorejo|rembang|kraton|pohjentrek|gondangwetan|rejoso|winongan|grati|lekok|nguling|beji|gempol|probolinggo|kraksaan|paiton|besuk|gading|pakuniran|kotaanyar|pajarakan|maron|gending|dringu|wonomerto|lumbang|tongas|sumberasih|leces|tegal siwalan|banyuanyar|tiris|krucil|kuripan|bantaran|sukapura|bromo|sumber|lumajang|yosowilangun|kunir|tempeh|pasirian|candipuro|pronojiwo|tempursari|rowokangkung|jatiroto|randuagung|klakah|ranuyoso|gucialit|padang|sukodono|sumbersuko|tekung|senduro|pasrujambe|kedungjajang|jember|ambulu|wuluhan|balung|puger|gumukmas|kencong|jombang|umbulsari|semboro|tanggul|sumberbaru|bangsalsari|rambipuji|panti|sukorambi|ajung|jenggawah|tempurejo|mumbulsari|mayang|silo|ledokombo|sumberjambe|sukowono|kalisat|pakusari|arjasa|jelbuk|patrang|sumbersari|kaliwates|bondowoso|tamanan|maesan|grujugan|curahdami|binakal|pakem|wringin|tegalampel|taman krocok|wonosari|tapen|sukosari|sumberwringin|ijen|botolinggo|prajekan|cermee|klabang|tlogosari|pujer|jambesari|tenggarang|situbondo|besuki|panarukan|asem bagus|asembagus|banyuputih|jangkar|arjugo|arjasa|kapongan|mangaran|panji|situbondo|kendit|mlandingan|bungatan|suboh|jatibanteng|sumbermalang|banyuwangi|genteng|rogojampi|muncar|jajag|gambiran|cluring|purwoharjo|tegaldlimo|bangorejo|pesanggaran|siliragung|glenmore|kalibaru|sempu|singojuruh|songgon|kabat|blimbingsari|glagah|licin|giri|kalipuro|wongsorejo|srono|bangkalan|socah|burneh|kamal|labang|kwanyar|modung|blega|konang|galis|tanah merah|tragah|arosbaya|klampis|sepulu|kokop|tanjung bumi|geger|sampang|torjun|pangarengan|jrengik|sreseh|tambelangan|kedungdung|robatal|karangpenang|ketapang|banyuates|sokobanah|camplong|omben|pamekasan|pademawu|galis|larangan|tlanakan|proppo|palengaan|pegantenan|kadur|pakong|waru|batumarmar|pasean|sumenep|kalianget|kota sumenep|mandalika|bluto|saronggi|giligenting|talango|gapura|batang batang|dungkek|batuputih|dasuk|ambunten|pasongsongan|rubaru|lenteng|ganding|guluk-guluk|pragaan|angsanah|arjasa|kangayan|sapeken|raas|gayam|masalembu|nonggunong)\b/i;
+
+    function deteksiApakahPulauJawa(teksAlamat) {
+        if (!teksAlamat) return false;
+        const almt = String(teksAlamat).toLowerCase();
+
+        // 1. CEK KODE POS 5 DIGIT (JIKA ADA DI ALAMAT)
+        // Kode pos Jawa mutlak diawali angka 1, 4, 5, atau 6.
+        // Kode pos Luar Jawa mutlak diawali angka 2 (Sumatera), 3 (Sumatera), 7 (Kalimantan), 8 (Bali/Nusa Tenggara), 9 (Sulawesi/Maluku/Papua).
+        const matchKodePos = almt.match(/\b([1-9]\d{4})\b/g);
+        if (matchKodePos && matchKodePos.length > 0) {
+            const kodePosTerakhir = matchKodePos[matchKodePos.length - 1];
+            const digitAwal = kodePosTerakhir.charAt(0);
+            if (['2', '3', '7', '8', '9'].includes(digitAwal)) return false; // Pasti Luar Jawa
+        }
+
+        // 2. CEK DAFTAR PROVINSI / KABUPATEN / KOTA LUAR PULAU JAWA
+        // Jika ada nama wilayah Luar Jawa (misal Riau, Dumai, Sintang, Kalimantan, Banjarmasin, Makassar, dll), langsung kunci sebagai LUAR JAWA!
+        if (REGEX_PROV_KOTA_LUAR_JAWA.test(almt)) {
+            return false;
+        }
+
+        // 3. CEK DAFTAR PROVINSI / KABUPATEN / KOTA / KECAMATAN SE-PULAU JAWA (Banten, DKI, Jabar, Jateng, DIY, Jatim)
+        if (REGEX_PROV_KOTA_KEC_JAWA.test(almt)) {
+            return true;
+        }
+
+        // 4. Jika tidak ada kata kunci Luar Jawa tapi memiliki Kode Pos berawalan 1, 4, 5, 6 -> Masuk Jawa
+        if (matchKodePos && matchKodePos.length > 0) {
+            const kodePosTerakhir = matchKodePos[matchKodePos.length - 1];
+            const digitAwal = kodePosTerakhir.charAt(0);
+            if (['1', '4', '5', '6'].includes(digitAwal)) return true;
+        }
+
+        return false;
+    }
+
+    function evaluasiFilterLanjutan(o, f) {
+        if (!f.blmC2 && !f.blmLunas && !f.blmOngkir && !f.sdhOngkir && !f.jnt && !f.jne && !f.pos && !f.jawa && !f.luarJawa && !f.noAlamat) return true;
+        const c2 = Number(o.cicilan2) || 0; const c3 = Number(o.cicilan3) || 0; const ongkir = Number(o.ongkir) || 0;
+        const eks = (o.ekspedisi || "").toUpperCase();
+
+        let passKeuangan = true;
+        if (f.blmC2 || f.blmLunas || f.blmOngkir || f.sdhOngkir) {
+            passKeuangan = false;
+            if (f.blmC2 && c2 === 0) passKeuangan = true;
+            if (f.blmLunas && c3 === 0) passKeuangan = true;
+            if (f.blmOngkir && ongkir === 0) passKeuangan = true;
+            if (f.sdhOngkir && ongkir > 0) passKeuangan = true;
+        }
+
+        let passEks = true;
+        if (f.jnt || f.jne || f.pos) {
+            passEks = false;
+            if (f.jnt && eks.includes("JNT")) passEks = true;
+            if (f.jne && eks.includes("JNE")) passEks = true;
+            if (f.pos && eks.includes("POS")) passEks = true;
+        }
+
+        let passAlamat = true;
+        if (f.jawa || f.luarJawa || f.noAlamat) {
+            passAlamat = false;
+            const isNoAlamat = cekApakahBelumAdaAlamat(o.alamat);
+            const isJawa = !isNoAlamat ? deteksiApakahPulauJawa(o.alamat) : false;
+
+            if (f.noAlamat && isNoAlamat) passAlamat = true;
+            if (f.jawa && !isNoAlamat && isJawa) passAlamat = true;
+            if (f.luarJawa && !isNoAlamat && !isJawa) passAlamat = true;
+        }
+        return passKeuangan && passEks && passAlamat;
+    }
+
+    function resetFilterLanjutan() {
+        ['fc-blmc2', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-jawa', 'fc-luarjawa', 'fc-noalamat'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.checked = false;
+        });
+        renderSlip();
+    }
+
+    function terapkanFilterLanjutan() {
+        document.getElementById('modalFilterLanjutan').classList.add('hidden');
+        renderSlip();
+    }
+
    // =======================================================
     // LOGIKA MODAL PENCARIAN & QTY STEPPER (FULL SCREEN)
     // =======================================================
@@ -1815,15 +2340,12 @@ function cekNotifikasiProduksi() {
         }
     });
 
-    // Suntikkan semua HTML notifikasi sekaligus
-    if (htmlNotif !== '') {
+   // Suntikkan semua HTML notifikasi sekaligus
+   if (htmlNotif !== '') {
         wadah.innerHTML = htmlNotif;
     }
 }
-            (err) => { // Jika Gagal
-                console.error("Gagal memuat data utama:", err);
-            }
-    
+
     async function handleOrderSubmit(e) {
         e.preventDefault();
         const form = e.target;
@@ -2361,6 +2883,8 @@ let pesanLog = "";
         // =========================================================
         // LOGIKA BARU: DINAMISASI DROPDOWN SARIMBIT BERDASARKAN FILTER LAIN
         // =========================================================
+        const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
+
         let sarimbitTersedia = new Set();
         let listMendesak = new Set();
 
@@ -2375,42 +2899,40 @@ let pesanLog = "";
 
         // 2. Kumpulkan sarimbit apa saja yang masih lolos dari filter-filter lain
         orderData.forEach(o => {
-            if (o.isArchived === true) return; 
+            if (o.isArchived === true || o.isarchived === true) return; 
             if (fTglMulai || fTglAkhir) {
                 const tglOrder = new Date(o.tanggal); 
                 if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
                 if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
             }
             if (filterToko && o.toko !== filterToko) return;
-            
-            // Jika filter tagihan aktif tapi sarimbit ini tidak ada di daftar mendesak, abaikan
             if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
+            
+            // FILTER LANJUTAN: Terapkan juga ke Dropdown Sarimbit
+            if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             
             sarimbitTersedia.add(o.sarimbit);
         });
 
         // 3. Susun ulang pilihan Dropdown Sarimbit secara cerdas
         if (filterSarimbitEl) {
-            const tempVal = filterSarimbitEl.value; // Ingat pilihan admin sebelumnya
+            const tempVal = filterSarimbitEl.value; 
             let optionsHTML = `<option value="">Semua Sarimbit</option>`;
             [...sarimbitTersedia].sort().forEach(s => {
                 optionsHTML += `<option value="${s}">${s}</option>`;
             });
             filterSarimbitEl.innerHTML = optionsHTML;
-            
-            // Jika sarimbit yang dipilih tadi masih ada di list yang baru, pertahankan
             if (sarimbitTersedia.has(tempVal)) {
                 filterSarimbitEl.value = tempVal;
                 filterSarimbit = tempVal;
             } else {
-                // Jika sudah hilang (misal ditagih besok, bukan hari ini), otomatis reset
                 filterSarimbitEl.value = "";
                 filterSarimbit = "";
             }
         }
         // =========================================================
 
-       // =========================================================
+        // =========================================================
         // OPTIMASI ANTI-LAG: Hitung status mendesak seluruh sarimbit 1x di awal
         // =========================================================
         const petaMendesak = {};
@@ -2423,7 +2945,7 @@ let pesanLog = "";
 
         const groups = {};
         orderData.forEach(o => {
-            if (o.isArchived === true) return; 
+            if (o.isArchived === true || o.isarchived === true) return; 
 
             // FILTER TANGGAL
             if (fTglMulai || fTglAkhir) {
@@ -2438,6 +2960,9 @@ let pesanLog = "";
             if (filterSarimbit && o.sarimbit !== filterSarimbit) return;
             if (filterToko && o.toko !== filterToko) return;
             if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
+
+            // FILTER LANJUTAN: Terapkan ke Tabel Data
+            if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
 
             const idUnik = o.idcustomer || o.idCustomer;
             const tglBarang = o.tanggal ? new Date(o.tanggal).getTime() : 0;
@@ -3277,13 +3802,15 @@ Array.from(tbody.children).forEach(tr => {
         const elemenFilterToko = document.getElementById('filter-toko-slip'); const filterToko = elemenFilterToko ? elemenFilterToko.value : "Semua";
         const elemenFilterSarimbit = document.getElementById('filter-sarimbit-slip'); const filterSarimbit = elemenFilterSarimbit ? elemenFilterSarimbit.value : "Semua";
         
+        const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
         const targetData = orderData.filter(o => {
             const namaCust = (o.customer || "").toLowerCase(); const sarimbitData = (o.sarimbit || "").toLowerCase(); const tokoData = (o.toko || "");
             const cocokSearch = namaCust.includes(search) || sarimbitData.includes(search);
             const cocokToko = (filterToko === "Semua" || filterToko === "") || (tokoData === filterToko);
             const cocokSarimbitFilter = (filterSarimbit === "Semua" || filterSarimbit === "") || (sarimbitData === filterSarimbit.toLowerCase());
-            return cocokSearch && cocokToko && cocokSarimbitFilter;
-        }); 
+            const passAdv = advFilter ? evaluasiFilterLanjutan(o, advFilter) : true;
+            return cocokSearch && cocokToko && cocokSarimbitFilter && passAdv;
+        });
         if(!targetData.length) return showToast("⚠️ Tidak ada data!");
         const fileName = getDynamicFilename('INVOICE');
         await generateWord(targetData, fileName);
@@ -3664,6 +4191,7 @@ Array.from(tbody.children).forEach(tr => {
         const filter = document.getElementById('filter-sarimbit-slip').value;
         const elemenFilterToko = document.getElementById('filter-toko-slip');
         const filterToko = elemenFilterToko ? elemenFilterToko.value : "";
+        const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
         const groups = {};
 
         orderData.forEach(o => {
@@ -3672,6 +4200,7 @@ Array.from(tbody.children).forEach(tr => {
             if (search && !cocokNama && !cocokSarimbit) return;
             if (filterToko && o.toko !== filterToko) return; 
             if (filter && o.sarimbit !== filter) return;
+            if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             
             const rawId = (o.idcustomer || o.idCustomer || "").toString().trim(); 
             const cleanName = o.customer.toString().toLowerCase().replace(/\s+/g, ' ').trim(); 
@@ -3787,12 +4316,14 @@ Array.from(tbody.children).forEach(tr => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4'); 
         const search = document.getElementById('search-customer').value.toLowerCase(); const filter = document.getElementById('filter-sarimbit-slip').value;
         const elemenFilterToko = document.getElementById('filter-toko-slip'); const filterToko = elemenFilterToko ? elemenFilterToko.value : "";
+        const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
         const groups = {};
         
         orderData.forEach(o => {
             const cocokNama = (o.customer || "").toLowerCase().includes(search); const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
             if (search && !cocokNama && !cocokSarimbit) return;
             if (filterToko && o.toko !== filterToko) return; if (filter && o.sarimbit !== filter) return;
+            if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             const rawId = (o.idcustomer || o.idCustomer || "").toString().trim(); const cleanName = o.customer.toString().toLowerCase().replace(/\s+/g, ' ').trim(); const idUnik = rawId !== "" ? rawId : "ID_LAMA_" + cleanName;
             if (!groups[idUnik]) { groups[idUnik] = { toko: o.toko || "-", nama: o.customer, alamat: o.alamat, telp: o.telepon, items: [], cicilan1: Number(o.cicilan1 || 0), cicilan2: Number(o.cicilan2 || 0), cicilan3: Number(o.cicilan3 || 0), ongkir: Number(o.ongkir || 0) }; }
             groups[idUnik].items.push(o);

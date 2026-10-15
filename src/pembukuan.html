@@ -229,29 +229,59 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
     </div>
   </div>
 
-  <div class="max-w-[98%] mx-auto mb-6 space-y-3">
-    <!-- REVISI: Mengubah grid menjadi 3 kolom untuk menampung Filter Arsip -->
-    <div class="glass p-4 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4 border border-slate-200 shadow-sm">
-      <div class="relative group">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base"></i>
-          <input type="text" id="filter-sarimbit" onkeyup="filterTable()" placeholder="Cari Koleksi Sarimbit..." class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-slate-800">
+  <div class="max-w-[98%] mx-auto mb-6 space-y-4">
+    <!-- PANEL FILTER: Desain Elegan 4 Kolom -->
+    <div class="glass p-5 md:p-6 rounded-3xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 border border-slate-200/80 shadow-md bg-white/50">
+      
+      <!-- Kolom Pencarian Sarimbit -->
+      <div class="relative group flex flex-col">
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-magnifying-glass text-blue-500 mr-1"></i> Pencarian</label>
+          <div class="relative">
+              <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
+              <input type="text" id="filter-sarimbit" onkeyup="filterTable()" placeholder="Cari Koleksi Sarimbit..." class="w-full pl-11 pr-4 py-3 bg-white hover:bg-slate-50 focus:bg-white rounded-xl font-bold text-xs text-slate-800 border border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm">
+          </div>
       </div>
-      <div class="relative group">
-        <i class="fa-solid fa-building absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-base pointer-events-none z-10"></i>
-        <!-- Mengubah dari teks input menjadi dropdown otomatis dengan background solid -->
-        <select id="filter-pusat" onchange="filterTable()" style="background-color: #ffffff !important;" class="w-full pl-10 pr-8 py-3 rounded-xl font-bold text-xs text-slate-800 cursor-pointer border border-slate-200 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all relative z-20">
-            <option value="">Semua Pusat/Brand</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none z-30"></i>
+      
+      <!-- Kolom Pusat/Brand -->
+      <div class="relative group flex flex-col">
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-building text-indigo-500 mr-1"></i> Filter Pusat</label>
+          <div class="relative">
+              <i class="fa-solid fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors text-sm pointer-events-none"></i>
+              <select id="filter-pusat" onchange="filterTable()" class="w-full pl-11 pr-10 py-3 bg-white hover:bg-slate-50 focus:bg-white rounded-xl font-bold text-xs text-slate-800 border border-slate-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 outline-none appearance-none cursor-pointer transition-all shadow-sm">
+                  <option value="">Semua Pusat/Brand</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+          </div>
       </div>
-      <div class="relative group">
-          <i class="fa-solid fa-filter absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors text-base pointer-events-none z-10"></i>
-          <select id="filter-status-arsip" onchange="filterTable()" class="glass-input w-full pl-10 pr-3 py-2.5 rounded-xl font-bold text-xs text-indigo-700 cursor-pointer shadow-sm outline-none bg-indigo-50/30 border-indigo-200">
-              <option value="semua">Tampilkan Semua (Aktif & Arsip)</option>
-              <option value="aktif">Hanya Sarimbit Aktif</option>
-              <option value="arsip">Hanya Sarimbit Arsip</option>
-          </select>
+      
+      <!-- Kolom Filter Arsip -->
+      <div class="relative group flex flex-col">
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-box-archive text-emerald-500 mr-1"></i> Status Koleksi</label>
+          <div class="relative">
+              <i class="fa-solid fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 group-focus-within:text-emerald-600 transition-colors text-sm pointer-events-none"></i>
+              <select id="filter-status-arsip" onchange="filterTable()" class="w-full pl-11 pr-10 py-3 bg-emerald-50/50 hover:bg-emerald-50 focus:bg-white rounded-xl font-bold text-xs text-emerald-700 border border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 outline-none appearance-none cursor-pointer transition-all shadow-sm">
+                  <option value="semua">Semua (Aktif & Arsip)</option>
+                  <option value="aktif">🟢 Hanya Sarimbit Aktif</option>
+                  <option value="arsip">📦 Hanya Sarimbit Arsip</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-emerald-500 pointer-events-none"></i>
+          </div>
       </div>
+      
+      <!-- Kolom Filter Print -->
+      <div class="relative group flex flex-col">
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-print text-rose-500 mr-1"></i> Status Cetak (Print)</label>
+          <div class="relative">
+              <i class="fa-solid fa-file-invoice absolute left-4 top-1/2 -translate-y-1/2 text-rose-500 group-focus-within:text-rose-600 transition-colors text-sm pointer-events-none"></i>
+              <select id="filter-status-print" onchange="filterTable()" class="w-full pl-11 pr-10 py-3 bg-rose-50/50 hover:bg-rose-50 focus:bg-white rounded-xl font-bold text-xs text-rose-700 border border-rose-200 focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 outline-none appearance-none cursor-pointer transition-all shadow-sm">
+                  <option value="semua">Semua Status Print</option>
+                  <option value="sudah">✅ Sudah Diprint</option>
+                  <option value="belum">❌ Belum Diprint</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-rose-500 pointer-events-none"></i>
+          </div>
+      </div>
+      
     </div>
     
     <div class="flex flex-wrap gap-2">
@@ -926,6 +956,9 @@ if (statusSync && statusTxt) {
       
       const filterStatusArsipEl = document.getElementById('filter-status-arsip');
       const statusArsipQuery = filterStatusArsipEl ? filterStatusArsipEl.value : "semua";
+
+      const filterStatusPrintEl = document.getElementById('filter-status-print');
+      const statusPrintQuery = filterStatusPrintEl ? filterStatusPrintEl.value : "semua";
       
       const pembatasArsip = document.getElementById('garis-pembatas-arsip');
       let jumlahArsipTerlihat = 0;
@@ -938,6 +971,8 @@ if (statusSync && statusTxt) {
         const bName = elBrand ? elBrand.value.toLowerCase() : "";
         
         const isArsip = sName.includes('arsip');
+        const isPrinted = row.querySelectorAll('input[type="checkbox"]')[0]?.checked || false;
+
         const cocokS = sName.includes(sQuery);
         const cocokB = (bQuery === "") || (bName === bQuery);
         const cocokTeks = cocokS && cocokB;
@@ -946,7 +981,11 @@ if (statusSync && statusTxt) {
         if (statusArsipQuery === "aktif" && isArsip) cocokStatus = false;
         if (statusArsipQuery === "arsip" && !isArsip) cocokStatus = false;
 
-        if (cocokTeks && cocokStatus) {
+        let cocokPrint = true;
+        if (statusPrintQuery === "sudah" && !isPrinted) cocokPrint = false;
+        if (statusPrintQuery === "belum" && isPrinted) cocokPrint = false;
+
+        if (cocokTeks && cocokStatus && cocokPrint) {
             row.style.display = "";
             if (isArsip) jumlahArsipTerlihat++;
         } else {
