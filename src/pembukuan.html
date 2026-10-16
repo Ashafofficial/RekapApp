@@ -204,6 +204,70 @@ pointer-events: none;
 from { opacity: 1; transform: scale(1); filter: blur(0px); } 
 to { opacity: 0; transform: scale(0.95); filter: blur(4px); } 
 }
+
+    /* ==========================================
+       TEMA GELAP (DARK MODE) UNTUK PEMBUKUAN
+       ========================================== */
+    body.theme-dark {
+        background-color: #0f172a !important;
+        background-image: none !important;
+        color: #f8fafc !important;
+    }
+    
+    /* Tabel, Kotak, dan Transparansi */
+    body.theme-dark .bg-white, body.theme-dark .bg-white\/30, body.theme-dark .bg-white\/40, body.theme-dark .bg-white\/50, body.theme-dark .glass {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    
+    /* Teks dan Judul */
+    body.theme-dark .text-slate-800, body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+    body.theme-dark .text-slate-600, body.theme-dark .text-slate-500, body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+    body.theme-dark .text-blue-700, body.theme-dark .text-blue-600 { color: #60a5fa !important; }
+    body.theme-dark .text-emerald-700, body.theme-dark .text-emerald-600 { color: #34d399 !important; }
+    body.theme-dark .from-slate-800 { --tw-gradient-from: #f8fafc var(--tw-gradient-from-position); }
+    body.theme-dark .to-indigo-900 { --tw-gradient-to: #94a3b8 var(--tw-gradient-to-position); }
+    
+    /* Menggelapkan Latar Belakang Warna-warni Bawaan Terang */
+    body.theme-dark .bg-slate-50, body.theme-dark .bg-slate-100, body.theme-dark .bg-slate-200\/50, 
+    body.theme-dark .bg-blue-50\/80, body.theme-dark .bg-blue-50\/50, body.theme-dark .bg-blue-50\/40, body.theme-dark .bg-blue-50\/30,
+    body.theme-dark .bg-emerald-50\/50, body.theme-dark .bg-emerald-50\/30,
+    body.theme-dark .bg-rose-50\/50, body.theme-dark .bg-indigo-50\/50 {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+    }
+    
+    /* Menghilangkan noda kotak terang pada label DP dan LUNAS */
+    body.theme-dark .bg-blue-100\/50, 
+    body.theme-dark .bg-emerald-100\/50 {
+        background-color: transparent !important;
+    }
+
+    /* Input Kolom dan Kalender (Flatpickr override ada di input utamanya) */
+    body.theme-dark input, body.theme-dark select, body.theme-dark textarea {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+    body.theme-dark input.bg-transparent {
+        background-color: transparent !important;
+        border-color: transparent !important;
+    }
+
+    /* Tabel Border dan Efek Sorot (Hover) */
+    body.theme-dark .border-slate-200, body.theme-dark .border-slate-200\/80, body.theme-dark .border-slate-200\/50, body.theme-dark .border-slate-300\/50,
+    body.theme-dark .border-blue-100, body.theme-dark .border-blue-200, body.theme-dark .border-emerald-200, body.theme-dark .border-indigo-200, body.theme-dark .border-rose-200 {
+        border-color: #334155 !important;
+    }
+    body.theme-dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #334155 !important;
+    }
+    body.theme-dark tbody tr.bg-white, body.theme-dark tbody tr.bg-slate-50 {
+        background-color: #1e293b !important;
+    }
+    body.theme-dark tbody tr:hover {
+        background-color: #0f172a !important;
+    }
 </style>
 </head>
 <body class="p-2 md:p-6 pb-24 text-slate-800">
@@ -507,14 +571,22 @@ if (statusSync && statusTxt) {
         }
     }
 
+  // ==============================================================
+   // BACA PENGATURAN MODE GELAP DARI LAYAR UTAMA SECARA INSTAN
+   // ==============================================================
+   window.addEventListener('DOMContentLoaded', () => {
+        const appSettings = JSON.parse(localStorage.getItem('sarimbitSettings'));
+        if (appSettings && appSettings.darkMode === true) {
+            document.body.classList.add('theme-dark');
+        }
+   });
+
    // MEMUAT DATA PERTAMA KALI HALAMAN DIBUKA
    window.onload = function() {
         periksaSinyal();
         
-        // Memanggil fungsi baru di atas
         muatDataPembukuan();
 
-        // Inisialisasi KTP Perangkat (Bawaan database.js)
         if (typeof initDeviceId === 'function') initDeviceId();
     };
 
