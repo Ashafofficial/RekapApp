@@ -6313,7 +6313,7 @@ function pilihProdukModal(metaString) {
     </button>
 </div>
 <!-- ========================================================================= -->
-<!-- SCRIPT SUNTIK PAKSA: AUTO-OPEN POPUP & MEMORI SARIMBIT PINTAR (ANTI-ERROR)-->
+<!-- SCRIPT SUNTIK PAKSA: PERBAIKAN TOTAL QTY, STRUK & MEMORI POP-UP (FINAL)   -->
 <!-- ========================================================================= -->
 <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -6322,14 +6322,14 @@ function pilihProdukModal(metaString) {
         window.apakahBaruBukaWeb = true;
         setTimeout(() => { window.apakahBaruBukaWeb = false; }, 1500);
     
-        // 1. Memaksa Tombol Tambah Barang agar otomatis membuka pop-up dengan jeda yang aman
+        // 1. OVERRIDE: Memaksa Tombol Tambah Barang agar buka pop-up perlahan
         window.addOrderRow = function(otomatisBuka = true) {
             const container = document.getElementById('order-items-list');
             const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
             container.appendChild(clone);
-            if(typeof updateLiveStruk === 'function') updateLiveStruk();
+            if(typeof window.updateLiveStruk === 'function') window.updateLiveStruk();
             
-            // JANGAN BUKA POP-UP JIKA WEB BARU SAJA DI-REFRESH
+            // Jangan buka pop-up jika web baru saja direfresh
             if (window.apakahBaruBukaWeb === true) return;
             
             if (otomatisBuka === true) {
@@ -6337,15 +6337,169 @@ function pilihProdukModal(metaString) {
                     const barisBaru = container.lastElementChild;
                     if (barisBaru) {
                         const divKlik = barisBaru.querySelector('[onclick="bukaModalPencarian(this)"]') || barisBaru.querySelector('.group\\/search');
-                        if (divKlik) {
-                            window.bukaModalPencarian(divKlik);
-                        }
+                        if (divKlik) window.bukaModalPencarian(divKlik);
                     }
                 }, 200);
             }
         };
     
-        // 2. Memaksa Pop-up agar memindai sarimbit dari seluruh baris pesanan
+        // 2. OVERRIDE: Memperbaiki Tombol (+) dan (-) agar Total Harga dan Struk tidak Macet/Crash
+        window.ubahQtyRow = function(btn, perubahan) {
+            const row = btn.closest('.order-row');
+            const qtyInput = row.querySelector('.row-qty');
+            let nilaiSekarang = parseInt(qtyInput.value) || 0;
+            let nilaiBaru = nilaiSekarang + perubahan;
+            if (nilaiBaru < 1) nilaiBaru = 1; 
+            qtyInput.value = nilaiBaru;
+            
+            // Pancing update subtotal kartu dengan aman (Tanpa melalui fungsi lama yang error)
+            const inputHidden = row.querySelector('.row-input');
+            if (inputHidden && inputHidden.dataset.meta) {
+                try {
+                    const meta = JSON.parse(inputHidden.dataset.meta);
+                    const formatRupiah = (n) => "Rp " + Number(n || 0).toLocaleString('id-ID');
+                    row.querySelector('.row-subtotal').innerText = formatRupiah(meta.harga * nilaiBaru);
+                } catch(e) {}
+            }
+            
+            if(typeof window.updateLiveStruk === 'function') window.updateLiveStruk();
+        };
+    
+        // 3. OVERRIDE: Memilih Barang di Pop-up dan Memasukkannya ke Struk
+        window.pilihProdukModal = function(metaString) {
+            if (!window.rowAktifPencarian) return;
+            
+            const metaData = JSON.parse(decodeURIComponent(metaString));
+            const textDisplay = window.rowAktifPencarian.querySelector('.teks-produk-terpilih');
+            const inputHidden = window.rowAktifPencarian.querySelector('.row-input');
+            const qtyInput = window.rowAktifPencarian.querySelector('.row-qty');
+            
+            inputHidden.value = `${metaData.pusat} - ${metaData.sarimbit} - ${metaData.barang} (${metaData.varian}/${metaData.size})`;
+            inputHidden.dataset.meta = JSON.stringify(metaData); // Menyimpan memori kuat
+            
+            if (textDisplay) {
+                textDisplay.textContent = `${metaData.sarimbit} - ${metaData.barang} (${metaData.varian}/${metaData.size})`;
+                textDisplay.classList.remove('text-slate-400');
+                textDisplay.classList.add('text-slate-800');
+            }
+            
+            const qty = parseInt(qtyInput.value) || 1;
+            const formatRupiah = (n) => "Rp " + Number(n || 0).toLocaleString('id-ID');
+            window.rowAktifPencarian.querySelector('.row-subtotal').innerText = formatRupiah(metaData.harga * qty);
+            
+            document.getElementById('modalPencarian').classList.add('hidden');
+            if(typeof window.updateLiveStruk === 'function') window.updateLiveStruk();
+        };
+    
+        // 4. OVERRIDE: Membuat Sistem Kalkulasi Live Struk Menjadi Kebal Error
+        window.updateLiveStruk = function() {
+            const formatRupiah = (n) => "Rp " + Number(n || 0).toLocaleString('id-ID');
+            const nama = document.getElementById('o-nama').value.trim();
+            document.getElementById('struk-nama').innerText = nama ? nama.toUpperCase() : "NAMA PELANGGAN";
+            document.getElementById('struk-telp').innerHTML = `<i class="fa-brands fa-whatsapp text-emerald-500"></i> ${document.getElementById('o-telp').value || "-"}`;
+            document.getElementById('struk-alamat').innerText = document.getElementById('o-alamat').value || "Alamat belum diisi";
+            document.getElementById('struk-kurir').innerText = document.getElementById('o-ekspedisi').value || "-";
+            document.getElementById('struk-toko').innerText = document.getElementById('o-toko').value || "-";
+    
+            let subtotal = 0;
+            let totalPcs = 0;
+            let htmlListBarang = "";
+            const trackerWarna = {}; 
+    
+            document.querySelectorAll('.order-row').forEach(row => {
+                const inputHidden = row.querySelector('.row-input');
+                const qtyInput = row.querySelector('.row-qty');
+                if (inputHidden && inputHidden.dataset.meta && qtyInput) {
+                    const qty = parseInt(qtyInput.value) || 0;
+                    if (qty > 0) {
+                        try {
+                            const meta = JSON.parse(inputHidden.dataset.meta);
+                            const subItem = meta.harga * qty;
+                            subtotal += subItem;
+                            totalPcs += qty;
+    
+                            htmlListBarang += `
+                                <div class="flex justify-between text-[11px] mb-1.5 pb-1.5 border-b border-slate-50 last:border-0">
+                                    <span class="text-slate-700 font-bold leading-tight">
+                                        <span class="font-black text-blue-600 mr-1">${qty}x</span> ${meta.sarimbit} - ${meta.barang} <span class="text-[9px] text-slate-400 font-medium">(${meta.varian}/${meta.size})</span>
+                                    </span>
+                                </div>
+                            `;
+    
+                            const subRowEl = row.querySelector('.row-subtotal');
+                            if (subRowEl) subRowEl.innerText = formatRupiah(subItem);
+    
+                            if (!trackerWarna[meta.sarimbit]) trackerWarna[meta.sarimbit] = new Set();
+                            trackerWarna[meta.sarimbit].add(meta.varian);
+                        } catch(e) {}
+                    }
+                }
+            });
+    
+            if (htmlListBarang === "") {
+                htmlListBarang = `<div class="text-[10px] text-slate-400 italic text-center py-2">Belum ada barang dipilih</div>`;
+            } else {
+                htmlListBarang += `
+                    <div class="mt-3 pt-3 border-t border-slate-200 text-right">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Kuantitas:</span>
+                        <span class="text-sm font-black text-indigo-600 ml-2">${totalPcs} Pcs</span>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('struk-list-barang').innerHTML = htmlListBarang;
+            document.getElementById('struk-total-pcs').innerText = totalPcs;
+    
+            // Peringatan Warna
+            let pesanPeringatan = "";
+            for (const srm in trackerWarna) {
+                if (trackerWarna[srm].size > 1) {
+                    pesanPeringatan = `Koleksi <b>${srm}</b> memiliki campuran warna (${[...trackerWarna[srm]].join(', ')}). Pastikan bukan karena salah klik varian!`;
+                    break;
+                }
+            }
+            const boxWarning = document.getElementById('struk-warning-warna');
+            if (pesanPeringatan !== "") {
+                boxWarning.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-500 mt-0.5"></i> <span class="text-[10px] leading-tight text-orange-700">${pesanPeringatan}</span>`;
+                boxWarning.classList.remove('hidden'); boxWarning.classList.add('flex');
+            } else {
+                boxWarning.classList.add('hidden'); boxWarning.classList.remove('flex');
+            }
+    
+            // Kalkulasi Keuangan
+            let tipeDiskon = document.getElementById('o-tipe-diskon').value;
+            let nilaiDiskon = Number(document.getElementById('o-nilai-diskon').value) || 0;
+            let totalDiskon = (tipeDiskon === 'persen') ? (subtotal * nilaiDiskon) / 100 : ((tipeDiskon === 'angka') ? nilaiDiskon : 0);
+            let grandTotal = Math.max(0, subtotal - totalDiskon);
+            let dpMasuk = Number(document.getElementById('o-cicilan1').value) || 0;
+            let sisaTagihan = grandTotal - dpMasuk;
+    
+            // Cetak Keuangan
+            const elSubtotal = document.getElementById('struk-subtotal');
+            if(elSubtotal) {
+                elSubtotal.innerText = formatRupiah(subtotal);
+                document.getElementById('struk-diskon').innerText = `- ${formatRupiah(totalDiskon)}`;
+                document.getElementById('struk-grandtotal').innerText = formatRupiah(grandTotal);
+                document.getElementById('struk-dp').innerText = `- ${formatRupiah(dpMasuk)}`;
+                document.getElementById('struk-sisa').innerText = formatRupiah(sisaTagihan);
+            }
+            
+            if(document.getElementById('kiri-total-pcs')) document.getElementById('kiri-total-pcs').innerText = totalPcs;
+            if(document.getElementById('kiri-grand-total')) document.getElementById('kiri-grand-total').innerText = formatRupiah(grandTotal);
+    
+            const wadahSimpan = document.getElementById('wadah-simpan-pesanan');
+            if (wadahSimpan) {
+                if (totalPcs > 0) {
+                    wadahSimpan.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
+                    wadahSimpan.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                } else {
+                    wadahSimpan.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+                    wadahSimpan.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                }
+            }
+        };
+    
+        // 5. OVERRIDE: Pop-up Agar Tidak Lupa Ingatan!
         window.bukaModalPencarian = function(btn) {
             if(btn) window.rowAktifPencarian = btn.closest('.order-row');
             document.getElementById('modalPencarian').classList.remove('hidden');
@@ -6360,7 +6514,7 @@ function pilihProdukModal(metaString) {
                 selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
             }
             
-            // SCANNER PINTAR: Mencari Sarimbit dari keranjang yang paling terakhir diisi (dari bawah ke atas)
+            // SCANNER PINTAR: Mencari Sarimbit secara paksa dari semua baris (dari bawah ke atas)
             let sarimbitIngatan = "";
             const semuaBaris = document.querySelectorAll('#order-items-list .order-row');
             
@@ -6370,14 +6524,14 @@ function pilihProdukModal(metaString) {
                     try { 
                         const meta = JSON.parse(inputData.dataset.meta);
                         if (meta && meta.sarimbit) {
-                            sarimbitIngatan = meta.sarimbit;
-                            break; // Ketemu! Langsung berhenti mencari
+                            sarimbitIngatan = meta.sarimbit; // Ketemu memorinya!
+                            break; 
                         }
                     } catch(e) {}
                 }
             }
             
-            selectSarimbit.value = sarimbitIngatan; // Otomatis mengisi dropdown pop-up dengan hasil temuan
+            selectSarimbit.value = sarimbitIngatan; // Otomatis mengatur dropdown!
             selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
             selectBarang.value = "";
             selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
