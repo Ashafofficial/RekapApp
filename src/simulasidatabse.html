@@ -1029,25 +1029,35 @@
 
   <template id="order-row-tmpl">
     <div class="order-row group p-5 bg-white rounded-2xl shadow-sm border border-slate-200 relative mb-4 transition-all hover:border-blue-300 hover:shadow-md">
+        <!-- Tombol Hapus -->
+        <button type="button" onclick="this.closest('.order-row').remove(); calculateOrderTotal();" class="absolute -top-3 -right-3 bg-white text-slate-400 w-8 h-8 rounded-full flex items-center justify-center shadow-md border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all z-10 opacity-0 group-hover:opacity-100">
+            <i class="fa-solid fa-xmark text-sm font-bold"></i>
+        </button>
+        
+        <!-- KATALOG SARIMBIT -->
         <div class="mb-4">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Katalog Sarimbit</label>
-            <select class="row-filter-sarimbit w-full p-3 mb-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-colors cursor-pointer" onchange="resetPencarianRow(this)">
-              <option value="">-- Sarimbit --</option>
-            </select>
-  
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block mt-2">Cari Produk</label>
-            <div onclick="bukaModalPencarian(this)" class="flex items-center w-full p-3 bg-white border border-slate-300 rounded-xl cursor-pointer hover:border-blue-500 transition-colors shadow-sm group/search">
-                <div class="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 group-hover/search:text-blue-500 transition-colors mr-3">
-                    <i class="fa-solid fa-search text-sm"></i>
-                </div>
-                <input type="hidden" class="row-input" data-meta="" required>
-                <div class="teks-produk-terpilih w-full bg-transparent text-sm font-semibold text-slate-400 truncate pr-2 select-none">
-                    Ketuk untuk mencari...
-                </div>
+            <div class="relative">
+                <select onchange="updateOpsiProdukRow(this)" class="row-filter-sarimbit w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer">
+                    <option value="">-- Pilih Sarimbit --</option>
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
             </div>
         </div>
         
-        <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
+        <!-- CARI PRODUK (Dropdown Bawaan Native) -->
+        <div class="mb-5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Pilih Produk</label>
+            <div class="relative">
+                <select class="row-input w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer" onchange="cariItemDariSelect(this)">
+                    <option value="">-- Pilih Baju (Muncul Pop-up Bawaan) --</option>
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+            </div>
+        </div>
+        
+        <!-- BARIS BAWAH: KUANTITAS & SUBTOTAL -->
+        <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-100 mt-2">
             <div class="flex items-center gap-3">
                 <div class="flex flex-col">
                     <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Kuantitas</label>
@@ -1067,10 +1077,6 @@
                 <span class="row-subtotal font-black text-xl text-slate-800">Rp 0</span>
             </div>
         </div>
-        
-        <button type="button" onclick="this.closest('.order-row').remove(); calculateOrderTotal();" class="absolute -top-3 -right-3 bg-white text-slate-400 w-8 h-8 rounded-full flex items-center justify-center shadow-md border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all z-10 opacity-0 group-hover:opacity-100">
-            <i class="fa-solid fa-xmark text-sm font-bold"></i>
-        </button>
     </div>
   </template>
 
