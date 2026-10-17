@@ -492,9 +492,11 @@
         </div>
       </header>
 
-  <div class="flex flex-1 overflow-hidden relative">
+  <!-- KUNCI 1: Efek kaca dipindah ke wadah utama agar tidak ada garis potong -->
+  <div class="flex flex-1 overflow-hidden relative bg-white/40 backdrop-blur-3xl border-none">
 
-    <aside id="main-sidebar" style="border: none !important; border-right-width: 0px !important; box-shadow: none !important;" class="fixed inset-y-0 left-0 z-50 w-72 glass flex flex-col h-full transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static shrink-0 rounded-r-[2rem] md:rounded-none overflow-hidden">
+ <!-- KUNCI 2: Menu kiri dibuat transparan di laptop agar menyatu tanpa batas -->
+ <aside id="main-sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white/90 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none flex flex-col h-full transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static shrink-0 rounded-r-[2rem] md:rounded-none overflow-hidden border-none shadow-none outline-none ring-0">
       
         <div class="px-10 pt-4 pb-6 flex justify-between items-center shrink-0">
             <div class="flex-1">
@@ -583,7 +585,8 @@
 
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden md:hidden fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-sm transition-opacity cursor-pointer"></div>
 
-    <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 relative bg-white/40 backdrop-blur-3xl">
+    <!-- KUNCI 3: Layar utama dibuat transparan karena wadah utama sudah kaca -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 relative bg-transparent border-none">
 
 <!-- HALAMAN: INPUT ORDER -->
 <div id="page-order" class="page active w-full">
@@ -967,15 +970,14 @@
       </div>
     </div>
 
-   <!-- HALAMAN: RINCIAN CUSTOMER -->
-   <div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
+  <!-- HALAMAN: RINCIAN CUSTOMER -->
+<div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-slate-200 pb-5">
         <div>
             <h2 class="text-3xl font-black tracking-tight text-slate-800">Database Pelanggan</h2>
             <p class="text-slate-500 font-medium mt-1">Manajemen data invoice, pembayaran, dan cetak slip pesanan.</p>
         </div>
         
-        <!-- PERBAIKAN POSISI TOMBOL: Menyatukan 3 tombol menjadi satu baris sejajar -->
         <div class="flex items-center flex-wrap gap-2 md:justify-end w-full md:w-auto">
           <button onclick="arsipPerSarimbit()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-slate-900 active:scale-95 transition-all text-xs flex items-center gap-2">
               <i class="fa-solid fa-box-archive text-slate-400"></i>ARSIP
@@ -987,48 +989,74 @@
               <i class="fa-solid fa-chart-pie"></i> Statistik
           </button>
         </div>
-      </div>
+    </div>
     
-    <div class="glass p-3 md:p-4 rounded-2xl flex flex-wrap gap-4 shadow-sm border border-slate-200 items-center justify-between">
-       
-      <div class="relative flex-auto min-w-[250px] max-w-md">
-          <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Cari pelanggan, nomor, atau sarimbit..." class="glass-input w-full pl-11 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800">
-      </div>
-      
-      <div class="flex flex-wrap items-center gap-2 lg:gap-3 flex-auto justify-start md:justify-end">
-          
-          <select id="filter-toko-slip" onchange="renderSlip()" class="glass-input w-32 md:w-36 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200">
-              <option value="">Semua Toko</option><option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option><option value="MASARA.HIJAB">MASARA.HIJAB</option>
-          </select>
-          
-          <select id="filter-sarimbit-slip" onchange="renderSlip()" class="px-4 py-3 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm outline-none focus:border-blue-400 cursor-pointer transition-all min-w-[160px]">
-              <option value="">Semua Sarimbit</option>
-          </select>
-          
-          <!-- FILTER BARU: STATUS TAGIHAN -->
-          <select id="filter-tagihan-slip" onchange="renderSlip()" class="px-4 py-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 shadow-sm outline-none focus:border-rose-400 cursor-pointer transition-all min-w-[150px]">
-              <option value="">Semua Jadwal</option>
-              <option value="aktif">Waktunya Tagihan (!)</option>
-          </select>
-          
-          <div id="slip-date-filter-wrapper" class="hidden flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-              <input type="date" id="filter-tgl-mulai-slip" onchange="renderSlip()" class="glass-input w-32 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200" title="Dari Tanggal">
-              <input type="date" id="filter-tgl-akhir-slip" onchange="renderSlip()" class="glass-input w-32 p-2.5 rounded-xl text-xs font-bold text-slate-600 cursor-pointer border-slate-200" title="Sampai Tanggal">
-          </div>
+   <!-- KOTAK PENCARIAN & FILTER (DESAIN 2 BARIS PROFESIONAL & SANGAT RAPI) -->
+   <div class="bg-white/80 backdrop-blur-md p-4 md:p-5 rounded-2xl flex flex-col gap-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-200 mb-6">
+        
+    <!-- BARIS 1: Pencarian & Tombol Unduh -->
+    <div class="flex flex-col lg:flex-row justify-between items-center gap-4 w-full">
+        <!-- Kotak Pencarian -->
+        <div class="relative w-full lg:flex-1">
+            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Ketik nama pelanggan, nomor WA, atau sarimbit..." class="w-full pl-11 pr-4 py-2.5 bg-slate-100/50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all outline-none">
+        </div>
 
-          <div class="hidden xl:block w-px h-6 bg-slate-300 mx-1"></div>
+        <!-- Tombol Unduh -->
+        <div class="flex items-center justify-end gap-2 w-full lg:w-auto shrink-0">
+            <button onclick="downloadFilteredWord()" title="Cetak Invoice (Word)" class="bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl font-bold border border-blue-200 hover:bg-blue-500 hover:text-white active:scale-95 transition-all text-xs flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-word text-sm"></i> <span class="hidden sm:inline">Word</span>
+            </button>
+            <button onclick="downloadCustomerPDF()" title="Cetak Sarimbit (PDF)" class="bg-rose-50 text-rose-600 px-4 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-500 hover:text-white active:scale-95 transition-all text-xs flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-pdf text-sm"></i> <span class="hidden sm:inline">PDF</span>
+            </button> 
+            <button onclick="downloadCustomerExcel()" title="Export Sarimbit (Excel)" class="bg-emerald-50 text-emerald-600 px-4 py-2.5 rounded-xl font-bold border border-emerald-200 hover:bg-emerald-500 hover:text-white active:scale-95 transition-all text-xs flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-excel text-sm"></i> <span class="hidden sm:inline">Excel</span>
+            </button>
+        </div>
+    </div>
 
-          <div class="flex items-center gap-2">
-             <button onclick="downloadFilteredWord()" class="bg-blue-50 text-blue-600 px-3 py-2.5 rounded-xl font-bold border border-blue-200 hover:bg-blue-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-word text-sm"></i> Invoice</button>
-             <button onclick="downloadCustomerPDF()" class="bg-rose-50 text-rose-600 px-3 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-pdf text-sm"></i> Sarimbit</button> 
-             <button onclick="downloadCustomerExcel()" class="bg-emerald-50 text-emerald-600 px-3 py-2.5 rounded-xl font-bold border border-emerald-200 hover:bg-emerald-100 active:scale-95 transition-all text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-file-excel text-sm"></i> Sarimbit</button>
-          </div>
-      </div>
+    <!-- Garis Pemisah Super Tipis -->
+    <div class="w-full h-px bg-slate-100"></div>
 
-   </div>
-
-      <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/50">
+   <!-- BARIS 2: Filter Dinamis -->
+   <div class="flex flex-col md:flex-row items-start md:items-center gap-3 w-full">
+    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 shrink-0 mb-1 md:mb-0">
+        <i class="fa-solid fa-filter"></i> Saring:
+    </div>
+    
+    <!-- WADAH FILTER: Mengunci Elemen Agar Sejajar Horizontal 100% -->
+    <div class="flex flex-row items-center gap-2.5 w-full overflow-x-auto pb-1 md:pb-0 scrollbar-none" style="white-space: nowrap;">
+        
+        <select id="filter-toko-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-50 border border-slate-200 px-3 rounded-xl text-xs font-bold text-slate-600 cursor-pointer outline-none focus:border-blue-400 focus:bg-white transition-all min-w-[130px]">
+            <option value="">Semua Toko</option>
+            <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
+            <option value="MASARA.HIJAB">MASARA.HIJAB</option>
+        </select>
+        
+        <select id="filter-sarimbit-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-50 border border-slate-200 px-3 rounded-xl text-xs font-bold text-slate-700 cursor-pointer outline-none focus:border-blue-400 focus:bg-white transition-all min-w-[150px]">
+            <option value="">Semua Sarimbit</option>
+        </select>
+        
+        <select id="filter-tagihan-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-rose-50/50 border border-rose-200 px-3 rounded-xl text-xs font-bold text-rose-600 cursor-pointer outline-none focus:border-rose-400 focus:bg-white transition-all min-w-[140px]">
+            <option value="">Semua Jadwal</option>
+            <option value="aktif">Waktunya Tagihan (!)</option>
+        </select>
+        
+        <!-- Filter Tanggal (Dikunci Mutlak Horizontal Sejajar & Tinggi Seragam) -->
+        <div id="slip-date-filter-wrapper" class="hidden shrink-0 h-10 bg-slate-50 border border-slate-200 rounded-xl px-3 shadow-sm">
+            <div class="h-full" style="display: flex; align-items: center; gap: 6px;">
+                <input type="date" id="filter-tgl-mulai-slip" onchange="renderSlip()" style="width: 105px; padding: 0; margin: 0; background: transparent; border: none; outline: none; font-size: 11px; font-weight: bold; color: #475569; cursor: pointer;" title="Dari Tanggal">
+                <span style="font-size: 12px; font-weight: 900; color: #cbd5e1;">-</span>
+                <input type="date" id="filter-tgl-akhir-slip" onchange="renderSlip()" style="width: 105px; padding: 0; margin: 0; background: transparent; border: none; outline: none; font-size: 11px; font-weight: bold; color: #475569; cursor: pointer;" title="Sampai Tanggal">
+            </div>
+        </div>
+    </div>
+</div>
+    
+</div>
+    <!-- TABEL DATA CUSTOMER -->
+    <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/50">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left min-w-[900px]">
                 <thead>
@@ -1042,8 +1070,8 @@
             </table>
         </div>
         <div id="pagination-slip" class="bg-white/30 border-t border-slate-100"></div>
-      </div>
-    </div> 
+    </div>
+</div>
 
     <!-- HALAMAN: DASHBOARD SUMBER -->
     <div id="page-dashboardsumber" class="page space-y-6 max-w-7xl mx-auto w-full">
@@ -1422,6 +1450,7 @@
 <!-- MODAL STATISTIK PROGRESS PELANGGAN -->
 <div id="modalStatistikProgress" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
     <div class="bg-white rounded-[2rem] w-full max-w-3xl shadow-2xl overflow-hidden border border-white animate-fade-in-up">
+        
         <div class="p-5 md:p-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white flex justify-between items-center shadow-md">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-sm shadow-inner">
@@ -1437,12 +1466,10 @@
             </button>
         </div>
         
-        <div class="p-6 md:p-8 max-h-[65vh] overflow-y-auto bg-slate-50/70">
+        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto bg-slate-50/70">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                <!-- Garis Pemisah Tengah untuk Layar Lebar -->
                 <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-200/80 -translate-x-1/2"></div>
                 
-                <!-- KOLOM KIRI: PROGRES SELESAI (HIJAU) -->
                 <div class="space-y-5 pr-0 md:pr-4">
                     <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-2.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Progres Selesai
@@ -1450,7 +1477,6 @@
                     <div id="wadah-stat-selesai" class="space-y-4"></div>
                 </div>
 
-                <!-- KOLOM KANAN: KEKURANGAN (MERAH) -->
                 <div class="space-y-5 pl-0 md:pl-4">
                     <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-2.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Kekurangan / Belum
@@ -1461,40 +1487,61 @@
         </div>
 
         <!-- FOOTER: PILIHAN UNDUHAN & TOMBOL EXCEL -->
-        <div class="p-4 md:p-5 bg-white border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap"><i class="fa-solid fa-list-check mr-1 text-indigo-500"></i> Pilih Data:</label>
-                <select id="pilihan-unduh-statistik" class="w-full sm:w-64 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-300 outline-none focus:bg-white focus:border-blue-500 cursor-pointer shadow-inner">
-                    <option value="ringkasan">📊 Ringkasan Persentase per Sarimbit</option>
-                    <option value="semua">📋 Semua Pelanggan (Sesuai Filter)</option>
-                    <optgroup label="Kategori Progres Selesai (Hijau)">
-                        <option value="sdh_c2">✅ Sudah Cicilan 2</option>
-                        <option value="sdh_lunas">✅ Sudah Pelunasan</option>
-                        <option value="sdh_ongkir">✅ Sudah Ongkir</option>
-                        <option value="sdh_alamat">✅ Alamat Lengkap</option>
-                    </optgroup>
-                    <optgroup label="Kategori Kekurangan / Belum (Merah)">
-                        <option value="blm_c2">❌ Belum Cicilan 2</option>
-                        <option value="blm_lunas">❌ Belum Pelunasan</option>
-                        <option value="blm_ongkir">❌ Belum Ongkir</option>
-                        <option value="blm_alamat">❌ Belum Ada Alamat</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                <button onclick="document.getElementById('modalStatistikProgress').classList.add('hidden')" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs md:text-sm hover:bg-slate-200 transition-colors">
-                    Kembali
-                </button>
-                <button onclick="unduhRekapStatistikExcel()" class="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-xs md:text-sm hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> Unduh Rekap Excel
-                </button>
+        <div class="p-4 md:p-5 bg-white border-t border-slate-200 flex flex-col gap-4">
+            <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-1 w-full">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-list-check mr-1 text-indigo-500"></i> Kategori Data:</label>
+                    <select id="kategori-unduh-stat" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-300 outline-none focus:bg-white focus:border-blue-500 cursor-pointer shadow-inner">
+                        <option value="semua">Semua Pelanggan (Sesuai Filter)</option>
+                        <optgroup label="Status Produksi">
+                            <option value="prod_close">Sudah Close PO</option>
+                            <option value="prod_ready">Sudah Ready</option>
+                            <option value="prod_open">Masih Open PO</option>
+                            <option value="prod_blmready">Belum Ready</option>
+                        </optgroup>
+                        <optgroup label="Status Keuangan & Alamat">
+                            <option value="sdh_c2">Sudah Cicilan 2</option>
+                            <option value="blm_c2_all">Belum Cicilan 2 (Semua)</option>
+                            <option value="blm_c2_lewat">Belum Cicilan 2 (Lewat Jatuh Tempo)</option>
+                            <option value="blm_c2_aman">Belum Cicilan 2 (Belum Waktunya)</option>
+                            <option value="sdh_lunas">Sudah Pelunasan</option>
+                            <option value="blm_lunas_all">Belum Pelunasan (Semua)</option>
+                            <option value="blm_lunas_lewat">Belum Pelunasan (Lewat Jatuh Tempo)</option>
+                            <option value="blm_lunas_aman">Belum Pelunasan (Belum Waktunya)</option>
+                            <option value="sdh_alamat">Alamat Lengkap</option>
+                            <option value="blm_alamat">Belum Ada Alamat</option>
+                        </optgroup>
+                        <optgroup label="Rincian Ongkos Kirim">
+                            <option value="sdh_ongkir_all">Sudah Ongkir (Semua)</option>
+                            <option value="blm_ongkir_all">Belum Ongkir (Semua)</option>
+                            <option value="blm_ongkir_open">Belum Ongkir (Tapi Barang Masih Open PO)</option>
+                            <option value="blm_ongkir_close">Belum Ongkir (Padahal Barang Sudah Close PO)</option>
+                            <option value="blm_ongkir_ready">Belum Ongkir (Padahal Barang Sudah Ready)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="flex-1 w-full">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-file-export mr-1 text-emerald-500"></i> Format Laporan:</label>
+                    <select id="format-unduh-stat" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-300 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer shadow-inner">
+                        <option value="lengkap">📋 Rincian Lengkap per Customer</option>
+                        <option value="sarimbit">📊 Rekap Daftar Nama Sarimbit Saja</option>
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-auto">
+                    <button onclick="unduhRekapStatistikExcel()" class="w-full px-6 py-2.5 h-[42px] bg-blue-600 text-white rounded-xl font-bold text-xs hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i> Unduh Excel
+                    </button>
+                </div>
             </div>
         </div>
+        
     </div>
 </div>
 
 <script>
-  // =======================================================
+// =======================================================
   // MESIN STATISTIK PROGRESS PELANGGAN & UNDUH EXCEL
   // =======================================================
   let dataStatistikAktif = [];
@@ -1554,19 +1601,59 @@
           groups[idUnik].items.push(o);
       });
 
+      const parsingTglAman = (tglString) => {
+          if (!tglString) return null;
+          let str = String(tglString).trim();
+          if (str.includes('/') || str.includes('.')) {
+              const pemisah = str.includes('/') ? '/' : '.';
+              const bagian = str.split(pemisah);
+              if (bagian[0].length <= 2 && bagian[2].length === 4) str = `${bagian[2]}-${bagian[1]}-${bagian[0]}`; 
+          }
+          const hasilTgl = new Date(str);
+          if (isNaN(hasilTgl.getTime())) return null;
+          hasilTgl.setHours(0,0,0,0);
+          return hasilTgl;
+      };
+
+      const sekarang = new Date();
+      sekarang.setHours(0,0,0,0);
+
       return Object.values(groups).map(g => {
           const isNoAlamat = cekApakahBelumAdaAlamat(g.alamat);
           const totalQty = g.items.reduce((sum, it) => sum + (Number(it.jumlah) || 0), 0);
           const gross = g.items.reduce((sum, it) => sum + ((Number(it.jumlah) || 0) * (Number(it.harga) || 0)), 0);
           const dTipe = g.items[0]?.diskonTipe || 'none';
           const dNilai = Number(g.items[0]?.diskonNilai) || 0;
-          let diskon = 0;
-          if (dTipe === 'persen') diskon = (gross * dNilai) / 100;
-          else if (dTipe === 'angka') diskon = dNilai;
-          let netTagihan = (gross - diskon) + g.ongkir;
-          if (netTagihan < 0) netTagihan = 0;
+          let diskon = (dTipe === 'persen') ? (gross * dNilai) / 100 : (dTipe === 'angka' ? dNilai : 0);
+          let netTagihan = Math.max(0, gross - diskon) + g.ongkir;
           const totalBayar = g.cicilan1 + g.cicilan2 + g.cicilan3;
-          const sisaTagihan = netTagihan - totalBayar;
+
+          let statusProduksi = "OPEN_PO";
+          let isC2Lewat = false;
+          let isLunasLewat = false;
+
+          if (typeof pembukuanData !== 'undefined') {
+              g.sarimbitSet.forEach(namaSrm => {
+                  const buku = pembukuanData.find(b => b.sarimbit === namaSrm);
+                  if (buku) {
+                      // Status Produksi
+                      const tglClose = parsingTglAman(buku.close);
+                      const tglReady = parsingTglAman(buku.ready);
+                      if (tglReady && tglReady.getTime() <= sekarang.getTime()) statusProduksi = "READY";
+                      else if (tglClose && tglClose.getTime() <= sekarang.getTime() && statusProduksi !== "READY") statusProduksi = "CLOSE_PO";
+
+                      // Status Keuangan
+                      const tglC2_Mentah = buku.c2 ? (String(buku.c2).includes('to') ? String(buku.c2).split('to')[0] : (String(buku.c2).includes('-') ? String(buku.c2).split('-')[0] : String(buku.c2))) : null;
+                      const tglLunas_Mentah = (buku.Lunas || buku.lunas) ? (String(buku.Lunas || buku.lunas).includes('to') ? String(buku.Lunas || buku.lunas).split('to')[0] : (String(buku.Lunas || buku.lunas).includes('-') ? String(buku.Lunas || buku.lunas).split('-')[0] : String(buku.Lunas || buku.lunas))) : null;
+
+                      const tglC2 = parsingTglAman(tglC2_Mentah);
+                      const tglLunas = parsingTglAman(tglLunas_Mentah);
+
+                      if (tglC2 && tglC2.getTime() <= sekarang.getTime()) isC2Lewat = true;
+                      if (tglLunas && tglLunas.getTime() <= sekarang.getTime()) isLunasLewat = true;
+                  }
+              });
+          }
 
           return {
               ...g,
@@ -1574,7 +1661,10 @@
               rincianBarang: g.items.map(it => `${it.jumlah}x ${it.sarimbit} - ${it.barang} (${it.varian}/${it.size})`).join(' | '),
               totalQty: totalQty,
               netTagihan: netTagihan,
-              sisaTagihan: sisaTagihan,
+              sisaTagihan: netTagihan - totalBayar,
+              statusProduksi: statusProduksi, 
+              isC2Lewat: isC2Lewat,
+              isLunasLewat: isLunasLewat,
               sdhC2: g.cicilan2 > 0,
               sdhLunas: g.cicilan3 > 0,
               sdhOngkir: g.ongkir > 0,
@@ -1583,30 +1673,206 @@
       });
   }
 
-  function buatItemGrafikStatistik(judul, jumlah, total, warnaTipe) {
-      const persen = total > 0 ? Math.round((jumlah / total) * 100) : 0;
+  // ALGORITMA PENGEPUL DATA UNTUK RICIAN KARTU SAAT DI-KLIK
+  function hitungDetailSarimbit(kumpulanData) {
+      const rincian = {};
+      kumpulanData.forEach(c => {
+          c.sarimbitSet.forEach(srm => {
+              rincian[srm] = (rincian[srm] || 0) + 1;
+          });
+      });
+      return Object.entries(rincian).sort((a,b) => b[1] - a[1]); 
+  }
+
+  function buatItemGrafikStatistik(kategoriId, judul, dataArray, totalSemua, warnaTipe) {
+      const jumlah = dataArray.length;
+      const persen = totalSemua > 0 ? Math.round((jumlah / totalSemua) * 100) : 0;
       const warnaUtama = warnaTipe === 'hijau' ? '#10b981' : '#e11d48';
       const warnaBg = warnaTipe === 'hijau' ? '#d1fae5' : '#ffe4e6';
       const classTeks = warnaTipe === 'hijau' ? 'text-emerald-600' : 'text-rose-600';
       const classBar = warnaTipe === 'hijau' ? 'bg-emerald-500' : 'bg-rose-500';
       const classTrack = warnaTipe === 'hijau' ? 'bg-emerald-100' : 'bg-rose-100';
 
+      const detailList = hitungDetailSarimbit(dataArray);
+      let htmlDetail = '';
+      if (detailList.length > 0) {
+          htmlDetail = `<div id="det-${kategoriId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 space-y-1.5 overflow-y-auto max-h-32 pr-1 custom-scrollbar">`;
+          detailList.forEach(d => { htmlDetail += `<div class="flex justify-between items-center text-[10px]"><span class="font-bold text-slate-600">${d[0]}</span><span class="font-black ${classTeks}">${d[1]} Cust</span></div>`; });
+          htmlDetail += `</div>`;
+      } else {
+          htmlDetail = `<div id="det-${kategoriId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 text-center text-[10px] font-bold text-slate-400">Tidak ada data sarimbit</div>`;
+      }
+
       return `
-      <div class="flex items-center gap-4 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative" style="background: conic-gradient(${warnaUtama} ${persen}%, ${warnaBg} 0);">
-              <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-black text-slate-700 shadow-inner">
-                  ${persen}%
+      <div onclick="document.getElementById('det-${kategoriId}').classList.toggle('hidden')" class="cursor-pointer hover:border-slate-300 transition-all flex flex-col bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm group">
+          <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative" style="background: conic-gradient(${warnaUtama} ${persen}%, ${warnaBg} 0);">
+                  <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-black text-slate-700 shadow-inner">${persen}%</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-baseline mb-1.5">
+                      <span class="text-xs md:text-sm font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">${judul}</span>
+                      <span class="text-xs font-black ${classTeks} ml-2 whitespace-nowrap">(${persen}%) <span class="text-[10px] font-semibold text-slate-400">${jumlah}/${totalSemua}</span></span>
+                  </div>
+                  <div class="w-full h-2.5 ${classTrack} rounded-full overflow-hidden p-0.5">
+                      <div class="h-full ${classBar} rounded-full transition-all duration-700" style="width: ${persen}%"></div>
+                  </div>
               </div>
           </div>
-          <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-baseline mb-1.5">
-                  <span class="text-xs md:text-sm font-bold text-slate-800 truncate">${judul}</span>
-                  <span class="text-xs font-black ${classTeks} ml-2 whitespace-nowrap">(${persen}%) <span class="text-[10px] font-semibold text-slate-400">${jumlah}/${total}</span></span>
+          ${htmlDetail}
+      </div>`;
+  }
+
+  function buatItemKeuanganDitel(kategoriId, judul, dataArray, totalSemua, dataLewat, dataAman, warnaTipe) {
+      const jumlah = dataArray.length;
+      const persen = totalSemua > 0 ? Math.round((jumlah / totalSemua) * 100) : 0;
+      const warnaUtama = warnaTipe === 'hijau' ? '#10b981' : '#e11d48';
+      const warnaBg = warnaTipe === 'hijau' ? '#d1fae5' : '#ffe4e6';
+      const classTeks = warnaTipe === 'hijau' ? 'text-emerald-600' : 'text-rose-600';
+      const classBar = warnaTipe === 'hijau' ? 'bg-emerald-500' : 'bg-rose-500';
+      const classTrack = warnaTipe === 'hijau' ? 'bg-emerald-100' : 'bg-rose-100';
+
+      const buildDetailHTML = (subId, arrData, title) => {
+          const detailList = hitungDetailSarimbit(arrData);
+          if (detailList.length === 0) return `<div id="${subId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 text-center text-[10px] font-bold text-slate-400">Tidak ada data sarimbit</div>`;
+          let html = `<div id="${subId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 space-y-1.5 overflow-y-auto max-h-32 pr-1 custom-scrollbar">`;
+          html += `<div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">${title}</div>`;
+          detailList.forEach(d => { html += `<div class="flex justify-between items-center text-[10px]"><span class="font-bold text-slate-600">${d[0]}</span><span class="font-black ${classTeks}">${d[1]} Cust</span></div>`; });
+          html += `</div>`;
+          return html;
+      };
+
+      const htmlMain = buildDetailHTML(`det-${kategoriId}-main`, dataArray, "Semua Data " + judul);
+      const htmlLewat = buildDetailHTML(`det-${kategoriId}-lewat`, dataLewat, "Jatuh Tempo (Sudah Lewat Tanggal)");
+      const htmlAman = buildDetailHTML(`det-${kategoriId}-aman`, dataAman, "Belum Masuk Waktu Tagihan");
+
+      return `
+      <div class="flex flex-col gap-2 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm group hover:border-slate-300 transition-all">
+          <div onclick="
+              document.getElementById('det-${kategoriId}-main').classList.toggle('hidden');
+              document.getElementById('det-${kategoriId}-lewat').classList.add('hidden');
+              document.getElementById('det-${kategoriId}-aman').classList.add('hidden');
+          " class="flex items-center gap-4 cursor-pointer">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative" style="background: conic-gradient(${warnaUtama} ${persen}%, ${warnaBg} 0);">
+                  <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-black text-slate-700 shadow-inner">${persen}%</div>
               </div>
-              <div class="w-full h-2.5 ${classTrack} rounded-full overflow-hidden p-0.5">
-                  <div class="h-full ${classBar} rounded-full transition-all duration-700" style="width: ${persen}%"></div>
+              <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-baseline mb-1.5">
+                      <span class="text-xs md:text-sm font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">${judul}</span>
+                      <span class="text-xs font-black ${classTeks} ml-2 whitespace-nowrap">(${persen}%) <span class="text-[10px] font-semibold text-slate-400">${jumlah}/${totalSemua}</span></span>
+                  </div>
+                  <div class="w-full h-2.5 ${classTrack} rounded-full overflow-hidden p-0.5">
+                      <div class="h-full ${classBar} rounded-full transition-all duration-700" style="width: ${persen}%"></div>
+                  </div>
               </div>
           </div>
+          <div class="grid grid-cols-2 gap-2 mt-1 pt-2 border-t border-slate-100">
+              <div onclick="
+                  event.stopPropagation();
+                  document.getElementById('det-${kategoriId}-lewat').classList.toggle('hidden');
+                  document.getElementById('det-${kategoriId}-main').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-aman').classList.add('hidden');
+              " class="bg-rose-50 hover:bg-rose-100 rounded-lg p-1.5 text-center border border-rose-100/50 cursor-pointer transition-colors active:scale-95 shadow-sm hover:shadow">
+                  <div class="text-[8px] font-bold text-rose-400 uppercase tracking-widest mb-0.5 pointer-events-none">Jatuh Tempo</div>
+                  <div class="text-xs font-black text-rose-700 pointer-events-none">${dataLewat.length} <span class="text-[8px] text-rose-400 font-medium">Cust</span></div>
+              </div>
+              <div onclick="
+                  event.stopPropagation();
+                  document.getElementById('det-${kategoriId}-aman').classList.toggle('hidden');
+                  document.getElementById('det-${kategoriId}-main').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-lewat').classList.add('hidden');
+              " class="bg-slate-50 hover:bg-slate-100 rounded-lg p-1.5 text-center border border-slate-100/50 cursor-pointer transition-colors active:scale-95 shadow-sm hover:shadow">
+                  <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 pointer-events-none">Belum Waktunya</div>
+                  <div class="text-xs font-black text-slate-700 pointer-events-none">${dataAman.length} <span class="text-[8px] text-slate-400 font-medium">Cust</span></div>
+              </div>
+          </div>
+          ${htmlMain}
+          ${htmlLewat}
+          ${htmlAman}
+      </div>`;
+  }
+
+  function buatItemOngkirDitel(kategoriId, judul, dataArray, totalSemua, dataOpen, dataClose, dataReady, warnaTipe) {
+      const jumlah = dataArray.length;
+      const persen = totalSemua > 0 ? Math.round((jumlah / totalSemua) * 100) : 0;
+      const warnaUtama = warnaTipe === 'hijau' ? '#10b981' : '#e11d48';
+      const warnaBg = warnaTipe === 'hijau' ? '#d1fae5' : '#ffe4e6';
+      const classTeks = warnaTipe === 'hijau' ? 'text-emerald-600' : 'text-rose-600';
+      const classBar = warnaTipe === 'hijau' ? 'bg-emerald-500' : 'bg-rose-500';
+      const classTrack = warnaTipe === 'hijau' ? 'bg-emerald-100' : 'bg-rose-100';
+
+      const buildDetailHTML = (subId, arrData, title) => {
+          const detailList = hitungDetailSarimbit(arrData);
+          if (detailList.length === 0) return `<div id="${subId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 text-center text-[10px] font-bold text-slate-400">Tidak ada data sarimbit</div>`;
+          let html = `<div id="${subId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 space-y-1.5 overflow-y-auto max-h-32 pr-1 custom-scrollbar">`;
+          html += `<div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">${title}</div>`;
+          detailList.forEach(d => { html += `<div class="flex justify-between items-center text-[10px]"><span class="font-bold text-slate-600">${d[0]}</span><span class="font-black ${classTeks}">${d[1]} Cust</span></div>`; });
+          html += `</div>`;
+          return html;
+      };
+
+      const htmlMain = buildDetailHTML(`det-${kategoriId}-main`, dataArray, "Semua Data Ongkir");
+      const htmlOpen = buildDetailHTML(`det-${kategoriId}-open`, dataOpen, "Rincian Sarimbit (Open PO)");
+      const htmlClose = buildDetailHTML(`det-${kategoriId}-close`, dataClose, "Rincian Sarimbit (Close PO)");
+      const htmlReady = buildDetailHTML(`det-${kategoriId}-ready`, dataReady, "Rincian Sarimbit (Ready)");
+
+      return `
+      <div class="flex flex-col gap-2 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm group hover:border-slate-300 transition-all">
+          <div onclick="
+              document.getElementById('det-${kategoriId}-main').classList.toggle('hidden');
+              document.getElementById('det-${kategoriId}-open').classList.add('hidden');
+              document.getElementById('det-${kategoriId}-close').classList.add('hidden');
+              document.getElementById('det-${kategoriId}-ready').classList.add('hidden');
+          " class="flex items-center gap-4 cursor-pointer">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative" style="background: conic-gradient(${warnaUtama} ${persen}%, ${warnaBg} 0);">
+                  <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-black text-slate-700 shadow-inner">${persen}%</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-baseline mb-1.5">
+                      <span class="text-xs md:text-sm font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">${judul}</span>
+                      <span class="text-xs font-black ${classTeks} ml-2 whitespace-nowrap">(${persen}%) <span class="text-[10px] font-semibold text-slate-400">${jumlah}/${totalSemua}</span></span>
+                  </div>
+                  <div class="w-full h-2.5 ${classTrack} rounded-full overflow-hidden p-0.5">
+                      <div class="h-full ${classBar} rounded-full transition-all duration-700" style="width: ${persen}%"></div>
+                  </div>
+              </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-1 pt-2 border-t border-slate-100">
+              <div onclick="
+                  event.stopPropagation();
+                  document.getElementById('det-${kategoriId}-open').classList.toggle('hidden');
+                  document.getElementById('det-${kategoriId}-main').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-close').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-ready').classList.add('hidden');
+              " class="bg-slate-50 hover:bg-slate-100 rounded-lg p-1.5 text-center border border-slate-100/50 cursor-pointer transition-colors active:scale-95 shadow-sm hover:shadow">
+                  <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 pointer-events-none">Open PO</div>
+                  <div class="text-xs font-black text-slate-700 pointer-events-none">${dataOpen.length} <span class="text-[8px] text-slate-400 font-medium">Cust</span></div>
+              </div>
+              <div onclick="
+                  event.stopPropagation();
+                  document.getElementById('det-${kategoriId}-close').classList.toggle('hidden');
+                  document.getElementById('det-${kategoriId}-main').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-open').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-ready').classList.add('hidden');
+              " class="bg-slate-50 hover:bg-slate-100 rounded-lg p-1.5 text-center border border-slate-100/50 cursor-pointer transition-colors active:scale-95 shadow-sm hover:shadow">
+                  <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 pointer-events-none">Close PO</div>
+                  <div class="text-xs font-black text-slate-700 pointer-events-none">${dataClose.length} <span class="text-[8px] text-slate-400 font-medium">Cust</span></div>
+              </div>
+              <div onclick="
+                  event.stopPropagation();
+                  document.getElementById('det-${kategoriId}-ready').classList.toggle('hidden');
+                  document.getElementById('det-${kategoriId}-main').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-open').classList.add('hidden');
+                  document.getElementById('det-${kategoriId}-close').classList.add('hidden');
+              " class="bg-slate-50 hover:bg-slate-100 rounded-lg p-1.5 text-center border border-slate-100/50 cursor-pointer transition-colors active:scale-95 shadow-sm hover:shadow">
+                  <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 pointer-events-none">Ready</div>
+                  <div class="text-xs font-black text-slate-700 pointer-events-none">${dataReady.length} <span class="text-[8px] text-slate-400 font-medium">Cust</span></div>
+              </div>
+          </div>
+          ${htmlMain}
+          ${htmlOpen}
+          ${htmlClose}
+          ${htmlReady}
       </div>`;
   }
 
@@ -1618,29 +1884,52 @@
       const filterToko = document.getElementById('filter-toko-slip')?.value || "Semua Toko";
       document.getElementById('subjudul-statistik').innerText = `Filter: ${filterSarimbit} • ${filterToko} (Total: ${total} Pelanggan)`;
 
-      const jmlSdhC2 = dataStatistikAktif.filter(d => d.sdhC2).length;
-      const jmlBlmC2 = total - jmlSdhC2;
+      // FILTERING ARRAY PRODUKSI
+      const dataReady = dataStatistikAktif.filter(d => d.statusProduksi === "READY");
+      const dataClosePO = dataStatistikAktif.filter(d => d.statusProduksi === "CLOSE_PO" || d.statusProduksi === "READY");
+      const dataOpenPO = dataStatistikAktif.filter(d => d.statusProduksi === "OPEN_PO");
+      const dataBelumReady = dataStatistikAktif.filter(d => d.statusProduksi !== "READY");
 
-      const jmlSdhLunas = dataStatistikAktif.filter(d => d.sdhLunas).length;
-      const jmlBlmLunas = total - jmlSdhLunas;
+      // FILTERING KEUANGAN (DIBELAH KEDALAM JATUH TEMPO)
+      const dataSdhC2 = dataStatistikAktif.filter(d => d.sdhC2);
+      const dataBlmC2 = dataStatistikAktif.filter(d => !d.sdhC2);
+      const dataBlmC2_Lewat = dataBlmC2.filter(d => d.isC2Lewat);
+      const dataBlmC2_Aman = dataBlmC2.filter(d => !d.isC2Lewat);
 
-      const jmlSdhOngkir = dataStatistikAktif.filter(d => d.sdhOngkir).length;
-      const jmlBlmOngkir = total - jmlSdhOngkir;
+      const dataSdhLunas = dataStatistikAktif.filter(d => d.sdhLunas);
+      const dataBlmLunas = dataStatistikAktif.filter(d => !d.sdhLunas);
+      const dataBlmLunas_Lewat = dataBlmLunas.filter(d => d.isLunasLewat);
+      const dataBlmLunas_Aman = dataBlmLunas.filter(d => !d.isLunasLewat);
 
-      const jmlSdhAlamat = dataStatistikAktif.filter(d => d.sdhAlamat).length;
-      const jmlBlmAlamat = total - jmlSdhAlamat;
+      const dataSdhAlamat = dataStatistikAktif.filter(d => d.sdhAlamat);
+      const dataBlmAlamat = dataStatistikAktif.filter(d => !d.sdhAlamat);
+
+      // ONGKIR SUPER SPESIFIK
+      const dataSdhOngkir = dataStatistikAktif.filter(d => d.sdhOngkir);
+      const sdhOngkir_Open = dataSdhOngkir.filter(d => d.statusProduksi === "OPEN_PO");
+      const sdhOngkir_Close = dataSdhOngkir.filter(d => d.statusProduksi === "CLOSE_PO");
+      const sdhOngkir_Ready = dataSdhOngkir.filter(d => d.statusProduksi === "READY");
+
+      const dataBlmOngkir = dataStatistikAktif.filter(d => !d.sdhOngkir);
+      const blmOngkir_Open = dataBlmOngkir.filter(d => d.statusProduksi === "OPEN_PO");
+      const blmOngkir_Close = dataBlmOngkir.filter(d => d.statusProduksi === "CLOSE_PO");
+      const blmOngkir_Ready = dataBlmOngkir.filter(d => d.statusProduksi === "READY");
 
       let htmlSelesai = "";
-      htmlSelesai += buatItemGrafikStatistik("Sudah Cicilan 2", jmlSdhC2, total, 'hijau');
-      htmlSelesai += buatItemGrafikStatistik("Sudah Pelunasan", jmlSdhLunas, total, 'hijau');
-      htmlSelesai += buatItemGrafikStatistik("Sudah Ongkir", jmlSdhOngkir, total, 'hijau');
-      htmlSelesai += buatItemGrafikStatistik("Alamat Lengkap", jmlSdhAlamat, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_close", "Sudah Close PO", dataClosePO, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_ready", "Sudah Ready", dataReady, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_c2", "Sudah Cicilan 2", dataSdhC2, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_lunas", "Sudah Pelunasan", dataSdhLunas, total, 'hijau');
+      htmlSelesai += buatItemOngkirDitel("sdh_ongkir", "Sudah Ongkir", dataSdhOngkir, total, sdhOngkir_Open, sdhOngkir_Close, sdhOngkir_Ready, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_alamat", "Alamat Lengkap", dataSdhAlamat, total, 'hijau');
 
       let htmlKurang = "";
-      htmlKurang += buatItemGrafikStatistik("Belum Cicilan 2", jmlBlmC2, total, 'merah');
-      htmlKurang += buatItemGrafikStatistik("Belum Pelunasan", jmlBlmLunas, total, 'merah');
-      htmlKurang += buatItemGrafikStatistik("Belum Ongkir", jmlBlmOngkir, total, 'merah');
-      htmlKurang += buatItemGrafikStatistik("Belum Ada Alamat", jmlBlmAlamat, total, 'merah');
+      htmlKurang += buatItemGrafikStatistik("masih_open", "Masih Open PO", dataOpenPO, total, 'merah');
+      htmlKurang += buatItemGrafikStatistik("blm_ready", "Belum Ready", dataBelumReady, total, 'merah');
+      htmlKurang += buatItemKeuanganDitel("blm_c2", "Belum Cicilan 2", dataBlmC2, total, dataBlmC2_Lewat, dataBlmC2_Aman, 'merah');
+      htmlKurang += buatItemKeuanganDitel("blm_lunas", "Belum Pelunasan", dataBlmLunas, total, dataBlmLunas_Lewat, dataBlmLunas_Aman, 'merah');
+      htmlKurang += buatItemOngkirDitel("blm_ongkir", "Belum Ongkir", dataBlmOngkir, total, blmOngkir_Open, blmOngkir_Close, blmOngkir_Ready, 'merah');
+      htmlKurang += buatItemGrafikStatistik("blm_alamat", "Belum Ada Alamat", dataBlmAlamat, total, 'merah');
 
       document.getElementById('wadah-stat-selesai').innerHTML = htmlSelesai;
       document.getElementById('wadah-stat-kurang').innerHTML = htmlKurang;
@@ -1648,136 +1937,97 @@
   }
 
   function unduhRekapStatistikExcel() {
-      if (!dataStatistikAktif || dataStatistikAktif.length === 0) {
-          dataStatistikAktif = kumpulkanDataPelangganStatistik();
+      if (!dataStatistikAktif || dataStatistikAktif.length === 0) dataStatistikAktif = kumpulkanDataPelangganStatistik();
+      if (dataStatistikAktif.length === 0) return showToast("⚠️ Tidak ada data pelanggan!");
+
+      const kategori = document.getElementById('kategori-unduh-stat').value;
+      const formatData = document.getElementById('format-unduh-stat').value;
+      
+      let dataTersaring = [];
+      let labelKategori = "";
+
+      switch(kategori) {
+          case "semua": dataTersaring = dataStatistikAktif; labelKategori = "SEMUA_PELANGGAN"; break;
+          case "prod_close": dataTersaring = dataStatistikAktif.filter(d => d.statusProduksi === "CLOSE_PO" || d.statusProduksi === "READY"); labelKategori = "SUDAH_CLOSE_PO"; break;
+          case "prod_ready": dataTersaring = dataStatistikAktif.filter(d => d.statusProduksi === "READY"); labelKategori = "SUDAH_READY"; break;
+          case "prod_open": dataTersaring = dataStatistikAktif.filter(d => d.statusProduksi === "OPEN_PO"); labelKategori = "MASIH_OPEN_PO"; break;
+          case "prod_blmready": dataTersaring = dataStatistikAktif.filter(d => d.statusProduksi !== "READY"); labelKategori = "BELUM_READY"; break;
+          
+          case "sdh_c2": dataTersaring = dataStatistikAktif.filter(d => d.sdhC2); labelKategori = "SUDAH_C2"; break;
+          case "blm_c2_all": dataTersaring = dataStatistikAktif.filter(d => !d.sdhC2); labelKategori = "BELUM_C2_SEMUA"; break;
+          case "blm_c2_lewat": dataTersaring = dataStatistikAktif.filter(d => !d.sdhC2 && d.isC2Lewat); labelKategori = "BELUM_C2_JATUH_TEMPO"; break;
+          case "blm_c2_aman": dataTersaring = dataStatistikAktif.filter(d => !d.sdhC2 && !d.isC2Lewat); labelKategori = "BELUM_C2_AMAN"; break;
+          
+          case "sdh_lunas": dataTersaring = dataStatistikAktif.filter(d => d.sdhLunas); labelKategori = "SUDAH_LUNAS"; break;
+          case "blm_lunas_all": dataTersaring = dataStatistikAktif.filter(d => !d.sdhLunas); labelKategori = "BELUM_LUNAS_SEMUA"; break;
+          case "blm_lunas_lewat": dataTersaring = dataStatistikAktif.filter(d => !d.sdhLunas && d.isLunasLewat); labelKategori = "BELUM_LUNAS_JATUH_TEMPO"; break;
+          case "blm_lunas_aman": dataTersaring = dataStatistikAktif.filter(d => !d.sdhLunas && !d.isLunasLewat); labelKategori = "BELUM_LUNAS_AMAN"; break;
+          
+          case "sdh_alamat": dataTersaring = dataStatistikAktif.filter(d => d.sdhAlamat); labelKategori = "ALAMAT_LENGKAP"; break;
+          case "blm_alamat": dataTersaring = dataStatistikAktif.filter(d => !d.sdhAlamat); labelKategori = "BELUM_ALAMAT"; break;
+          
+          case "sdh_ongkir_all": dataTersaring = dataStatistikAktif.filter(d => d.sdhOngkir); labelKategori = "SDH_ONGKIR_SEMUA"; break;
+          case "blm_ongkir_all": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir); labelKategori = "BLM_ONGKIR_SEMUA"; break;
+          case "blm_ongkir_open": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir && d.statusProduksi === "OPEN_PO"); labelKategori = "BLM_ONGKIR_OPEN_PO"; break;
+          case "blm_ongkir_close": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir && d.statusProduksi === "CLOSE_PO"); labelKategori = "BLM_ONGKIR_CLOSE_PO"; break;
+          case "blm_ongkir_ready": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir && d.statusProduksi === "READY"); labelKategori = "BLM_ONGKIR_READY"; break;
       }
-      if (dataStatistikAktif.length === 0) return showToast("⚠️ Tidak ada data pelanggan untuk diunduh!");
 
-      const pilihan = document.getElementById('pilihan-unduh-statistik').value;
+      if (dataTersaring.length === 0) return showToast("⚠️ Tidak ada data untuk kategori ini!");
+
       const wb = XLSX.utils.book_new();
-      let namaFile = "REKAP_STATISTIK";
+      let namaFile = `STATISTIK_${labelKategori}`;
 
-      if (pilihan === 'ringkasan') {
-          // MODE 1: RINGKASAN PERSENTASE PER NAMA SARIMBIT
-          const statPerSarimbit = {};
-          dataStatistikAktif.forEach(cust => {
-              cust.sarimbitSet.forEach(srm => {
-                  if (!statPerSarimbit[srm]) {
-                      statPerSarimbit[srm] = { total: 0, sdhC2: 0, blmC2: 0, sdhLunas: 0, blmLunas: 0, sdhOngkir: 0, blmOngkir: 0, sdhAlamat: 0, blmAlamat: 0 };
-                  }
-                  const st = statPerSarimbit[srm];
-                  st.total++;
-                  if (cust.sdhC2) st.sdhC2++; else st.blmC2++;
-                  if (cust.sdhLunas) st.sdhLunas++; else st.blmLunas++;
-                  if (cust.sdhOngkir) st.sdhOngkir++; else st.blmOngkir++;
-                  if (cust.sdhAlamat) st.sdhAlamat++; else st.blmAlamat++;
-              });
-          });
-
-          const rows = [[
-              "No", "Koleksi Sarimbit", "Total Customer",
-              "Sudah C2", "Belum C2",
-              "Sudah Pelunasan", "Belum Pelunasan",
-              "Sudah Ongkir", "Belum Ongkir",
-              "Alamat Lengkap", "Belum Ada Alamat"
-          ]];
-
+      if (formatData === "sarimbit") {
+          const detailList = hitungDetailSarimbit(dataTersaring);
+          const rows = [["No", "Nama Koleksi Sarimbit", "Total Pelanggan"]];
           let no = 1;
-          const hitungPct = (jml, tot) => `${jml} (${tot > 0 ? Math.round((jml / tot) * 100) : 0}%)`;
-
-          Object.keys(statPerSarimbit).sort().forEach(srm => {
-              const st = statPerSarimbit[srm];
-              rows.push([
-                  no++, srm, st.total,
-                  hitungPct(st.sdhC2, st.total), hitungPct(st.blmC2, st.total),
-                  hitungPct(st.sdhLunas, st.total), hitungPct(st.blmLunas, st.total),
-                  hitungPct(st.sdhOngkir, st.total), hitungPct(st.blmOngkir, st.total),
-                  hitungPct(st.sdhAlamat, st.total), hitungPct(st.blmAlamat, st.total)
-              ]);
-          });
+          detailList.forEach(d => { rows.push([no++, d[0], d[1]]); });
 
           const ws = XLSX.utils.aoa_to_sheet(rows);
-          ws['!cols'] = [
-              { wch: 5 }, { wch: 28 }, { wch: 15 },
-              { wch: 16 }, { wch: 16 }, { wch: 18 }, { wch: 18 },
-              { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 18 }
-          ];
-          for (let i in ws) {
-              if (i[0] === '!') continue;
-              ws[i].s = { alignment: { horizontal: "center", vertical: "center", wrapText: true }, font: { name: "Arial", sz: 10 } };
-              if (i.replace(/[A-Z]/g, '') === "1") {
-                  ws[i].s.font.bold = true;
-                  ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } };
-              }
-          }
-          XLSX.utils.book_append_sheet(wb, ws, "Statistik_Per_Sarimbit");
-          namaFile = "STATISTIK_PERSENTASE_SARIMBIT";
-
+          ws['!cols'] = [{ wch: 5 }, { wch: 40 }, { wch: 25 }];
+          bikinStylingExcel(ws);
+          XLSX.utils.book_append_sheet(wb, ws, "Rekap_Sarimbit");
+          namaFile += "_RINGKASAN";
+          
       } else {
-          // MODE 2: RINCIAN PELANGGAN SESUAI PILIHAN KATEGORI + NAMA SARIMBIT
-          let dataTersaring = dataStatistikAktif;
-          let labelKategori = "SEMUA";
-
-          if (pilihan === 'sdh_c2') { dataTersaring = dataStatistikAktif.filter(d => d.sdhC2); labelKategori = "SUDAH_CICILAN_2"; }
-          else if (pilihan === 'blm_c2') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhC2); labelKategori = "BELUM_CICILAN_2"; }
-          else if (pilihan === 'sdh_lunas') { dataTersaring = dataStatistikAktif.filter(d => d.sdhLunas); labelKategori = "SUDAH_PELUNASAN"; }
-          else if (pilihan === 'blm_lunas') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhLunas); labelKategori = "BELUM_PELUNASAN"; }
-          else if (pilihan === 'sdh_ongkir') { dataTersaring = dataStatistikAktif.filter(d => d.sdhOngkir); labelKategori = "SUDAH_ONGKIR"; }
-          else if (pilihan === 'blm_ongkir') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir); labelKategori = "BELUM_ONGKIR"; }
-          else if (pilihan === 'sdh_alamat') { dataTersaring = dataStatistikAktif.filter(d => d.sdhAlamat); labelKategori = "ALAMAT_LENGKAP"; }
-          else if (pilihan === 'blm_alamat') { dataTersaring = dataStatistikAktif.filter(d => !d.sdhAlamat); labelKategori = "BELUM_ADA_ALAMAT"; }
-
-          if (dataTersaring.length === 0) return showToast("⚠️ Tidak ada pelanggan pada kategori pilihan ini!");
-
           const rows = [[
               "No", "Toko", "Nama Pelanggan", "No. WhatsApp", "Alamat Pengiriman",
-              "Koleksi Sarimbit", "Rincian Barang", "Total Pcs", "Kurir",
-              "DP / C1", "Cicilan 2", "Pelunasan", "Ongkir", "Sisa Tagihan", "Status Kategori"
+              "Koleksi Sarimbit", "Status Produksi", "Total Pcs", "Kurir",
+              "DP / C1", "Cicilan 2", "Pelunasan", "Ongkir", "Sisa Tagihan"
           ]];
 
           dataTersaring.forEach((c, idx) => {
               rows.push([
-                  idx + 1,
-                  c.toko,
-                  c.nama.toUpperCase(),
-                  c.telp,
-                  c.alamat,
-                  c.daftarSarimbit,
-                  c.rincianBarang,
-                  c.totalQty,
-                  c.ekspedisi || "-",
-                  c.cicilan1,
-                  c.cicilan2,
-                  c.cicilan3,
-                  c.ongkir,
-                  c.sisaTagihan,
-                  labelKategori.replace(/_/g, ' ')
+                  idx + 1, c.toko, c.nama.toUpperCase(), c.telp, c.alamat,
+                  c.daftarSarimbit, c.statusProduksi.replace('_', ' '), c.totalQty, c.ekspedisi || "-",
+                  c.cicilan1, c.cicilan2, c.cicilan3, c.ongkir, c.sisaTagihan
               ]);
           });
 
           const ws = XLSX.utils.aoa_to_sheet(rows);
           ws['!cols'] = [
               { wch: 5 }, { wch: 18 }, { wch: 25 }, { wch: 16 }, { wch: 38 },
-              { wch: 25 }, { wch: 45 }, { wch: 10 }, { wch: 12 },
-              { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 15 }, { wch: 20 }
+              { wch: 25 }, { wch: 18 }, { wch: 10 }, { wch: 12 },
+              { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 15 }
           ];
-          for (let i in ws) {
-              if (i[0] === '!') continue;
-              ws[i].s = { alignment: { horizontal: "center", vertical: "center", wrapText: true }, font: { name: "Arial", sz: 10 } };
-              if (i.replace(/[A-Z]/g, '') === "1") {
-                  ws[i].s.font.bold = true;
-                  ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } };
-              }
-          }
-          XLSX.utils.book_append_sheet(wb, ws, "Data_Rekap");
-          namaFile = `REKAP_${labelKategori}`;
+          bikinStylingExcel(ws);
+          XLSX.utils.book_append_sheet(wb, ws, "Rincian_Lengkap");
       }
 
-      const fSarimbit = document.getElementById('filter-sarimbit-slip')?.value;
-      if (fSarimbit) namaFile += `_${fSarimbit.replace(/[^a-zA-Z0-9]/g, '_')}`;
-
       XLSX.writeFile(wb, `${namaFile}.xlsx`);
-      showToast("✅ Rekap Statistik Excel berhasil diunduh!");
+      showToast("✅ Excel berhasil diunduh!");
+  }
+
+  function bikinStylingExcel(ws) {
+      for (let i in ws) {
+          if (i[0] === '!') continue;
+          ws[i].s = { alignment: { horizontal: "center", vertical: "center", wrapText: true }, font: { name: "Arial", sz: 10 } };
+          if (i.replace(/[A-Z]/g, '') === "1") {
+              ws[i].s.font.bold = true;
+              ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } };
+          }
+      }
   }
 
   // MESIN PENYARING FILTER LANJUTAN
@@ -6539,6 +6789,58 @@ function pilihProdukModal(metaString) {
             
             setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 150);
             if(typeof cariProdukBesar === 'function') cariProdukBesar(); 
+        };
+    
+    });
+    </script>
+    <!-- ========================================================================= -->
+<!-- SCRIPT VISUAL: MERUBAH WARNA TOMBOL FILTER EXTRA SAAT AKTIF               -->
+<!-- ========================================================================= -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        // 1. Mengambil alih fungsi Terapkan Filter
+        window.terapkanFilterLanjutan = function() {
+            document.getElementById('modalFilterLanjutan').classList.add('hidden');
+            
+            // Mengecek apakah ada minimal 1 kotak filter yang dicentang
+            const f = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : {};
+            const isAktif = f.blmC2 || f.blmLunas || f.blmOngkir || f.sdhOngkir || f.jnt || f.jne || f.pos || f.jawa || f.luarJawa || f.noAlamat;
+            
+            // Mencari tombol Filter Extra di layar
+            const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
+            if (btnFilter) {
+                if (isAktif) {
+                    // Berubah jadi warna MERAH dan berkedip elegan jika ada filter jalan
+                    btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-black text-white bg-rose-500 border border-rose-600 hover:bg-rose-600 active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-rose-500/30";
+                    btnFilter.innerHTML = `<i class="fa-solid fa-filter animate-pulse"></i> Filter Aktif`;
+                } else {
+                    // Kembali ke warna asal (Indigo/Biru Muda) jika tidak ada filter
+                    btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm";
+                    btnFilter.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter Extra`;
+                }
+            }
+            
+            // Memicu kalkulasi ulang (Dropdown Sarimbit juga otomatis disaring di sini)
+            if(typeof window.renderSlip === 'function') window.renderSlip();
+        };
+    
+        // 2. Mengambil alih fungsi Reset Filter
+        window.resetFilterLanjutan = function() {
+            // Hapus semua centang
+            ['fc-blmc2', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-jawa', 'fc-luarjawa', 'fc-noalamat'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.checked = false;
+            });
+            
+            // Kembalikan tombol ke warna asal (Indigo/Biru Muda)
+            const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
+            if (btnFilter) {
+                btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm";
+                btnFilter.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter Extra`;
+            }
+            
+            // Memicu kalkulasi ulang
+            if(typeof window.renderSlip === 'function') window.renderSlip();
         };
     
     });
