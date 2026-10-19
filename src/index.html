@@ -2155,137 +2155,12 @@
     let rowAktifPencarian = null;
     let warnaAktifPencarian = ""; // Variabel pengingat warna terakhir
 
-  // =========================================================================
-    // MESIN LIVE STRUK (REAL-TIME NOTA) & PERINGATAN WARNA
-    // =========================================================================
-    function updateLiveStruk() {
-        // 1. Tarik Data Penerima
-        const nama = document.getElementById('o-nama').value.trim();
-        document.getElementById('struk-nama').innerText = nama ? nama.toUpperCase() : "NAMA PELANGGAN";
-        document.getElementById('struk-telp').innerHTML = `<i class="fa-brands fa-whatsapp text-emerald-500"></i> ${document.getElementById('o-telp').value || "-"}`;
-        document.getElementById('struk-alamat').innerText = document.getElementById('o-alamat').value || "Alamat belum diisi";
-        
-        // Ekspedisi & Toko
-        document.getElementById('struk-kurir').innerText = document.getElementById('o-ekspedisi').value || "-";
-        document.getElementById('struk-toko').innerText = document.getElementById('o-toko').value || "-";
-
-        // 2. Kalkulasi Daftar Belanja & Cek Warna Ganda
-        let subtotal = 0;
-        let totalPcs = 0;
-        let htmlListBarang = "";
-        const trackerWarna = {}; // { "NAMA_SARIMBIT": Set("Merah", "Biru") }
-
-        document.querySelectorAll('.order-row').forEach(row => {
-            const inputHidden = row.querySelector('.row-input');
-            const qtyInput = row.querySelector('.row-qty');
-            if (inputHidden && inputHidden.dataset.meta && qtyInput) {
-                const qty = parseInt(qtyInput.value) || 0;
-                if (qty > 0) {
-                    const meta = JSON.parse(inputHidden.dataset.meta);
-                    const subItem = meta.harga * qty;
-                    subtotal += subItem;
-                    totalPcs += qty;
-
-                    // Mengisi Tampilan List di Struk Kanan
-                    htmlListBarang += `
-                        <div class="flex justify-between text-[11px] mb-1.5 pb-1.5 border-b border-slate-50 last:border-0">
-                            <span class="text-slate-600 font-medium pr-2 leading-tight">
-                                <span class="font-black text-blue-600">${qty}x</span> ${meta.sarimbit} - ${meta.barang} <span class="text-[9px] text-slate-400">(${meta.varian}/${meta.size})</span>
-                            </span>
-                            <span class="font-black text-slate-800 whitespace-nowrap">${formatRp(subItem)}</span>
-                        </div>
-                    `;
-
-                    // Update Subtotal di Row Kiri
-                    const subRowEl = row.querySelector('.row-subtotal');
-                    if (subRowEl) subRowEl.innerText = formatRp(subItem);
-
-                    // Menyimpan warna untuk dicek
-                    if (!trackerWarna[meta.sarimbit]) trackerWarna[meta.sarimbit] = new Set();
-                    trackerWarna[meta.sarimbit].add(meta.varian);
-                }
-            }
-        });
-
-        if (htmlListBarang === "") {
-            htmlListBarang = `<div class="text-[10px] text-slate-400 italic text-center py-2">Belum ada barang dipilih</div>`;
-        }
-        document.getElementById('struk-list-barang').innerHTML = htmlListBarang;
-        document.getElementById('struk-total-pcs').innerText = totalPcs;
-
-        // Cek apakah ada sarimbit yang memiliki lebih dari 1 warna
-        let pesanPeringatan = "";
-        for (const srm in trackerWarna) {
-            if (trackerWarna[srm].size > 1) {
-                pesanPeringatan = `Koleksi <b>${srm}</b> memiliki campuran warna (${[...trackerWarna[srm]].join(', ')}). Pastikan bukan karena salah klik varian!`;
-                break;
-            }
-        }
-        
-        const boxWarning = document.getElementById('struk-warning-warna');
-        if (pesanPeringatan !== "") {
-            boxWarning.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-500 mt-0.5"></i> <span class="text-[10px] leading-tight text-orange-700">${pesanPeringatan}</span>`;
-            boxWarning.classList.remove('hidden');
-            boxWarning.classList.add('flex');
-        } else {
-            boxWarning.classList.add('hidden');
-            boxWarning.classList.remove('flex');
-        }
-
-        // 3. Kalkulasi Keuangan Akhir
-        let tipeDiskon = document.getElementById('o-tipe-diskon').value;
-        let nilaiDiskon = Number(document.getElementById('o-nilai-diskon').value) || 0;
-        let totalDiskon = 0;
-
-        if (tipeDiskon === 'persen') totalDiskon = (subtotal * nilaiDiskon) / 100;
-        else if (tipeDiskon === 'angka') totalDiskon = nilaiDiskon;
-
-        let grandTotal = subtotal - totalDiskon;
-        if (grandTotal < 0) grandTotal = 0;
-
-        // DP Masuk
-        let dpMasuk = Number(document.getElementById('o-cicilan1').value) || 0;
-        // Asumsi Ongkir tidak ditagihkan di awal (Sesuai struk lama, sisa = GT - DP)
-        let sisaTagihan = grandTotal - dpMasuk;
-
-        // Print ke layar
-        document.getElementById('struk-subtotal').innerText = formatRp(subtotal);
-        document.getElementById('struk-diskon').innerText = `- ${formatRp(totalDiskon)}`;
-        document.getElementById('struk-grandtotal').innerText = formatRp(grandTotal);
-        document.getElementById('struk-dp').innerText = `- ${formatRp(dpMasuk)}`;
-        document.getElementById('struk-sisa').innerText = formatRp(sisaTagihan);
-        // CETAK NOMINAL KE PANEL KIRI BAWAH SECARA LIVE (DESAIN BARU)
-        if(document.getElementById('kiri-total-pcs')) document.getElementById('kiri-total-pcs').innerText = totalPcs;
-        if(document.getElementById('kiri-grand-total')) document.getElementById('kiri-grand-total').innerText = formatRp(grandTotal);
-
-       // LOGIKA MUNCUL/HILANG TOMBOL SIMPAN (MELAYANG DARI BAWAH LAYAR)
-       const wadahSimpan = document.getElementById('wadah-simpan-pesanan');
-        if (wadahSimpan) {
-            if (totalPcs > 0) {
-                // Meluncur naik ke tengah layar
-                wadahSimpan.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
-                wadahSimpan.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
-            } else {
-                // Tenggelam menghilang ke bawah layar
-                wadahSimpan.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
-                wadahSimpan.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
-            }
-        }
-    }
+ 
 
     // Ubah fungsi lawas calculateOrderTotal agar nyambung ke sistem Struk Baru
     function calculateOrderTotal() { updateLiveStruk(); }
 
-    function ubahQtyRow(btn, perubahan) {
-        const row = btn.closest('.order-row');
-        const input = row.querySelector('.row-qty');
-        let nilaiSekarang = parseInt(input.value) || 0;
-        let nilaiBaru = nilaiSekarang + perubahan;
-        if (nilaiBaru < 1) nilaiBaru = 1; 
-        input.value = nilaiBaru;
-        updateLiveStruk();
-    }
-
+   
    // =========================================================================
     // MESIN DATALIST (SARAN AUTO-FILL)
     // =========================================================================
@@ -2317,231 +2192,7 @@
     // =========================================================================
     let keranjangModal = {}; // Menampung item yang sedang dipilih di dalam pop-up
 
-    function bukaModalPencarian(btn) {
-        if(btn) {
-            rowAktifPencarian = btn.closest('.order-row');
-        }
-        
-        document.getElementById('modalPencarian').classList.remove('hidden');
-        document.getElementById('inputPencarianBesar').value = "";
-        
-        const selectSarimbit = document.getElementById('filterSarimbitModal');
-        const selectBarang = document.getElementById('filterBarangModal');
-        const selectWarna = document.getElementById('filterWarnaModal');
-        
-        if (masterData && masterData.length > 0) {
-            const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
-            selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
-        }
-        
-        // Otomatis sesuaikan filter Sarimbit Pop-up dengan Sarimbit yang ada di baris tersebut
-        if (rowAktifPencarian) {
-            const rowSarimbit = rowAktifPencarian.querySelector('.row-filter-sarimbit');
-            if (rowSarimbit && rowSarimbit.value) {
-                selectSarimbit.value = rowSarimbit.value;
-            } else {
-                selectSarimbit.value = "";
-            }
-        } else {
-            selectSarimbit.value = "";
-        }
-        
-        selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
-        selectBarang.value = "";
-        selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
-        selectWarna.value = "";
-        
-        setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 100);
-        cariProdukBesar(); 
-    }
-
-    function tutupModalPencarian() {
-        document.getElementById('modalPencarian').classList.add('hidden');
-    }
-
-    function cariProdukBesar() {
-        const query = document.getElementById('inputPencarianBesar').value.toLowerCase();
-        const filterSarimbit = document.getElementById('filterSarimbitModal').value;
-        const filterBarangEl = document.getElementById('filterBarangModal');
-        const filterWarnaEl = document.getElementById('filterWarnaModal');
-        
-        const barangAktif = filterBarangEl.value;
-        const warnaAktif = filterWarnaEl.value;
-
-        let hasilSaringanAwal = masterData || [];
-
-        if (hasilSaringanAwal.length > 0) {
-            hasilSaringanAwal = hasilSaringanAwal.filter(m => {
-                if (filterSarimbit && m.sarimbit !== filterSarimbit) return false;
-                const namaLengkap = `${m.pusat} ${m.sarimbit} ${m.barang} ${m.varian} ${m.size}`.toLowerCase();
-                return namaLengkap.includes(query);
-            });
-        }
-
-        if (hasilSaringanAwal.length > 0) {
-            const barangTersedia = [...new Set(hasilSaringanAwal.map(m => m.barang))].sort();
-            let opsiBarang = `<option value="">-- Semua Barang --</option>`;
-            barangTersedia.forEach(b => { opsiBarang += `<option value="${b}">${b}</option>`; });
-            
-            filterBarangEl.innerHTML = opsiBarang;
-            if (barangTersedia.includes(barangAktif)) filterBarangEl.value = barangAktif;
-            else filterBarangEl.value = "";
-        } else {
-            filterBarangEl.innerHTML = `<option value="">-- Semua Barang --</option>`;
-        }
-
-        const barangFinal = filterBarangEl.value;
-        let saringanWarna = hasilSaringanAwal;
-        if (barangFinal) {
-            saringanWarna = saringanWarna.filter(m => m.barang === barangFinal);
-        }
-
-        if (saringanWarna.length > 0) {
-            const warnaTersedia = [...new Set(saringanWarna.map(m => m.varian))].sort();
-            let opsiWarna = `<option value="">-- Semua Warna --</option>`;
-            warnaTersedia.forEach(w => { opsiWarna += `<option value="${w}">${w}</option>`; });
-            
-            filterWarnaEl.innerHTML = opsiWarna;
-            if (warnaTersedia.includes(warnaAktif)) filterWarnaEl.value = warnaAktif;
-            else filterWarnaEl.value = "";
-        } else {
-            filterWarnaEl.innerHTML = `<option value="">-- Semua Warna --</option>`;
-        }
-
-        const warnaFinal = filterWarnaEl.value;
-        let hasilRender = saringanWarna;
-        if (warnaFinal) {
-            hasilRender = saringanWarna.filter(m => m.varian === warnaFinal);
-        }
-
-        renderProdukModal(hasilRender.slice(0, 100));
-    }
-
-    function renderProdukModal(hasil) {
-        const boxHasil = document.getElementById('hasilPencarianBesar');
-        // Mengubah baris memanjang menjadi 2 kolom grid berdesain kartu
-        boxHasil.className = "grid grid-cols-1 md:grid-cols-2 gap-3 pb-6";
-        
-        if (!masterData || masterData.length === 0) {
-            boxHasil.innerHTML = `<div class="col-span-full py-10 text-center text-slate-400 font-bold">Data Master Barang kosong.</div>`;
-            return;
-        }
-
-        if (hasil && hasil.length > 0) {
-            let html = '';
-
-            hasil.forEach(m => {
-                const metaAsli = { pusat: m.pusat, sarimbit: m.sarimbit, barang: m.barang, varian: m.varian, size: m.size, harga: m.harga, berat: m.berat };
-                const metaString = encodeURIComponent(JSON.stringify(metaAsli)).replace(/'/g, "%27");
-
-                // Desain kartu kotak dan tombol + - dihilangkan, diubah menjadi 1 klik penuh
-                html += `
-                    <div onclick="pilihProdukModal('${metaString}')" class="bg-white p-4 rounded-[1.2rem] border border-slate-200 shadow-sm cursor-pointer hover:border-blue-500 hover:shadow-md transition-all flex flex-col relative overflow-hidden group">
-                        <!-- Harga di pojok kanan atas -->
-                        <div class="absolute top-0 right-0 bg-blue-50 text-blue-600 text-[11px] font-black px-3 py-1.5 rounded-bl-[1rem] border-b border-l border-blue-100 group-hover:bg-blue-500 group-hover:text-white transition-colors">${formatRp(m.harga)}</div>
-                        
-                        <!-- Informasi Utama -->
-                        <div class="flex flex-col pr-20">
-                            <span class="font-black text-slate-800 text-[13px] leading-snug mb-2">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md uppercase border border-slate-200 tracking-wider">${escapeHTML(m.varian)}</span>
-                                <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase border border-blue-200 tracking-wider">SZ: ${escapeHTML(m.size)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            boxHasil.innerHTML = html;
-        } else {
-            boxHasil.innerHTML = `<div class="col-span-full py-16 flex flex-col items-center justify-center"><i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i><h4 class="text-sm font-bold text-slate-400">Produk tidak ditemukan</h4></div>`;
-        }
-    }
-
-    // FUNGSI BARU PENGGANTI QTY: Langsung pilih barang, tempel ke form, hitung harga, lalu tutup pop-up
-    function pilihProdukModal(metaString) {
-        if (!rowAktifPencarian) return;
-        
-        const metaData = JSON.parse(decodeURIComponent(metaString));
-        const textDisplay = rowAktifPencarian.querySelector('.teks-produk-terpilih');
-        const inputHidden = rowAktifPencarian.querySelector('.row-input');
-        const qtyInput = rowAktifPencarian.querySelector('.row-qty');
-        
-        // Simpan data barang rahasia
-        inputHidden.value = `${metaData.pusat} - ${metaData.sarimbit} - ${metaData.barang} (${metaData.varian}/${metaData.size})`;
-        inputHidden.dataset.meta = JSON.stringify(metaData);
-        
-        // Ubah teks tampilan "Ketuk untuk mencari..." menjadi nama barang
-        if (textDisplay) {
-            textDisplay.textContent = `${metaData.sarimbit} - ${metaData.barang} (${metaData.varian}/${metaData.size})`;
-            textDisplay.classList.remove('text-slate-400');
-            textDisplay.classList.add('text-slate-800');
-        }
-        
-        // Hitung subtotal seketika berdasarkan kuantitas yang ada di baris
-        const qty = parseInt(qtyInput.value) || 1;
-        rowAktifPencarian.querySelector('.row-subtotal').innerText = formatRp(metaData.harga * qty);
-        
-        tutupModalPencarian();
-        updateLiveStruk(); // Panggil kalkulasi Nota Kanan
-    }
-
-    function renderProdukModal(hasil) {
-        const boxHasil = document.getElementById('hasilPencarianBesar');
-        
-        if (!masterData || masterData.length === 0) {
-            boxHasil.innerHTML = `<div class="col-span-full py-10 text-center text-slate-400 font-bold">Data Master Barang kosong.</div>`;
-            return;
-        }
-
-        if (hasil && hasil.length > 0) {
-            let html = '';
-            // Ambil wadah keranjang asli untuk membaca qty secara realtime
-            const containerKeranjang = document.getElementById('order-items-list');
-            const barisKeranjang = containerKeranjang.querySelectorAll('.order-row');
-
-            hasil.forEach(m => {
-                const hargaItem = Number(m.harga) || 0;
-                // Kunci unik untuk keranjang (harus aman dari petik)
-                const metaAsli = { pusat: m.pusat, sarimbit: m.sarimbit, barang: m.barang, varian: m.varian, size: m.size, harga: m.harga, berat: m.berat };
-                const metaString = encodeURIComponent(JSON.stringify(metaAsli)).replace(/'/g, "%27");
-                const idAman = btoa(metaString).replace(/[^a-zA-Z0-9]/g, '');
-                
-                // Cek kuantitas yang sedang hidup di layar Daftar Belanja
-                let currentQty = 0;
-                barisKeranjang.forEach(r => {
-                    const input = r.querySelector('.row-input');
-                    if (input && input.dataset.meta === decodeURIComponent(metaString)) {
-                        currentQty = parseInt(r.querySelector('.row-qty').value) || 0;
-                    }
-                });
-
-                html += `
-                    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-[#007AFF] transition-all">
-                        
-                        <!-- SISI KIRI: Informasi Barang -->
-                        <div class="flex flex-col flex-1 pr-4">
-                            <span class="font-black text-slate-800 text-[13px] leading-snug mb-1.5">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md uppercase border border-slate-200 tracking-wider">${escapeHTML(m.varian)}</span>
-                                <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase border border-blue-200 tracking-wider">SZ: ${escapeHTML(m.size)}</span>
-                            </div>
-                        </div>
-                        
-                        <!-- SISI KANAN: Tombol Qty (Lebih mungil dan rapat) -->
-                        <div class="flex items-center justify-center gap-1.5 bg-slate-50 shrink-0 rounded-xl p-1 border border-slate-200/60 shadow-inner">
-                            <button type="button" onclick="ubahQtyModal('${metaString}', -1)" class="w-8 h-8 flex items-center justify-center rounded-[10px] text-slate-500 hover:bg-white hover:text-rose-500 shadow-sm transition-all active:scale-90"><i class="fa-solid fa-minus text-xs"></i></button>
-                            <span id="qty-modal-${idAman}" class="font-black text-base text-slate-800 w-7 text-center">${currentQty}</span>
-                            <button type="button" onclick="ubahQtyModal('${metaString}', 1)" class="w-8 h-8 flex items-center justify-center rounded-[10px] text-slate-500 hover:bg-white hover:text-emerald-500 shadow-sm transition-all active:scale-90"><i class="fa-solid fa-plus text-xs"></i></button>
-                        </div>
-                        
-                    </div>
-                `;
-            });
-            boxHasil.innerHTML = html;
-        } else {
-            boxHasil.innerHTML = `<div class="col-span-full py-16 flex flex-col items-center justify-center"><i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i><h4 class="text-sm font-bold text-slate-400">Produk tidak ditemukan</h4></div>`;
-        }
-    }
+    
 
     function terapkanProdukTerpilih() {
         const container = document.getElementById('order-items-list');
@@ -2586,6 +2237,7 @@
         const itemsToEdit = orderData.filter(o => o.idcustomer === idCustomer || o.idCustomer === idCustomer);
         if (itemsToEdit.length === 0) return showToast("Data tidak ditemukan");
 
+        // TANGKAP POSISI LAYAR SEBELUM PINDAH KE FORM EDIT
         const mainElement = document.querySelector('main');
         window.posisiLayarSebelumEdit = mainElement ? mainElement.scrollTop : 0;
 
@@ -2597,6 +2249,7 @@
         document.getElementById('o-toko').value = head.toko || "";
         document.getElementById('o-sumber').value = head.asal_order || ""; 
         
+        // Membaca Ekspedisi dengan aman dari perbedaan huruf besar/kecil
         const dropdownEkspedisi = document.getElementById('o-ekspedisi');
         const opsiEkspedisi = Array.from(dropdownEkspedisi.options).map(opt => opt.value.toLowerCase());
         const ekspedisiAsli = (head.ekspedisi || "").toLowerCase();
@@ -2606,35 +2259,60 @@
             dropdownEkspedisi.value = "";
         }
 
+        // DP / Cicilan 1
         document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || head.cicilan1 || 0;
+        
+        // =========================================================================
+        // REVISI UTAMA: AMBIL DAN KUNCI KEUANGAN LAMA KE INPUT HIDDEN DENGAN AMAN
+        // =========================================================================
         document.getElementById('o-cicilan2').value = Number(head.cicilan2) || 0;
         document.getElementById('o-cicilan3').value = Number(head.cicilan3) || 0;
         document.getElementById('o-ongkir').value = Number(head.ongkir) || 0;
         document.getElementById('o-resi').value = head.resi || "";
+        // =========================================================================
+        
+        // MENARIK DATA DISKON SAAT EDIT
         document.getElementById('o-tipe-diskon').value = head.diskonTipe || "none";
         document.getElementById('o-nilai-diskon').value = head.diskonNilai || "";
+
+        // AMBIL DAN KUNCI TANGGAL ASLI TRANSAKSI KE INPUT HIDDEN
         document.getElementById('o-tanggal-asli').value = head.tanggal || "";
 
         const container = document.getElementById('order-items-list');
         container.innerHTML = '';
 
         itemsToEdit.forEach(it => {
+            // CETAK KARTU TEMPLATE
             const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
             const row = clone.querySelector('.order-row');
+            
+            // KODE USANG YANG BIKIN CRASH SUDAH SAYA MUSNAHKAN DI SINI!
+
+            const input = row.querySelector('.row-input');
+            const qtyInput = row.querySelector('.row-qty');
+            const textDisplay = row.querySelector('.teks-produk-terpilih');
+
+            // Susun data rahasia
             const metaDataPesanan = { pusat: it.pusat || "", sarimbit: it.sarimbit || "", barang: it.barang || "", varian: it.varian || "", size: it.size || "", harga: it.harga || 0, berat: it.berat || 0 };
 
-            row.querySelector('.row-input').dataset.meta = JSON.stringify(metaDataPesanan);
-            row.querySelector('.row-qty').value = it.jumlah;
-            row.querySelector('.row-nama-tampil').innerText = `${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang}`;
-            row.querySelector('.row-warna-tampil').innerText = metaDataPesanan.varian;
-            row.querySelector('.row-size-tampil').innerText = metaDataPesanan.size;
-            row.querySelector('.row-harga-tampil').innerText = formatRp(metaDataPesanan.harga);
-
+            // Tempelkan data ke dalam kolom input
+            input.value = `${metaDataPesanan.pusat} - ${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang} (${metaDataPesanan.varian}/${metaDataPesanan.size})`;
+            input.dataset.meta = JSON.stringify(metaDataPesanan);
+            qtyInput.value = it.jumlah;
+            
+            // Merubah tampilan kotak Pop-up cerdas agar memunculkan nama barang
+            if (textDisplay) {
+                textDisplay.textContent = `${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang} (${metaDataPesanan.varian}/${metaDataPesanan.size})`;
+                textDisplay.classList.remove('text-slate-400');
+                textDisplay.classList.add('text-slate-800');
+            }
+            
             container.appendChild(clone);
         });
 
-        updateLiveStruk(); // PANGGIL UPDATE STRUK SEKALIGUS KALKULASI TOTAL
-
+        updateLiveStruk(); // Panggil kalkulasi mutlak
+        
+        // Ubah warna tombol simpan jadi Orange (Tanda Sedang Edit)
         const btnSave = document.getElementById('btn-save-order');
         btnSave.innerHTML = `<i class="fa-solid fa-pen"></i> UPDATE PESANAN`;
         btnSave.classList.replace('bg-[#007AFF]', 'bg-orange-500');
@@ -2644,81 +2322,7 @@
         showToast("✍️ Mode Edit Aktif");
     }
 
-    function hapusRowIni(btn) {
-        btn.closest('.order-row').remove();
-        updateLiveStruk();
-    }
-
-   // =======================================================
-// MESIN KARTU PESANAN (MURNI METODE POP-UP KATALOG)
-// =======================================================
-function addOrderRow() {
-    const container = document.getElementById('order-items-list');
-    const rows = container.querySelectorAll('.order-row');
     
-    // Fitur Cerdas: Mengingat Katalog Sarimbit dari baris kartu sebelumnya
-    let lastSarimbit = "";
-    if (rows.length > 0) {
-        const lastSelect = rows[rows.length - 1].querySelector('.row-filter-sarimbit');
-        if (lastSelect) lastSarimbit = lastSelect.value;
-    }
-    
-    const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
-    
-    // Isi pilihan dropdown Sarimbit
-    const selectSarimbit = clone.querySelector('.row-filter-sarimbit');
-    if (masterData && masterData.length > 0) {
-        const sarimbitsMaster = [...new Set(masterData.map(m => m.sarimbit))].sort();
-        selectSarimbit.innerHTML = `<option value="">-- Pilih Sarimbit --</option>` + sarimbitsMaster.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-    
-    container.appendChild(clone);
-    
-    // Autofill nama sarimbit seketika di baris baru!
-    if (lastSarimbit !== "") {
-        const insertedRow = container.lastElementChild;
-        const sel = insertedRow.querySelector('.row-filter-sarimbit');
-        if (sel) {
-            sel.value = lastSarimbit;
-            resetPencarianRow(sel);
-        }
-    }
-    updateLiveStruk();
-}
-
-    function updateOpsiProdukRow(selectElem) {
-        const row = selectElem.closest('.order-row');
-        const sarimbit = selectElem.value;
-        const inputProduk = row.querySelector('.row-input');
-        
-        inputProduk.value = ''; // Reset input pencarian
-        inputProduk.dataset.meta = ''; // Bersihkan rekaman harga lama
-        row.querySelector('.row-subtotal').innerText = 'Rp 0';
-        
-        // Ciptakan "Daftar Pilih" (Datalist) super rahasia khusus untuk baris ini saja
-        const dataListId = 'saran-produk-' + Math.random().toString(36).substr(2, 9);
-        inputProduk.setAttribute('list', dataListId);
-        
-        let oldDl = row.querySelector('datalist');
-        if(oldDl) oldDl.remove();
-        
-        const dl = document.createElement('datalist');
-        dl.id = dataListId;
-        
-        if (sarimbit && masterData) {
-            const produkTersedia = masterData.filter(m => m.sarimbit === sarimbit);
-            produkTersedia.forEach(m => {
-                // Label Tampilan: "Dress Mom (Size/Warna) - Rp xxx"
-                const label = `${m.barang} (${m.size}/${m.varian}) - ${formatRp(m.harga)}`;
-                // Sembunyikan harga asli di balik layar agar sistem gampang menghitungnya
-                const metaString = encodeURIComponent(JSON.stringify({ pusat: m.pusat, sarimbit: m.sarimbit, barang: m.barang, varian: m.varian, size: m.size, harga: m.harga, berat: m.berat }));
-                dl.innerHTML += `<option value="${label}" data-meta="${metaString}"></option>`;
-            });
-        }
-        row.appendChild(dl);
-        updateLiveStruk();
-    }
-
     function cariItemDariDatalist(inputElem) {
         const row = inputElem.closest('.order-row');
         const listId = inputElem.getAttribute('list');
@@ -2747,21 +2351,7 @@ function addOrderRow() {
         }
     }
 
-    function ubahQtyRow(btn, perubahan) {
-        const row = btn.closest('.order-row');
-        const input = row.querySelector('.row-qty');
-        let nilaiSekarang = parseInt(input.value) || 0;
-        let nilaiBaru = nilaiSekarang + perubahan;
-        if (nilaiBaru < 1) nilaiBaru = 1; 
-        input.value = nilaiBaru;
-        
-        if (typeof updateLiveStruk === 'function') {
-            updateLiveStruk();
-        } else {
-            calculateOrderTotal();
-        }
-    }
-
+    
     function resetPencarianRow(selectElem) {
         const row = selectElem.closest('.order-row');
         const textDisplay = row.querySelector('.teks-produk-terpilih');
@@ -3304,8 +2894,17 @@ function cekNotifikasiProduksi() {
     }
 }
 
-    async function handleOrderSubmit(e) {
+async function handleOrderSubmit(e) {
         e.preventDefault();
+        
+        // PENGAMAN MUTLAK: Gembok tombol diletakkan di BARIS PERTAMA sebelum sistem berpikir!
+        // Mencegah penyakit double-click yang menggandakan data
+        const btnSave = document.getElementById('btn-save-order');
+        if (btnSave.disabled) return; 
+        btnSave.disabled = true;
+        const originalBtnContent = btnSave.innerHTML;
+        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> MENYIMPAN...`;
+
         const form = e.target;
         const isEditMode = form.dataset.editMode; 
         const customer = document.getElementById('o-nama').value.trim() || "-";
@@ -3314,9 +2913,8 @@ function cekNotifikasiProduksi() {
         const toko = document.getElementById('o-toko').value;
         const ekspedisi = document.getElementById('o-ekspedisi').value; 
         const cicilan1 = Number(document.getElementById('o-cicilan1').value) || 0;
-        const asal_order = document.getElementById('o-sumber').value; // PENANGKAP SUMBER ORDER
+        const asal_order = document.getElementById('o-sumber').value;
         
-        // Menarik kembali data keuangan lama dari elemen tersembunyi
         const cicilan2 = isEditMode ? (Number(document.getElementById('o-cicilan2').value) || 0) : 0;
         const cicilan3 = isEditMode ? (Number(document.getElementById('o-cicilan3').value) || 0) : 0;
         const ongkir = isEditMode ? (Number(document.getElementById('o-ongkir').value) || 0) : 0;
@@ -3326,22 +2924,17 @@ function cekNotifikasiProduksi() {
         const items = [];
         const waktuSekarang = new Date().toISOString();
         
-        // =========================================================================
-        // VARIABEL AUDIT TRAIL: Mengingat data lama sebelum tertimpa
-        // =========================================================================
         let oldTotalPcs = 0;
         let oldGrandTotal = 0;
 
+        // EKSEKUSI PEMUSNAHAN DATA LAMA SAAT EDIT
         if (isEditMode) {
-            // REVISI: Menggunakan filter manual pada array agar pasti menemukan data
-            // tanpa terpengaruh perbedaan huruf besar/kecil pada penulisan id
             const allLocalOrders = await dbLokal.orders.toArray();
             const oldItems = allLocalOrders.filter(o => 
                 (String(o.idcustomer) === String(isEditMode) || String(o.idCustomer) === String(isEditMode)) 
                 && o.syncstatus !== -1
             );
             
-            // Hitung kalkulasi data lamanya untuk kebutuhan perbandingan log
             if (oldItems.length > 0) {
                 let oldSubtotal = 0;
                 let oldDiskonTipe = oldItems[0].diskonTipe || 'none';
@@ -3361,52 +2954,44 @@ function cekNotifikasiProduksi() {
             const oldIds = oldItems.map(o => o.id);
             
             if (oldIds.length > 0) {
-                // Matikan status barang lama di memori laptop
+                // Matikan status barang lama di laptop
                 await dbLokal.orders.where('id').anyOf(oldIds).modify({ syncstatus: -1, updated_at: waktuSekarang });
                 
-                // Matikan status barang lama di server Supabase
+                // Matikan status barang lama di Supabase
                 if (navigator.onLine) {
                     supabaseFetch(`/rest/v1/orders?id=in.(${oldIds.join(',')})`, { 
                         method: "PATCH", 
                         body: JSON.stringify({ syncstatus: -1, updated_at: waktuSekarang })
                     }).then(res => {
+                        // Soft delete aman
                         if (res !== null) dbLokal.orders.where('id').anyOf(oldIds).delete();
                     }).catch(err => console.log("Gagal soft delete:", err));
                 }
             }
         }
-        // =========================================================================
 
-    // PENGAMAN 1: KUNCI TOMBOL SAAT LOADING (Anti Double-Click)
-    const btnSave = document.getElementById('btn-save-order');
-        if (btnSave.disabled) return; 
-        btnSave.disabled = true;
-        const originalBtnContent = btnSave.innerHTML;
-        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> MENYIMPAN...`;
-
+        // MENCETAK DATA BARU (HASIL EDIT)
         document.querySelectorAll('.order-row').forEach(row => {
             const input = row.querySelector('.row-input');
             const qty = Number(row.querySelector('.row-qty').value);
             
             if(input.dataset.meta && qty > 0) {
                 const meta = JSON.parse(input.dataset.meta);
-                
-                // REVISI: KUNCI TANGGAL ASLI AGAR TIDAK PERNAH BERUBAH SAAT DIEDIT
                 let tanggalBarang = isEditMode ? (document.getElementById('o-tanggal-asli').value || waktuSekarang) : waktuSekarang;
 
                 items.push({
-    idcustomer: idToSave, customer: customer, telepon: telepon, alamat: alamat, toko: toko,
-    pusat: meta.pusat, sarimbit: meta.sarimbit, barang: meta.barang, varian: meta.varian, 
-    size: meta.size, harga: meta.harga, berat: meta.berat, jumlah: qty, 
-    total: meta.harga * qty, 
-    cicilan1: cicilan1, cicilan2: cicilan2, cicilan3: cicilan3, // Data Keuangan Aman
-    ongkir: ongkir, resi: resi, // Data Ongkir dan Resi Aman
-    ekspedisi: ekspedisi, 
-    asal_order: asal_order,
-    diskonTipe: document.getElementById('o-tipe-diskon').value,
-    diskonNilai: Number(document.getElementById('o-nilai-diskon').value) || 0,
-    tanggal: tanggalBarang // Memperbaiki bug tanggal reset saat edit
-});
+                    idcustomer: idToSave, customer: customer, telepon: telepon, alamat: alamat, toko: toko,
+                    pusat: meta.pusat, sarimbit: meta.sarimbit, barang: meta.barang, varian: meta.varian, 
+                    size: meta.size, harga: meta.harga, berat: meta.berat, jumlah: qty, 
+                    total: meta.harga * qty, 
+                    cicilan1: cicilan1, cicilan2: cicilan2, cicilan3: cicilan3, 
+                    ongkir: ongkir, resi: resi, 
+                    ekspedisi: ekspedisi, 
+                    asal_order: asal_order,
+                    diskonTipe: document.getElementById('o-tipe-diskon').value,
+                    diskonNilai: Number(document.getElementById('o-nilai-diskon').value) || 0,
+                    tanggal: tanggalBarang 
+                });
             }
         });
 
@@ -3416,7 +3001,6 @@ function cekNotifikasiProduksi() {
             return showToast("⚠️ Pesanan tidak boleh kosong!");
         }
 
-        // Kalkulasi Total yang baru diinput oleh Admin
         const totalPcsLog = items.reduce((sum, it) => sum + it.jumlah, 0);
         const subtotalLog = items.reduce((sum, it) => sum + it.total, 0);
         const tipeDiskonLog = document.getElementById('o-tipe-diskon').value;
@@ -3429,19 +3013,18 @@ function cekNotifikasiProduksi() {
         window.DatabaseAPI.saveOrders(
             items,
             () => { // onSuccess
-                const btnSimpan = document.getElementById('btn-save-order');
-                btnSimpan.disabled = false;
-                btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
 
-form.reset(); 
-document.getElementById('order-items-list').innerHTML = '';
-document.getElementById('o-tanggal-asli').value = '';
-document.getElementById('o-cicilan2').value = '';
-document.getElementById('o-cicilan3').value = '';
-document.getElementById('o-ongkir').value = '';
-document.getElementById('o-resi').value = '';
+                form.reset(); 
+                document.getElementById('order-items-list').innerHTML = '';
+                document.getElementById('o-tanggal-asli').value = '';
+                document.getElementById('o-cicilan2').value = '';
+                document.getElementById('o-cicilan3').value = '';
+                document.getElementById('o-ongkir').value = '';
+                document.getElementById('o-resi').value = '';
 
-let pesanLog = "";
+                let pesanLog = "";
                 if (isEditMode) {
                     let perubahan = [];
                     if (oldTotalPcs !== totalPcsLog) perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
@@ -3451,12 +3034,11 @@ let pesanLog = "";
                     else pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian Barang diubah)`;
                     
                     delete form.dataset.editMode; 
-                    btnSimpan.classList.replace('bg-orange-500', 'bg-blue-600');
-                    btnSimpan.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
+                    btnSave.classList.replace('bg-orange-500', 'bg-[#007AFF]');
+                    btnSave.classList.replace('hover:bg-orange-600', 'hover:bg-[#0056b3]');
                     
                     switchTab('slip');
                     
-                    // KEMBALIKAN POSISI LAYAR KE TITIK SEMULA SETELAH EDIT SELESAI
                     if (typeof window.posisiLayarSebelumEdit !== 'undefined') {
                         setTimeout(() => {
                             const mainElem = document.querySelector('main');
@@ -3468,7 +3050,13 @@ let pesanLog = "";
                     document.getElementById('o-nama').focus(); 
                 }
 
-                addOrderRow(); 
+                // PERBAIKAN: Jika sedang Mode Edit, siapkan baris baru TAPI JANGAN buka Pop-up
+                if (isEditMode) {
+                    addOrderRow(false); 
+                } else {
+                    addOrderRow(true); 
+                }
+                
                 calculateOrderTotal();
                  
                 showToast("✅ Pesanan Berhasil Disimpan!");
@@ -3476,9 +3064,8 @@ let pesanLog = "";
                 loadAllData();
             },
             () => { // onFailure
-                const btnSimpan = document.getElementById('btn-save-order');
-                btnSimpan.disabled = false;
-                btnSimpan.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PESANAN`;
                 showToast("❌ Gagal menyimpan pesanan!");
             }
         );
@@ -3763,40 +3350,7 @@ let pesanLog = "";
         updateLiveStruk();
     }
 
-    // 2. FUNGSI UTAMA: MENAMBAH KARTU BARU (DENGAN AUTO-FILL SARIMBIT)
-    function addOrderRow() {
-        const container = document.getElementById('order-items-list');
-        const rows = container.querySelectorAll('.order-row');
-        
-        // Fitur Cerdas: Mengingat Katalog Sarimbit dari kartu sebelumnya
-        let lastSarimbit = "";
-        if (rows.length > 0) {
-            const lastSelect = rows[rows.length - 1].querySelector('.row-filter-sarimbit');
-            if (lastSelect) lastSarimbit = lastSelect.value;
-        }
-        
-        // Mencetak kartu baru dari cetakan template di HTML
-        const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
-        
-        // Mengisi pilihan Sarimbit dari database master
-        const selectSarimbit = clone.querySelector('.row-filter-sarimbit');
-        if (masterData && masterData.length > 0) {
-            const sarimbitsMaster = [...new Set(masterData.map(m => m.sarimbit))].sort();
-            selectSarimbit.innerHTML = `<option value="">-- Pilih Sarimbit --</option>` + sarimbitsMaster.map(s => `<option value="${s}">${s}</option>`).join('');
-        }
-        
-        container.appendChild(clone);
-        
-        // Menempelkan otomatis nama Sarimbit jika kartu sebelumnya sudah diisi
-        if (lastSarimbit !== "") {
-            const insertedRow = container.lastElementChild;
-            const sel = insertedRow.querySelector('.row-filter-sarimbit');
-            sel.value = lastSarimbit;
-            updateOpsiProdukRow(sel); // Memancing datalist agar menyiapkan baju-bajunya
-        }
-        updateLiveStruk();
-    }
-
+  
   // MENCETAK DAFTAR BAJU KE DALAM DROPDOWN
   function updateOpsiProdukRow(selectElem) {
         const row = selectElem.closest('.order-row');
@@ -4218,92 +3772,7 @@ let pesanLog = "";
         renderPaginationSlip(totalItems, totalPages);
     }
 
-    function editOrderan(idCustomer) {
-        const itemsToEdit = orderData.filter(o => o.idcustomer === idCustomer || o.idCustomer === idCustomer);
-        if (itemsToEdit.length === 0) return showToast("Data tidak ditemukan");
 
-        // TANGKAP POSISI LAYAR SEBELUM PINDAH KE FORM EDIT
-        const mainElement = document.querySelector('main');
-        window.posisiLayarSebelumEdit = mainElement ? mainElement.scrollTop : 0;
-
-        switchTab('order');
-        const head = itemsToEdit[0];
-        document.getElementById('o-nama').value = head.customer;
-        document.getElementById('o-telp').value = head.telepon;
-        document.getElementById('o-alamat').value = head.alamat;
-        document.getElementById('o-toko').value = head.toko || "";
-        document.getElementById('o-sumber').value = head.asal_order || ""; 
-        
-        // Membaca Ekspedisi dengan aman dari perbedaan huruf besar/kecil
-        const dropdownEkspedisi = document.getElementById('o-ekspedisi');
-        const opsiEkspedisi = Array.from(dropdownEkspedisi.options).map(opt => opt.value.toLowerCase());
-        const ekspedisiAsli = (head.ekspedisi || "").toLowerCase();
-        if (opsiEkspedisi.includes(ekspedisiAsli)) {
-            dropdownEkspedisi.value = Array.from(dropdownEkspedisi.options).find(opt => opt.value.toLowerCase() === ekspedisiAsli).value;
-        } else {
-            dropdownEkspedisi.value = "";
-        }
-
-        // DP / Cicilan 1
-        document.getElementById('o-cicilan1').value = itemsToEdit.find(it => Number(it.cicilan1) > 0)?.cicilan1 || head.cicilan1 || 0;
-        
-        // =========================================================================
-        // REVISI UTAMA: AMBIL DAN KUNCI KEUANGAN LAMA KE INPUT HIDDEN DENGAN AMAN
-        // =========================================================================
-        document.getElementById('o-cicilan2').value = Number(head.cicilan2) || 0;
-        document.getElementById('o-cicilan3').value = Number(head.cicilan3) || 0;
-        document.getElementById('o-ongkir').value = Number(head.ongkir) || 0;
-        document.getElementById('o-resi').value = head.resi || "";
-        // =========================================================================
-        
-        // MENARIK DATA DISKON SAAT EDIT
-        document.getElementById('o-tipe-diskon').value = head.diskonTipe || "none";
-        document.getElementById('o-nilai-diskon').value = head.diskonNilai || "";
-
-        // AMBIL DAN KUNCI TANGGAL ASLI TRANSAKSI KE INPUT HIDDEN
-        document.getElementById('o-tanggal-asli').value = head.tanggal || "";
-
-        const container = document.getElementById('order-items-list');
-        container.innerHTML = '';
-
-        itemsToEdit.forEach(it => {
-            const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
-            const row = clone.querySelector('.order-row');
-            const selectFilter = clone.querySelector('.row-filter-sarimbit');
-            if (masterData.length > 0) {
-                const sarimbits = [...new Set(masterData.map(m => m.sarimbit))].sort();
-                selectFilter.innerHTML = `<option value="">-- Sarimbit --</option>` + sarimbits.map(s => `<option value="${s}">${s}</option>`).join('');
-                selectFilter.value = it.sarimbit; 
-            }
-
-            const input = row.querySelector('.row-input');
-            const qtyInput = row.querySelector('.row-qty');
-            const textDisplay = row.querySelector('.teks-produk-terpilih');
-
-        const metaDataPesanan = { pusat: it.pusat || "", sarimbit: it.sarimbit || "", barang: it.barang || "", varian: it.varian || "", size: it.size || "", harga: it.harga || 0, berat: it.berat || 0 };
-
-        input.value = `${metaDataPesanan.pusat} - ${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang} (${metaDataPesanan.varian}/${metaDataPesanan.size})`;
-        input.dataset.meta = JSON.stringify(metaDataPesanan);
-        qtyInput.value = it.jumlah;
-        
-        if (textDisplay) {
-            textDisplay.textContent = `${metaDataPesanan.sarimbit} - ${metaDataPesanan.barang} (${metaDataPesanan.varian}/${metaDataPesanan.size})`;
-            textDisplay.classList.remove('text-slate-400');
-            textDisplay.classList.add('text-slate-800');
-        }
-        
-        container.appendChild(clone);
-    });
-
-    updateLiveStruk(); // Panggil kalkulasi mutlak
-        const btnSave = document.getElementById('btn-save-order');
-        btnSave.innerHTML = `<i class="fa-solid fa-pen"></i> UPDATE PESANAN`;
-        btnSave.classList.replace('bg-blue-600', 'bg-orange-500');
-        btnSave.classList.replace('hover:bg-blue-700', 'hover:bg-orange-600');
-        
-        document.querySelector('form').dataset.editMode = idCustomer;
-        showToast("✍️ Mode Edit Aktif");
-    }
     function renderRekap() {
         const tbody = document.getElementById('tbody-rekap');
         const fTglMulai = document.getElementById('filter-tgl-mulai-rekap').value;
@@ -6063,66 +5532,6 @@ function addOrderRow() {
     }, 150);
 }
 
-// 2. FUNGSI POP-UP PINTAR (Sistem Lacak Total)
-function bukaModalPencarian(btn) {
-    if(btn) window.rowAktifPencarian = btn.closest('.order-row');
-    document.getElementById('modalPencarian').classList.remove('hidden');
-    document.getElementById('inputPencarianBesar').value = "";
-    
-    const selectSarimbit = document.getElementById('filterSarimbitModal');
-    const selectBarang = document.getElementById('filterBarangModal');
-    const selectWarna = document.getElementById('filterWarnaModal');
-    
-    if (masterData && masterData.length > 0) {
-        const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
-        selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-    
-    let sarimbitIngatan = "";
-    
-    // Cek dulu baris yang diklik ini (Barangkali Admin sedang mengedit baris yang sudah ada)
-    if (window.rowAktifPencarian) {
-        const inputHidden = window.rowAktifPencarian.querySelector('.row-input');
-        if (inputHidden && inputHidden.dataset.meta) {
-            try { sarimbitIngatan = JSON.parse(inputHidden.dataset.meta).sarimbit; } catch(e) {}
-        }
-    }
-    
-    // Jika masih kosong (artinya baris baru), cari paksa dari SELURUH baris pesanan yang ada di layar
-    if (!sarimbitIngatan) {
-        const semuaBaris = document.querySelectorAll('#order-items-list .order-row');
-        // Loop dari bawah ke atas agar mendapat memori yang paling terakhir
-        for (let i = semuaBaris.length - 1; i >= 0; i--) {
-            const inputData = semuaBaris[i].querySelector('.row-input');
-            if (inputData && inputData.dataset.meta) {
-                try { 
-                    sarimbitIngatan = JSON.parse(inputData.dataset.meta).sarimbit; 
-                    if (sarimbitIngatan) break; // Berhenti mencari jika sudah ketemu!
-                } catch(e) {}
-            }
-        }
-    }
-    
-    // Terapkan hasil ingatan ke pop-up
-    selectSarimbit.value = sarimbitIngatan;
-    selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
-    selectBarang.value = "";
-    selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
-    selectWarna.value = "";
-    
-    setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 150);
-    cariProdukBesar(); // Memicu pencarian sesuai memori Sarimbit
-}
-
-function tutupModalPencarian() {
-    document.getElementById('modalPencarian').classList.add('hidden');
-}
-function addOrderRow() {
-    const container = document.getElementById('order-items-list');
-    const clone = document.getElementById('order-row-tmpl').content.cloneNode(true);
-    container.appendChild(clone);
-    updateLiveStruk();
-}
 
 function updateLiveStruk() {
     // 1. Tarik Data Penerima
@@ -6241,165 +5650,11 @@ function updateLiveStruk() {
     }
 }
 
-function bukaModalPencarian(btn) {
-    if(btn) window.rowAktifPencarian = btn.closest('.order-row');
-    document.getElementById('modalPencarian').classList.remove('hidden');
-    document.getElementById('inputPencarianBesar').value = "";
-    
-    const selectSarimbit = document.getElementById('filterSarimbitModal');
-    const selectBarang = document.getElementById('filterBarangModal');
-    const selectWarna = document.getElementById('filterWarnaModal');
-    
-    if (masterData && masterData.length > 0) {
-        const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
-        selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-    
-    let sarimbitIngatan = "";
-    if (window.rowAktifPencarian) {
-        const inputHidden = window.rowAktifPencarian.querySelector('.row-input');
-        if (inputHidden && inputHidden.dataset.meta) {
-            try { sarimbitIngatan = JSON.parse(inputHidden.dataset.meta).sarimbit; } catch(e) {}
-        } else {
-            const barisAtas = window.rowAktifPencarian.previousElementSibling;
-            if (barisAtas) {
-                const prevInput = barisAtas.querySelector('.row-input');
-                if (prevInput && prevInput.dataset.meta) {
-                    try { sarimbitIngatan = JSON.parse(prevInput.dataset.meta).sarimbit; } catch(e) {}
-                }
-            }
-        }
-    }
-    selectSarimbit.value = sarimbitIngatan;
-    
-    selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
-    selectBarang.value = "";
-    selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
-    selectWarna.value = "";
-    
-    setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 100);
-    cariProdukBesar(); 
-}
 
 function tutupModalPencarian() {
     document.getElementById('modalPencarian').classList.add('hidden');
 }
 
-function cariProdukBesar() {
-    const query = document.getElementById('inputPencarianBesar').value.toLowerCase();
-    const filterSarimbit = document.getElementById('filterSarimbitModal').value;
-    const filterBarangEl = document.getElementById('filterBarangModal');
-    const filterWarnaEl = document.getElementById('filterWarnaModal');
-    
-    const barangAktif = filterBarangEl.value;
-    const warnaAktif = filterWarnaEl.value;
-
-    let hasilSaringanAwal = masterData || [];
-
-    if (hasilSaringanAwal.length > 0) {
-        hasilSaringanAwal = hasilSaringanAwal.filter(m => {
-            if (filterSarimbit && m.sarimbit !== filterSarimbit) return false;
-            const namaLengkap = `${m.pusat} ${m.sarimbit} ${m.barang} ${m.varian} ${m.size}`.toLowerCase();
-            return namaLengkap.includes(query);
-        });
-    }
-
-    if (hasilSaringanAwal.length > 0) {
-        const barangTersedia = [...new Set(hasilSaringanAwal.map(m => m.barang))].sort();
-        let opsiBarang = `<option value="">-- Semua Barang --</option>`;
-        barangTersedia.forEach(b => { opsiBarang += `<option value="${b}">${b}</option>`; });
-        
-        filterBarangEl.innerHTML = opsiBarang;
-        if (barangTersedia.includes(barangAktif)) filterBarangEl.value = barangAktif;
-        else filterBarangEl.value = "";
-    } else {
-        filterBarangEl.innerHTML = `<option value="">-- Semua Barang --</option>`;
-    }
-
-    const barangFinal = filterBarangEl.value;
-    let saringanWarna = hasilSaringanAwal;
-    if (barangFinal) {
-        saringanWarna = saringanWarna.filter(m => m.barang === barangFinal);
-    }
-
-    if (saringanWarna.length > 0) {
-        const warnaTersedia = [...new Set(saringanWarna.map(m => m.varian))].sort();
-        let opsiWarna = `<option value="">-- Semua Warna --</option>`;
-        warnaTersedia.forEach(w => { opsiWarna += `<option value="${w}">${w}</option>`; });
-        
-        filterWarnaEl.innerHTML = opsiWarna;
-        if (warnaTersedia.includes(warnaAktif)) filterWarnaEl.value = warnaAktif;
-        else filterWarnaEl.value = "";
-    } else {
-        filterWarnaEl.innerHTML = `<option value="">-- Semua Warna --</option>`;
-    }
-
-    const warnaFinal = filterWarnaEl.value;
-    let hasilRender = saringanWarna;
-    if (warnaFinal) {
-        hasilRender = saringanWarna.filter(m => m.varian === warnaFinal);
-    }
-
-    renderProdukModal(hasilRender.slice(0, 100));
-}
-
-function renderProdukModal(hasil) {
-    const boxHasil = document.getElementById('hasilPencarianBesar');
-    boxHasil.className = "grid grid-cols-1 md:grid-cols-2 gap-3 pb-6"; 
-    
-    if (!masterData || masterData.length === 0) {
-        boxHasil.innerHTML = `<div class="col-span-full py-10 text-center text-slate-400 font-bold">Data Master Barang kosong.</div>`;
-        return;
-    }
-
-    if (hasil && hasil.length > 0) {
-        let html = '';
-        hasil.forEach(m => {
-            const metaAsli = { pusat: m.pusat, sarimbit: m.sarimbit, barang: m.barang, varian: m.varian, size: m.size, harga: m.harga, berat: m.berat };
-            const metaString = encodeURIComponent(JSON.stringify(metaAsli)).replace(/'/g, "%27");
-
-            html += `
-                <div onclick="pilihProdukModal('${metaString}')" class="bg-white p-4 rounded-[1.2rem] border border-slate-200 shadow-sm cursor-pointer hover:border-blue-500 hover:shadow-md transition-all flex flex-col relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 bg-blue-50 text-blue-600 text-[11px] font-black px-3 py-1.5 rounded-bl-[1rem] border-b border-l border-blue-100 group-hover:bg-blue-500 group-hover:text-white transition-colors">${formatRp(m.harga)}</div>
-                    <div class="flex flex-col pr-20">
-                        <span class="font-black text-slate-800 text-[13px] leading-snug mb-2">${escapeHTML(m.sarimbit)} - ${escapeHTML(m.barang)}</span>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md uppercase border border-slate-200 tracking-wider">${escapeHTML(m.varian)}</span>
-                            <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase border border-blue-200 tracking-wider">SZ: ${escapeHTML(m.size)}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        boxHasil.innerHTML = html;
-    } else {
-        boxHasil.innerHTML = `<div class="col-span-full py-16 flex flex-col items-center justify-center"><i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i><h4 class="text-sm font-bold text-slate-400">Produk tidak ditemukan</h4></div>`;
-    }
-}
-
-function pilihProdukModal(metaString) {
-    if (!window.rowAktifPencarian) return;
-    
-    const metaData = JSON.parse(decodeURIComponent(metaString));
-    const textDisplay = window.rowAktifPencarian.querySelector('.teks-produk-terpilih');
-    const inputHidden = window.rowAktifPencarian.querySelector('.row-input');
-    const qtyInput = window.rowAktifPencarian.querySelector('.row-qty');
-    
-    inputHidden.value = `${metaData.pusat} - ${metaData.sarimbit} - ${metaData.barang} (${metaData.varian}/${metaData.size})`;
-    inputHidden.dataset.meta = JSON.stringify(metaData);
-    
-    if (textDisplay) {
-        textDisplay.textContent = `${metaData.sarimbit} - ${metaData.barang} (${metaData.varian}/${metaData.size})`;
-        textDisplay.classList.remove('text-slate-400');
-        textDisplay.classList.add('text-slate-800');
-    }
-    
-    const qty = parseInt(qtyInput.value) || 1;
-    window.rowAktifPencarian.querySelector('.row-subtotal').innerText = formatRp(metaData.harga * qty);
-    
-    tutupModalPencarian();
-    updateLiveStruk(); 
-}
 
 function bukaModalPencarian(btn) {
     if(btn) window.rowAktifPencarian = btn.closest('.order-row');
