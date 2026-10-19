@@ -1,3 +1,4 @@
+```yaml
 name: Build Android APK
 
 on:
@@ -37,11 +38,11 @@ jobs:
       - name: Install Kebutuhan NPM
         run: npm install
 
-      - name: Rakit Aplikasi Android (Proses Inti)
-        run: npm run tauri android build
+      - name: Rakit Aplikasi Android (Mode Debug/Siap Instal)
+        run: npm run tauri android build -- --debug
 
       - name: Simpan Hasil APK
         uses: actions/upload-artifact@v4
         with:
-          name: SarimbitPro-Android-APK
-          path: src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+          name: SarimbitPro-Android-Siap-Instal
+          path: src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
