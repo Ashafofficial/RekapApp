@@ -3,7 +3,7 @@
 // ========================================================
 
 const SUPABASE_URL = "https://dhrnbqitaxykmufucucv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_I0ehNCjUO9Y-FULSmMVPAg_3VlsLqL6";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocm5icWl0YXh5a211ZnVjdWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMDI0NzcsImV4cCI6MjA5MzY3ODQ3N30.d88hqsXgANLqvtgr3boAEEYTr5u-Pl0jYb452NCWr5U";
 
 const tokenPerangkat = localStorage.getItem('sarimbit_vip_token') || 'TIDAK-ADA-SERTIFIKAT';
 
