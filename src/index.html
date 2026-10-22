@@ -4342,8 +4342,23 @@ Array.from(tbody.children).forEach(tr => {
     }
     
     function exportMasterFilteredExcel() {
-        const filter = document.getElementById('filter-sarimbit-master').value; const search = document.getElementById('search-master').value.toLowerCase();
-        let filtered = masterData.filter(m => (!filter || m.sarimbit === filter) && (m.barang.toLowerCase().includes(search) || m.sarimbit.toLowerCase().includes(search)));
+        const filter = document.getElementById('filter-sarimbit-master').value; 
+        const search = document.getElementById('search-master').value.toLowerCase();
+        const filterBerat = document.getElementById('filter-berat-master') ? document.getElementById('filter-berat-master').value : "";
+        
+        let filtered = masterData.filter(m => {
+            const cocokSearch = m.barang.toLowerCase().includes(search) || m.sarimbit.toLowerCase().includes(search);
+            if (search && !cocokSearch) return false;
+            if (filter && m.sarimbit !== filter) return false;
+            
+            // REVISI: Aktifkan Filter Gramasi untuk Output Excel
+            const berat = Number(m.berat || m.Berat || 0);
+            if (filterBerat === 'nol' && berat > 0) return false;
+            if (filterBerat === 'ada' && berat === 0) return false;
+            
+            return true;
+        });
+
         if(filtered.length === 0) return showToast("⚠️ Tidak ada data!");
         
         const excelData = [["ID_SISTEM", "Nama Pusat", "Koleksi Sarimbit", "Nama Barang", "Warna", "Size", "Harga Jual", "Berat (gr)"]];
@@ -4354,7 +4369,6 @@ Array.from(tbody.children).forEach(tr => {
         
         catatLog('DOWNLOAD', 'MASTER', `Mengunduh Excel Master Barang (${filter || "Semua Koleksi"})`);
     }
-    
     function exportRekapExcel() {
         if(!orderData.length) return showToast("Data kosong!");
         const fTglMulai = document.getElementById('filter-tgl-mulai-rekap').value; 
@@ -4413,23 +4427,40 @@ Array.from(tbody.children).forEach(tr => {
         let grandTotalQty = 0;
         
         Object.keys(summary).sort((a, b) => {
-            const [sarimbitA, barangA, varianA, sizeA] = a.split('|');
-            const [sarimbitB, barangB, varianB, sizeB] = b.split('|');
+            // KUNCI PERBAIKAN: Split menjadi 3 bagian (Produk Gabungan, Varian, Size)
+            const [prodA, varianA, sizeA] = a.split('||');
+            const [prodB, varianB, sizeB] = b.split('||');
             
-            if (sarimbitA !== sarimbitB) return sarimbitA.localeCompare(sarimbitB);
-            if (barangA !== barangB) return barangA.localeCompare(barangB);
+            if (prodA !== prodB) return prodA.localeCompare(prodB);
             if (varianA !== varianB) return varianA.localeCompare(varianB);
             
-            const indexA = sizeOrder.indexOf(sizeA.toLowerCase());
-            const indexB = sizeOrder.indexOf(sizeB.toLowerCase());
+            // Pengaman agar tidak error jika size ternyata kosong
+            const amanSizeA = sizeA ? sizeA.toLowerCase() : "";
+            const amanSizeB = sizeB ? sizeB.toLowerCase() : "";
+            
+            const indexA = sizeOrder.indexOf(amanSizeA);
+            const indexB = sizeOrder.indexOf(amanSizeB);
             return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
         }).forEach(k => { 
-            const [sarimbit, barang, varian, size] = k.split('|'); 
+            // Ekstrak 3 bagian asli
+            const [prod, varian, size] = k.split('||'); 
+            
+            // Pisahkan kembali "Sarimbit - Barang" menjadi 2 kolom terpisah untuk Excel
+            let sarimbit = prod;
+            let barang = "-";
+            const pemisahIndex = prod.indexOf(' - ');
+            if (pemisahIndex !== -1) {
+                sarimbit = prod.substring(0, pemisahIndex);
+                barang = prod.substring(pemisahIndex + 3);
+            }
+            
             const qtyBaris = summary[k];
             grandTotalQty += qtyBaris;
             
-            // REVISI: Data Qty murni angka tanpa tambahan "Pcs"
-            excelData.push([ nomor++, sarimbit, barang, varian, size.toUpperCase(), qtyBaris ]); 
+            // Pengaman toUpperCase()
+            const amanSize = size ? size.toUpperCase() : "-";
+            
+            excelData.push([ nomor++, sarimbit, barang, varian, amanSize, qtyBaris ]); 
         });
 
         // REVISI: Baris Total, angka murni tanpa "Pcs"
@@ -4941,7 +4972,9 @@ Array.from(tbody.children).forEach(tr => {
         orderData.forEach(o => {
             const cocokNama = (o.customer || "").toLowerCase().includes(search); 
             const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
-            if (search && !cocokNama && !cocokSarimbit) return;
+            const cocokTelp = (o.telepon || "").includes(search); // REVISI: Bisa cari nomor WA
+            if (search && !cocokNama && !cocokSarimbit && !cocokTelp) return;
+            
             if (filterToko && o.toko !== filterToko) return; 
             if (filter && o.sarimbit !== filter) return;
             if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
@@ -4960,12 +4993,22 @@ Array.from(tbody.children).forEach(tr => {
         });
 
         const dataExcel = [];
-        // [PERBAIKAN]: Menambahkan kolom Ekspedisi sebelum Status
         dataExcel.push([ "No", "Toko", "Nama", "Alamat", "Telepon", "Sarimbit", "Nama Barang", "Varian", "Size", "Qty", "Cicilan 1", "Cicilan 2", "Cicilan 3", "Ongkir & Berat", "Ekspedisi", "Status" ]);
 
         let nomor = 1; const merges = []; 
         Object.keys(groups).forEach(name => {
             const c = groups[name]; const startRow = dataExcel.length; 
+            
+            // Kalkulasi Sisa Tagihan Pintar
+            const totalBelanja = c.items.reduce((sum, it) => sum + ((Number(it.harga) || 0) * (Number(it.jumlah) || 0)), 0);
+            const dTipe = c.items[0].diskonTipe || 'none';
+            const dNilai = Number(c.items[0].diskonNilai) || 0;
+            let totalDiskon = 0;
+            if (dTipe === 'persen') totalDiskon = (totalBelanja * dNilai) / 100;
+            else if (dTipe === 'angka') totalDiskon = dNilai;
+            const sisaTagihan = (totalBelanja - totalDiskon + c.ongkir) - (c.cicilan1 + c.cicilan2 + c.cicilan3);
+            const statusLunas = sisaTagihan <= 0 ? "Lunas" : "Belum Lunas";
+
             const totalBeratGram = c.items.reduce((sum, it) => {
                 let gramItem = Number(it.berat || it.Berat || 0);
                 if (gramItem === 0) {
@@ -4992,8 +5035,8 @@ Array.from(tbody.children).forEach(tr => {
                     i === 0 ? c.cicilan2 : "", 
                     i === 0 ? c.cicilan3 : "", 
                     i === 0 ? infoOngkirBerat : "", 
-                    i === 0 ? (c.items[0].ekspedisi || "-") : "", // [PERBAIKAN] Menarik nama Ekspedisi
-                    i === 0 ? "Belum Lunas" : "" 
+                    i === 0 ? (c.items[0].ekspedisi || "-") : "", 
+                    i === 0 ? statusLunas : "" // REVISI: Status dinamis!
                 ];
                 dataExcel.push(row);
             });
@@ -5001,7 +5044,6 @@ Array.from(tbody.children).forEach(tr => {
             if (c.items.length > 1) {
                 const endRow = startRow + c.items.length - 1;
                 for (let col = 0; col <= 4; col++) merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
-                // [PERBAIKAN] Lebarkan area Merge sel mengikuti tambahan 1 kolom
                 for (let col = 10; col <= 15; col++) merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
             }
             nomor++;
@@ -5010,43 +5052,17 @@ Array.from(tbody.children).forEach(tr => {
         const wb = XLSX.utils.book_new(); 
         const ws = XLSX.utils.aoa_to_sheet(dataExcel);
         
-        // LOGIKA PENERAPAN GAYA (RATA TENGAH & BUNGKUS TEKS)
         for (let i in ws) {
             if (i[0] === '!') continue; 
-            
-            ws[i].s = {
-                alignment: {
-                    horizontal: "center", 
-                    vertical: "center",   
-                    wrapText: true        
-                },
-                font: { name: "Arial", sz: 10 }
-            };
-            
-            if (i.replace(/[A-Z]/g, '') === "1") {
-                ws[i].s.font.bold = true;
-                ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } };
-            }
+            ws[i].s = { alignment: { horizontal: "center", vertical: "center", wrapText: true }, font: { name: "Arial", sz: 10 } };
+            if (i.replace(/[A-Z]/g, '') === "1") { ws[i].s.font.bold = true; ws[i].s.fill = { fgColor: { rgb: "E2E8F0" } }; }
         }
 
         ws['!merges'] = merges;
-        // REVISI: Penyesuaian lebar kolom agar pas dengan susunan urutan data yang baru
         ws['!cols'] = [ 
-            { wch: 5 },  // No
-            { wch: 18 }, // Toko
-            { wch: 25 }, // Nama
-            { wch: 40 }, // Alamat
-            { wch: 16 }, // Telepon
-            { wch: 20 }, // Sarimbit
-            { wch: 25 }, // Nama Barang
-            { wch: 15 }, // Varian
-            { wch: 10 }, // Size
-            { wch: 12 }, // Qty (Lebar disesuaikan untuk teks " Pcs")
-            { wch: 15 }, // Cicilan 1
-            { wch: 15 }, // Cicilan 2
-            { wch: 15 }, // Cicilan 3
-            { wch: 22 }, // Ongkir & Berat
-            { wch: 12 }  // Status
+            { wch: 5 }, { wch: 18 }, { wch: 25 }, { wch: 40 }, { wch: 16 }, 
+            { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 10 }, { wch: 12 }, 
+            { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 22 }, { wch: 15 }, { wch: 12 } // REVISI: Pas 16 Kolom
         ]; 
         
         XLSX.utils.book_append_sheet(wb, ws, "Data Customer");
@@ -5057,10 +5073,8 @@ Array.from(tbody.children).forEach(tr => {
         if(search) fileNameParts.push(search);
         
         const finalFileName = fileNameParts.join('_').replace(/[^a-zA-Z0-9]/g, '_') + ".xlsx";
-
         XLSX.writeFile(wb, finalFileName); 
         showToast("Excel Berhasil Diunduh!");
-        
         catatLog('DOWNLOAD', 'SLIP', `Mengunduh Excel Database Pelanggan (${filterToko || "Semua Toko"})`);
     }
     async function downloadCustomerPDF() {
@@ -5396,7 +5410,6 @@ async function eksekusiDorongDataPaksa() {
         const semuaOrderLokal = await dbLokal.orders.filter(o => o.syncstatus !== -1).toArray();
         if (semuaOrderLokal.length > 0) {
             const payloadOrderBersih = semuaOrderLokal.map(o => {
-                // Semua 27 kolom WAJIB ADA agar Supabase tidak teriak "Keys must match"
                 return {
                     id: o.id,
                     idcustomer: o.idCustomer || o.idcustomer || `CUST-RECOVERY-${o.id}`,
@@ -5421,6 +5434,7 @@ async function eksekusiDorongDataPaksa() {
                     resi: o.resi || "",
                     tanggal: o.tanggal || new Date().toISOString(),
                     toko: o.toko || "",
+                    asal_order: o.asal_order || "", // REVISI: Data sumber agar tidak hilang
                     syncstatus: o.syncstatus !== undefined ? o.syncstatus : 1,
                     diskonTipe: o.diskonTipe || "none",
                     isarchived: (o.isArchived === true || o.isarchived === true),

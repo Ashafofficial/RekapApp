@@ -581,13 +581,19 @@ function jalankanPenyegaranLayarWindows() {
             const mainElement = document.querySelector('main');
             const posisiScrollAsli = mainElement ? mainElement.scrollTop : 0;
             
-            if (typeof masterData !== 'undefined') masterData = res.master || []; 
+            if (typeof masterData !== 'undefined') {
+                masterData = res.master || [];
+                window.cacheBeratMaster = null; // REVISI: Reset cache berat agar anti-lag
+            }
             if (typeof orderData !== 'undefined') orderData = res.orders || [];
+            if (typeof pembukuanData !== 'undefined') pembukuanData = res.pembukuan || []; // REVISI: Mencegah error jadwal
+            
             if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
             
             if (document.getElementById('page-slip')?.classList.contains('active') && typeof renderSlip === 'function') renderSlip();
             if (document.getElementById('page-rekap')?.classList.contains('active') && typeof renderRekap === 'function') renderRekap();
-            if (typeof muatDataPembukuan === 'function') muatDataPembukuan();
+            if (document.getElementById('page-master')?.classList.contains('active') && typeof renderMaster === 'function') renderMaster();
+            if (typeof muatDataPembukuan === 'function') muatDataPembukuan(); // Tetap aman walau ada di halaman terpisah
             
             if (mainElement) {
                 setTimeout(() => { mainElement.scrollTop = posisiScrollAsli; }, 20);
