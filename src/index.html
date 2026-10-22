@@ -24,6 +24,10 @@
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+ <!-- MESIN KALENDER FLATPICKR -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+ <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+ <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
  
  <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
@@ -843,11 +847,19 @@
                     <input type="text" id="search-master" onkeyup="renderMaster()" placeholder="Cari barang atau koleksi..." class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800">
                 </div>
                 
-                <div class="flex gap-2 items-center">
-                    <select id="filter-sarimbit-master" onchange="renderMaster()" class="glass-input px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border-slate-200 cursor-pointer min-w-[150px]">
+                <div class="flex gap-2 items-center w-full lg:w-auto">
+                    <!-- FILTER GRAMASI BARU -->
+                    <select id="filter-berat-master" onchange="renderMaster()" class="glass-input px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 border-slate-200 cursor-pointer min-w-[110px] w-full lg:w-auto outline-none transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+                        <option value="">Semua Gramasi</option>
+                        <option value="nol">0 gr (Kosong)</option>
+                        <option value="ada">Sudah Terisi</option>
+                    </select>
+
+                    <select id="filter-sarimbit-master" onchange="renderMaster()" class="glass-input px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border-slate-200 cursor-pointer min-w-[150px] w-full lg:w-auto outline-none transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
                         <option value="">Sarimbit</option>
                     </select>
-                    <button id="btn-delete-sarimbit" onclick="hapusSarimbitTerpilih()" class="hidden bg-rose-50 text-rose-600 px-3 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all text-sm" title="Hapus Koleksi Ini">
+                    
+                    <button id="btn-delete-sarimbit" onclick="hapusSarimbitTerpilih()" class="hidden bg-rose-50 text-rose-600 px-3 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all text-sm shrink-0" title="Hapus Koleksi Ini">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
@@ -900,15 +912,13 @@
         <div class="lg:col-span-3 space-y-5">
             <div class="glass p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 bg-white/60">
                 <h4 class="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-regular fa-calendar text-blue-500"></i> Rentang Waktu</h4>
-                <div class="space-y-4">
-                  <div>
-                      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Dari Tanggal</label>
-                      <input type="date" id="filter-tgl-mulai-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer shadow-inner">
-                  </div>
-                  <div>
-                      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Sampai Tanggal</label>
-                      <input type="date" id="filter-tgl-akhir-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-3.5 py-3 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer shadow-inner">
-                  </div>
+                <div class="h-12 bg-white border border-slate-200 rounded-xl px-4 shadow-sm hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all cursor-pointer w-full">
+                    <div class="h-full flex items-center gap-3">
+                        <i class="fa-regular fa-calendar-days text-slate-400 text-base"></i>
+                        <input type="text" id="filter-date-range-rekap" placeholder="Tanggal" class="w-full p-0 m-0 bg-transparent border-none outline-none text-sm font-semibold text-slate-700 cursor-pointer focus:ring-0">
+                        <input type="hidden" id="filter-tgl-mulai-rekap">
+                        <input type="hidden" id="filter-tgl-akhir-rekap">
+                    </div>
                 </div>
             </div>
             
@@ -991,70 +1001,115 @@
         </div>
     </div>
     
-   <!-- KOTAK PENCARIAN & FILTER (DESAIN 2 BARIS PROFESIONAL & SANGAT RAPI) -->
-   <div class="bg-white/80 backdrop-blur-md p-4 md:p-5 rounded-2xl flex flex-col gap-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-200 mb-6">
+  <!-- KOTAK PENCARIAN & FILTER (DESAIN COMPACT SAAS 1 BARIS MUTLAK) -->
+  <div class="bg-white/80 backdrop-blur-md p-3.5 rounded-2xl flex flex-col shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-200 mb-6 relative z-[100]">
         
-    <!-- BARIS 1: Pencarian & Tombol Unduh -->
-    <div class="flex flex-col lg:flex-row justify-between items-center gap-4 w-full">
-        <!-- Kotak Pencarian -->
-        <div class="relative w-full lg:flex-1">
-            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Ketik nama pelanggan, nomor WA, atau sarimbit..." class="w-full pl-11 pr-4 py-2.5 bg-slate-100/50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all outline-none">
+    <!-- Wadah Flex: Memaksa semua elemen sejajar 1 baris (horizontal) -->
+    <div class="flex flex-col lg:flex-row items-center gap-2 lg:gap-3 w-full">
+        
+        <!-- Kotak Pencarian Manual (Porsi fleksibel) -->
+        <div class="relative flex-1 w-full min-w-[200px]">
+            <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Cari nama, WA, atau sarimbit..." class="w-full pl-10 pr-4 py-2.5 bg-slate-100/50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs lg:text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all outline-none">
         </div>
 
-        <!-- Tombol Unduh -->
-        <div class="flex items-center justify-end gap-2 w-full lg:w-auto shrink-0">
-            <button onclick="downloadFilteredWord()" title="Cetak Invoice (Word)" class="bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl font-bold border border-blue-200 hover:bg-blue-500 hover:text-white active:scale-95 transition-all text-xs flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-file-word text-sm"></i> <span class="hidden sm:inline">Word</span>
-            </button>
-            <button onclick="downloadCustomerPDF()" title="Cetak Sarimbit (PDF)" class="bg-rose-50 text-rose-600 px-4 py-2.5 rounded-xl font-bold border border-rose-200 hover:bg-rose-500 hover:text-white active:scale-95 transition-all text-xs flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-file-pdf text-sm"></i> <span class="hidden sm:inline">PDF</span>
-            </button> 
-            <button onclick="downloadCustomerExcel()" title="Export Sarimbit (Excel)" class="bg-emerald-50 text-emerald-600 px-4 py-2.5 rounded-xl font-bold border border-emerald-200 hover:bg-emerald-500 hover:text-white active:scale-95 transition-all text-xs flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-file-excel text-sm"></i> <span class="hidden sm:inline">Excel</span>
-            </button>
-        </div>
-    </div>
+        <!-- Wadah Filter Dinamis (Merapat di tengah, bisa di-scroll Kiri-Kanan di layar kecil) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none w-full lg:w-auto shrink-0 py-1 lg:py-0">
+            
+            <div class="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 shrink-0 ml-1">
+                <i class="fa-solid fa-filter"></i>
+            </div>
 
-    <!-- Garis Pemisah Super Tipis -->
-    <div class="w-full h-px bg-slate-100"></div>
-
-   <!-- BARIS 2: Filter Dinamis -->
-   <div class="flex flex-col md:flex-row items-start md:items-center gap-3 w-full">
-    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 shrink-0 mb-1 md:mb-0">
-        <i class="fa-solid fa-filter"></i> Saring:
-    </div>
-    
-    <!-- WADAH FILTER: Mengunci Elemen Agar Sejajar Horizontal 100% -->
-    <div class="flex flex-row items-center gap-2.5 w-full overflow-x-auto pb-1 md:pb-0 scrollbar-none" style="white-space: nowrap;">
-        
-        <select id="filter-toko-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-50 border border-slate-200 px-3 rounded-xl text-xs font-bold text-slate-600 cursor-pointer outline-none focus:border-blue-400 focus:bg-white transition-all min-w-[130px]">
-            <option value="">Semua Toko</option>
+           <!-- Lebar dropdown dipangkas agar padat dan teks diposisikan ke TENGAH (Gaya Samsung One UI) -->
+           <select id="filter-toko-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-100 border border-transparent px-2 lg:px-3 rounded-full text-[11px] lg:text-xs font-bold text-slate-700 cursor-pointer outline-none focus:ring-2 focus:ring-slate-300 hover:bg-slate-200 transition-all w-[90px] lg:w-[100px] appearance-none text-center shadow-none">
+            <option value="">Toko</option>
             <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
             <option value="MASARA.HIJAB">MASARA.HIJAB</option>
         </select>
         
-        <select id="filter-sarimbit-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-50 border border-slate-200 px-3 rounded-xl text-xs font-bold text-slate-700 cursor-pointer outline-none focus:border-blue-400 focus:bg-white transition-all min-w-[150px]">
+        <select id="filter-sarimbit-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-100 border border-transparent px-2 lg:px-3 rounded-full text-[11px] lg:text-xs font-bold text-slate-700 cursor-pointer outline-none focus:ring-2 focus:ring-slate-300 hover:bg-slate-200 transition-all w-[100px] lg:w-[125px] appearance-none text-center shadow-none">
             <option value="">Semua Sarimbit</option>
         </select>
         
-        <select id="filter-tagihan-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-rose-50/50 border border-rose-200 px-3 rounded-xl text-xs font-bold text-rose-600 cursor-pointer outline-none focus:border-rose-400 focus:bg-white transition-all min-w-[140px]">
-            <option value="">Semua Jadwal</option>
-            <option value="aktif">Waktunya Tagihan (!)</option>
+        <select id="filter-tagihan-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-100 border border-transparent px-2 lg:px-3 rounded-full text-[11px] lg:text-xs font-bold text-slate-700 cursor-pointer outline-none focus:ring-2 focus:ring-slate-300 hover:bg-slate-200 transition-all w-[90px] lg:w-[105px] appearance-none text-center shadow-none">
+            <option value="">Jadwal</option>
+            <option value="aktif">Waktu Tagihan</option>
         </select>
         
-        <!-- Filter Tanggal (Dikunci Mutlak Horizontal Sejajar & Tinggi Seragam) -->
-        <div id="slip-date-filter-wrapper" class="hidden shrink-0 h-10 bg-slate-50 border border-slate-200 rounded-xl px-3 shadow-sm">
-            <div class="h-full" style="display: flex; align-items: center; gap: 6px;">
-                <input type="date" id="filter-tgl-mulai-slip" onchange="renderSlip()" style="width: 105px; padding: 0; margin: 0; background: transparent; border: none; outline: none; font-size: 11px; font-weight: bold; color: #475569; cursor: pointer;" title="Dari Tanggal">
-                <span style="font-size: 12px; font-weight: 900; color: #cbd5e1;">-</span>
-                <input type="date" id="filter-tgl-akhir-slip" onchange="renderSlip()" style="width: 105px; padding: 0; margin: 0; background: transparent; border: none; outline: none; font-size: 11px; font-weight: bold; color: #475569; cursor: pointer;" title="Sampai Tanggal">
+        <!-- Filter Tanggal (Gaya Flatpickr + Samsung Pill) -->
+        <div id="slip-date-filter-wrapper" class="hidden shrink-0 h-10 bg-slate-100 border border-transparent rounded-full px-2 lg:px-3 shadow-none hover:bg-slate-200 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all cursor-pointer">
+            <div class="h-full flex items-center gap-1.5">
+                <i class="fa-regular fa-calendar-days text-slate-500 text-[11px] ml-1"></i>
+                <div class="flex items-center gap-1">
+                    <input type="text" id="filter-date-range-slip" placeholder="Tanggal" class="w-[120px] p-0 m-0 bg-transparent border-none outline-none text-[11px] font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
+                    <input type="hidden" id="filter-tgl-mulai-slip">
+                    <input type="hidden" id="filter-tgl-akhir-slip">
+                </div>
             </div>
         </div>
+        </div>
+
+        <!-- Tombol Export Dropdown Pintar (DI LUAR AREA SCROLL FILTER) -->
+        <div class="relative shrink-0 w-full lg:w-auto" id="dropdown-export-container">
+            <button onclick="toggleExportMenu()" class="w-full lg:w-auto bg-slate-800 text-white px-4 py-2 h-10 rounded-xl font-bold hover:bg-slate-900 active:scale-95 transition-all text-xs flex items-center justify-center gap-2 shadow-sm border border-slate-700">
+                <i class="fa-solid fa-cloud-arrow-down"></i> EXPORT <i class="fa-solid fa-chevron-down text-[9px] ml-1 transition-transform" id="export-chevron"></i>
+            </button>
+            
+            <!-- Pop-up Menu Export -->
+            <div id="export-menu" class="hidden opacity-0 scale-95 origin-top-right transition-all duration-200 absolute right-0 top-[calc(100%+8px)] w-48 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_15px_40px_-10px_rgba(0,0,0,0.3)] border border-slate-200 z-[9999] p-2 flex flex-col gap-1">
+                <button onclick="tutupExportMenu(); downloadFilteredWord()" class="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-700 transition-all text-xs font-bold group">
+                    <div class="w-7 h-7 rounded-lg bg-blue-100/50 text-blue-500 border border-blue-100 flex items-center justify-center group-hover:scale-105 group-hover:bg-blue-500 group-hover:text-white transition-all"><i class="fa-solid fa-file-word"></i></div>
+                    Invoice (Word)
+                </button>
+                <button onclick="tutupExportMenu(); downloadCustomerPDF()" class="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl hover:bg-rose-50 text-slate-600 hover:text-rose-700 transition-all text-xs font-bold group">
+                    <div class="w-7 h-7 rounded-lg bg-rose-100/50 text-rose-500 border border-rose-100 flex items-center justify-center group-hover:scale-105 group-hover:bg-rose-500 group-hover:text-white transition-all"><i class="fa-solid fa-file-pdf"></i></div>
+                    Sarimbit (PDF)
+                </button>
+                <button onclick="tutupExportMenu(); downloadCustomerExcel()" class="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 transition-all text-xs font-bold group">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-100/50 text-emerald-500 border border-emerald-100 flex items-center justify-center group-hover:scale-105 group-hover:bg-emerald-500 group-hover:text-white transition-all"><i class="fa-solid fa-file-excel"></i></div>
+                    Sarimbit (Excel)
+                </button>
+            </div>
+        </div>
+        
     </div>
-</div>
-    
-</div>
+  </div>
+
+  <!-- Script Penutup dan Animasi Dropdown (Penyebab bocornya layar sudah dihapus) -->
+  <script>
+      function toggleExportMenu() {
+          const menu = document.getElementById('export-menu');
+          const chevron = document.getElementById('export-chevron');
+          if (menu.classList.contains('hidden')) {
+              menu.classList.remove('hidden');
+              if(chevron) chevron.style.transform = 'rotate(180deg)';
+              setTimeout(() => {
+                  menu.classList.remove('opacity-0', 'scale-95');
+              }, 10);
+          } else {
+              tutupExportMenu();
+          }
+      }
+
+      function tutupExportMenu() {
+          const menu = document.getElementById('export-menu');
+          const chevron = document.getElementById('export-chevron');
+          if(menu) {
+              menu.classList.add('opacity-0', 'scale-95');
+              if(chevron) chevron.style.transform = 'rotate(0deg)';
+              setTimeout(() => {
+                  menu.classList.add('hidden');
+              }, 200); 
+          }
+      }
+
+      document.addEventListener('click', function(event) {
+          const container = document.getElementById('dropdown-export-container');
+          if (container && !container.contains(event.target)) {
+              tutupExportMenu();
+          }
+      });
+  </script>
     <!-- TABEL DATA CUSTOMER -->
     <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/50">
         <div class="overflow-x-auto">
@@ -1089,15 +1144,18 @@
                 <option value="">Semua Bulan</option>
             </select>
         </div>
-      <div>
-          <label class="text-[10px] font-semibold text-slate-600 block mb-1">Dari Tanggal</label>
-          <input type="date" id="filter-tgl-mulai-sumber" onchange="renderDashboardSumber()" class="glass-input w-full md:w-auto p-2.5 rounded-lg text-xs font-bold text-slate-700">
-      </div>
-      <div>
-          <label class="text-[10px] font-semibold text-slate-600 block mb-1">Sampai Tanggal</label>
-          <input type="date" id="filter-tgl-akhir-sumber" onchange="renderDashboardSumber()" class="glass-input w-full md:w-auto p-2.5 rounded-lg text-xs font-bold text-slate-700">
-      </div>
-      <button onclick="document.getElementById('filter-bulan-sumber').value=''; document.getElementById('filter-tgl-mulai-sumber').value=''; document.getElementById('filter-tgl-akhir-sumber').value=''; renderDashboardSumber();" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border border-slate-200 shadow-sm active:scale-95">Reset</button>
+        <div class="flex-1 min-w-[200px]">
+            <label class="text-[10px] font-semibold text-slate-600 block mb-1">Rentang Tanggal</label>
+            <div class="h-[42px] bg-white border border-slate-200 rounded-xl px-3 shadow-sm hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all cursor-pointer w-full">
+                <div class="h-full flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-days text-slate-400 text-sm"></i>
+                    <input type="text" id="filter-date-range-sumber" placeholder="Tanggal" class="w-full p-0 m-0 bg-transparent border-none outline-none text-xs font-semibold text-slate-700 cursor-pointer focus:ring-0">
+                    <input type="hidden" id="filter-tgl-mulai-sumber">
+                    <input type="hidden" id="filter-tgl-akhir-sumber">
+                </div>
+            </div>
+        </div>
+        <button onclick="document.getElementById('filter-bulan-sumber').value=''; if(document.getElementById('filter-date-range-sumber')._flatpickr) document.getElementById('filter-date-range-sumber')._flatpickr.clear(); document.getElementById('filter-tgl-mulai-sumber').value=''; document.getElementById('filter-tgl-akhir-sumber').value=''; renderDashboardSumber();" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border border-slate-200 shadow-sm active:scale-95">Reset</button>
     </div>
 
     <button onclick="toggleModalUnduh(true)" class="w-full md:w-auto bg-rose-50 text-rose-600 px-5 py-2.5 rounded-xl text-sm font-bold border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
@@ -1406,47 +1464,54 @@
 
   <!-- MODAL FILTER LANJUTAN SLIP -->
   <div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
-      <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white">
-          <div class="p-5 bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex justify-between items-center shadow-md">
-              <h3 class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-filter"></i> Filter Lanjutan</h3>
-              <button onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors">
-                  <i class="fa-solid fa-xmark"></i>
-              </button>
-          </div>
-          <div class="p-6 max-h-[65vh] overflow-y-auto bg-slate-50 space-y-6">
-              <div>
-                  <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-money-bill-wave text-indigo-500 mr-1"></i> Status Keuangan</h4>
-                  <div class="grid grid-cols-2 gap-3">
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmc2" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Cicilan 2</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmlunas" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Pelunasan</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmongkir" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Ongkir</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-sdhongkir" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Sudah Ongkir</span></label>
-                  </div>
-              </div>
-              <div>
-                  <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-truck text-blue-500 mr-1"></i> Logistik Ekspedisi</h4>
-                  <div class="grid grid-cols-3 gap-3">
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-blue-300 shadow-sm"><input type="checkbox" id="fc-jne" class="w-4 h-4 text-blue-600"> <span class="text-sm font-bold text-slate-700">Hanya JNE</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-rose-300 shadow-sm"><input type="checkbox" id="fc-jnt" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-slate-700">Hanya JNT</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-orange-300 shadow-sm"><input type="checkbox" id="fc-pos" class="w-4 h-4 text-orange-600"> <span class="text-sm font-bold text-slate-700">Hanya POS</span></label>
-                  </div>
-              </div>
-              <div>
-                  <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-map-location-dot text-emerald-500 mr-1"></i> Wilayah Pengiriman</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-sm"><input type="checkbox" id="fc-jawa" class="w-4 h-4 text-emerald-600"> <span class="text-sm font-bold text-slate-700">Hanya Pulau Jawa</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-sm"><input type="checkbox" id="fc-luarjawa" class="w-4 h-4 text-emerald-600"> <span class="text-sm font-bold text-slate-700">Hanya Luar Pulau Jawa</span></label>
-                      <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-rose-300 shadow-sm md:col-span-2"><input type="checkbox" id="fc-noalamat" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-rose-600">Belum Ada Alamat Lengkap (Kosong)</span></label>
-                  </div>
-              </div>
-          </div>
-          <div class="p-4 bg-white border-t border-slate-200 flex justify-between">
-            <button onclick="resetFilterLanjutan()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">Reset Pilihan</button>
-            <button onclick="terapkanFilterLanjutan()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-md transition-all"><i class="fa-solid fa-check mr-2"></i>Terapkan Filter</button>
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white">
+        <div class="p-5 bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex justify-between items-center shadow-md">
+            <h3 class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-filter"></i> Filter Lanjutan</h3>
+            <button onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-    </div>
+        <div class="p-6 max-h-[65vh] overflow-y-auto bg-slate-50 space-y-6">
+            <div>
+                <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-money-bill-wave text-indigo-500 mr-1"></i> Status Keuangan</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmc2" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Cicilan 2</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmlunas" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Pelunasan</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-blmongkir" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Belum Ongkir</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm"><input type="checkbox" id="fc-sdhongkir" class="w-4 h-4 text-indigo-600"> <span class="text-sm font-bold text-slate-700">Sudah Ongkir</span></label>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-truck text-blue-500 mr-1"></i> Logistik Ekspedisi</h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-blue-300 shadow-sm"><input type="checkbox" id="fc-jne" class="w-4 h-4 text-blue-600"> <span class="text-sm font-bold text-slate-700">Hanya JNE</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-rose-300 shadow-sm"><input type="checkbox" id="fc-jnt" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-slate-700">Hanya JNT</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-orange-300 shadow-sm"><input type="checkbox" id="fc-pos" class="w-4 h-4 text-orange-600"> <span class="text-sm font-bold text-slate-700">Hanya POS</span></label>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-map-location-dot text-emerald-500 mr-1"></i> Wilayah Pengiriman</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-sm"><input type="checkbox" id="fc-jawa" class="w-4 h-4 text-emerald-600"> <span class="text-sm font-bold text-slate-700">Hanya Pulau Jawa</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-sm"><input type="checkbox" id="fc-luarjawa" class="w-4 h-4 text-emerald-600"> <span class="text-sm font-bold text-slate-700">Hanya Luar Pulau Jawa</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-slate-200 hover:border-rose-300 shadow-sm md:col-span-2"><input type="checkbox" id="fc-noalamat" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-rose-600">Belum Ada Alamat Lengkap (Kosong)</span></label>
+                </div>
+            </div>
+            
+            <!-- BLOK BARU: STATUS BERAT (GRAMASI) -->
+            <div>
+                <h4 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest border-b border-slate-200 pb-2"><i class="fa-solid fa-weight-scale text-orange-500 mr-1"></i> Informasi Berat Barang</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-3 rounded-xl border border-rose-200 shadow-sm hover:border-rose-300 transition-all shadow-[0_0_10px_rgba(244,63,94,0.1)]"><input type="checkbox" id="fc-blmgram" class="w-4 h-4 text-rose-600"> <span class="text-sm font-bold text-rose-600">Belum Ada Total Gram (0 gr)</span></label>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-white border-t border-slate-200 flex justify-between">
+          <button onclick="resetFilterLanjutan()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">Reset Pilihan</button>
+          <button onclick="terapkanFilterLanjutan()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-md transition-all"><i class="fa-solid fa-check mr-2"></i>Terapkan Filter</button>
+      </div>
+  </div>
 </div>
-
 <!-- MODAL STATISTIK PROGRESS PELANGGAN -->
 <div id="modalStatistikProgress" class="hidden fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
     <div class="bg-white rounded-[2rem] w-full max-w-3xl shadow-2xl overflow-hidden border border-white animate-fade-in-up">
@@ -2031,12 +2096,13 @@
   }
 
   // MESIN PENYARING FILTER LANJUTAN
-    function dapatkanKondisiFilterLanjutan() {
+  function dapatkanKondisiFilterLanjutan() {
         return {
             blmC2: document.getElementById('fc-blmc2')?.checked, blmLunas: document.getElementById('fc-blmlunas')?.checked,
             blmOngkir: document.getElementById('fc-blmongkir')?.checked, sdhOngkir: document.getElementById('fc-sdhongkir')?.checked,
             jnt: document.getElementById('fc-jnt')?.checked, jne: document.getElementById('fc-jne')?.checked, pos: document.getElementById('fc-pos')?.checked,
-            jawa: document.getElementById('fc-jawa')?.checked, luarJawa: document.getElementById('fc-luarjawa')?.checked, noAlamat: document.getElementById('fc-noalamat')?.checked
+            jawa: document.getElementById('fc-jawa')?.checked, luarJawa: document.getElementById('fc-luarjawa')?.checked, noAlamat: document.getElementById('fc-noalamat')?.checked,
+            blmGram: document.getElementById('fc-blmgram')?.checked // <-- PENAMBAHAN SENSOR GRAM
         };
     }
 
@@ -2102,8 +2168,50 @@
         return false;
     }
 
+  // ==========================================
+    // OTAK CACHE: MENCEGAH LAG SAAT LIVE LOOKUP
+    // ==========================================
+    window.cacheBeratMaster = null;
+
+    function bangunCacheMaster() {
+        if (!window.cacheBeratMaster && typeof masterData !== 'undefined' && masterData.length > 0) {
+            window.cacheBeratMaster = new Map();
+            const bersihkanStr = (val) => String(val || "").trim().toLowerCase();
+            
+            masterData.forEach(m => {
+                const berat = Number(m.berat || m.Berat || 0);
+                if (berat > 0) {
+                    const srm = bersihkanStr(m.sarimbit);
+                    const brg = bersihkanStr(m.barang);
+                    
+                    // Kunci Akurat & Kunci Cadangan
+                    window.cacheBeratMaster.set(`${srm}|${brg}|${bersihkanStr(m.varian)}|${bersihkanStr(m.size)}`, berat);
+                    if (!window.cacheBeratMaster.has(`${srm}|${brg}`)) {
+                        window.cacheBeratMaster.set(`${srm}|${brg}`, berat);
+                    }
+                }
+            });
+        }
+    }
+
+    function dapatkanBeratLive(srm, brg, varn, sz) {
+        bangunCacheMaster();
+        if (!window.cacheBeratMaster) return 0;
+        
+        const bersihkanStr = (val) => String(val || "").trim().toLowerCase();
+        const srmBersih = bersihkanStr(srm);
+        const brgBersih = bersihkanStr(brg);
+        
+        // Coba kunci akurat, jika gagal pakai kunci cadangan
+        let hasil = window.cacheBeratMaster.get(`${srmBersih}|${brgBersih}|${bersihkanStr(varn)}|${bersihkanStr(sz)}`);
+        if (hasil === undefined) hasil = window.cacheBeratMaster.get(`${srmBersih}|${brgBersih}`);
+        
+        return hasil || 0;
+    }
+
     function evaluasiFilterLanjutan(o, f) {
-        if (!f.blmC2 && !f.blmLunas && !f.blmOngkir && !f.sdhOngkir && !f.jnt && !f.jne && !f.pos && !f.jawa && !f.luarJawa && !f.noAlamat) return true;
+        if (!f.blmC2 && !f.blmLunas && !f.blmOngkir && !f.sdhOngkir && !f.jnt && !f.jne && !f.pos && !f.jawa && !f.luarJawa && !f.noAlamat && !f.blmGram) return true;
+        
         const c2 = Number(o.cicilan2) || 0; const c3 = Number(o.cicilan3) || 0; const ongkir = Number(o.ongkir) || 0;
         const eks = (o.ekspedisi || "").toUpperCase();
 
@@ -2129,26 +2237,28 @@
             passAlamat = false;
             const isNoAlamat = cekApakahBelumAdaAlamat(o.alamat);
             const isJawa = !isNoAlamat ? deteksiApakahPulauJawa(o.alamat) : false;
-
             if (f.noAlamat && isNoAlamat) passAlamat = true;
             if (f.jawa && !isNoAlamat && isJawa) passAlamat = true;
             if (f.luarJawa && !isNoAlamat && !isJawa) passAlamat = true;
         }
-        return passKeuangan && passEks && passAlamat;
-    }
 
-    function resetFilterLanjutan() {
-        ['fc-blmc2', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-jawa', 'fc-luarjawa', 'fc-noalamat'].forEach(id => {
-            const el = document.getElementById(id); if (el) el.checked = false;
-        });
-        renderSlip();
-    }
+        // --- LOGIKA FILTER GRAMASI 0 DENGAN CACHE (TIDAK LAG) ---
+        let passGram = true;
+        if (f.blmGram) {
+            passGram = false;
+            let gramItem = Number(o.berat || o.Berat || 0);
+            
+            // Cek Master dengan kecepatan instan (O(1))
+            if (gramItem === 0) {
+                const liveWeight = dapatkanBeratLive(o.sarimbit, o.barang, o.varian, o.size);
+                if (liveWeight > 0) gramItem = liveWeight;
+            }
+            
+            if (gramItem === 0) passGram = true;
+        }
 
-    function terapkanFilterLanjutan() {
-        document.getElementById('modalFilterLanjutan').classList.add('hidden');
-        renderSlip();
+        return passKeuangan && passEks && passAlamat && passGram;
     }
-
    // =======================================================
     // LOGIKA MODAL PENCARIAN & QTY STEPPER (FULL SCREEN)
     // =======================================================
@@ -2759,17 +2869,50 @@ function switchTab(t) {
                 orderData = semuaOrder.filter(o => o.isarchived !== true && o.isArchived !== true);
 
                 if (orderData.length > 0 && masterData.length > 0) {
-                    // PERCEPATAN EKSTREM: Gunakan pemetaan Hash Map untuk mencocokkan berat gram seketika
-                    const mapBerat = new Map();
+                    // MESIN PENCOCOK GRAMASI CERDAS (SMART MATCHING KUNCI PENYELAMAT)
+                    const mapBeratAkurat = new Map();
+                    const mapBeratKasar = new Map();
+
+                    // Fungsi super pembersih: Mengubah data kosong (null/undefined) jadi "", dan merapatkan spasi ganda
+                    const bersihkan = (teks) => (teks === null || teks === undefined) ? "" : String(teks).trim().toLowerCase().replace(/\s+/g, ' ');
+
                     masterData.forEach(m => {
-                        const key = `${String(m.sarimbit).trim().toLowerCase()}|${String(m.barang).trim().toLowerCase()}|${String(m.varian).trim().toLowerCase()}|${String(m.size).trim().toLowerCase()}`;
-                        mapBerat.set(key, m.berat);
+                        const srm = bersihkan(m.sarimbit);
+                        const brg = bersihkan(m.barang);
+                        const varn = bersihkan(m.varian);
+                        const sz = bersihkan(m.size);
+                        const brt = Number(m.berat) || 0;
+
+                        // 1. Simpan Kunci Akurat (Cocok 100% Varian dan Size)
+                        mapBeratAkurat.set(`${srm}|${brg}|${varn}|${sz}`, brt);
+                        
+                        // 2. Simpan Kunci Penyelamat (Asal Sarimbit & Barang cocok, ambil gramasinya!)
+                        if (!mapBeratKasar.has(`${srm}|${brg}`)) {
+                            mapBeratKasar.set(`${srm}|${brg}`, brt);
+                        }
                     });
 
                     orderData.forEach(order => {
-                        const key = `${String(order.sarimbit).trim().toLowerCase()}|${String(order.barang).trim().toLowerCase()}|${String(order.varian).trim().toLowerCase()}|${String(order.size).trim().toLowerCase()}`;
-                        const beratMaster = mapBerat.get(key);
-                        if (beratMaster !== undefined) order.berat = beratMaster;
+                        const srm = bersihkan(order.sarimbit);
+                        const brg = bersihkan(order.barang);
+                        
+                        const kunciAkurat = `${srm}|${brg}|${bersihkan(order.varian)}|${bersihkan(order.size)}`;
+                        const kunciKasar = `${srm}|${brg}`;
+
+                        // Coba tarik data dengan Kunci Akurat dulu
+                        let beratMaster = mapBeratAkurat.get(kunciAkurat);
+                        
+                        // JIKA GAGAL MATCHING (karena Varian/Size kosong atau salah): Gunakan Kunci Penyelamat!
+                        if (beratMaster === undefined) {
+                            beratMaster = mapBeratKasar.get(kunciKasar);
+                        }
+
+                        // Terapkan gramasi ke dalam struk
+                        if (beratMaster !== undefined) {
+                            order.berat = beratMaster;
+                        } else {
+                            order.berat = Number(order.berat) || 0;
+                        }
                     });
                 }
                 updateGlobalFilters();
@@ -3143,25 +3286,95 @@ async function handleOrderSubmit(e) {
         const editInfo = form.dataset.editMode ? JSON.parse(form.dataset.editMode) : null;
         
         const payload = {
-            pusat: document.getElementById('m-pusat').value, sarimbit: document.getElementById('m-sarimbit').value,
-            barang: document.getElementById('m-barang').value, varian: document.getElementById('m-varian').value,
-            size: document.getElementById('m-size').value, harga: Number(document.getElementById('m-harga').value),
+            pusat: document.getElementById('m-pusat').value, 
+            sarimbit: document.getElementById('m-sarimbit').value,
+            barang: document.getElementById('m-barang').value, 
+            varian: document.getElementById('m-varian').value,
+            size: document.getElementById('m-size').value, 
+            harga: Number(document.getElementById('m-harga').value),
             berat: Number(document.getElementById('m-berat').value)
         };
 
         window.DatabaseAPI.simpanMasterBaru(
             payload, editInfo,
-            () => { // onSuccess
+            async () => { // onSuccess
                 if (editInfo) {
-                    showToast("✅ Master Diperbarui!");
+                    showToast("⏳ Menyinkronkan perubahan ke orderan lama...");
+                    
+                    // ==========================================================
+                    // SISTEM CASCADE: UPDATE OTOMATIS ORDERAN LAMA JIKA MASTER DIEDIT
+                    // ==========================================================
+                    try {
+                        const bersih = (str) => (str || "").toString().trim().toLowerCase().replace(/\s+/g, ' ');
+                        const oldSrm = bersih(editInfo.sarimbit);
+                        const oldBrg = bersih(editInfo.barang);
+                        const oldVar = bersih(editInfo.varian);
+                        const oldSz = bersih(editInfo.size);
+
+                        // 1. Tarik semua orderan dari memori lokal
+                        const semuaOrder = await dbLokal.orders.toArray();
+                        
+                        // 2. Cari orderan lama yang menggunakan nama sebelum diedit
+                        const orderTerdampak = semuaOrder.filter(o => 
+                            bersih(o.sarimbit) === oldSrm && 
+                            bersih(o.barang) === oldBrg && 
+                            bersih(o.varian) === oldVar && 
+                            bersih(o.size) === oldSz &&
+                            o.syncstatus !== -1 // Abaikan data yang sudah dihapus
+                        );
+
+                        if (orderTerdampak.length > 0) {
+                            const waktuSekarang = new Date().toISOString();
+                            
+                            // 3. Timpa paksa dengan Nama, Harga, dan Gramasi yang baru!
+                            orderTerdampak.forEach(o => {
+                                o.pusat = payload.pusat;
+                                o.sarimbit = payload.sarimbit;
+                                o.barang = payload.barang;
+                                o.varian = payload.varian;
+                                o.size = payload.size;
+                                o.harga = payload.harga;
+                                o.berat = payload.berat;
+                                o.total = payload.harga * (Number(o.jumlah) || 0); // Update total tagihannya juga
+                                o.updated_at = waktuSekarang;
+                            });
+
+                            // 4. Simpan ke database lokal agar UI langsung berubah
+                            await dbLokal.orders.bulkPut(orderTerdampak);
+
+                            // 5. Tembakkan diam-diam ke Supabase jika internet nyala
+                            if (navigator.onLine && typeof SUPABASE_URL !== 'undefined') {
+                                const headersJSON = { 
+                                    "apikey": SUPABASE_KEY, 
+                                    "Authorization": `Bearer ${SUPABASE_KEY}`, 
+                                    "Content-Type": "application/json", 
+                                    "Prefer": "resolution=merge-duplicates" 
+                                };
+                                // Potong per 100 data agar tidak memberatkan server
+                                const chunkSize = 100;
+                                for (let i = 0; i < orderTerdampak.length; i += chunkSize) {
+                                    const chunk = orderTerdampak.slice(i, i + chunkSize);
+                                    await fetch(`${SUPABASE_URL}/rest/v1/orders?on_conflict=id`, {
+                                        method: "POST", headers: headersJSON, body: JSON.stringify(chunk)
+                                    });
+                                }
+                            }
+                            console.log(`✅ Berhasil menyinkronkan ${orderTerdampak.length} orderan lama dengan master baru.`);
+                        }
+                    } catch(err) {
+                        console.error("Gagal sinkronisasi orderan lama:", err);
+                    }
+                    // ==========================================================
+
+                    showToast("✅ Master & Orderan Lama Berhasil Diperbarui!");
                     const btn = form.querySelector('button[type="submit"]');
                     btn.innerHTML = `<i class="fa-solid fa-check"></i> SIMPAN BARANG`;
                     btn.classList.replace('bg-orange-500', 'bg-slate-800');
                     btn.classList.replace('hover:bg-orange-600', 'hover:bg-slate-900');
-                    catatLog('UPDATE', 'MASTER', `Edit Katalog: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size}) menjadi Rp ${payload.harga.toLocaleString('id-ID')}`);
+                    if (typeof catatLog === 'function') catatLog('UPDATE', 'MASTER', `Edit Master & Sinkron Order: ${payload.sarimbit} - ${payload.barang}`);
                 } else {
                     showToast("✅ Master Baru Tersimpan!");
-                    catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang} (${payload.varian}/${payload.size})`);
+                    if (typeof catatLog === 'function') catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang}`);
                 }
                 form.reset(); delete form.dataset.editMode;
                 loadAllData();
@@ -3284,42 +3497,89 @@ async function handleOrderSubmit(e) {
     function renderMaster() {
         const tbody = document.getElementById('tbody-master');
         const search = document.getElementById('search-master').value.toLowerCase();
-        const filter = document.getElementById('filter-sarimbit-master').value;
+        const filterBerat = document.getElementById('filter-berat-master') ? document.getElementById('filter-berat-master').value : "";
+        const filterSarimbitEl = document.getElementById('filter-sarimbit-master');
+        let filterSarimbit = filterSarimbitEl ? filterSarimbitEl.value : "";
         
-        // LOGIKA MUNCUL/HILANG TOMBOL HAPUS MASSAL (REVISI UX)
+        // 1. Filter awal berdasarkan Pencarian dan Status Gramasi
+        let dataTersaring = masterData.filter(m => {
+            const cocokSearch = m.barang.toLowerCase().includes(search) || m.sarimbit.toLowerCase().includes(search);
+            if (search && !cocokSearch) return false;
+            
+            const berat = Number(m.berat || m.Berat || 0);
+            if (filterBerat === 'nol' && berat > 0) return false;
+            if (filterBerat === 'ada' && berat === 0) return false;
+            
+            return true;
+        });
+
+        // 2. Kumpulkan Sarimbit yang masih tersisa untuk memperbarui Dropdown secara dinamis
+        let sarimbitTersedia = new Set();
+        dataTersaring.forEach(m => sarimbitTersedia.add(m.sarimbit));
+        
+        if (filterSarimbitEl) {
+            const tempVal = filterSarimbitEl.value; 
+            let optionsHTML = `<option value="">Semua Sarimbit</option>`;
+            [...sarimbitTersedia].sort().forEach(s => {
+                optionsHTML += `<option value="${s}">${s}</option>`;
+            });
+            filterSarimbitEl.innerHTML = optionsHTML;
+            
+            if (sarimbitTersedia.has(tempVal)) {
+                filterSarimbitEl.value = tempVal;
+                filterSarimbit = tempVal;
+            } else {
+                filterSarimbitEl.value = "";
+                filterSarimbit = "";
+            }
+        }
+
+        // 3. Terapkan filter Sarimbit untuk tampilan tabel
+        if (filterSarimbit) {
+            dataTersaring = dataTersaring.filter(m => m.sarimbit === filterSarimbit);
+        }
+        
+        // --- LOGIKA MUNCUL/HILANG TOMBOL HAPUS MASSAL ---
         const btnDel = document.getElementById('btn-delete-sarimbit');
         if (btnDel) {
-            // 1. Cek apakah Sakelar di Pengaturan NYALA
             if (appSettings.allowDeleteMaster === true) {
-                btnDel.classList.remove('hidden'); // Pastikan tombol selalu muncul
-                
-                // 2. Cek apakah Admin sudah memilih Sarimbit
-                if (filter !== "") {
-                    // Nyalakan tombol (Merah & Bisa diklik)
+                btnDel.classList.remove('hidden');
+                if (filterSarimbit !== "") {
                     btnDel.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-100', 'text-slate-400', 'border-slate-200');
                     btnDel.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200', 'hover:bg-rose-100');
                     btnDel.disabled = false;
                 } else {
-                    // Matikan tombol sementara (Abu-abu & Dikunci)
                     btnDel.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200', 'hover:bg-rose-100');
                     btnDel.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-100', 'text-slate-400', 'border-slate-200');
                     btnDel.disabled = true;
                 }
             } else {
-                // Jika Sakelar MATI, hilangkan total dari layar
                 btnDel.classList.add('hidden');
             }
         }
+        // -----------------------------------------------
 
-        let filtered = masterData.filter(m => (!filter || m.sarimbit === filter) && (m.barang.toLowerCase().includes(search) || m.sarimbit.toLowerCase().includes(search)));
-        const totalItems = filtered.length; const totalPages = Math.ceil(totalItems / rowsPerPageMaster);
-        if (currentPageMaster > totalPages) currentPageMaster = 1;
+        const totalItems = dataTersaring.length; 
+        const totalPages = Math.ceil(totalItems / rowsPerPageMaster);
+        if (currentPageMaster > totalPages && totalPages > 0) currentPageMaster = totalPages;
+        if (currentPageMaster < 1) currentPageMaster = 1;
 
         const startIndex = (currentPageMaster - 1) * rowsPerPageMaster;
-        const paginatedData = filtered.slice(startIndex, startIndex + rowsPerPageMaster);
+        const paginatedData = dataTersaring.slice(startIndex, startIndex + rowsPerPageMaster);
 
-        // HANYA MENGUBAH CLASS TAILWIND PADA STRING HTML INI AGAR DESAIN NYA COCOK
-        tbody.innerHTML = paginatedData.map(m => `
+        if (paginatedData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-400 font-bold bg-slate-50 border-y border-slate-100"><i class="fa-solid fa-box-open text-3xl mb-3 block text-slate-300"></i>Tidak ada data barang yang sesuai</td></tr>`;
+            document.getElementById('pagination-master').innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = paginatedData.map(m => {
+            // Beri tanda visual merah yang berkedip halus jika gramasi masih 0
+            const gramBadge = Number(m.berat || m.Berat || 0) === 0 
+                ? `<span class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded border border-rose-200 animate-pulse shadow-sm">0 gr</span>` 
+                : `${m.berat} gr`;
+                
+            return `
             <tr>
                 <td class="px-5 py-4 border-b border-slate-100">
                     <div class="font-bold text-slate-800 text-sm mb-1">${escapeHTML(m.sarimbit)}</div>
@@ -3334,16 +3594,29 @@ async function handleOrderSubmit(e) {
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100 text-right">
                     <div class="font-black text-slate-800 mb-1 text-sm">${formatRp(m.harga)}</div>
-                    <div class="text-[10px] text-slate-500 font-semibold">${m.berat} gr</div>
+                    <div class="text-[10px] font-bold text-slate-500 flex justify-end">${gramBadge}</div>
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100 text-center">
                     <button onclick="editMaster('${escapeHTML(m.pusat)}', '${escapeHTML(m.sarimbit)}', '${escapeHTML(m.barang)}', '${escapeHTML(m.varian)}', '${escapeHTML(m.size)}', ${m.harga}, ${m.berat})" class="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-500 hover:text-white transition-colors border border-orange-200 shadow-sm active:scale-95"><i class="fa-solid fa-pen text-xs"></i></button>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
+        
         renderPaginationControls(totalItems, totalPages);
+        
+        // Logika Reaksi Warna Filter
+        const warnaAktif = ['bg-indigo-50', 'text-indigo-600', 'border-indigo-300', 'shadow-sm'];
+        const warnaMati = ['bg-slate-50', 'text-slate-600', 'border-slate-200'];
+        const fBeratEl = document.getElementById('filter-berat-master');
+        if (fBeratEl) {
+            if (fBeratEl.value !== "") { fBeratEl.classList.remove(...warnaMati); fBeratEl.classList.add(...warnaAktif); } 
+            else { fBeratEl.classList.remove(...warnaAktif); fBeratEl.classList.add(...warnaMati); }
+        }
+        if (filterSarimbitEl) {
+            if (filterSarimbitEl.value !== "") { filterSarimbitEl.classList.remove(...warnaMati); filterSarimbitEl.classList.add(...warnaAktif); } 
+            else { filterSarimbitEl.classList.remove(...warnaAktif); filterSarimbitEl.classList.add(...warnaMati); }
+        }
     }
-
    // 1. FUNGSI MENGHAPUS KARTU
    function hapusRowIni(btn) {
         btn.closest('.order-row').remove();
@@ -3441,7 +3714,7 @@ async function handleOrderSubmit(e) {
             });
         }
 
-        // 2. Kumpulkan sarimbit apa saja yang masih lolos dari filter-filter lain
+        // 2. Kumpulkan sarimbit apa saja yang masih lolos dari filter DASAR
         orderData.forEach(o => {
             if (o.isArchived === true || o.isarchived === true) return; 
             if (fTglMulai || fTglAkhir) {
@@ -3449,11 +3722,12 @@ async function handleOrderSubmit(e) {
                 if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
                 if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
             }
+            // Filter Toko dan Jadwal tetap berlaku untuk Dropdown
             if (filterToko && o.toko !== filterToko) return;
             if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
             
-            // FILTER LANJUTAN: Terapkan juga ke Dropdown Sarimbit
-            if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
+            // KUNCI PERBAIKAN: Baris evaluasi Filter Extra (Filter Lanjutan) SAYA HAPUS DARI SINI
+            // Agar nama-nama Sarimbit di Dropdown TIDAK MENGHILANG saat Filter Extra dinyalakan!
             
             sarimbitTersedia.add(o.sarimbit);
         });
@@ -3710,7 +3984,18 @@ async function handleOrderSubmit(e) {
             const c = groups[name];
             const idAman = btoa(encodeURIComponent(c.idCustomer)).replace(/[^a-zA-Z0-9]/g, '');
 
-            const totalBeratGram = c.items.reduce((sum, it) => { const b = Number(it.berat || 0); return sum + (b * Number(it.jumlah || 0)); }, 0);
+          // PERHITUNGAN TOTAL BERAT DENGAN CACHE LIVE LOOKUP (SANGAT RINGAN & INSTAN)
+          const totalBeratGram = c.items.reduce((sum, it) => {
+                let gramItem = Number(it.berat || it.Berat || 0);
+                
+                if (gramItem === 0) {
+                    const liveWeight = typeof dapatkanBeratLive === 'function' ? dapatkanBeratLive(it.sarimbit, it.barang, it.varian, it.size) : 0;
+                    if (liveWeight > 0) gramItem = liveWeight;
+                }
+                
+                return sum + (gramItem * (Number(it.jumlah) || 1));
+            }, 0);
+
             const beratFormatted = totalBeratGram >= 1000 ? (totalBeratGram / 1000).toFixed(2) + " kg" : totalBeratGram + " gr";
             
             const totalPcsCustomer = c.items.reduce((sum, it) => sum + Number(it.jumlah || 0), 0);
@@ -4681,7 +4966,14 @@ Array.from(tbody.children).forEach(tr => {
         let nomor = 1; const merges = []; 
         Object.keys(groups).forEach(name => {
             const c = groups[name]; const startRow = dataExcel.length; 
-            const totalBeratGram = c.items.reduce((sum, it) => { const b = Number(it.berat || 0); return sum + (b * Number(it.jumlah || 0)); }, 0);
+            const totalBeratGram = c.items.reduce((sum, it) => {
+                let gramItem = Number(it.berat || it.Berat || 0);
+                if (gramItem === 0) {
+                    const liveWeight = typeof dapatkanBeratLive === 'function' ? dapatkanBeratLive(it.sarimbit, it.barang, it.varian, it.size) : 0;
+                    if (liveWeight > 0) gramItem = liveWeight;
+                }
+                return sum + (gramItem * (Number(it.jumlah) || 1));
+            }, 0);
             const infoOngkirBerat = `${formatRp(c.ongkir)} \n(${(totalBeratGram/1000).toFixed(2)} kg)`;
 
             c.items.forEach((it, i) => {
@@ -6048,57 +6340,260 @@ function pilihProdukModal(metaString) {
     
     });
     </script>
-    <!-- ========================================================================= -->
-<!-- SCRIPT VISUAL: MERUBAH WARNA TOMBOL FILTER EXTRA SAAT AKTIF               -->
-<!-- ========================================================================= -->
-<script>
+  <script>
+    // =========================================================================
+    // SCRIPT FINAL: REAKSI WARNA, FILTER LANJUTAN (ANTI-LAG), DAN LIVE LOOKUP
+    // =========================================================================
     document.addEventListener("DOMContentLoaded", () => {
         
-        // 1. Mengambil alih fungsi Terapkan Filter
+        // 1. FUNGSI TERAPKAN FILTER LANJUTAN (ANTI-LAG)
         window.terapkanFilterLanjutan = function() {
+            // A. TUTUP MODAL SEKETIKA (UI Instant Feedback)
             document.getElementById('modalFilterLanjutan').classList.add('hidden');
             
-            // Mengecek apakah ada minimal 1 kotak filter yang dicentang
             const f = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : {};
-            const isAktif = f.blmC2 || f.blmLunas || f.blmOngkir || f.sdhOngkir || f.jnt || f.jne || f.pos || f.jawa || f.luarJawa || f.noAlamat;
+            const isAktif = f.blmC2 || f.blmLunas || f.blmOngkir || f.sdhOngkir || f.jnt || f.jne || f.pos || f.jawa || f.luarJawa || f.noAlamat || f.blmGram;
             
-            // Mencari tombol Filter Extra di layar
             const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
             if (btnFilter) {
                 if (isAktif) {
-                    // Berubah jadi warna MERAH dan berkedip elegan jika ada filter jalan
                     btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-black text-white bg-rose-500 border border-rose-600 hover:bg-rose-600 active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-rose-500/30";
-                    btnFilter.innerHTML = `<i class="fa-solid fa-filter animate-pulse"></i> Filter Aktif`;
+                    btnFilter.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyaring...`;
                 } else {
-                    // Kembali ke warna asal (Indigo/Biru Muda) jika tidak ada filter
                     btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm";
                     btnFilter.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter Extra`;
                 }
             }
             
-            // Memicu kalkulasi ulang (Dropdown Sarimbit juga otomatis disaring di sini)
-            if(typeof window.renderSlip === 'function') window.renderSlip();
+            // B. JEDA NAFAS BROWSER 50ms (Memisahkan beban hitungan dari UI)
+            setTimeout(() => {
+                if(typeof window.renderSlip === 'function') window.renderSlip();
+                if (btnFilter && isAktif) btnFilter.innerHTML = `<i class="fa-solid fa-filter"></i> Filter Aktif`;
+            }, 50); 
         };
     
-        // 2. Mengambil alih fungsi Reset Filter
+        // 2. FUNGSI RESET FILTER LANJUTAN (ANTI-LAG)
         window.resetFilterLanjutan = function() {
-            // Hapus semua centang
-            ['fc-blmc2', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-jawa', 'fc-luarjawa', 'fc-noalamat'].forEach(id => {
+            document.getElementById('modalFilterLanjutan').classList.add('hidden');
+            ['fc-blmc2', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-jawa', 'fc-luarjawa', 'fc-noalamat', 'fc-blmgram'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.checked = false;
             });
             
-            // Kembalikan tombol ke warna asal (Indigo/Biru Muda)
             const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
             if (btnFilter) {
                 btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm";
-                btnFilter.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter Extra`;
+                btnFilter.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Mereset...`;
             }
             
-            // Memicu kalkulasi ulang
-            if(typeof window.renderSlip === 'function') window.renderSlip();
+            setTimeout(() => {
+                if(typeof window.renderSlip === 'function') window.renderSlip();
+                if (btnFilter) btnFilter.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter Extra`;
+            }, 50);
         };
+
+        // 3. FUNGSI RENDER SLIP CERDAS (GAYA SAMSUNG & DROPDOWN BEBAS HAMBATAN)
+        const fungsiAsliRenderSlip = window.renderSlip;
+        
+        window.renderSlip = function() {
+            // A. EKSEKUSI FUNGSI RENDER UTAMA
+            if (typeof fungsiAsliRenderSlip === 'function') {
+                fungsiAsliRenderSlip();
+            }
+
+            // B. REVISI UX DROPDOWN SARIMBIT (TETAP MENAMPILKAN OPSI MESKI DIFILTER)
+            const search = document.getElementById('search-customer')?.value.toLowerCase() || "";
+            const filterToko = document.getElementById('filter-toko-slip')?.value || "";
+            const filterTagihan = document.getElementById('filter-tagihan-slip')?.value || "";
+            const fTglMulai = document.getElementById('filter-tgl-mulai-slip')?.value || "";
+            const fTglAkhir = document.getElementById('filter-tgl-akhir-slip')?.value || "";
+            const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
+            const filterSarimbitEl = document.getElementById('filter-sarimbit-slip');
+            
+            let sarimbitTersedia = new Set();
+            let listMendesak = new Set();
+
+            if (filterTagihan === "aktif" && typeof pembukuanData !== 'undefined') {
+                pembukuanData.forEach(b => {
+                    if (evaluasiTagihan(b.c1).mendesak || evaluasiTagihan(b.c2).mendesak || evaluasiTagihan(b.Lunas || b.lunas).mendesak) listMendesak.add(b.sarimbit);
+                });
+            }
+
+            // Kumpulkan daftar sarimbit yang lolos filter KECUALI filter sarimbit itu sendiri
+            if (typeof orderData !== 'undefined') {
+                orderData.forEach(o => {
+                    if (o.isArchived === true || o.isarchived === true) return; 
+                    if (fTglMulai || fTglAkhir) {
+                        const tglOrder = new Date(o.tanggal); 
+                        if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
+                        if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
+                    }
+                    if (filterToko && o.toko !== filterToko) return;
+                    if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
+                    
+                    // Filter Lanjutan Tetap Berlaku
+                    if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
+                    
+                    sarimbitTersedia.add(o.sarimbit);
+                });
+            }
+
+            // Susun ulang pilihan Dropdown Sarimbit secara mandiri
+            if (filterSarimbitEl) {
+                const tempVal = filterSarimbitEl.value; 
+                let optionsHTML = `<option value="">Semua Sarimbit</option>`;
+                [...sarimbitTersedia].sort().forEach(s => {
+                    optionsHTML += `<option value="${s}">${s}</option>`;
+                });
+                filterSarimbitEl.innerHTML = optionsHTML;
+                
+                // Pertahankan pilihan lama jika masih lolos filter extra, jika tidak, reset.
+                if (sarimbitTersedia.has(tempVal)) {
+                    filterSarimbitEl.value = tempVal;
+                } else {
+                    filterSarimbitEl.value = ""; 
+                }
+            }
+            
+            // C. LOGIKA PEWARNAAN GAYA SAMSUNG ONE UI
+            const warnaMati = ['bg-slate-100', 'text-slate-700', 'hover:bg-slate-200'];
+            const warnaHidupBiru = ['bg-blue-100', 'text-blue-700', 'hover:bg-blue-200'];
+            const warnaHidupMerah = ['bg-rose-100', 'text-rose-700', 'hover:bg-rose-200'];
     
+            const cekDanWarnai = (idElemen, warnaAktif) => {
+                const el = document.getElementById(idElemen);
+                if (el) {
+                    if (el.value !== "") {
+                        el.classList.remove(...warnaMati);
+                        el.classList.add(...warnaAktif);
+                    } else {
+                        el.classList.remove(...warnaAktif);
+                        el.classList.add(...warnaMati);
+                    }
+                }
+            };
+    
+            cekDanWarnai('filter-toko-slip', warnaHidupBiru);
+            cekDanWarnai('filter-sarimbit-slip', warnaHidupBiru);
+            cekDanWarnai('filter-tagihan-slip', warnaHidupMerah); 
+        };
     });
-    </script>
+</script>
+  <script>
+    // SCRIPT: REAKSI WARNA FILTER OTOMATIS SAAT DIGUNAKAN (GAYA SAMSUNG ONE UI)
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        // Tembak fungsi ini ke dalam fungsi asli renderSlip()
+        const fungsiAsliRenderSlip = window.renderSlip;
+        
+        window.renderSlip = function() {
+            // Jalankan fungsi aslinya dulu
+            if (typeof fungsiAsliRenderSlip === 'function') {
+                fungsiAsliRenderSlip();
+            }
+            
+            // --- LOGIKA PEWARNAAN GAYA SAMSUNG ---
+            const warnaMati = ['bg-slate-100', 'text-slate-700', 'hover:bg-slate-200'];
+            const warnaHidupBiru = ['bg-blue-100', 'text-blue-700', 'hover:bg-blue-200'];
+            const warnaHidupMerah = ['bg-rose-100', 'text-rose-700', 'hover:bg-rose-200'];
+    
+            const cekDanWarnai = (idElemen, warnaAktif) => {
+                const el = document.getElementById(idElemen);
+                if (el) {
+                    if (el.value !== "") {
+                        // Jika filter sedang AKTIF -> Nyalakan Warna ala Samsung
+                        el.classList.remove(...warnaMati);
+                        el.classList.add(...warnaAktif);
+                    } else {
+                        // Jika dikembalikan ke "Semua" -> Matikan Warna (Kembali ke Abu-abu Samsung)
+                        el.classList.remove(...warnaAktif);
+                        el.classList.add(...warnaMati);
+                    }
+                }
+            };
+    
+            // Eksekusi pemeriksaan untuk ke-3 tombol
+            cekDanWarnai('filter-toko-slip', warnaHidupBiru);
+            cekDanWarnai('filter-sarimbit-slip', warnaHidupBiru);
+            cekDanWarnai('filter-tagihan-slip', warnaHidupMerah); 
+        };
+    });
+</script>
+        <script>
+            // SCRIPT: MENGAKTIFKAN KALENDER RENTANG TANGGAL (DATE RANGE) UNTUK SEMUA MENU
+            document.addEventListener("DOMContentLoaded", () => {
+                
+                // Konfigurasi dasar kalender (Bahasa Indonesia & Format)
+                const kalenderConfig = {
+                    mode: "range",
+                    dateFormat: "Y-m-d",
+                    locale: "id", 
+                    altInput: true,
+                    altFormat: "d M Y", 
+                    placeholder: "Tanggal"
+                };
+            
+                // 1. Kalender untuk Menu Rincian Customer (Slip)
+                const inputSlip = document.getElementById('filter-date-range-slip');
+                if (inputSlip) {
+                    flatpickr(inputSlip, {
+                        ...kalenderConfig,
+                        onChange: function(selectedDates, dateStr, instance) {
+                            const hiddenStart = document.getElementById('filter-tgl-mulai-slip');
+                            const hiddenEnd = document.getElementById('filter-tgl-akhir-slip');
+                            if (selectedDates.length === 2) {
+                                hiddenStart.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                                hiddenEnd.value = instance.formatDate(selectedDates[1], "Y-m-d");
+                                if (typeof renderSlip === 'function') renderSlip();
+                            } else if (selectedDates.length === 0) {
+                                hiddenStart.value = ""; hiddenEnd.value = "";
+                                if (typeof renderSlip === 'function') renderSlip();
+                            }
+                        }
+                    });
+                }
+            
+                // 2. Kalender untuk Menu Rekap Barang
+                const inputRekap = document.getElementById('filter-date-range-rekap');
+                if (inputRekap) {
+                    flatpickr(inputRekap, {
+                        ...kalenderConfig,
+                        onChange: function(selectedDates, dateStr, instance) {
+                            const hiddenStart = document.getElementById('filter-tgl-mulai-rekap');
+                            const hiddenEnd = document.getElementById('filter-tgl-akhir-rekap');
+                            if (selectedDates.length === 2) {
+                                hiddenStart.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                                hiddenEnd.value = instance.formatDate(selectedDates[1], "Y-m-d");
+                                if (typeof updateRekapOptions === 'function') updateRekapOptions();
+                                if (typeof renderRekap === 'function') renderRekap();
+                            } else if (selectedDates.length === 0) {
+                                hiddenStart.value = ""; hiddenEnd.value = "";
+                                if (typeof updateRekapOptions === 'function') updateRekapOptions();
+                                if (typeof renderRekap === 'function') renderRekap();
+                            }
+                        }
+                    });
+                }
+            
+                // 3. Kalender untuk Menu Sumber Orderan
+                const inputSumber = document.getElementById('filter-date-range-sumber');
+                if (inputSumber) {
+                    flatpickr(inputSumber, {
+                        ...kalenderConfig,
+                        onChange: function(selectedDates, dateStr, instance) {
+                            const hiddenStart = document.getElementById('filter-tgl-mulai-sumber');
+                            const hiddenEnd = document.getElementById('filter-tgl-akhir-sumber');
+                            if (selectedDates.length === 2) {
+                                hiddenStart.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                                hiddenEnd.value = instance.formatDate(selectedDates[1], "Y-m-d");
+                                if (typeof renderDashboardSumber === 'function') renderDashboardSumber();
+                            } else if (selectedDates.length === 0) {
+                                hiddenStart.value = ""; hiddenEnd.value = "";
+                                if (typeof renderDashboardSumber === 'function') renderDashboardSumber();
+                            }
+                        }
+                    });
+                }
+            });
+            </script>
 </body>
 </html>
