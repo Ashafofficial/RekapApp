@@ -344,6 +344,15 @@
         box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(255,255,255,0.8) !important;
     }
     
+    /* TAMPILAN GLASS IPHONE/IOS UNTUK POP-UP KATALOG */
+    .ios-glass {
+        background: rgba(255, 255, 255, 0.45) !important;
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(255,255,255,0.8) !important;
+    }
+    
     .glass-header {
         background: rgba(255, 255, 255, 0.85) !important;
         backdrop-filter: blur(24px);
@@ -352,15 +361,24 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     
-    /* ==========================================
+   /* ==========================================
        REAKSI KOLOM INPUT (KURSOR MENDEKAT & DIKLIK)
        ========================================== */
+    /* KUNCI MUTLAK: Mematikan paksa garis kotak biru/hitam bawaan Chrome/Safari */
+    input:focus, select:focus, textarea:focus, 
+    input:active, select:active, textarea:active,
+    input:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: transparent !important;
+    }
+    
     .glass-input {
         background: rgba(255, 255, 255, 0.8) !important;
         border: 1px solid rgba(226, 232, 240, 0.8) !important;
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; /* Animasi sangat halus */
-        outline: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        outline: none !important;
     }
     
     /* 1. Reaksi saat kursor MENGAMBANG di atasnya (Hover) */
@@ -378,26 +396,6 @@
         box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25), 0 8px 24px -4px rgba(59, 130, 246, 0.2) !important;
         transform: translateY(-3px); /* Kotak melompat lebih tinggi */
     }
-
-    /* Terapkan reaksi yang sama untuk semua kolom form reguler di dalam aplikasi */
-    input[type="text"], input[type="number"], input[type="date"], select, textarea {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    input[type="text"]:hover, input[type="number"]:hover, input[type="date"]:hover, select:hover, textarea:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px -4px rgba(59, 130, 246, 0.25) !important;
-        border-color: #93c5fd;
-    }
-
-    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
-        transform: translateY(-3px);
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25), 0 8px 24px -4px rgba(59, 130, 246, 0.2) !important;
-        border-color: #3b82f6 !important;
-        outline: none !important;
-    }
-    /* ========================================== */
-
     .nav-btn {
         margin: 6px 16px;
         border-radius: 12px;
@@ -874,7 +872,7 @@
                     </select>
 
                     <select id="filter-sarimbit-master" onchange="renderMaster()" class="shrink-0 h-10 bg-slate-100 border border-transparent px-3 rounded-full text-[11px] font-bold text-slate-700 cursor-pointer outline-none focus:ring-2 focus:ring-slate-300 hover:bg-slate-200 transition-all appearance-none text-center shadow-none w-[130px]">
-                        <option value="">Semua Sarimbit</option>
+                        <option value="">Sarimbit</option>
                     </select>
                     
                     <button id="btn-delete-sarimbit" onclick="hapusSarimbitTerpilih()" class="hidden w-10 h-10 bg-rose-100 text-rose-600 rounded-full font-bold border border-transparent hover:bg-rose-200 active:scale-95 transition-all text-sm shrink-0 flex items-center justify-center shadow-none" title="Hapus Koleksi Ini">
@@ -957,9 +955,9 @@
             <div class="glass p-5 md:p-6 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-200 mb-4 relative z-[80]">
                 <h4 class="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</h4>
                 <div class="space-y-3">
-                  <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Semua Sarimbit</option></select>
-                  <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Semua Varian</option></select>
-                  <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Semua Nama Barang</option></select>
+                  <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Sarimbit</option></select>
+                  <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Varian</option></select>
+                  <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Nama Barang</option></select>
                   <select id="filter-size-rekap" onchange="renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-none text-center appearance-none"><option value="">Semua Size</option></select>
                 </div>
             </div>
@@ -967,7 +965,7 @@
             <div class="glass p-5 md:p-6 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-200 mb-4 relative z-[70]">
                 <h4 class="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-server text-emerald-500"></i> Setor Barang</h4>
                 <select id="export-rekap-filter" onchange="renderRekap()" class="w-full px-4 h-10 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-transparent hover:bg-slate-200 outline-none focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all cursor-pointer shadow-none text-center appearance-none">
-                    <option value="semua">Semua Status (Total)</option>
+                    <option value="semua">Semua (Total)</option>
                     <option value="disetor">Hanya Sudah Disetor</option>
                     <option value="antre">Hanya Antre (Belum Disetor)</option>
                 </select>
@@ -1059,7 +1057,7 @@
         </select>
         
         <select id="filter-sarimbit-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-100 border border-transparent px-2 lg:px-3 rounded-full text-[11px] lg:text-xs font-bold text-slate-700 cursor-pointer outline-none focus:ring-2 focus:ring-slate-300 hover:bg-slate-200 transition-all w-[100px] lg:w-[125px] appearance-none text-center shadow-none">
-            <option value="">Semua Sarimbit</option>
+            <option value="">Sarimbit</option>
         </select>
         
         <select id="filter-tagihan-slip" onchange="renderSlip()" class="shrink-0 h-10 bg-slate-100 border border-transparent px-2 lg:px-3 rounded-full text-[11px] lg:text-xs font-bold text-slate-700 cursor-pointer outline-none focus:ring-2 focus:ring-slate-300 hover:bg-slate-200 transition-all w-[90px] lg:w-[105px] appearance-none text-center shadow-none">
@@ -1483,65 +1481,47 @@
 </div>
 
 <!-- MODAL PENCARIAN & MULTI-SELECT -->
-<!-- Trik Tirai Terbelah: lg:right-[380px] mencegah latar gelap menutupi area Nota di kanan layar -->
-<div id="modalPencarian" class="hidden fixed inset-y-0 left-0 right-0 lg:right-[380px] z-[100] bg-slate-900/40 backdrop-blur-sm flex items-start justify-center pt-8 md:pt-12 px-4 pb-10">
-    <!-- Ukuran modal dirampingkan dari 4xl menjadi 3xl agar tidak saling senggol dengan Nota -->
-    <div class="bg-slate-50 w-full max-w-3xl h-[88vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-fade-in-up border border-white">
+<div id="modalPencarian" class="hidden fixed inset-y-0 left-0 right-0 lg:right-[380px] z-[100] bg-slate-900/10 backdrop-blur-[2px] flex items-start justify-center pt-8 md:pt-12 px-4 pb-10 pointer-events-none transition-all duration-300">
+    <!-- Menggunakan .ios-glass -->
+    <div class="ios-glass w-full max-w-3xl h-[88vh] rounded-[2.5rem] flex flex-col overflow-hidden animate-fade-in-up pointer-events-auto">
         
-        <div class="p-6 border-b border-slate-200 bg-white relative z-10 shadow-sm shrink-0">
+        <div class="p-6 border-b border-white/40 bg-white/30 relative z-10 shrink-0">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                    <div class="w-8 h-8 bg-[#E5E5EA] text-[#007AFF] rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm shadow-md"><i class="fa-solid fa-box-open"></i></div>
                     Katalog Sarimbit
                 </h3>
-                <button type="button" onclick="tutupModalPencarian()" class="w-8 h-8 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 rounded-full flex items-center justify-center text-slate-500 transition-colors border border-slate-200">
+                <button type="button" onclick="tutupModalPencarian()" class="w-8 h-8 bg-white/60 hover:bg-rose-100 hover:text-rose-600 rounded-full flex items-center justify-center text-slate-600 transition-all border border-white/60 shadow-sm active:scale-95">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             
             <div class="flex flex-col md:flex-row gap-2.5">
-                <!-- Kotak Pencarian Manual -->
-                <div class="flex-1 flex items-center bg-[#F2F2F7] border border-transparent rounded-[14px] focus-within:border-[#007AFF] focus-within:bg-white transition-all p-1">
-                    <i class="fa-solid fa-search text-slate-400 text-sm ml-3 mr-2"></i>
-                    <input type="text" id="inputPencarianBesar" oninput="cariProdukBesar()" placeholder="Ketik ukuran atau keyword..." class="w-full bg-transparent py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-[#8E8E93]">
-                </div>
-                
-                <!-- Filter Dinamis Nama Sarimbit -->
+               <!-- Kotak Pencarian Manual -->
+               <div class="flex-1 flex items-center bg-[#F2F2F7] border border-transparent rounded-[14px] focus-within:border-[#007AFF] focus-within:ring-4 focus-within:ring-[#007AFF]/20 focus-within:bg-white transition-all p-1">
+                <i class="fa-solid fa-search text-slate-400 text-sm ml-3 mr-2"></i>
+                <input type="text" id="inputPencarianBesar" oninput="cariProdukBesar()" placeholder="Ketik ukuran atau keyword..." class="w-full bg-transparent border-none ring-0 focus:ring-0 focus:border-none py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-[#8E8E93]">
+            </div>
                 <div class="relative md:w-[22%]">
-                    <select id="filterSarimbitModal" onchange="cariProdukBesar()" class="w-full bg-[#F2F2F7] border border-transparent rounded-[14px] pl-3 pr-8 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#007AFF] focus:bg-white transition-all cursor-pointer appearance-none">
-                        <option value="">-- Semua Sarimbit --</option>
-                    </select>
-                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                    <select id="filterSarimbitModal" onchange="cariProdukBesar()" class="w-full bg-white/50 border border-white/60 rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer appearance-none shadow-sm"><option value="">-- Sarimbit --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none"></i>
                 </div>
-                
-                <!-- Filter Dinamis Nama Barang -->
                 <div class="relative md:w-[22%]">
-                    <select id="filterBarangModal" onchange="cariProdukBesar()" class="w-full bg-[#F2F2F7] border border-transparent rounded-[14px] pl-3 pr-8 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#007AFF] focus:bg-white transition-all cursor-pointer appearance-none">
-                        <option value="">-- Semua Barang --</option>
-                    </select>
-                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                    <select id="filterBarangModal" onchange="cariProdukBesar()" class="w-full bg-white/50 border border-white/60 rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer appearance-none shadow-sm"><option value="">-- Barang --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none"></i>
                 </div>
-
-                <!-- Filter Dinamis Warna -->
                 <div class="relative md:w-[20%]">
-                    <select id="filterWarnaModal" onchange="cariProdukBesar()" class="w-full bg-[#F2F2F7] border border-transparent rounded-[14px] pl-3 pr-8 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#007AFF] focus:bg-white transition-all cursor-pointer appearance-none">
-                        <option value="">-- Semua Warna --</option>
-                    </select>
-                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                    <select id="filterWarnaModal" onchange="cariProdukBesar()" class="w-full bg-white/50 border border-white/60 rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer appearance-none shadow-sm"><option value="">-- Warna --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none"></i>
                 </div>
             </div>
         </div>
 
-       <!-- Area List Barang (DIUBAH KE MODE BARIS KASIR) -->
-       <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-[#F2F2F7]">
-        <div id="hasilPencarianBesar" class="grid grid-cols-1 gap-2 pb-6">
-            <!-- Data Katalog Masuk Sini -->
-        </div>
-    </div>
-        
+       <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-transparent">
+        <div id="hasilPencarianBesar" class="grid grid-cols-1 md:grid-cols-2 gap-3 pb-6"></div>
+       </div>
     </div>
 </div>
-
   <!-- MODAL FILTER LANJUTAN SLIP (SAMSUNG ONE UI x iOS GLASS) -->
 <div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-md flex items-center justify-center px-4 transition-opacity">
     <div class="bg-white/85 backdrop-blur-2xl rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col">
@@ -3568,8 +3548,17 @@ async function handleOrderSubmit(e) {
                     showToast("✅ Master Baru Tersimpan!");
                     if (typeof catatLog === 'function') catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang}`);
                 }
+                
                 form.reset(); delete form.dataset.editMode;
                 loadAllData();
+
+                // 2. KEMBALIKAN POSISI SCROLL KE BARANG YANG DIEDIT SEBELUMNYA
+                if (editInfo && typeof window.posisiScrollMaster !== 'undefined') {
+                    setTimeout(() => {
+                        const mainElem = document.querySelector('main');
+                        if (mainElem) mainElem.scrollTo({ top: window.posisiScrollMaster, behavior: 'smooth' });
+                    }, 250); // Jeda seperempat detik agar tabel selesai di-render ulang
+                }
             },
             (e) => { showToast("Gagal menyimpan master."); }
         );
@@ -3700,7 +3689,14 @@ async function handleOrderSubmit(e) {
     }
 
     function editMaster(pusat, sarimbit, barang, varian, size, harga, berat) {
-        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        // 1. Simpan posisi scroll tabel saat ini ke memori
+        const mainElem = document.querySelector('main');
+        if (mainElem) {
+            window.posisiScrollMaster = mainElem.scrollTop;
+            // Scroll halus ke form (paling atas)
+            mainElem.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
         document.getElementById('m-pusat').value = pusat; document.getElementById('m-sarimbit').value = sarimbit; document.getElementById('m-barang').value = barang;
         document.getElementById('m-varian').value = varian; document.getElementById('m-size').value = size; document.getElementById('m-harga').value = harga; document.getElementById('m-berat').value = berat;
 
@@ -3738,7 +3734,7 @@ async function handleOrderSubmit(e) {
         
         if (filterSarimbitEl) {
             const tempVal = filterSarimbitEl.value; 
-            let optionsHTML = `<option value="">Semua Sarimbit</option>`;
+            let optionsHTML = `<option value="">Sarimbit</option>`;
             [...sarimbitTersedia].sort().forEach(s => {
                 optionsHTML += `<option value="${s}">${s}</option>`;
             });
@@ -3956,7 +3952,7 @@ async function handleOrderSubmit(e) {
         // 3. Susun ulang pilihan Dropdown Sarimbit secara cerdas
         if (filterSarimbitEl) {
             const tempVal = filterSarimbitEl.value; 
-            let optionsHTML = `<option value="">Semua Sarimbit</option>`;
+            let optionsHTML = `<option value="">Sarimbit</option>`;
             [...sarimbitTersedia].sort().forEach(s => {
                 optionsHTML += `<option value="${s}">${s}</option>`;
             });
@@ -4130,11 +4126,12 @@ async function handleOrderSubmit(e) {
                     <!-- ONGKIR & RIWAYAT SEJAJAR VERTICAL -->
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <!-- ONGKIR -->
-                        <div class="bg-orange-50/30 p-3 rounded-[1.2rem] border border-orange-200 shadow-sm flex flex-col justify-center">
-                            <label class="text-[9px] font-bold text-orange-600 uppercase tracking-widest block mb-2"><i class="fa-solid fa-truck-fast mr-1"></i> Biaya Ongkir</label>
-                            <div class="flex items-center bg-white rounded-xl px-3 h-10 border border-orange-200 focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all cursor-text w-full shadow-inner">
-                                <span class="text-[10px] font-bold text-orange-400 mr-1.5 select-none">Rp</span>
-                                <input type="number" id="slip-ongkir-${idAman}" value="${c.ongkir || 0}" onchange="updateDataDirect('${c.idCustomer}', 'ongkir', this.value)" class="w-full bg-transparent border-none outline-none text-xs font-black text-orange-700 p-0 m-0 focus:ring-0 appearance-none">
+                        <div class="bg-white p-3 rounded-[1.2rem] border border-orange-200 shadow-sm flex flex-col justify-center focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/20 transition-all cursor-text relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-orange-50/50 pointer-events-none"></div>
+                            <label class="text-[9px] font-black text-orange-600 uppercase tracking-widest block mb-1 relative z-10"><i class="fa-solid fa-truck-fast mr-1"></i> Biaya Ongkir</label>
+                            <div class="flex items-center w-full relative z-10">
+                                <span class="text-[10px] font-black text-orange-400 mr-2 select-none">Rp</span>
+                                <input type="number" id="slip-ongkir-${idAman}" value="${c.ongkir || 0}" onchange="updateDataDirect('${c.idCustomer}', 'ongkir', this.value)" class="w-full bg-transparent border-none outline-none focus:ring-0 focus:border-none focus:outline-none text-sm font-black text-orange-700 p-0 m-0 appearance-none">
                             </div>
                         </div>
 
@@ -4862,7 +4859,7 @@ Array.from(tbody.children).forEach(tr => {
         const fileName = getDynamicFilename('INVOICE');
         await generateWord(targetData, fileName);
         
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh Kumpulan Word Invoice untuk (${filterToko || 'Semua Toko'} - ${filterSarimbit || 'Semua Sarimbit'})`);
+        catatLog('DOWNLOAD', 'SLIP', `Mengunduh Kumpulan Word Invoice untuk (${filterToko || 'Toko'} - ${filterSarimbit || 'Sarimbit'})`);
     }
     async function generateWord(data, filename) {
         const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, TabStopType, VerticalAlign } = docx;
@@ -6382,7 +6379,7 @@ function bukaModalPencarian(btn) {
     
     if (masterData && masterData.length > 0) {
         const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
-        selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
+        selectSarimbit.innerHTML = `<option value="">-- Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
     }
     
     // Otomatis mencocokkan filter Sarimbit dengan baris pesanan
@@ -6397,9 +6394,9 @@ function bukaModalPencarian(btn) {
         selectSarimbit.value = "";
     }
     
-    selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
+    selectBarang.innerHTML = `<option value="">-- Barang --</option>`;
     selectBarang.value = "";
-    selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
+    selectWarna.innerHTML = `<option value="">-- Warna --</option>`;
     selectWarna.value = "";
     
     setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 100);
@@ -6427,14 +6424,14 @@ function cariProdukBesar() {
 
     if (hasilSaringanAwal.length > 0) {
         const barangTersedia = [...new Set(hasilSaringanAwal.map(m => m.barang))].sort();
-        let opsiBarang = `<option value="">-- Semua Barang --</option>`;
+        let opsiBarang = `<option value="">-- Barang --</option>`;
         barangTersedia.forEach(b => { opsiBarang += `<option value="${b}">${b}</option>`; });
         
         filterBarangEl.innerHTML = opsiBarang;
         if (barangTersedia.includes(barangAktif)) filterBarangEl.value = barangAktif;
         else filterBarangEl.value = "";
     } else {
-        filterBarangEl.innerHTML = `<option value="">-- Semua Barang --</option>`;
+        filterBarangEl.innerHTML = `<option value="">-- Barang --</option>`;
     }
 
     const barangFinal = filterBarangEl.value;
@@ -6445,14 +6442,14 @@ function cariProdukBesar() {
 
     if (saringanWarna.length > 0) {
         const warnaTersedia = [...new Set(saringanWarna.map(m => m.varian))].sort();
-        let opsiWarna = `<option value="">-- Semua Warna --</option>`;
+        let opsiWarna = `<option value="">-- Warna --</option>`;
         warnaTersedia.forEach(w => { opsiWarna += `<option value="${w}">${w}</option>`; });
         
         filterWarnaEl.innerHTML = opsiWarna;
         if (warnaTersedia.includes(warnaAktif)) filterWarnaEl.value = warnaAktif;
         else filterWarnaEl.value = "";
     } else {
-        filterWarnaEl.innerHTML = `<option value="">-- Semua Warna --</option>`;
+        filterWarnaEl.innerHTML = `<option value="">-- Warna --</option>`;
     }
 
     const warnaFinal = filterWarnaEl.value;
@@ -6746,7 +6743,7 @@ function pilihProdukModal(metaString) {
             
             if (typeof masterData !== 'undefined' && masterData && masterData.length > 0) {
                 const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
-                selectSarimbit.innerHTML = `<option value="">-- Semua Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
+                selectSarimbit.innerHTML = `<option value="">--  Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
             }
             
             // SCANNER PINTAR: Mencari Sarimbit secara paksa dari semua baris (dari bawah ke atas)
@@ -6767,9 +6764,9 @@ function pilihProdukModal(metaString) {
             }
             
             selectSarimbit.value = sarimbitIngatan; // Otomatis mengatur dropdown!
-            selectBarang.innerHTML = `<option value="">-- Semua Barang --</option>`;
+            selectBarang.innerHTML = `<option value="">-- Barang --</option>`;
             selectBarang.value = "";
-            selectWarna.innerHTML = `<option value="">-- Semua Warna --</option>`;
+            selectWarna.innerHTML = `<option value="">-- Warna --</option>`;
             selectWarna.value = "";
             
             setTimeout(() => document.getElementById('inputPencarianBesar').focus(), 150);
@@ -6878,7 +6875,7 @@ function pilihProdukModal(metaString) {
             // Susun ulang pilihan Dropdown Sarimbit secara mandiri
             if (filterSarimbitEl) {
                 const tempVal = filterSarimbitEl.value; 
-                let optionsHTML = `<option value="">Semua Sarimbit</option>`;
+                let optionsHTML = `<option value="">Sarimbit</option>`;
                 [...sarimbitTersedia].sort().forEach(s => {
                     optionsHTML += `<option value="${s}">${s}</option>`;
                 });
@@ -7034,23 +7031,21 @@ function pilihProdukModal(metaString) {
             });
             </script>
             <script>
-                // =======================================================
-                // FUNGSI MESIN PEMBAYARAN DINAMIS (ARRAY JSON) - FORM ORDER
-                // =======================================================
-                window.tambahBarisPembayaranForm = function(nominal = '', tanggal = '') {
+              window.tambahBarisPembayaranForm = function(nominal = '', tanggal = '') {
                     const wadah = document.getElementById('wadah-pembayaran-form');
                     if (!wadah) return;
                     const tglDefault = tanggal || new Date().toISOString().split('T')[0];
                     
-                    // Kunci hanya 1 baris, buang tombol hapus (x)
+                    // REVISI: Fokus (ring) dipindah ke kotak terluar, padding dihilangkan agar lega
                     wadah.innerHTML = `
-                        <div class="flex items-center gap-2 pembayaran-row bg-white p-2 rounded-[1rem] border border-blue-200/50 shadow-sm">
-                            <div class="flex-1 border border-slate-200 rounded-full px-3 h-10 flex items-center focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all bg-slate-50">
+                        <div class="flex items-center gap-2 pembayaran-row bg-white p-1 rounded-full border border-blue-200 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 transition-all">
+                            <div class="flex-1 flex items-center px-4 h-10">
                                 <span class="text-[10px] font-bold text-blue-500 mr-2">Rp</span>
-                                <input type="number" class="w-full bg-transparent outline-none text-sm font-black text-slate-700 p-0 m-0 input-nominal-bayar focus:ring-0 appearance-none" value="${nominal}" placeholder="0" oninput="if(typeof updateLiveStruk==='function') updateLiveStruk(); else if(typeof window.updateLiveStruk==='function') window.updateLiveStruk();">
+                                <input type="number" class="w-full bg-transparent outline-none border-none focus:ring-0 focus:border-none focus:outline-none text-sm font-black text-slate-700 p-0 m-0 input-nominal-bayar appearance-none" value="${nominal}" placeholder="0" oninput="if(typeof updateLiveStruk==='function') updateLiveStruk(); else if(typeof window.updateLiveStruk==='function') window.updateLiveStruk();">
                             </div>
-                            <div class="w-28 border border-slate-200 rounded-full px-3 h-10 flex items-center focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all bg-slate-50">
-                                <input type="date" class="w-full bg-transparent outline-none text-[10px] font-bold text-slate-600 p-0 m-0 input-tgl-bayar focus:ring-0" value="${tglDefault}">
+                            <div class="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
+                            <div class="w-28 flex items-center px-3 h-10">
+                                <input type="date" class="w-full bg-transparent outline-none border-none focus:ring-0 focus:border-none focus:outline-none text-[10px] font-bold text-slate-600 p-0 m-0 input-tgl-bayar cursor-pointer" value="${tglDefault}">
                             </div>
                         </div>
                     `;
@@ -7179,20 +7174,23 @@ function pilihProdukModal(metaString) {
                     if (!riwayat || riwayat.length === 0) return `<div class="text-center text-[11px] text-slate-400 italic py-4">Belum ada uang masuk</div>`;
                     return riwayat.map((b, i) => {
                         let labelTeks = i === 0 ? "DP Awal (Rp)" : `Pembayaran ke ${i+1} (Rp)`;
+                        let btnHapus = i === 0 
+                            ? `<div class="w-7 h-7 shrink-0"></div>` 
+                            : `<button type="button" onclick="this.closest('.pembayaran-row').remove(); window.updateLabelPembayaran(); window.hitungSisaTagihanModal();" class="w-7 h-7 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center border border-rose-100 shrink-0 shadow-sm active:scale-90"><i class="fa-solid fa-xmark text-xs"></i></button>`;
+                        
                         return `
-                        <div class="flex items-center gap-2 pembayaran-row bg-white p-3 rounded-xl border border-slate-200 shadow-sm transition-all hover:border-blue-300">
-                            <div class="nomor-urut-bayar bg-blue-50 text-blue-600 font-black text-xs w-7 h-7 rounded-full flex items-center justify-center shrink-0 border border-blue-100">${i+1}</div>
-                            <div class="flex-1">
-                                <span class="tag-label-bayar text-[9px] font-bold text-slate-400 uppercase block mb-1">${labelTeks}</span>
-                                <input type="number" oninput="window.hitungSisaTagihanModal()" class="w-full text-sm font-black text-slate-700 outline-none bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100 focus:bg-white focus:border-blue-400 input-nom transition-all" value="${b.nominal}">
+                        <div class="flex items-center gap-2 pembayaran-row bg-white p-2 rounded-[1.2rem] border border-slate-200 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 transition-all">
+                            <div class="nomor-urut-bayar bg-blue-50 text-blue-600 font-black text-xs w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-blue-100 ml-1">${i+1}</div>
+                            <div class="flex-1 flex flex-col justify-center px-2">
+                                <span class="tag-label-bayar text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">${labelTeks}</span>
+                                <input type="number" oninput="window.hitungSisaTagihanModal()" class="w-full text-sm font-black text-slate-700 outline-none border-none bg-transparent p-0 m-0 input-nom" value="${b.nominal}">
                             </div>
-                            <div class="w-32 border-l border-slate-100 pl-3">
-                                <span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Tanggal</span>
-                                <input type="date" class="w-full text-[11px] font-bold text-slate-600 outline-none bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100 focus:bg-white focus:border-blue-400 input-tgl cursor-pointer transition-all" value="${b.tgl}">
+                            <div class="w-px h-8 bg-slate-200 mx-1 shrink-0"></div>
+                            <div class="w-28 flex flex-col justify-center px-2">
+                                <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Tanggal</span>
+                                <input type="date" class="w-full text-[10px] font-bold text-slate-600 outline-none border-none bg-transparent p-0 m-0 input-tgl cursor-pointer" value="${b.tgl}">
                             </div>
-                            <button type="button" onclick="this.closest('.pembayaran-row').remove(); window.updateLabelPembayaran(); window.hitungSisaTagihanModal();" class="mt-4 w-7 h-7 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center border border-rose-100 shrink-0 shadow-sm active:scale-90">
-                                <i class="fa-solid fa-xmark text-xs"></i>
-                            </button>
+                            ${btnHapus}
                         </div>
                         `;
                     }).join('');
