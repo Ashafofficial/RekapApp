@@ -8,8 +8,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const tokenPerangkat = localStorage.getItem('sarimbit_vip_token') || 'TIDAK-ADA-SERTIFIKAT';
 
 const dbLokal = new Dexie("SarimbitPro_DB");
-dbLokal.version(125).stores({
-    orders: '++id, idcustomer, customer, sarimbit, syncstatus, isArchived, updated_at',
+dbLokal.version(126).stores({
+    orders: '++id, idcustomer, customer, sarimbit, syncstatus, isArchived, updated_at, riwayat_pembayaran',
     master: '++id, pusat, sarimbit, barang, updated_at',
     pembukuan: '++id, sarimbit, isArchived, isPrinted, isInformed, updated_at',
     metadata: 'key',
@@ -184,7 +184,8 @@ window.DatabaseAPI = {
             ...it, id: it.id || (baseId + idx), updated_at: now, syncstatus: 0,
             harga: Number(it.harga) || 0, jumlah: Number(it.jumlah) || 0, total: Number(it.total) || 0,
             berat: Number(it.berat) || 0, cicilan1: Number(it.cicilan1) || 0, cicilan2: Number(it.cicilan2) || 0,
-            cicilan3: Number(it.cicilan3) || 0, ongkir: Number(it.ongkir) || 0, diskonNilai: Number(it.diskonNilai) || 0
+            cicilan3: Number(it.cicilan3) || 0, ongkir: Number(it.ongkir) || 0, diskonNilai: Number(it.diskonNilai) || 0,
+            riwayat_pembayaran: it.riwayat_pembayaran || []
         }));
 
         try {
