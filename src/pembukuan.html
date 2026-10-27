@@ -274,87 +274,91 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
 
   <div id="connection-banner" class="fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[10px] font-black uppercase tracking-widest hidden shadow-sm transition-opacity duration-300"></div>
 
-  <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+  <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-start gap-4 pt-4">
     <div>
-      <button onclick="pindahHalaman('index.html')" class="text-blue-600 font-bold text-[11px] flex items-center gap-1.5 mb-3 hover:text-blue-800 transition-all drop-shadow-sm w-fit px-3 py-1.5 bg-blue-50/50 rounded-lg border border-blue-100 hover:bg-blue-100 active:scale-95 cursor-pointer">
-        <i class="fa-solid fa-arrow-left"></i> KEMBALI KE PANEL UTAMA
-      </button>
-      <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm">DASHBOARD PEMBUKUAN</h1>
-      <p class="text-slate-500 font-semibold mt-1 text-xs md:text-sm">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
-    </div>
-    <div class="flex items-center gap-2">
-        <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center glass rounded-xl hover:bg-white active:scale-95 transition-all text-slate-500 hover:text-blue-600 border border-slate-200 shadow-sm" title="Refresh Data">
-          <i class="fa-solid fa-rotate text-base"></i>
+        <button onclick="pindahHalaman('index.html')" class="text-blue-600 font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 mb-2.5 hover:text-blue-800 transition-all drop-shadow-sm w-fit px-3 py-1.5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full border border-white hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)] active:scale-95 cursor-pointer group">
+          <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> KEMBALI KE PANEL UTAMA
         </button>
-        <div id="status-sync" class="transition-all duration-300 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-sm border border-slate-200 bg-white/50">
-           <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-400"></div> 
-           <span id="status-text">MEMERIKSA KONEKSI...</span>
+        <h1 class="text-xl md:text-[26px] font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm mb-0.5 leading-none">DASHBOARD PEMBUKUAN</h1>
+        <p class="text-slate-500 font-bold mt-1 text-[10px] md:text-[11px]">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
+      </div>
+    
+    <!-- REVISI: NOTIF ONLINE DI ATAS, TOMBOL REFRESH DI BAWAHNYA -->
+    <div class="flex flex-col items-end gap-3 mt-1">
+        <div id="status-sync" class="transition-all duration-300 px-5 py-2 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-white bg-white/80 backdrop-blur-md">
+           <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-sm"></div> 
+           <span id="status-text">MEMERIKSA...</span>
         </div>
+        <button onclick="location.reload()" class="h-9 px-4 flex items-center justify-center bg-gradient-to-br from-white to-slate-50 rounded-full hover:from-slate-50 hover:to-slate-100 active:scale-95 transition-all text-slate-500 hover:text-blue-600 border border-white shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_15px_rgba(59,130,246,0.15)] text-[10px] font-black uppercase tracking-widest gap-2 group" title="Refresh Data">
+          <i class="fa-solid fa-rotate text-xs group-hover:rotate-180 transition-transform duration-500"></i> REFRESH
+        </button>
     </div>
   </div>
 
-  <div class="max-w-[98%] mx-auto mb-6 space-y-4">
-    <!-- PANEL FILTER: Desain Elegan 4 Kolom -->
-    <div class="glass p-5 md:p-6 rounded-3xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 border border-slate-200/80 shadow-md bg-white/50">
-      
-      <!-- Kolom Pencarian Sarimbit -->
-      <div class="relative group flex flex-col">
-          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-magnifying-glass text-blue-500 mr-1"></i> Pencarian</label>
-          <div class="relative">
-              <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
-              <input type="text" id="filter-sarimbit" onkeyup="filterTable()" placeholder="Cari Koleksi Sarimbit..." class="w-full pl-11 pr-4 py-3 bg-white hover:bg-slate-50 focus:bg-white rounded-xl font-bold text-xs text-slate-800 border border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm">
+  <div class="max-w-[98%] mx-auto mb-4 space-y-3">
+    <!-- PANEL FILTER: Desain Elegan Kapsul iOS/Samsung (Ukuran Mini & Padat) -->
+    <div class="bg-white/80 backdrop-blur-2xl p-3 md:p-4 rounded-[1.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white relative z-[90]">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- Kolom Pencarian Sarimbit -->
+          <div class="relative group flex flex-col">
+              <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 ml-1 flex items-center gap-1.5"><div class="w-4 h-4 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-magnifying-glass text-[8px]"></i></div> Pencarian</label>
+              <div class="relative">
+                  <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-[10px]"></i>
+                  <input type="text" id="filter-sarimbit" onkeyup="filterTable()" placeholder="Cari Koleksi Sarimbit..." class="w-full pl-9 pr-4 h-9 bg-slate-50 hover:bg-slate-100 focus:bg-white rounded-full font-bold text-[11px] text-slate-700 border border-slate-200/60 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-sm">
+              </div>
           </div>
-      </div>
-      
-      <!-- Kolom Pusat/Brand -->
-      <div class="relative group flex flex-col">
-          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-building text-indigo-500 mr-1"></i> Filter Pusat</label>
-          <div class="relative">
-              <i class="fa-solid fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors text-sm pointer-events-none"></i>
-              <select id="filter-pusat" onchange="filterTable()" class="w-full pl-11 pr-10 py-3 bg-white hover:bg-slate-50 focus:bg-white rounded-xl font-bold text-xs text-slate-800 border border-slate-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 outline-none appearance-none cursor-pointer transition-all shadow-sm">
-                  <option value="">Semua Pusat/Brand</option>
-              </select>
-              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+          
+          <!-- Kolom Pusat/Brand -->
+          <div class="relative group flex flex-col">
+              <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 ml-1 flex items-center gap-1.5"><div class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center"><i class="fa-solid fa-building text-[8px]"></i></div> Filter Pusat</label>
+              <div class="relative">
+                  <select id="filter-pusat" onchange="filterTable()" class="w-full pl-4 pr-8 h-9 bg-slate-50 hover:bg-slate-100 focus:bg-white rounded-full font-bold text-[11px] text-slate-700 border border-slate-200/60 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 outline-none appearance-none cursor-pointer transition-all shadow-sm">
+                      <option value="">Semua Pusat/Brand</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none"></i>
+              </div>
           </div>
-      </div>
-      
-      <!-- Kolom Filter Arsip -->
-      <div class="relative group flex flex-col">
-          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-box-archive text-emerald-500 mr-1"></i> Status Koleksi</label>
-          <div class="relative">
-              <i class="fa-solid fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 group-focus-within:text-emerald-600 transition-colors text-sm pointer-events-none"></i>
-              <select id="filter-status-arsip" onchange="filterTable()" class="w-full pl-11 pr-10 py-3 bg-emerald-50/50 hover:bg-emerald-50 focus:bg-white rounded-xl font-bold text-xs text-emerald-700 border border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 outline-none appearance-none cursor-pointer transition-all shadow-sm">
-                  <option value="semua">Semua (Aktif & Arsip)</option>
-                  <option value="aktif">🟢 Hanya Sarimbit Aktif</option>
-                  <option value="arsip">📦 Hanya Sarimbit Arsip</option>
-              </select>
-              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-emerald-500 pointer-events-none"></i>
+          
+          <!-- Kolom Filter Arsip -->
+          <div class="relative group flex flex-col">
+              <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 ml-1 flex items-center gap-1.5"><div class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center"><i class="fa-solid fa-box-archive text-[8px]"></i></div> Status Koleksi</label>
+              <div class="relative">
+                  <select id="filter-status-arsip" onchange="filterTable()" class="w-full pl-4 pr-8 h-9 bg-emerald-50/40 hover:bg-emerald-50/70 focus:bg-white rounded-full font-bold text-[11px] text-emerald-700 border border-emerald-200/60 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 outline-none appearance-none cursor-pointer transition-all shadow-sm">
+                      <option value="semua">Semua (Aktif & Arsip)</option>
+                      <option value="aktif">🟢 Hanya Sarimbit Aktif</option>
+                      <option value="arsip">📦 Hanya Sarimbit Arsip</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-emerald-500 group-focus-within:text-emerald-600 transition-colors pointer-events-none"></i>
+              </div>
           </div>
-      </div>
-      
-      <!-- Kolom Filter Print -->
-      <div class="relative group flex flex-col">
-          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1"><i class="fa-solid fa-print text-rose-500 mr-1"></i> Status Cetak (Print)</label>
-          <div class="relative">
-              <i class="fa-solid fa-file-invoice absolute left-4 top-1/2 -translate-y-1/2 text-rose-500 group-focus-within:text-rose-600 transition-colors text-sm pointer-events-none"></i>
-              <select id="filter-status-print" onchange="filterTable()" class="w-full pl-11 pr-10 py-3 bg-rose-50/50 hover:bg-rose-50 focus:bg-white rounded-xl font-bold text-xs text-rose-700 border border-rose-200 focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 outline-none appearance-none cursor-pointer transition-all shadow-sm">
-                  <option value="semua">Semua Status Print</option>
-                  <option value="sudah">✅ Sudah Diprint</option>
-                  <option value="belum">❌ Belum Diprint</option>
-              </select>
-              <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-rose-500 pointer-events-none"></i>
+          
+          <!-- Kolom Filter Print -->
+          <div class="relative group flex flex-col">
+              <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 ml-1 flex items-center gap-1.5"><div class="w-4 h-4 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center"><i class="fa-solid fa-print text-[8px]"></i></div> Status Cetak</label>
+              <div class="relative">
+                  <select id="filter-status-print" onchange="filterTable()" class="w-full pl-4 pr-8 h-9 bg-rose-50/40 hover:bg-rose-50/70 focus:bg-white rounded-full font-bold text-[11px] text-rose-700 border border-rose-200/60 focus:border-rose-400 focus:ring-4 focus:ring-rose-100 outline-none appearance-none cursor-pointer transition-all shadow-sm">
+                      <option value="semua">Semua Status Print</option>
+                      <option value="sudah">✅ Sudah Diprint</option>
+                      <option value="belum">❌ Belum Diprint</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-rose-500 group-focus-within:text-rose-600 transition-colors pointer-events-none"></i>
+              </div>
           </div>
-      </div>
-      
-    </div>
-    
-    <div class="flex flex-wrap gap-2">
-      <button onclick="exportToExcel()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-black text-[11px] shadow-md border border-emerald-400/50 flex items-center gap-1.5 btn-hover-fx">
-        <i class="fa-solid fa-file-excel text-sm"></i> UNDUH EXCEL
-      </button>
-      <button onclick="exportToPDF()" class="bg-gradient-to-r from-rose-500 to-rose-600 text-white px-5 py-2.5 rounded-xl font-black text-[11px] shadow-md border border-rose-400/50 flex items-center gap-1.5 btn-hover-fx">
-        <i class="fa-solid fa-file-pdf text-sm"></i> UNDUH PDF
-      </button>
+        </div>
+        
+        <!-- BORDER SEPARATOR & TOMBOL EXPORT BAWAH (DIPADATKAN) -->
+        <div class="mt-4 pt-3 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-3">
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tindakan Laporan:</span>
+            <div class="flex flex-wrap gap-2.5">
+                <button onclick="exportToExcel()" class="bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-5 h-8 rounded-full font-black text-[10px] shadow-[0_2px_8px_rgba(16,185,129,0.15)] hover:shadow-[0_4px_12px_rgba(5,150,105,0.4)] hover:from-emerald-500 hover:to-emerald-600 hover:text-white border border-white flex items-center gap-1.5 transition-all active:scale-95 group uppercase tracking-wider">
+                  <i class="fa-solid fa-file-excel text-[11px] group-hover:scale-110 transition-transform"></i> Unduh Excel
+                </button>
+                <button onclick="exportToPDF()" class="bg-gradient-to-br from-rose-50 to-rose-100 text-rose-600 px-5 h-8 rounded-full font-black text-[10px] shadow-[0_2px_8px_rgba(244,63,94,0.15)] hover:shadow-[0_4px_12px_rgba(225,29,72,0.4)] hover:from-rose-500 hover:to-rose-600 hover:text-white border border-white flex items-center gap-1.5 transition-all active:scale-95 group uppercase tracking-wider">
+                  <i class="fa-solid fa-file-pdf text-[11px] group-hover:scale-110 transition-transform"></i> Unduh PDF
+                </button>
+            </div>
+        </div>
     </div>
   </div>
 
