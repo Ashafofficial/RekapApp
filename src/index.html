@@ -242,6 +242,74 @@
     .donat-svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
     .donat-track { fill: none; stroke-width: 4.5; stroke-linecap: round; }
     .donat-isi { fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    /* ========================================================= */
+    /* GAYA TOOLTIP KACA CERDAS (Versi Lembut & Melayang Ke Bawah) */
+    /* ========================================================= */
+    .tooltip-kaca {
+        position: relative;
+        display: inline-flex;
+    }
+    
+    .tooltip-kaca::before, .tooltip-kaca::after {
+        position: absolute;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Animasi super halus */
+        z-index: 150;
+        
+        /* REVISI: Pindah posisi ke BAWAH tombol (bukan di atas) */
+        top: 130%; 
+        left: 50%;
+        
+        /* REVISI: Posisi awal sebelum animasi (bersembunyi sedikit di atas lalu turun) */
+        transform: translate(-50%, -10px); 
+    }
+
+    /* 1. Kotak Teks Tooltip (Versi Lembut) */
+    .tooltip-kaca::before {
+        content: attr(data-tooltip);
+        background: rgba(255, 255, 255, 0.65); /* Kaca sedikit lebih bening */
+        backdrop-filter: blur(12px) saturate(160%);
+        -webkit-backdrop-filter: blur(12px) saturate(160%);
+        
+        /* REVISI FONT: Warna lebih soft, font kecil, normal (tidak bold), huruf biasa */
+        color: #475569; /* Slate 600 (Abu-abu kebiruan lembut) */
+        font-size: 9px;
+        font-weight: 600; /* Semi-bold ringan, tidak terlalu tegas */
+        text-transform: none; /* Huruf normal (bukan kapital semua) */
+        letter-spacing: 0.3px;
+        
+        padding: 5px 10px; /* Padding dipangkas agar kotak lebih mungil */
+        border-radius: 8px; /* Sudut lebih kecil agar proporsional */
+        white-space: nowrap;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    /* 2. Segitiga Panah Atas Tooltip */
+    .tooltip-kaca::after {
+        content: '';
+        /* REVISI PANAH: Mengubah panah agar menunjuk ke ATAS (karena kotaknya ada di bawah) */
+        top: -12px; /* Posisi di atas kotak tooltip */
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent rgba(255, 255, 255, 0.65) transparent; /* Segitiga mengarah ke atas */
+        backdrop-filter: blur(4px);
+    }
+
+    /* 3. Reaksi Saat Kursor Di-hover & Ditahan */
+    .tooltip-kaca:hover::before, .tooltip-kaca:hover::after {
+        opacity: 1;
+        visibility: visible;
+        /* REVISI ANIMASI: Melayang turun ke posisi normal (0) */
+        transform: translate(-50%, 0); 
+        transition-delay: 0.5s; /* JEDA 0.5 DETIK */
+    }
+    
+    /* Adaptasi Dark Mode */
+    body.theme-dark .tooltip-kaca::before { background: rgba(30, 41, 59, 0.7); color: #cbd5e1; border-color: rgba(51, 65, 85, 0.8); }
+    body.theme-dark .tooltip-kaca::after { border-color: transparent transparent rgba(30, 41, 59, 0.7) transparent; }
   </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
@@ -717,16 +785,32 @@
                 <h2 class="text-3xl font-black tracking-tight text-slate-800">Rekapitulasi Order</h2>
                 <p class="text-slate-500 font-medium mt-1">Laporan jumlah pesanan berdasarkan filter spesifik.</p>
             </div>
-           <!-- KELOMPOK TOMBOL AKSI (GAYA KAPSUL SAMSUNG ONE UI & iOS) -->
-           <div class="flex gap-2.5 flex-wrap items-center justify-end">
-            <button id="btn-setor-semua" onclick="setorSemuaFilter()" class="bg-slate-100 opacity-60 cursor-not-allowed text-slate-400 px-6 h-10 rounded-full text-[11px] font-black transition-all flex items-center gap-2 shadow-none border border-transparent group" disabled title="Pilih Sarimbit di filter terlebih dahulu"><i class="fa-solid fa-check-double group-hover:scale-110 transition-transform"></i> Setor</button>
+          <!-- KELOMPOK TOMBOL AKSI (GAYA KAPSUL SAMSUNG ONE UI & iOS + TOOLTIP KACA) -->
+          <div class="flex gap-2.5 flex-wrap items-center justify-end">
+               
+            <!-- Tombol Setor -->
+            <div class="tooltip-kaca" data-tooltip="Setor semua kuantitas barang">
+                <button id="btn-setor-semua" onclick="setorSemuaFilter()" class="bg-slate-100 opacity-60 cursor-not-allowed text-slate-400 px-6 h-10 rounded-full text-[11px] font-black transition-all flex items-center gap-2 shadow-none border border-transparent group" disabled><i class="fa-solid fa-check-double group-hover:scale-110 transition-transform"></i> Setor</button>
+            </div>
             
             <!-- GARIS PEMISAH VERTIKAL -->
             <div class="w-px h-6 bg-slate-300 mx-1 shrink-0"></div>
             
-            <button onclick="exportRekapExcel()" class="bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-6 h-10 rounded-full text-[11px] font-black border border-white hover:from-emerald-500 hover:to-emerald-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:shadow-[0_6px_15px_rgba(5,150,105,0.4)] flex items-center gap-2 group"><i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> Excel</button>
+            <!-- Tombol Excel -->
+            <div class="tooltip-kaca" data-tooltip="Unduh data ke Excel">
+                <button onclick="exportRekapExcel()" class="bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-5 h-10 rounded-full text-[11px] font-black border border-white hover:from-emerald-500 hover:to-emerald-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center gap-2 group"><i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> Excel</button>
+            </div>
             
-            <button onclick="exportRekapPDF()" class="bg-gradient-to-br from-rose-50 to-rose-100 text-rose-600 px-6 h-10 rounded-full text-[11px] font-black border border-white hover:from-rose-500 hover:to-rose-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(244,63,94,0.15)] hover:shadow-[0_6px_15px_rgba(225,29,72,0.4)] flex items-center gap-2 group"><i class="fa-solid fa-file-pdf group-hover:scale-110 transition-transform"></i> PDF</button>
+            <!-- Tombol Laporan PDF -->
+            <div class="tooltip-kaca" data-tooltip="Unduh data ke PDF">
+                <button onclick="exportRekapPDF()" class="bg-gradient-to-br from-rose-50 to-rose-100 text-rose-600 px-5 h-10 rounded-full text-[11px] font-black border border-white hover:from-rose-500 hover:to-rose-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(244,63,94,0.15)] flex items-center gap-2 group"><i class="fa-solid fa-file-pdf group-hover:scale-110 transition-transform"></i> Laporan</button>
+            </div>
+            
+            <!-- Tombol Ceklis Konfeksi -->
+            <div class="tooltip-kaca" data-tooltip="pencocokan data ">
+                <button onclick="bukaModalCeklis()" class="bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 px-5 h-10 rounded-full text-[11px] font-black border border-white hover:from-indigo-500 hover:to-indigo-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(79,70,229,0.15)] flex items-center gap-2 group hover:shadow-[0_6px_15px_rgba(79,70,229,0.4)]"><i class="fa-solid fa-clipboard-check group-hover:scale-110 transition-transform"></i> Ceklis</button>
+            </div>
+            
         </div>
           </div>
 
@@ -800,15 +884,29 @@
                   </div>
               </div>
 
-              <!-- REVISI TABEL: Header memiliki warna latar abu terang untuk memperjelas batas judul kolom -->
               <div class="glass rounded-[2rem] overflow-hidden shadow-sm border border-slate-200/60 bg-white/60 flex-1 flex flex-col relative">
+                  
+                  <!-- TAMBAHAN: PROGRESS BAR CEKLIS PABRIK -->
+                  <div id="progress-ceklis-container" class="px-6 py-4 bg-white/80 border-b border-slate-200/60 flex flex-col gap-2 hidden">
+                      <div class="flex justify-between items-end">
+                          <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-1.5"></i> Progres Audit Konfeksi</span>
+                          <span id="text-progres-ceklis" class="text-[11px] font-black text-emerald-600 tracking-wider">0 / 0 Item (0%)</span>
+                      </div>
+                      <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                          <div id="bar-progres-ceklis" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0 relative overflow-hidden">
+                              <div class="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity"></div>
+                          </div>
+                      </div>
+                  </div>
+
                   <div class="overflow-x-auto flex-1">
-                      <table class="w-full text-sm text-left min-w-[500px]">
+                      <table class="w-full text-sm text-left min-w-[600px]">
                           <thead class="bg-slate-50/80 border-b border-slate-200">
                               <tr class="text-slate-500 uppercase text-[10px] tracking-widest font-bold">
-                                  <th class="px-6 py-5 w-[45%]">Koleksi & Barang</th>
-                                  <th class="px-6 py-5">Varian / Size</th>
-                                  <th class="px-6 py-5 text-center">Jumlah Qty</th>
+                                  <th class="px-6 py-5 w-[35%]">Koleksi & Barang</th>
+                                  <th class="px-6 py-5 w-[25%]">Varian / Size</th>
+                                  <th class="px-6 py-5 w-[20%] text-center">Jumlah Qty</th>
+                                  <th class="px-6 py-5 w-[20%] text-center">Status Audit</th>
                               </tr>
                           </thead>
                           <tbody id="tbody-rekap" class="divide-y divide-slate-100"></tbody>
@@ -1276,7 +1374,55 @@
         </div>
     </div>
 </div>
+<!-- MODAL AUDIT CEKLIS DIGITAL PABRIK (GAYA KACA iOS X SAMSUNG CAPSULE) -->
+<div id="modalKonfirmasiCeklis" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md flex justify-center items-end md:items-center z-[130] transition-opacity duration-300 opacity-0 pointer-events-none p-0 md:p-4">
+    
+    <div class="bg-white/90 backdrop-blur-2xl rounded-t-[2.5rem] md:rounded-[2.5rem] w-full max-w-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.3)] border border-white flex flex-col h-[90vh] md:h-[85vh] transform translate-y-full md:translate-y-10 transition-transform duration-300" id="modalKonfirmasiCeklisContent">
+        
+        <!-- Header Gradasi Tajam (Mengunci Posisi Atas) -->
+        <div class="p-5 md:p-6 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex justify-between items-center shadow-md relative z-20 shrink-0 rounded-t-[2.5rem] md:rounded-t-[2.5rem]">
+            <div>
+                <h3 class="font-black text-lg flex items-center gap-2.5 tracking-wide leading-none"><i class="fa-solid fa-clipboard-check text-indigo-200"></i> Audit Pabrik Digital</h3>
+                <p id="teks-sarimbit-ceklis" class="text-[10px] font-bold text-indigo-100 uppercase tracking-widest mt-1.5 opacity-90 truncate max-w-[200px] md:max-w-md">Koleksi Aktif</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <!-- Tombol Unduh PDF Dipindah Ke Atas -->
+                <button onclick="exportCeklisPDF()" class="h-9 px-4 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm border border-white/30 text-[10px] font-black uppercase tracking-wider group" title="Unduh PDF Kertas">
+                    <i class="fa-solid fa-download group-hover:-translate-y-0.5 transition-transform"></i> <span class="hidden md:inline">PDF</span>
+                </button>
+                <button onclick="tutupModalCeklis()" class="w-9 h-9 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors active:scale-95 shadow-sm border border-white/30 group">
+                    <i class="fa-solid fa-xmark font-bold group-hover:scale-110 transition-transform text-sm"></i>
+                </button>
+            </div>
+        </div>
 
+        <!-- Indikator Kemajuan (Progress Bar) -->
+        <div class="px-6 py-4 bg-white/60 border-b border-slate-200/60 flex flex-col gap-2 shrink-0 z-10 shadow-[0_4px_15px_rgba(0,0,0,0.02)] backdrop-blur-sm">
+            <div class="flex justify-between items-end">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Progres Audit</span>
+                <span id="teks-progres-modal" class="text-[11px] font-black text-indigo-600 tracking-wider">0 / 0 Item (0%)</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                <div id="bar-progres-modal" class="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Area List Barang Interaktif (Bisa Di-Scroll) -->
+        <div id="wadah-list-ceklis-modal" class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50/50 custom-scrollbar relative z-0">
+            <!-- Data Injeksi JS Masuk Sini -->
+        </div>
+        
+        <!-- Footer Tombol -->
+        <div class="p-5 md:p-6 bg-white/80 border-t border-slate-200/50 flex justify-end shrink-0 backdrop-blur-md">
+            <button onclick="tutupModalCeklis()" class="w-full py-3.5 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-full font-black text-sm hover:from-slate-800 hover:to-slate-900 transition-all active:scale-95 shadow-[0_6px_15px_rgba(15,23,42,0.3)] border border-slate-600 flex items-center justify-center gap-2 group tracking-wide">
+                <i class="fa-solid fa-check group-hover:scale-125 transition-transform"></i> Tutup Pengecekan
+            </button>
+        </div>
+    </div>
+</div>
 <!-- MODAL RIWAYAT PEMBAYARAN (SLIP) - iOS GLASS x SAMSUNG CAPSULE -->
 <div id="modalRiwayatSlip" class="hidden fixed inset-0 z-[130] bg-slate-900/50 flex items-center justify-center px-4 transition-opacity">
     
@@ -4210,23 +4356,41 @@ async function handleOrderSubmit(e) {
         const buildRekapHtml = (idAman, key, data, prod, varian, size, laciId) => {
             idYangDibutuhkanRekap.add(`rekap-rowA-${idAman}`);
             idYangDibutuhkanRekap.add(laciId);
+            
+            // LOGIKA TARIK DATA CEKLIS DARI LOKAL MEMORI
+            const memoriCeklis = JSON.parse(localStorage.getItem('DataCeklisPabrik')) || {};
+            const isChecked = memoriCeklis[key] ? true : false;
+            
+            // GAYA CSS DINAMIS SESUAI STATUS CEKLIS
+            const rowClass = isChecked ? "bg-emerald-50/50 opacity-80" : "hover:bg-slate-50";
+            const btnClass = isChecked 
+                ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] border-transparent" 
+                : "bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600 border-slate-200 shadow-sm";
+            const btnText = isChecked ? "Sesuai" : "Ceklis";
+            const labelSizeClass = isChecked ? "bg-emerald-100/50 text-emerald-600 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200";
+
             return `
-            <tr id="rekap-rowA-${idAman}" class="hover:bg-slate-50 transition-colors group">
+            <tr id="rekap-rowA-${idAman}" class="${rowClass} transition-all duration-300 group">
                 <td class="px-5 py-4 border-b border-slate-100">
                     <div class="flex items-center gap-3">
-                        <button onclick="document.getElementById('${laciId}').classList.toggle('hidden')" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm focus:outline-none cursor-pointer border border-slate-200">
+                        <button onclick="document.getElementById('${laciId}').classList.toggle('hidden')" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm focus:outline-none cursor-pointer border border-slate-200 shrink-0">
                             <i class="fa-solid fa-plus text-xs"></i>
                         </button>
-                        <span class="font-bold text-slate-700">${prod}</span>
+                        <span class="font-bold ${isChecked ? 'text-emerald-700 line-through decoration-emerald-300' : 'text-slate-700'} transition-colors">${prod}</span>
                     </div>
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100">
-                    <span class="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-600 uppercase tracking-wider">${varian} / ${size}</span>
+                    <span class="border px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider transition-colors ${labelSizeClass}">${varian} / ${size}</span>
                 </td>
-                <td class="px-5 py-4 border-b border-slate-100 text-center font-black text-blue-600 text-xl" id="rekap-qtytampil-${idAman}">${data.qtyTampil}</td>
+                <td class="px-5 py-4 border-b border-slate-100 text-center font-black ${isChecked ? 'text-emerald-500' : 'text-blue-600'} text-xl transition-colors" id="rekap-qtytampil-${idAman}">${data.qtyTampil}</td>
+                <td class="px-5 py-4 border-b border-slate-100 text-center">
+                    <button onclick="toggleCeklisPabrik('${key}')" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${btnClass} flex items-center justify-center gap-1.5 mx-auto border active:scale-95 w-[90px]">
+                        <i class="fa-solid fa-check"></i> <span id="text-ceklis-${idAman}">${btnText}</span>
+                    </button>
+                </td>
             </tr>
             <tr id="${laciId}" class="hidden bg-slate-50 border-b border-slate-200 shadow-inner">
-                <td colspan="3" class="px-14 py-4">
+                <td colspan="4" class="px-14 py-4">
                     <div class="flex items-center gap-6 max-w-sm">
                         <div class="flex flex-col bg-white px-4 py-3 rounded-xl border border-emerald-100 shadow-sm flex-1">
                             <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sudah Disetor</span>
@@ -4258,12 +4422,32 @@ async function handleOrderSubmit(e) {
                 adaBarisBaruRekap = true;
             }
         });
-// Sapu bersih DOM lama yang tidak diperlukan
-Array.from(tbody.children).forEach(tr => {
+
+        // Sapu bersih DOM lama yang tidak diperlukan
+        Array.from(tbody.children).forEach(tr => {
             if (tr.id && !idYangDibutuhkanRekap.has(tr.id)) tr.remove();
         });
 
         if (adaBarisBaruRekap) tbody.insertAdjacentHTML('beforeend', tempHTMLRekap);
+        
+        // MENGHITUNG BILAH KEMAJUAN (PROGRESS BAR) AUDIT KONFEKSI
+        const memoriCeklisGlobal = JSON.parse(localStorage.getItem('DataCeklisPabrik')) || {};
+        let countSudahDiCeklis = 0;
+        
+        // Menghitung berapa baris yang diceklis "dari total baris yang saat ini tampil di tabel filter"
+        sortedKeys.forEach(k => { if(memoriCeklisGlobal[k]) countSudahDiCeklis++; });
+        
+        const wadahProgres = document.getElementById('progress-ceklis-container');
+        if (wadahProgres) {
+            if (sortedKeys.length > 0) {
+                wadahProgres.classList.remove('hidden');
+                const persentase = Math.round((countSudahDiCeklis / sortedKeys.length) * 100);
+                document.getElementById('text-progres-ceklis').innerText = `${countSudahDiCeklis} / ${sortedKeys.length} Item (${persentase}%)`;
+                document.getElementById('bar-progres-ceklis').style.width = `${persentase}%`;
+            } else {
+                wadahProgres.classList.add('hidden');
+            }
+        }
         
        // PENGUNCI POSISI MUTLAK REKAP BARANG (ANTI-LAG REFLOW)
        let prevRowRekap = null;
@@ -5689,8 +5873,344 @@ window.simpanSetoranLokal = function(key, val, total, laciId) {
 };
 
 // ========================================================
-// FUNGSI SETOR SEMUA DATA SESUAI FILTER
+// SISTEM AUDIT CEKLIS KONFEKSI LOKAL & EXPORT PDF CEKLIS (MODAL DIGITAL)
 // ========================================================
+window.bukaModalCeklis = function() {
+    const fSarimbit = document.getElementById('filter-sarimbit-rekap').value;
+    const fBarang = document.getElementById('filter-barang-rekap').value;
+    
+    // Mesin pembaca filter otomatis
+    let namaTampil = "SEMUA KOLEKSI";
+    if (fSarimbit) {
+        namaTampil = fSarimbit;
+        if (fBarang) namaTampil += ` - ${fBarang}`;
+    }
+    
+    document.getElementById('teks-sarimbit-ceklis').innerText = namaTampil;
+    
+    // RENDER ISI DAFTAR BARANG KE DALAM MODAL
+    renderDataAuditKeModal();
+    
+    const modal = document.getElementById('modalKonfirmasiCeklis');
+    const content = document.getElementById('modalKonfirmasiCeklisContent');
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+        if (window.innerWidth < 768) {
+            content.classList.remove('translate-y-full'); // Animasi naik dari bawah untuk HP
+        } else {
+            content.classList.remove('translate-y-10'); // Animasi naik sedikit untuk Desktop
+        }
+    }, 10);
+};
+
+window.tutupModalCeklis = function() {
+    const modal = document.getElementById('modalKonfirmasiCeklis');
+    const content = document.getElementById('modalKonfirmasiCeklisContent');
+    
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    
+    if (window.innerWidth < 768) {
+        content.classList.add('translate-y-full');
+    } else {
+        content.classList.add('translate-y-10');
+    }
+
+    setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    
+    // Refresh tabel Rekap di belakang agar status warna ceklisnya sinkron!
+    if(typeof renderRekap === 'function') renderRekap();
+};
+
+window.renderDataAuditKeModal = function() {
+    // 1. Tangkap seluruh data dengan mematuhi semua filter yang sedang aktif!
+    const fTglMulai = document.getElementById('filter-tgl-mulai-rekap').value; 
+    const fTglAkhir = document.getElementById('filter-tgl-akhir-rekap').value;
+    const fSarimbit = document.getElementById('filter-sarimbit-rekap').value; 
+    const fVarian = document.getElementById('filter-varian-rekap').value;
+    const fBarang = document.getElementById('filter-barang-rekap').value; 
+    const fSize = document.getElementById('filter-size-rekap').value; 
+    
+    const summary = {}; 
+    let grandTotalQty = 0;
+    
+    orderData.forEach(o => {
+        if (fTglMulai || fTglAkhir) { 
+            const tglOrder = new Date(o.tanggal); 
+            if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
+            if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
+        }
+        if(fSarimbit && o.sarimbit !== fSarimbit) return; 
+        if(fVarian && o.varian !== fVarian) return; 
+        if(fBarang && o.barang !== fBarang) return; 
+        if(fSize && o.size !== fSize) return;
+     
+        const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
+        summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
+    });
+
+    const memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
+    const filterSetoran = document.getElementById('export-rekap-filter') ? document.getElementById('export-rekap-filter').value : 'semua';
+
+    for (const k in summary) {
+        const disetor = memoriSetoran[k] || 0;
+        const antre = summary[k] - disetor;
+        let qtyValid = 0;
+
+        if (filterSetoran === 'semua') qtyValid = summary[k];
+        else if (filterSetoran === 'disetor' && disetor > 0) qtyValid = disetor;
+        else if (filterSetoran === 'antre' && antre > 0) qtyValid = antre;
+
+        if (qtyValid > 0) { summary[k] = qtyValid; } 
+        else { delete summary[k]; }
+    }
+    
+    const sizeOrder = ['xxs', 'xs', 's', 'm', 'l', 'xl', 'xxl', '2xl', '3xl', '4xl', '5xl', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '14'];
+    
+    const sortedKeys = Object.keys(summary).sort((a, b) => {
+        const [prodA, varianA, sizeA] = a.split('||'); const [prodB, varianB, sizeB] = b.split('||');
+        if (prodA !== prodB) return prodA.localeCompare(prodB);
+        if (varianA !== varianB) return varianA.localeCompare(varianB);
+        const indexA = sizeOrder.indexOf(sizeA.toLowerCase()); const indexB = sizeOrder.indexOf(sizeB.toLowerCase());
+        return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+    });
+    
+    const wadah = document.getElementById('wadah-list-ceklis-modal');
+    if (sortedKeys.length === 0) {
+        wadah.innerHTML = `<div class="py-10 text-center"><i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3 block"></i><span class="text-slate-400 font-bold text-sm">Tidak ada barang yang perlu diaudit.</span></div>`;
+        document.getElementById('teks-progres-modal').innerText = `0 / 0 Item (0%)`;
+        document.getElementById('bar-progres-modal').style.width = `0%`;
+        return;
+    }
+    
+    const memoriCeklis = JSON.parse(localStorage.getItem('DataCeklisPabrik')) || {};
+    let htmlContent = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 pb-6">`;
+    let countSudahDiceklis = 0;
+    
+    sortedKeys.forEach(key => {
+        const [prod, varian, size] = key.split('||');
+        const qtyTarget = summary[key];
+        const isChecked = memoriCeklis[key] ? true : false;
+        
+        if (isChecked) countSudahDiceklis++;
+        
+        const idSafe = btoa(encodeURIComponent(key)).replace(/[^a-zA-Z0-9]/g, '');
+        
+        // CSS Dinamis Kapsul Kartu
+        const cardClass = isChecked ? "bg-emerald-50 border-emerald-300 shadow-sm opacity-80" : "bg-white border-slate-200/80 hover:border-indigo-400 shadow-[0_4px_15px_rgba(0,0,0,0.03)] hover:shadow-md";
+        const titleClass = isChecked ? "text-emerald-700 line-through decoration-emerald-300 opacity-70" : "text-slate-800";
+        const labelClass = isChecked ? "bg-emerald-100 text-emerald-600 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200";
+        
+        // CSS Dinamis Tombol Bulat Kanan
+        const btnClass = isChecked 
+            ? "bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-transparent" 
+            : "bg-slate-50 text-slate-400 hover:bg-indigo-100 hover:text-indigo-600 border-slate-200 shadow-inner";
+        const iconClass = isChecked ? "fa-solid fa-check" : "fa-regular fa-circle";
+        
+        htmlContent += `
+        <div id="card-modal-${idSafe}" onclick="toggleCeklisPabrikDalamModal('${key}', '${idSafe}')" class="p-3.5 rounded-[1.5rem] border flex items-center justify-between cursor-pointer transition-all duration-300 group ${cardClass}">
+            <div class="flex-1 pr-3 leading-tight min-w-0">
+                <h4 id="title-modal-${idSafe}" class="text-[13px] font-black tracking-tight mb-1.5 truncate transition-all duration-300 ${titleClass}">${prod}</h4>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span id="label1-modal-${idSafe}" class="text-[9px] px-2 py-0.5 rounded border uppercase font-bold tracking-wider transition-colors duration-300 ${labelClass}">${varian}</span>
+                    <span id="label2-modal-${idSafe}" class="text-[9px] px-2 py-0.5 rounded border uppercase font-black tracking-wider transition-colors duration-300 ${labelClass}">SZ: ${size}</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="text-right">
+                    <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Target</span>
+                    <span id="qty-modal-${idSafe}" class="text-[17px] font-black leading-none transition-colors duration-300 ${isChecked ? 'text-emerald-500' : 'text-indigo-600'}">${qtyTarget}</span>
+                </div>
+                <div id="btn-modal-${idSafe}" class="w-10 h-10 rounded-full flex items-center justify-center text-[15px] border transition-all duration-300 group-hover:scale-110 active:scale-95 ${btnClass}">
+                    <i id="icon-modal-${idSafe}" class="${iconClass}"></i>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    htmlContent += `</div>`;
+    wadah.innerHTML = htmlContent;
+    
+    // Hitung Kemajuan
+    const persentase = Math.round((countSudahDiceklis / sortedKeys.length) * 100);
+    document.getElementById('teks-progres-modal').innerText = `${countSudahDiceklis} / ${sortedKeys.length} Item (${persentase}%)`;
+    document.getElementById('bar-progres-modal').style.width = `${persentase}%`;
+};
+
+// Fungsi Merubah Tampilan Seketika Saat Di-klik Tanpa Harus Render Ulang Keseluruhan UI!
+window.toggleCeklisPabrikDalamModal = function(key, idSafe) {
+    let memoriCeklis = JSON.parse(localStorage.getItem('DataCeklisPabrik')) || {};
+    let isCheckedSekarang = memoriCeklis[key] ? true : false;
+    let isCheckedBaru = !isCheckedSekarang;
+    
+    // Toggle (Nyalakan / Matikan)
+    if (isCheckedBaru) memoriCeklis[key] = true;
+    else delete memoriCeklis[key];
+    
+    localStorage.setItem('DataCeklisPabrik', JSON.stringify(memoriCeklis));
+    
+    // TRANSISI VISUAL INSTAN CSS (Anti-Lag / Anti-Flicker)
+    const card = document.getElementById(`card-modal-${idSafe}`);
+    const title = document.getElementById(`title-modal-${idSafe}`);
+    const label1 = document.getElementById(`label1-modal-${idSafe}`);
+    const label2 = document.getElementById(`label2-modal-${idSafe}`);
+    const qtyText = document.getElementById(`qty-modal-${idSafe}`);
+    const btn = document.getElementById(`btn-modal-${idSafe}`);
+    const icon = document.getElementById(`icon-modal-${idSafe}`);
+    
+    if (isCheckedBaru) {
+        // Mode Hidup (Selesai/Hijau)
+        card.className = "p-3.5 rounded-[1.5rem] border flex items-center justify-between cursor-pointer transition-all duration-300 group bg-emerald-50 border-emerald-300 shadow-sm opacity-80";
+        title.className = "text-[13px] font-black tracking-tight mb-1.5 truncate transition-all duration-300 text-emerald-700 line-through decoration-emerald-300 opacity-70";
+        label1.className = "text-[9px] px-2 py-0.5 rounded border uppercase font-bold tracking-wider transition-colors duration-300 bg-emerald-100 text-emerald-600 border-emerald-200";
+        label2.className = "text-[9px] px-2 py-0.5 rounded border uppercase font-black tracking-wider transition-colors duration-300 bg-emerald-100 text-emerald-600 border-emerald-200";
+        qtyText.className = "text-[17px] font-black leading-none transition-colors duration-300 text-emerald-500";
+        btn.className = "w-10 h-10 rounded-full flex items-center justify-center text-[15px] border transition-all duration-300 group-hover:scale-110 active:scale-95 bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-transparent";
+        icon.className = "fa-solid fa-check";
+    } else {
+        // Mode Mati (Belum/Putih)
+        card.className = "p-3.5 rounded-[1.5rem] border flex items-center justify-between cursor-pointer transition-all duration-300 group bg-white border-slate-200/80 hover:border-indigo-400 shadow-[0_4px_15px_rgba(0,0,0,0.03)] hover:shadow-md";
+        title.className = "text-[13px] font-black tracking-tight mb-1.5 truncate transition-all duration-300 text-slate-800";
+        label1.className = "text-[9px] px-2 py-0.5 rounded border uppercase font-bold tracking-wider transition-colors duration-300 bg-slate-100 text-slate-600 border-slate-200";
+        label2.className = "text-[9px] px-2 py-0.5 rounded border uppercase font-black tracking-wider transition-colors duration-300 bg-slate-100 text-slate-600 border-slate-200";
+        qtyText.className = "text-[17px] font-black leading-none transition-colors duration-300 text-indigo-600";
+        btn.className = "w-10 h-10 rounded-full flex items-center justify-center text-[15px] border transition-all duration-300 group-hover:scale-110 active:scale-95 bg-slate-50 text-slate-400 hover:bg-indigo-100 hover:text-indigo-600 border-slate-200 shadow-inner";
+        icon.className = "fa-regular fa-circle";
+    }
+    
+    // Update Hitungan Progress Bar Seketika
+    let targetPcs = 0;
+    const semuaCards = document.querySelectorAll('[id^="card-modal-"]');
+    let hitungChecked = 0;
+    
+    semuaCards.forEach(c => {
+        targetPcs++;
+        if (c.classList.contains('bg-emerald-50')) hitungChecked++;
+    });
+    
+    const persentase = targetPcs > 0 ? Math.round((hitungChecked / targetPcs) * 100) : 0;
+    document.getElementById('teks-progres-modal').innerText = `${hitungChecked} / ${targetPcs} Item (${persentase}%)`;
+    document.getElementById('bar-progres-modal').style.width = `${persentase}%`;
+};
+
+// Fungsi Lama Untuk Klik Ceklis Dari Dalam Tabel (Desktop)
+window.toggleCeklisPabrik = function(key) {
+    let memoriCeklis = JSON.parse(localStorage.getItem('DataCeklisPabrik')) || {};
+    if (memoriCeklis[key]) delete memoriCeklis[key]; else memoriCeklis[key] = true;
+    localStorage.setItem('DataCeklisPabrik', JSON.stringify(memoriCeklis));
+    if(typeof renderRekap === 'function') renderRekap();
+};
+
+window.exportCeklisPDF = function() {
+    if (!orderData.length) return showToast("Data kosong!");
+    
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF('p', 'mm', 'a4'); 
+    
+    const fTglMulai = document.getElementById('filter-tgl-mulai-rekap').value; 
+    const fTglAkhir = document.getElementById('filter-tgl-akhir-rekap').value;
+    const fSarimbit = document.getElementById('filter-sarimbit-rekap').value; 
+    const fVarian = document.getElementById('filter-varian-rekap').value;
+    const fBarang = document.getElementById('filter-barang-rekap').value; 
+    const fSize = document.getElementById('filter-size-rekap').value; 
+    
+    const summary = {}; 
+    let grandTotalQty = 0;
+    
+    orderData.forEach(o => {
+        if (fTglMulai || fTglAkhir) { 
+            const tglOrder = new Date(o.tanggal); 
+            if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
+            if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
+        }
+        if(fSarimbit && o.sarimbit !== fSarimbit) return; 
+        if(fVarian && o.varian !== fVarian) return; 
+        if(fBarang && o.barang !== fBarang) return; 
+        if(fSize && o.size !== fSize) return;
+     
+        const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
+        summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
+    });
+
+    const memoriSetoran = JSON.parse(localStorage.getItem('DataSetoranPusat')) || {};
+    const filterSetoran = document.getElementById('export-rekap-filter') ? document.getElementById('export-rekap-filter').value : 'semua';
+
+    for (const k in summary) {
+        const disetor = memoriSetoran[k] || 0;
+        const antre = summary[k] - disetor;
+        let qtyValid = 0;
+
+        if (filterSetoran === 'semua') qtyValid = summary[k];
+        else if (filterSetoran === 'disetor' && disetor > 0) qtyValid = disetor;
+        else if (filterSetoran === 'antre' && antre > 0) qtyValid = antre;
+
+        if (qtyValid > 0) {
+            summary[k] = qtyValid; 
+            grandTotalQty += qtyValid; 
+        } else {
+            delete summary[k]; 
+        }
+    }
+    
+    const sizeOrder = ['xxs', 'xs', 's', 'm', 'l', 'xl', 'xxl', '2xl', '3xl', '4xl', '5xl', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '14'];
+    
+    const sortedKeys = Object.keys(summary).sort((a, b) => {
+        const [prodA, varianA, sizeA] = a.split('||'); const [prodB, varianB, sizeB] = b.split('||');
+        if (prodA !== prodB) return prodA.localeCompare(prodB);
+        if (varianA !== varianB) return varianA.localeCompare(varianB);
+        const indexA = sizeOrder.indexOf(sizeA.toLowerCase()); const indexB = sizeOrder.indexOf(sizeB.toLowerCase());
+        return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+    });
+    
+    if (sortedKeys.length === 0) return showToast("Tidak ada data dalam filter ini!");
+    
+    const bodyData = sortedKeys.map((key, index) => { 
+        const [prod, varian, size] = key.split('||'); 
+        return [ 
+            index + 1, 
+            `${prod}\nVarian: ${varian} / Sz: ${size.toUpperCase()}`, 
+            summary[key],
+            "" // String kosong untuk dicap kotak centang
+        ]; 
+    });
+    
+    doc.setFontSize(15); doc.text("LEMBAR AUDIT BARANG KONFEKSI", 14, 15); 
+    doc.setFontSize(10); doc.setTextColor(100,116,139); doc.text(`Koleksi: ${fSarimbit || 'Semua'} | Total Target: ${grandTotalQty} Pcs`, 14, 22); 
+    
+    doc.autoTable({ 
+        startY: 28, 
+        head: [['No', 'Rincian Nama Barang', 'Total Qty', 'Ceklis Pabrik']], 
+        body: bodyData, 
+        theme: 'grid', 
+        headStyles: { fillColor: [79, 70, 229], halign: 'center' }, 
+        columnStyles: { 0: { halign: 'center', cellWidth: 10 }, 1: { cellWidth: 100 }, 2: { halign: 'center', fontStyle: 'bold', cellWidth: 25 }, 3: { halign: 'center', cellWidth: 35 } },
+        styles: { fontSize: 10, cellPadding: 4, valign: 'middle' },
+        didDrawCell: function(data) {
+            if (data.section === 'body' && data.column.index === 3) {
+                doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.4);
+                const boxSize = 8; const xPos = data.cell.x + (data.cell.width / 2) - (boxSize / 2); const yPos = data.cell.y + (data.cell.height / 2) - (boxSize / 2);
+                doc.rect(xPos, yPos, boxSize, boxSize);
+            }
+        }
+    });
+    
+    const fileName = `CEKLIS_PABRIK_${fSarimbit || "SEMUA"}.pdf`;
+    if (window.__TAURI__) {
+        const arrayBuffer = doc.output('arraybuffer');
+        const uint8Array = new Uint8Array(arrayBuffer);
+        window.simpanKeTauriData(uint8Array, fileName);
+    } else {
+        window.saveAs(doc.output('blob'), fileName);
+        showToast("✅ PDF Ceklis Pabrik Berhasil Diunduh!");
+    }
+    
+    if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'REKAP', `Mengunduh PDF Ceklis Pabrik Konfeksi (${fSarimbit || "Semua"})`);
+};
+
 // ========================================================
 // FUNGSI SETOR SEMUA DATA SESUAI FILTER
 // ========================================================
