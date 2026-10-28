@@ -182,14 +182,13 @@
                 };
             });
         }
-
+// =======================================================
+        // PENARIK DATA LANGSUNG KE SUPABASE (MODE PINTAR)
         // =======================================================
-        // PENARIK DATA LANGSUNG KE SUPABASE
-        // =======================================================
-        function ambilDataSupabase() {
-            showToast("⏳ Mensinkronkan pesanan terbaru...", "loading");
+        function ambilDataSupabase(isSenyap = false) {
+            // Hanya munculkan loading toast jika bukan tarikan background (senyap)
+            if(!isSenyap) showToast("⏳ Mensinkronkan pesanan terbaru...", "loading");
             
-            // JIKA MENGGUNAKAN SUPABASE VIA database.js (Paling Akurat)
             if (typeof window.DatabaseAPI !== 'undefined') {
                 window.DatabaseAPI.getAllData(
                     async (res) => {
@@ -197,20 +196,17 @@
                             const masterData = res.master || [];
                             let dataMentah = res.orders || [];
 
-                            // Amankan arsip agar tidak nyampur
                             let sarimbitDiarsip = [];
                             try {
                                 const localBuku = await dbLokal.pembukuan.toArray();
                                 sarimbitDiarsip = localBuku.filter(b => b.isarchived === true || b.isArchived === true).map(b => b.sarimbit);
                             } catch(e) {}
 
-                            // Mencocokkan Gramasi dengan Akurat (Menghindari bug huruf besar/kecil)
                             if (dataMentah.length > 0 && masterData.length > 0) {
                                 const bersihkanStr = (val) => String(val || "").trim().toLowerCase();
                                 const mapBerat = new Map();
                                 masterData.forEach(m => {
                                     mapBerat.set(`${bersihkanStr(m.sarimbit)}|${bersihkanStr(m.barang)}|${bersihkanStr(m.varian)}|${bersihkanStr(m.size)}`, Number(m.berat || 0));
-                                    // Cadangan Kasar
                                     if (!mapBerat.has(`${bersihkanStr(m.sarimbit)}|${bersihkanStr(m.barang)}`)) {
                                         mapBerat.set(`${bersihkanStr(m.sarimbit)}|${bersihkanStr(m.barang)}`, Number(m.berat || 0));
                                     }
@@ -222,22 +218,22 @@
                                     
                                     let beratKetemu = mapBerat.get(kunciAkurat);
                                     if (beratKetemu === undefined) beratKetemu = mapBerat.get(kunciKasar);
-                                    
                                     order.berat = beratKetemu !== undefined ? beratKetemu : (Number(order.berat) || 0);
                                 });
                             }
 
-                            // Saring Data! Buang yang diarsip
                             orderData = dataMentah.filter(o => {
                                 const statusBawaanArsip = o.isarchived === true || o.isArchived === true;
                                 const statusTerarsipDiBuku = sarimbitDiarsip.includes(o.sarimbit);
                                 return !statusBawaanArsip && !statusTerarsipDiBuku;
                             });
                             
+                            // Hitung jumlah data sebelum diproses untuk mendeteksi pesanan baru
+                            const jumlahAntreanLama = groupedOrders.length;
+                            
                             prosesDataAwal();
                             populateFilterDropdown();
                             
-                            // Kembalikan ingatan pencarian lama
                             const savedSearch = sessionStorage.getItem('logistikSearch');
                             if (savedSearch) {
                                 searchQuery = savedSearch.toLowerCase();
@@ -250,21 +246,33 @@
                                 document.getElementById('filterSarimbit').value = filterValue;
                             }
 
-                            renderCards();
-                            showToast(`✅ Data Terupdate! Ditemukan ${groupedOrders.length} antrean paket.`, "success");
+                            // Hanya me-render ulang jika sedang tidak ada pop-up (kamera/batch) terbuka agar ketikan user tidak hilang
+                            const modalBatchTerbuka = !document.getElementById('modalBatch').classList.contains('hidden');
+                            if(!modalBatchTerbuka) {
+                                renderCards();
+                            }
+                            
+                            // Logika Notifikasi Pintar
+                            if (!isSenyap) {
+                                showToast(`✅ Data Terupdate! Ditemukan ${groupedOrders.length} antrean paket.`, "success");
+                            } else if (groupedOrders.length > jumlahAntreanLama && !modalBatchTerbuka) {
+                                showToast(`🔔 Ada Pesanan Baru Masuk!`, "success");
+                            }
 
                         } catch (err) {
                             console.error(err);
-                            showToast("❌ Kesalahan saat memproses data!", "error");
+                            if(!isSenyap) showToast("❌ Kesalahan saat memproses data!", "error");
                         }
                     },
                     (err) => {
-                        showToast("❌ Gagal terhubung ke Database!", "error");
+                        if(!isSenyap) showToast("❌ Gagal terhubung ke Database!", "error");
                     }
                 );
             } else {
-                document.getElementById('cardsContainer').innerHTML = `<div class="text-center py-10 text-rose-500 bg-white rounded-[1.5rem] border border-rose-200 shadow-sm"><i class="fa-solid fa-triangle-exclamation text-5xl mb-3"></i><p class="text-sm font-bold">Sistem Database Tidak Terdeteksi.</p></div>`;
-                showToast("❌ File database.js tidak terbaca!", "error");
+                if(!isSenyap) {
+                    document.getElementById('cardsContainer').innerHTML = `<div class="text-center py-10 text-rose-500 bg-white rounded-[1.5rem] border border-rose-200 shadow-sm"><i class="fa-solid fa-triangle-exclamation text-5xl mb-3"></i><p class="text-sm font-bold">Sistem Database Tidak Terdeteksi.</p></div>`;
+                    showToast("❌ File database.js tidak terbaca!", "error");
+                }
             }
         }
 
@@ -359,18 +367,18 @@
                     const varian = item.varian || item.warna || "-";
                     const ukuran = item.size || item.ukuran || "-";
 
-                  // BAGIAN 1: RINCIAN PESANAN (DIPERKECIL)
+                  // BAGIAN 1: RINCIAN PESANAN (SUPER SLIM)
                   itemHtml += `
-                        <div class="flex justify-between items-center py-1.5 border-b border-slate-100 last:border-0">
+                        <div class="flex justify-between items-center py-1.5 border-b border-slate-100/60 last:border-0">
                             <div class="flex-1 pr-2 leading-tight">
                                 <span class="font-black text-indigo-600 text-[9px] mr-1 bg-indigo-50 border border-indigo-100 px-1 py-0.5 rounded leading-none">${qty}x</span> 
                                 <span class="text-slate-800 font-bold text-[10px] leading-tight">${namaBarang}</span>
                                 <div class="text-[8px] font-bold text-slate-500 mt-0.5 flex items-center gap-1">
-                                    <span class="bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded text-slate-600 leading-none">${varian}</span> 
-                                    <span class="bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded text-slate-600 leading-none">SZ: ${ukuran}</span>
+                                    <span class="bg-slate-50 border border-slate-200/60 px-1 py-0.5 rounded text-slate-600 leading-none">${varian}</span> 
+                                    <span class="bg-slate-50 border border-slate-200/60 px-1 py-0.5 rounded text-slate-600 leading-none">SZ: ${ukuran}</span>
                                 </div>
                             </div>
-                             <div class="text-[8px] font-black text-slate-500 whitespace-nowrap bg-slate-50 border border-slate-200/60 px-1.5 py-1 rounded-md shadow-sm">${beratAsli * qty}g</div>
+                             <div class="text-[8px] font-black text-slate-500 whitespace-nowrap bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded shadow-sm">${beratAsli * qty}g</div>
                         </div>`;
                 });
 
@@ -382,105 +390,105 @@
                 else if(ekspedisi.includes("POS")) warnaEks = "from-orange-500 to-orange-600";
 
                 const card = document.createElement('div');
-                card.className = "bg-white/95 backdrop-blur-md rounded-[1.5rem] shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-white overflow-hidden relative mb-4 transition-all"; 
+                card.className = "bg-white/95 backdrop-blur-md rounded-[1.2rem] shadow-[0_4px_15px_rgba(0,0,0,0.04)] border border-white overflow-hidden relative mb-3 transition-all"; 
                 card.innerHTML = `
-                    <!-- Badge Ekspedisi Gradasi (Diperkecil) -->
-                    <div class="absolute top-0 right-0 bg-gradient-to-r ${warnaEks} text-white text-[8px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest shadow-sm z-10">${ekspedisi}</div>
+                    <!-- Badge Ekspedisi Gradasi (Super Slim) -->
+                    <div class="absolute top-0 right-0 bg-gradient-to-r ${warnaEks} text-white text-[8px] font-black px-2.5 py-1 rounded-bl-xl uppercase tracking-widest shadow-sm z-10">${ekspedisi}</div>
                     
-                    <!-- Info Customer (Ramping) -->
-                    <div class="p-3.5 pb-2">
-                        <h2 class="text-[13px] font-black text-slate-900 leading-tight mb-1.5 pr-12"><i class="fa-solid fa-circle-user text-indigo-500 mr-1"></i>${namaCustomer}</h2>
+                    <!-- Info Customer (Super Slim) -->
+                    <div class="p-3 pb-1.5">
+                        <h2 class="text-[11px] font-black text-slate-900 leading-tight mb-1 pr-12"><i class="fa-solid fa-circle-user text-indigo-500 mr-1"></i>${namaCustomer}</h2>
                         <div class="flex flex-wrap gap-1.5 mb-1.5">
-                            <div class="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full inline-flex items-center shadow-sm">
+                            <div class="text-[8px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded-full inline-flex items-center shadow-sm">
                                 <i class="fa-brands fa-whatsapp mr-1 text-emerald-500"></i> ${telepon}
                             </div>
                         </div>
-                        <p class="text-[10px] font-semibold text-slate-600 leading-snug bg-slate-50 p-2.5 rounded-xl border border-slate-100 shadow-sm"><i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i>${alamat}</p>
+                        <p class="text-[9px] font-semibold text-slate-600 leading-snug bg-slate-50 p-1.5 rounded-lg border border-slate-100 shadow-sm"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${alamat}</p>
                     </div>
 
-                    <!-- KARTU PENGIRIM & ESTIMASI BERAT (Ramping) -->
-                    <div class="mx-3.5 mb-3 p-3 border border-slate-100 bg-gradient-to-br from-slate-50 to-white rounded-xl flex justify-between items-center shadow-sm">
+                    <!-- KARTU PENGIRIM & ESTIMASI BERAT (Super Slim) -->
+                    <div class="mx-3 mb-2 p-2 border border-slate-100 bg-gradient-to-br from-slate-50 to-white rounded-lg flex justify-between items-center shadow-sm">
                         <div>
-                            <p class="text-slate-400 text-[8px] font-black uppercase tracking-widest mb-0.5">Pengirim</p>
-                            <p class="font-black text-slate-800 text-[11px] leading-none">${pengirimNama}</p>
-                            <p class="text-slate-500 text-[9px] font-bold mt-0.5">${pengirimTelp}</p>
+                            <p class="text-slate-400 text-[7px] font-black uppercase tracking-widest mb-0.5">Pengirim</p>
+                            <p class="font-black text-slate-800 text-[10px] leading-none">${pengirimNama}</p>
+                            <p class="text-slate-500 text-[8px] font-bold mt-0.5">${pengirimTelp}</p>
                         </div>
-                        <div class="text-right border-l border-slate-200/60 pl-3">
-                            <p class="text-slate-400 text-[8px] font-black uppercase tracking-widest mb-0.5">Estimasi Sistem</p>
-                            <p class="font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-[13px] leading-none drop-shadow-sm">${totalBeratKg} Kg</p>
+                        <div class="text-right border-l border-slate-200/60 pl-2">
+                            <p class="text-slate-400 text-[7px] font-black uppercase tracking-widest mb-0.5">Estimasi Sistem</p>
+                            <p class="font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-[11px] leading-none drop-shadow-sm">${totalBeratKg} Kg</p>
                         </div>
                     </div>
 
-                    <!-- Wrapper Rincian Barang (Ramping) -->
-                    <div class="mx-3.5 mb-3.5">
-                        <div class="flex items-center gap-2 mb-1.5">
-                            <div class="w-5 h-5 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-shirt text-[9px]"></i></div>
-                            <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Rincian Baju</span>
+                    <!-- Wrapper Rincian Barang (Super Slim) -->
+                    <div class="mx-3 mb-2.5">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <div class="w-4 h-4 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-shirt text-[7px]"></i></div>
+                            <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Rincian Baju</span>
                         </div>
-                        <div class="bg-white rounded-xl p-2.5 border border-slate-200/60 shadow-sm">${itemHtml}</div>
+                        <div class="bg-white rounded-lg p-1.5 border border-slate-200/60 shadow-sm">${itemHtml}</div>
                     </div>
 
-                    <!-- AREA AKSI & TOMBOL (BERAT & KAMERA) (Ramping) -->
-                    <div class="bg-gradient-to-b from-slate-50 to-white p-3.5 border-t border-slate-100">
+                    <!-- AREA AKSI & TOMBOL (BERAT & KAMERA) (Super Slim) -->
+                    <div class="bg-gradient-to-b from-slate-50 to-white p-3 border-t border-slate-100">
                         
-                        <!-- KARTU BERAT TIMBANGAN (Ramping) -->
-                        <div class="bg-gradient-to-r from-orange-50/80 to-amber-50/80 border border-orange-200/60 rounded-full p-2 flex justify-between items-center mb-3 shadow-sm">
-                            <div class="pl-2">
-                                <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest leading-none mb-0.5">Berat Timbangan</p>
-                                <p class="text-[8px] text-orange-500 font-bold">Ubah jika meleset</p>
+                        <!-- KARTU BERAT TIMBANGAN (Super Slim) -->
+                        <div class="bg-gradient-to-r from-orange-50/80 to-amber-50/80 border border-orange-200/60 rounded-full p-1.5 flex justify-between items-center mb-2.5 shadow-sm">
+                            <div class="pl-1.5">
+                                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest leading-none mb-0.5">Berat Timbangan</p>
+                                <p class="text-[7px] text-orange-500 font-bold">Ubah jika meleset</p>
                             </div>
-                            <div class="flex items-center bg-white rounded-full border border-orange-200 shadow-inner px-3 py-1 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all w-28">
-                                <input type="number" id="berat-aktual-${id}" value="${totalBeratKg}" step="0.01" class="w-full bg-transparent text-right font-black text-orange-700 text-[13px] outline-none border-none p-0 m-0">
-                                <span class="ml-1 text-[10px] font-black text-orange-400 select-none">Kg</span>
+                            <div class="flex items-center bg-white rounded-full border border-orange-200 shadow-inner px-2 py-0.5 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all w-24">
+                                <input type="number" id="berat-aktual-${id}" value="${totalBeratKg}" step="0.01" class="w-full bg-transparent text-right font-black text-orange-700 text-[11px] outline-none border-none p-0 m-0">
+                                <span class="ml-1 text-[8px] font-black text-orange-400 select-none">Kg</span>
                             </div>
                         </div>
 
-                        <!-- Tombol SOP 1, 2, 3 (GAYA KAPSUL SLIM) -->
-                        <div class="space-y-2.5">
+                        <!-- Tombol SOP 1, 2, 3 (GAYA KAPSUL SUPER SLIM) -->
+                        <div class="space-y-1.5">
                             <!-- SOP 1: CEK PAKET -->
-                            <div class="bg-white p-2.5 rounded-2xl border border-blue-100 shadow-sm flex flex-col gap-2">
-                                <div class="flex items-center justify-between px-1.5">
-                                    <p class="text-[10px] font-black text-slate-800 flex items-center gap-1.5"><span class="bg-blue-100 text-blue-600 w-5 h-5 inline-flex items-center justify-center rounded-full text-[9px] font-black shadow-inner">1</span> Cek Paket</p>
-                                    <span class="text-[8px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-black uppercase tracking-wider border border-blue-200/60">Internal</span>
+                            <div class="bg-white p-1.5 rounded-xl border border-blue-100 shadow-sm flex flex-col gap-1.5">
+                                <div class="flex items-center justify-between px-1">
+                                    <p class="text-[9px] font-black text-slate-800 flex items-center gap-1.5"><span class="bg-blue-100 text-blue-600 w-4 h-4 inline-flex items-center justify-center rounded-full text-[8px] font-black shadow-inner">1</span> Cek Paket</p>
+                                    <span class="text-[7px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider border border-blue-200/60">Internal</span>
                                 </div>
-                                <div class="flex gap-2">
-                                    <label class="flex-1 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[10px] font-black text-center rounded-full cursor-pointer shadow-sm hover:from-blue-600 hover:to-indigo-600 active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                                        <i class="fa-solid fa-camera text-[11px]"></i> Kamera <input type="file" accept="image/*" capture="environment" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'CEK_PAKET', '${ekspedisi}')">
+                                <div class="flex gap-1.5">
+                                    <label class="flex-1 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[9px] font-black text-center rounded-full cursor-pointer shadow-sm hover:from-blue-600 hover:to-indigo-600 active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-wider">
+                                        <i class="fa-solid fa-camera text-[10px]"></i> Kamera <input type="file" accept="image/*" capture="environment" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'CEK_PAKET', '${ekspedisi}')">
                                     </label>
-                                    <label class="flex-1 py-2 bg-slate-50 text-slate-600 text-[10px] font-black text-center rounded-full border border-slate-200 cursor-pointer shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                                        <i class="fa-regular fa-image text-slate-400 text-[11px]"></i> Galeri <input type="file" accept="image/*" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'CEK_PAKET', '${ekspedisi}')">
+                                    <label class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[9px] font-black text-center rounded-full border border-slate-200 cursor-pointer shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-wider">
+                                        <i class="fa-regular fa-image text-slate-400 text-[10px]"></i> Galeri <input type="file" accept="image/*" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'CEK_PAKET', '${ekspedisi}')">
                                     </label>
                                 </div>
                             </div>
                             
                             <!-- SOP 2: PACKING -->
-                            <div class="bg-white p-2.5 rounded-2xl border border-orange-100 shadow-sm flex flex-col gap-2">
-                                <div class="flex items-center justify-between px-1.5">
-                                    <p class="text-[10px] font-black text-slate-800 flex items-center gap-1.5"><span class="bg-orange-100 text-orange-600 w-5 h-5 inline-flex items-center justify-center rounded-full text-[9px] font-black shadow-inner">2</span> Bukti Packing</p>
-                                    <span class="text-[8px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded font-black uppercase tracking-wider border border-orange-200/60">Kurir</span>
+                            <div class="bg-white p-1.5 rounded-xl border border-orange-100 shadow-sm flex flex-col gap-1.5">
+                                <div class="flex items-center justify-between px-1">
+                                    <p class="text-[9px] font-black text-slate-800 flex items-center gap-1.5"><span class="bg-orange-100 text-orange-600 w-4 h-4 inline-flex items-center justify-center rounded-full text-[8px] font-black shadow-inner">2</span> Bukti Packing</p>
+                                    <span class="text-[7px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider border border-orange-200/60">Kurir</span>
                                 </div>
-                                <div class="flex gap-2">
-                                    <label class="flex-1 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-black text-center rounded-full cursor-pointer shadow-sm hover:from-orange-600 hover:to-red-600 active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                                        <i class="fa-solid fa-camera text-[11px]"></i> Kamera <input type="file" accept="image/*" capture="environment" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'PACKING', '${ekspedisi}')">
+                                <div class="flex gap-1.5">
+                                    <label class="flex-1 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[9px] font-black text-center rounded-full cursor-pointer shadow-sm hover:from-orange-600 hover:to-red-600 active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-wider">
+                                        <i class="fa-solid fa-camera text-[10px]"></i> Kamera <input type="file" accept="image/*" capture="environment" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'PACKING', '${ekspedisi}')">
                                     </label>
-                                    <label class="flex-1 py-2 bg-slate-50 text-slate-600 text-[10px] font-black text-center rounded-full border border-slate-200 cursor-pointer shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                                        <i class="fa-regular fa-image text-slate-400 text-[11px]"></i> Galeri <input type="file" accept="image/*" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'PACKING', '${ekspedisi}')">
+                                    <label class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[9px] font-black text-center rounded-full border border-slate-200 cursor-pointer shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-wider">
+                                        <i class="fa-regular fa-image text-slate-400 text-[10px]"></i> Galeri <input type="file" accept="image/*" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'PACKING', '${ekspedisi}')">
                                     </label>
                                 </div>
                             </div>
 
                             <!-- SOP 3: RESI -->
-                            <div class="bg-white p-2.5 rounded-2xl border border-emerald-100 shadow-sm flex flex-col gap-2">
-                                <div class="flex items-center justify-between px-1.5">
-                                    <p class="text-[10px] font-black text-slate-800 flex items-center gap-1.5"><span class="bg-emerald-100 text-emerald-600 w-5 h-5 inline-flex items-center justify-center rounded-full text-[9px] font-black shadow-inner">3</span> Bukti Resi</p>
-                                    <span class="text-[8px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-200/60">Internal</span>
+                            <div class="bg-white p-1.5 rounded-xl border border-emerald-100 shadow-sm flex flex-col gap-1.5">
+                                <div class="flex items-center justify-between px-1">
+                                    <p class="text-[9px] font-black text-slate-800 flex items-center gap-1.5"><span class="bg-emerald-100 text-emerald-600 w-4 h-4 inline-flex items-center justify-center rounded-full text-[8px] font-black shadow-inner">3</span> Bukti Resi</p>
+                                    <span class="text-[7px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-200/60">Internal</span>
                                 </div>
-                                <div class="flex gap-2">
-                                    <label class="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black text-center rounded-full cursor-pointer shadow-sm hover:from-emerald-600 hover:to-teal-600 active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                                        <i class="fa-solid fa-camera text-[11px]"></i> Kamera <input type="file" accept="image/*" capture="environment" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'RESI', '${ekspedisi}')">
+                                <div class="flex gap-1.5">
+                                    <label class="flex-1 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-black text-center rounded-full cursor-pointer shadow-sm hover:from-emerald-600 hover:to-teal-600 active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-wider">
+                                        <i class="fa-solid fa-camera text-[10px]"></i> Kamera <input type="file" accept="image/*" capture="environment" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'RESI', '${ekspedisi}')">
                                     </label>
-                                    <label class="flex-1 py-2 bg-slate-50 text-slate-600 text-[10px] font-black text-center rounded-full border border-slate-200 cursor-pointer shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                                        <i class="fa-regular fa-image text-slate-400 text-[11px]"></i> Galeri <input type="file" accept="image/*" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'RESI', '${ekspedisi}')">
+                                    <label class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[9px] font-black text-center rounded-full border border-slate-200 cursor-pointer shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-wider">
+                                        <i class="fa-regular fa-image text-slate-400 text-[10px]"></i> Galeri <input type="file" accept="image/*" class="hidden" onchange="prosesKirimTelegram(this, '${id}', 'RESI', '${ekspedisi}')">
                                     </label>
                                 </div>
                             </div>
@@ -819,7 +827,25 @@
             renderCards(); 
         });
         
-        window.onload = () => { ambilDataSupabase(); };
+       // =======================================================
+        // INTEGRASI REALTIME SUPABASE (DARI DATABASE.JS)
+        // =======================================================
+        // Menyadap (override) fungsi refresh otomatis bawaan database.js
+        // agar langsung merender ulang khusus halaman Logistik ini.
+        window.jalankanPenyegaranLayarWindows = function() {
+            if (typeof ambilDataSupabase === 'function') {
+                ambilDataSupabase(true); // Tarik data senyap & tampilkan notif jika ada order baru
+            }
+        };
+
+        window.onload = () => { 
+            // 1. Tarikan pertama kali buka aplikasi
+            ambilDataSupabase(false); 
+            
+            // 2. RADAR BACKGROUND (10 Detik) DIHAPUS
+            // Karena sekarang Logistik sudah menggunakan Realtime instan (0 detik) 
+            // bawaan dari inisialisasiSupabaseRealtime() di database.js
+        };
     </script>
 </body>
 </html>
