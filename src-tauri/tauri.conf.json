@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rekap",
+  "productName": "Logistik Pro",
   "version": "0.1.0",
-  "identifier": "com.hmr.rekap",
+  "identifier": "com.hmr.logistik",
   "build": {
     "frontendDist": "../src"
   },
@@ -12,7 +12,8 @@
       {
         "title": "LOGISTIK",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "url": "logistik.html"
       }
     ],
     "security": {
