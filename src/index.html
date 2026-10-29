@@ -38,24 +38,63 @@
  <!-- 3. BARU PANGGIL DATABASE.JS (Mesin Anda) -->
  <script src="database.js?v=16"></script>
 
-<!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (TAURI V2 - FINAL) -->
+<!-- SCRIPT PENYELAMAT DOWNLOAD UNIVERSAL (OFFLINE FIRST - NATIVE OPEN) -->
 <script>
+    // 1. FUNGSI KHUSUS UNTUK MEMBUKA FILE DI LAPTOP (WINDOWS/MAC) VIA TAURI
+    window.bukaFileDiLaptop = async function(pathFisik) {
+        if (window.__TAURI__ && pathFisik) {
+            try {
+                const tauriCore = window.__TAURI__.core;
+                // Perintah ampuh Tauri untuk langsung membuka file dengan aplikasi bawaan komputer (Misal: Microsoft Excel / Word)
+                await tauriCore.invoke('plugin:shell|open', { path: pathFisik });
+            } catch (e) {
+                console.log("Gagal buka otomatis:", e);
+            }
+        }
+    };
+
+    // 2. FUNGSI NOTIFIKASI CUSTOM (KHUSUS UNTUK LAPTOP/TAURI)
+    window.tampilkanNotifLaptop = function(judul, pesan, pathFisik) {
+        if (!("Notification" in window) || !window.__TAURI__) return;
+
+        if (Notification.permission === "granted") {
+            const notif = new Notification(judul, { body: pesan, icon: 'logo.png' });
+            
+            // REAKSI SAAT NOTIFIKASI DI LAPTOP DIKLIK -> BUKA FILE!
+            notif.onclick = function() {
+                window.focus(); 
+                this.close();
+                window.bukaFileDiLaptop(pathFisik); 
+            };
+            setTimeout(() => notif.close(), 8000);
+            
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
+        // Minta izin notifikasi di awal khusus untuk pengguna Laptop
+        if ("Notification" in window && window.__TAURI__ && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+
         // FUNGSI INTI MENYIMPAN KE HARDISK MAC/WINDOWS VIA TAURI
-        window.simpanKeTauriData = async function(uint8Array, filename) {
+        window.simpanKeTauriData = async function(blob, filename) {
             if (!window.__TAURI__ || !window.__TAURI__.core) return false;
             
             try {
                 const tauriCore = window.__TAURI__.core;
+                const arrayBuffer = await blob.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
                 
-                // Ambil ekstensi untuk deteksi format otomatis
                 const extMatch = filename.match(/\.([^.]+)$/);
                 const ext = extMatch ? extMatch[1].toLowerCase() : '';
                 
                 const dialogOptions = { defaultPath: filename };
                 if (ext) dialogOptions.filters = [{ name: ext.toUpperCase(), extensions: [ext] }];
 
-                // Memunculkan kotak Save As bawaan sistem
+                // Memunculkan kotak Save As bawaan sistem Windows
                 const savePath = await tauriCore.invoke('plugin:dialog|save', { 
                     options: dialogOptions 
                 });
@@ -65,60 +104,77 @@
                         const fs = window.__TAURI__.fs || window.__TAURI__.plugin_fs;
                         await fs.writeFile(savePath, uint8Array);
                     } catch(err) {
-                        // Fallback terkuat jika penulisan standar ditolak
                         await tauriCore.invoke('plugin:fs|write', { path: savePath, contents: Array.from(uint8Array) });
                     }
+                    
                     if (typeof showToast === 'function') showToast("✅ File " + ext.toUpperCase() + " berhasil disimpan!");
+                    
+                    // PANGGIL NOTIFIKASI LAPTOP YANG BISA DIKLIK BUKA FILE
+                    window.tampilkanNotifLaptop(
+                        "Unduhan Selesai", 
+                        `File ${filename} telah disimpan. Klik notif ini untuk membuka file.`,
+                        savePath
+                    );
+                    
                     return true;
                 }
             } catch (e) {
-                const msg = typeof e === 'string' ? e : (e.message || JSON.stringify(e));
-                alert("❌ Gagal menyimpan file: " + msg);
+                alert("❌ Gagal menyimpan file.");
             }
             return false;
         };
 
-      // PEMBAJAK 1: FileSaver.js (Word Document)
-      if (window.saveAs) {
+        // PEMBAJAK 1: FileSaver.js (Word Document)
+        if (window.saveAs) {
             const originalSaveAs = window.saveAs;
             window.saveAs = async function(blob, filename) {
                 if (window.__TAURI__) {
                     try {
-                        const arrayBuffer = await blob.arrayBuffer();
-                        const uint8Array = new Uint8Array(arrayBuffer);
-                        const sukses = await window.simpanKeTauriData(uint8Array, filename);
+                        const sukses = await window.simpanKeTauriData(blob, filename);
                         if (sukses) return;
                     } catch(e) {}
                 }
+                
+                // DI HP ANDROID: Kita serahkan 100% ke Download Manager Asli Bawaan Android!
+                // Supaya notifikasi sistem muncul dengan tombol [BUKA FILE] yang bekerja secara Offline!
                 originalSaveAs(blob, filename);
+                if(typeof showToast === 'function') showToast("⏳ Mengunduh... Cek notifikasi bawaan HP Anda untuk membuka file.");
             };
         }
         
-        // PEMBAJAK 2: jsPDF (Semua PDF - Menangkap doc.save dan window.saveAs)
+        // PEMBAJAK 2: jsPDF (Semua PDF)
         if (window.jspdf && window.jspdf.jsPDF) {
             const originalPdfSave = window.jspdf.jsPDF.prototype.save;
-            window.jspdf.jsPDF.prototype.save = function(filename) {
+            window.jspdf.jsPDF.prototype.save = async function(filename) { 
+                const blob = this.output('blob'); 
+                
                 if (window.__TAURI__) {
-                    const arrayBuffer = this.output('arraybuffer');
-                    const uint8Array = new Uint8Array(arrayBuffer);
-                    window.simpanKeTauriData(uint8Array, filename);
+                    window.simpanKeTauriData(blob, filename);
                     return this;
                 }
-                return originalPdfSave.call(this, filename);
+                
+                // DI HP ANDROID: Diserahkan ke sistem Download Manager HP agar Offline
+                const result = originalPdfSave.call(this, filename);
+                if(typeof showToast === 'function') showToast("⏳ Memproses PDF... Cek notifikasi bawaan HP Anda untuk membuka file.");
+                return result;
             };
         }
         
         // PEMBAJAK 3: SheetJS / XLSX (Semua Excel)
         if (window.XLSX) {
             const originalXlsxWrite = window.XLSX.writeFile;
-            window.XLSX.writeFile = function(wb, filename) {
+            window.XLSX.writeFile = async function(wb, filename) { 
+                const arrayBuffer = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                
                 if (window.__TAURI__) {
-                    const arrayBuffer = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                    const uint8Array = new Uint8Array(arrayBuffer);
-                    window.simpanKeTauriData(uint8Array, filename);
+                    window.simpanKeTauriData(blob, filename);
                     return;
                 }
+                
+                // DI HP ANDROID: Diserahkan ke sistem Download Manager HP agar Offline
                 originalXlsxWrite(wb, filename);
+                if(typeof showToast === 'function') showToast("⏳ Menyiapkan Excel... Cek notifikasi bawaan HP Anda untuk membuka file.");
             };
         }
     });
@@ -242,7 +298,7 @@
     .donat-svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
     .donat-track { fill: none; stroke-width: 4.5; stroke-linecap: round; }
     .donat-isi { fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    /* ========================================================= */
+   /* ========================================================= */
     /* GAYA TOOLTIP KACA CERDAS (Versi Lembut & Melayang Ke Bawah) */
     /* ========================================================= */
     .tooltip-kaca {
@@ -255,36 +311,60 @@
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Animasi super halus */
-        z-index: 150;
-        
-        /* REVISI: Pindah posisi ke BAWAH tombol (bukan di atas) */
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 9999; /* PERBAIKAN: Paksa tingkat tertinggi agar tidak terpotong header/wadah */
         top: 130%; 
-        left: 50%;
         
-        /* REVISI: Posisi awal sebelum animasi (bersembunyi sedikit di atas lalu turun) */
-        transform: translate(-50%, -10px); 
+        /* PERBAIKAN: Mengatur poros dari kanan agar merapat ke batas kanan tombol, 
+           mengindari teks menabrak sisi kanan layar jika teks terlalu panjang */
+        right: 0;
+        transform: translate(0, -10px); 
     }
 
-    /* 1. Kotak Teks Tooltip (Versi Lembut) */
+    /* 1. Kotak Teks Tooltip (Versi Lembut & Multi-Baris) */
     .tooltip-kaca::before {
         content: attr(data-tooltip);
-        background: rgba(255, 255, 255, 0.65); /* Kaca sedikit lebih bening */
+        background: rgba(255, 255, 255, 0.85); /* Dibuat sedikit lebih solid agar tulisan jelas terbaca */
         backdrop-filter: blur(12px) saturate(160%);
         -webkit-backdrop-filter: blur(12px) saturate(160%);
-        
-        /* REVISI FONT: Warna lebih soft, font kecil, normal (tidak bold), huruf biasa */
-        color: #475569; /* Slate 600 (Abu-abu kebiruan lembut) */
+        color: #475569; 
         font-size: 9px;
-        font-weight: 600; /* Semi-bold ringan, tidak terlalu tegas */
-        text-transform: none; /* Huruf normal (bukan kapital semua) */
+        font-weight: 600; 
+        text-transform: none; 
         letter-spacing: 0.3px;
+        line-height: 1.4; /* Memberi jarak nyaman antar baris kalimat */
         
-        padding: 5px 10px; /* Padding dipangkas agar kotak lebih mungil */
-        border-radius: 8px; /* Sudut lebih kecil agar proporsional */
-        white-space: nowrap;
+        padding: 6px 12px; 
+        border-radius: 8px; 
+        
+        /* PERBAIKAN ANTI POTONG: Memaksa teks turun baris jika kepanjangan */
+        white-space: normal; 
+        width: max-content; /* Otomatis melebar, tapi... */
+        max-width: 180px; /* ...terbatas max 180px, jika lebih akan otomatis turun baris! */
+        text-align: right; /* Menyesuaikan poros kanan */
+        
         border: 1px solid rgba(255, 255, 255, 0.9);
-        box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    /* 2. Segitiga Panah Atas Tooltip (Menyesuaikan Poros Baru) */
+    .tooltip-kaca::after {
+        content: '';
+        top: -12px; 
+        right: 20px; /* Geser panah agar tepat berada di atas tombol ujung kanan (Ceklis) */
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent rgba(255, 255, 255, 0.85) transparent;
+        backdrop-filter: blur(4px);
+    }
+
+    /* 3. Reaksi Saat Kursor Di-hover & Ditahan */
+    .tooltip-kaca:hover::before, .tooltip-kaca:hover::after {
+        opacity: 1;
+        visibility: visible;
+        /* Mengembalikan ke poros kanan bawah dengan aman */
+        transform: translate(0, 0); 
+        transition-delay: 0.5s; 
     }
 
     /* 2. Segitiga Panah Atas Tooltip */
@@ -314,14 +394,14 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
     
-  <!-- WADAH NOTIFIKASI PRODUKSI (SMART ALARM) MENGAMBANG DI POJOK KANAN BAWAH -->
-  <div id="wadah-notif-produksi" class="fixed bottom-8 right-4 md:right-6 z-[120] flex flex-col justify-end gap-1.5 w-40 md:w-[170px] pointer-events-none"></div>
-  
-    <!-- INDIKATOR SINYAL PERMANEN ANTI HANCUR (Pojok Kanan Atas - Ukuran Diperkecil) -->
-    <div id="connection-banner" style="position: fixed; top: 15px; right: 15px; z-index: 9999; padding: 6px 12px; border-radius: 20px; font-size: 9px; font-weight: 900; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #bfdbfe; background-color: rgba(239, 246, 255, 0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #1d4ed8; transition: all 0.3s ease;">
-        <span id="connection-dot" style="width: 7px; height: 7px; border-radius: 50%; background-color: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.8); transition: all 0.3s ease;"></span>
-        <span id="connection-text">MEMERIKSA...</span>
-      </div>
+    <!-- WADAH NOTIFIKASI PRODUKSI (SMART ALARM) MENGAMBANG DI POJOK KANAN BAWAH -->
+    <div id="wadah-notif-produksi" class="fixed bottom-8 right-4 md:right-6 z-[120] flex flex-col justify-end gap-1.5 w-40 md:w-[170px] pointer-events-none"></div>
+    
+      <!-- INDIKATOR SINYAL PERMANEN ANTI HANCUR (Pojok Kiri Atas - Di atas Logo HMR) -->
+      <div id="connection-banner" style="position: fixed; top: 15px; left: 24px; z-index: 9999; padding: 6px 12px; border-radius: 20px; font-size: 9px; font-weight: 900; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #bfdbfe; background-color: rgba(239, 246, 255, 0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #1d4ed8; transition: all 0.3s ease;">
+          <span id="connection-dot" style="width: 7px; height: 7px; border-radius: 50%; background-color: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.8); transition: all 0.3s ease;"></span>
+          <span id="connection-text">MEMERIKSA...</span>
+        </div>
   
     <!-- NOTIFIKASI KANAN ATAS (NEMPEL DI LAYAR LAPTOP/MONITOR) -->
     <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
@@ -807,7 +887,8 @@
             </div>
             
             <!-- Tombol Ceklis Konfeksi -->
-            <div class="tooltip-kaca" data-tooltip="pencocokan data ">
+            <div class="tooltip-kaca" data-tooltip="sebelum pencocokan data,
+            filter dahulu sarimbitnya ">
                 <button onclick="bukaModalCeklis()" class="bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 px-5 h-10 rounded-full text-[11px] font-black border border-white hover:from-indigo-500 hover:to-indigo-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(79,70,229,0.15)] flex items-center gap-2 group hover:shadow-[0_6px_15px_rgba(79,70,229,0.4)]"><i class="fa-solid fa-clipboard-check group-hover:scale-110 transition-transform"></i> Ceklis</button>
             </div>
             
@@ -889,7 +970,7 @@
                   <!-- TAMBAHAN: PROGRESS BAR CEKLIS PABRIK -->
                   <div id="progress-ceklis-container" class="px-6 py-4 bg-white/80 border-b border-slate-200/60 flex flex-col gap-2 hidden">
                       <div class="flex justify-between items-end">
-                          <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-1.5"></i> Progres Audit Konfeksi</span>
+                          <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-1.5"></i> Pencocokan data</span>
                           <span id="text-progres-ceklis" class="text-[11px] font-black text-emerald-600 tracking-wider">0 / 0 Item (0%)</span>
                       </div>
                       <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
