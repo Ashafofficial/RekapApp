@@ -73,15 +73,15 @@
                     class="w-full pl-8 pr-3 h-11 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 rounded-full text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm">
             </div>
             
-            <!-- Kotak Dropdown Sarimbit (Dipersempit Untuk HP) -->
-            <div class="relative w-[115px] md:w-[130px] shrink-0 group">
-                <select id="filterSarimbit" onchange="filterCards()" class="w-full pl-3 pr-6 h-11 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 rounded-full text-[10px] md:text-[11px] font-bold text-slate-700 appearance-none focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm cursor-pointer relative z-10 text-center">
-                    <option value="">Sarimbit</option>
-                </select>
-                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none z-20">
-                    <i class="fa-solid fa-chevron-down text-slate-400 group-focus-within:text-blue-500 transition-colors text-[9px]"></i>
-                </div>
+           <!-- Kotak Dropdown Sarimbit (Dipersempit Untuk HP) -->
+           <div class="relative w-[115px] md:w-[130px] shrink-0 group">
+            <select id="filterSarimbit" class="w-full pl-3 pr-6 h-11 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 rounded-full text-[10px] md:text-[11px] font-bold text-slate-700 appearance-none focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm cursor-pointer relative z-10 text-center">
+                <option value="">Sarimbit</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none z-20">
+                <i class="fa-solid fa-chevron-down text-slate-400 group-focus-within:text-blue-500 transition-colors text-[9px]"></i>
             </div>
+        </div>
         </div>
     </div>
 </header>
@@ -94,8 +94,8 @@
         </div>
     </div>
     
-    <!-- WADAH PAGINATION BARU -->
-    <div id="pagination-logistik" class="mt-2 relative z-30"></div>
+    <!-- WADAH PAGINATION (TOMBOL NEXT & PREV) -->
+    <div id="pagination-logistik" class="mt-4 mb-2 relative z-30"></div>
 </main>
 
     <!-- TOMBOL BATCH RESI (MELAYANG GAYA KAPSUL - POJOK KIRI) -->
@@ -331,14 +331,16 @@
             if (search !== "" || filter !== "") {
                 hasilFilter = groupedOrders.filter(group => {
                     const cocokNama = search === "" || group.teksPencarian.includes(search);
-                    const cocokFilter = filter === "" || group.items.some(i => i.sarimbit === filter);
+                    // KUNCI PERBAIKAN: Gunakan trik .trim().toLowerCase() agar kebal terhadap salah spasi atau huruf besar/kecil dari database
+                    const cocokFilter = filter === "" || group.items.some(i => (i.sarimbit || "").trim().toLowerCase() === filter.trim().toLowerCase());
                     return cocokNama && cocokFilter;
                 });
             }
 
             if (hasilFilter.length === 0) {
                 container.innerHTML = `<div class="text-center py-16 bg-white rounded-[2rem] border border-slate-200 shadow-sm"><i class="fa-solid fa-box-open text-5xl mb-4 text-slate-300"></i><p class="text-sm font-bold text-slate-500">Pesanan tidak ditemukan.</p></div>`;
-                document.getElementById('pagination-logistik').innerHTML = ''; // Sembunyikan halaman jika kosong
+                const halContainer = document.getElementById('pagination-logistik');
+                if (halContainer) halContainer.innerHTML = ''; // Sembunyikan halaman jika kosong
                 return;
             }
 
@@ -378,7 +380,6 @@
                 group.items.forEach(item => {
                     const qty = item.jumlah || item.qty || item.quantity || 1;
                     const beratAsli = Number(item.berat || item.berat_gram || 0);
-                    // KUNCI PERBAIKAN: Hapus penambahan +300g per item, gunakan berat murni!
                     totalBeratGram += (beratAsli * qty); 
                     
                     const namaBarang = item.sarimbit + " - " + item.barang;
@@ -515,11 +516,46 @@
                 fragment.appendChild(card);
             });
 
-            // Masukkan kartu-kartu ke container
+            // Masukkan kartu-kartu ke container utama
             container.appendChild(fragment);
             
-            // Render Navigasi Paginasi di Bawahnya
+            // Render Navigasi Paginasi (Next/Prev) di Bawahnya
             renderPaginationLogistik(totalData, totalPages);
+        }
+        
+        // =======================================================
+        // FUNGSI RENDER TOMBOL NEXT/PREV (GAYA KACA iOS)
+        // =======================================================
+        function renderPaginationLogistik(totalItems, totalPages) {
+            const paginationContainer = document.getElementById("pagination-logistik");
+            if (!paginationContainer) return;
+            
+            if (totalPages <= 1) { 
+                paginationContainer.innerHTML = `<div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mt-2 mb-8">Total: ${totalItems} Antrean</div>`; 
+                return; 
+            }
+            
+            paginationContainer.innerHTML = `
+                <div class="flex items-center justify-between p-3.5 bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white shadow-[0_4px_15px_rgba(0,0,0,0.03)] mb-8 transition-all relative z-40 mx-2">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider ml-3">Hal <span class="text-indigo-600 font-black">${window.currentPageLogistik}</span> dari ${totalPages}</div>
+                    <div class="flex gap-2">
+                        <button onclick="changePageLogistik(-1)" ${window.currentPageLogistik === 1 ? 'disabled' : ''} class="w-10 h-10 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-600 shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed border-b-2">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button onclick="changePageLogistik(1)" ${window.currentPageLogistik === totalPages ? 'disabled' : ''} class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 border border-transparent rounded-full text-white shadow-[0_4px_10px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_12px_rgba(79,70,229,0.4)] hover:from-indigo-600 hover:to-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed border-b-2 border-indigo-700">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // FUNGSI PEMINDAH HALAMAN
+        function changePageLogistik(direction) { 
+            window.currentPageLogistik += direction; 
+            renderCards(); 
+            // Cerdas: Scroll mulus kembali ke ujung atas secara otomatis setiap kali pindah halaman
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
         
         // FUNGSI RENDER TOMBOL NEXT/PREV (GAYA KACA)
@@ -532,13 +568,13 @@
             }
             
             paginationContainer.innerHTML = `
-                <div class="flex items-center justify-between p-3.5 bg-white/70 backdrop-blur-xl rounded-full border border-white shadow-[0_4px_15px_rgba(0,0,0,0.03)] mb-8 transition-all mx-2">
-                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider ml-3">Hal ${window.currentPageLogistik} dari ${totalPages}</div>
+                <div class="flex items-center justify-between p-3.5 bg-white/70 backdrop-blur-xl rounded-[2rem] border border-white shadow-[0_4px_15px_rgba(0,0,0,0.03)] mb-8 transition-all relative z-40 mx-2">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider ml-3">Hal <span class="text-indigo-600 font-black">${window.currentPageLogistik}</span> dari ${totalPages}</div>
                     <div class="flex gap-2">
-                        <button onclick="changePageLogistik(-1)" ${window.currentPageLogistik === 1 ? 'disabled' : ''} class="w-10 h-10 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-600 shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        <button onclick="changePageLogistik(-1)" ${window.currentPageLogistik === 1 ? 'disabled' : ''} class="w-10 h-10 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-600 shadow-sm hover:bg-slate-100 hover:text-slate-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed border-b-2">
                             <i class="fa-solid fa-chevron-left text-xs"></i>
                         </button>
-                        <button onclick="changePageLogistik(1)" ${window.currentPageLogistik === totalPages ? 'disabled' : ''} class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 border border-transparent rounded-full text-white shadow-[0_4px_10px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_12px_rgba(79,70,229,0.4)] hover:from-indigo-600 hover:to-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        <button onclick="changePageLogistik(1)" ${window.currentPageLogistik === totalPages ? 'disabled' : ''} class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 border border-transparent rounded-full text-white shadow-[0_4px_10px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_12px_rgba(79,70,229,0.4)] hover:from-indigo-600 hover:to-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed border-b-2 border-indigo-700">
                             <i class="fa-solid fa-chevron-right text-xs"></i>
                         </button>
                     </div>
@@ -546,12 +582,14 @@
             `;
         }
 
+        // FUNGSI PEMINDAH HALAMAN
         function changePageLogistik(direction) { 
             window.currentPageLogistik += direction; 
             renderCards(); 
             // Cerdas: Scroll mulus kembali ke ujung atas secara otomatis setiap kali pindah halaman
             window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
+
         // =======================================================
         // KIRIM FOTO DARI DALAM KARTU (3 TOMBOL SOP)
         // =======================================================
