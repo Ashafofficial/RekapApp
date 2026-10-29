@@ -1,4 +1,4 @@
-package com.hmr.logistik
+package com.hmr.rekap
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
