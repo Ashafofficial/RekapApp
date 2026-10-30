@@ -587,11 +587,59 @@ if (statusSync && statusTxt) {
 
    // MEMUAT DATA PERTAMA KALI HALAMAN DIBUKA
    window.onload = function() {
-        periksaSinyal();
-        
-        muatDataPembukuan();
+       periksaSinyal();
+       
+       muatDataPembukuan();
 
-        if (typeof initDeviceId === 'function') initDeviceId();
+       if (typeof initDeviceId === 'function') initDeviceId();
+       
+       // =======================================================
+       // FITUR PINTAR: TANGKAP PERINTAH DARI KLIK NOTIFIKASI DI INDEX.HTML
+       // =======================================================
+       const sarimbitBidikan = sessionStorage.getItem('sorot_sarimbit_pembukuan');
+       if (sarimbitBidikan) {
+           // Segera hapus memorinya agar tidak terjadi efek berulang saat di-refresh manual
+           sessionStorage.removeItem('sorot_sarimbit_pembukuan');
+           
+           // Kita gunakan interval untuk memastikan tabel sudah selesai digambar (dirender) di layar
+           let pencarianSelesai = false;
+           let percobaanCari = 0;
+           
+           const timerCari = setInterval(() => {
+               percobaanCari++;
+               // Cari id baris tabel yang dienkripsi (Base64) dengan aman
+               const idAmanTarget = btoa(encodeURIComponent(sarimbitBidikan)).replace(/[^a-zA-Z0-9]/g, '');
+               const barisTarget = document.getElementById(`row-${idAmanTarget}`);
+               
+               if (barisTarget) {
+                   clearInterval(timerCari);
+                   pencarianSelesai = true;
+                   
+                   // 1. Filter paksa pencarian tabel agar sarimbit target tampil (jika daftar sangat panjang)
+                   const inputCari = document.getElementById('filter-sarimbit');
+                   if (inputCari) {
+                       inputCari.value = sarimbitBidikan;
+                       if(typeof filterTable === 'function') filterTable();
+                   }
+                   
+                   // 2. Gulir layar (Scroll) langsung menuju baris target
+                   barisTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                   
+                   // 3. Efek Kedip Sorot (Blink Kuning Lembut) agar mata Admin tertuju padanya
+                   setTimeout(() => {
+                       barisTarget.classList.add('bg-amber-100', 'transition-colors', 'duration-[1500ms]');
+                       
+                       setTimeout(() => {
+                           barisTarget.classList.remove('bg-amber-100');
+                       }, 2000);
+                   }, 500); // Tunda sebentar efek kedipnya agar serasi dengan scroll layar
+                   
+               } else if (percobaanCari > 30) {
+                   // Berhenti mencari jika setelah 3 detik baris tidak ditemukan
+                   clearInterval(timerCari);
+               }
+           }, 100); // Meraba tabel setiap 100 milidetik
+       }
     };
 
     function showToast(msg) {

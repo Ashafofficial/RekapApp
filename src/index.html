@@ -441,7 +441,7 @@
       </div>
 
     <!-- Area Navigasi Adaptif (Padding menyusut di HP) -->
-  <nav class="flex-1 overflow-y-auto overflow-x-hidden px-1 md:px-2 pt-3 md:pt-6 pb-24 relative w-full h-full custom-scrollbar">
+  <nav class="flex-1 overflow-y-auto overflow-x-hidden px-1 md:px-2 pt-0 md:pt-1 pb-24 relative w-full h-full custom-scrollbar">
     <div class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest px-5 md:px-6 mb-2 md:mb-3">Menu Utama</div>
     
     <button onclick="switchTab('order')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm active-link" id="nav-order">
@@ -795,7 +795,7 @@
 
                   <div class="relative group">
                       <select id="filter-berat-master" onchange="renderMaster()" class="shrink-0 h-10 bg-slate-50 border border-slate-200/60 pl-4 pr-7 rounded-full text-[11px] font-bold text-slate-700 cursor-pointer outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 hover:bg-slate-100 transition-all appearance-none shadow-sm w-[110px]">
-                          <option value="">Semua Gram</option>
+                          <option value="">Gram</option>
                           <option value="nol">0 gr (Kosong)</option>
                           <option value="ada">Sudah Terisi</option>
                       </select>
@@ -873,14 +873,24 @@
             <!-- GARIS PEMISAH VERTIKAL -->
             <div class="w-px h-6 bg-slate-300 mx-1 shrink-0"></div>
             
-            <!-- Tombol Excel -->
-            <div class="tooltip-kaca" data-tooltip="Unduh data ke Excel">
-                <button onclick="exportRekapExcel()" class="bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-5 h-10 rounded-full text-[11px] font-black border border-white hover:from-emerald-500 hover:to-emerald-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center gap-2 group"><i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> Excel</button>
-            </div>
-            
-            <!-- Tombol Laporan PDF -->
-            <div class="tooltip-kaca" data-tooltip="Unduh data ke PDF">
-                <button onclick="exportRekapPDF()" class="bg-gradient-to-br from-rose-50 to-rose-100 text-rose-600 px-5 h-10 rounded-full text-[11px] font-black border border-white hover:from-rose-500 hover:to-rose-600 hover:text-white active:scale-95 transition-all shadow-[0_4px_12px_rgba(244,63,94,0.15)] flex items-center gap-2 group"><i class="fa-solid fa-file-pdf group-hover:scale-110 transition-transform"></i> Laporan</button>
+            <!-- Tombol Unduh Gabungan (Pop-up Dropdown) -->
+            <div class="relative z-[99999]" id="wadah-dropdown-unduh-rekap">
+                <button onclick="toggleDropdownUnduhRekap()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 h-10 rounded-full text-[11px] font-black uppercase tracking-widest border border-slate-600 hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_6px_16px_rgba(15,23,42,0.4)] flex items-center gap-2 group relative z-[99999]">
+                    <i class="fa-solid fa-cloud-arrow-down text-slate-300"></i> UNDUH <i class="fa-solid fa-chevron-down text-[9px] ml-1 text-slate-400 group-hover:text-white transition-all" id="ikon-chevron-unduh-rekap"></i>
+                </button>
+                
+                <!-- Pop-up Menu Transparan (Kaca Blur) Rata Tengah -->
+                <div id="dropdown-unduh-rekap" class="hidden absolute left-1/2 -translate-x-1/2 top-[calc(100%+12px)] w-40 bg-white/70 backdrop-blur-2xl rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.2)] border border-white/80 p-2 z-[999999] opacity-0 scale-95 origin-top transition-all duration-300 flex flex-col gap-1.5">
+                    
+                    <button onclick="tutupDropdownUnduhRekap(); exportRekapExcel()" class="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 text-emerald-600 hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm hover:shadow-[0_6px_15px_rgba(16,185,129,0.3)] border border-emerald-100 hover:border-transparent group bg-white/80">
+                        <span>Excel</span> <i class="fa-solid fa-file-excel group-hover:scale-125 transition-transform text-xs"></i>
+                    </button>
+                    
+                    <button onclick="tutupDropdownUnduhRekap(); exportRekapPDF()" class="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r hover:from-rose-500 hover:to-red-500 text-rose-600 hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm hover:shadow-[0_6px_15px_rgba(244,63,94,0.3)] border border-rose-100 hover:border-transparent group bg-white/80">
+                        <span>PDF</span> <i class="fa-solid fa-file-pdf group-hover:scale-125 transition-transform text-xs"></i>
+                    </button>
+                    
+                </div>
             </div>
             
             <!-- Tombol Ceklis Konfeksi -->
@@ -1104,41 +1114,77 @@
     </div>
   </div>
 
-  <!-- Script Penutup dan Animasi Dropdown (Penyebab bocornya layar sudah dihapus) -->
-  <script>
-      function toggleExportMenu() {
-          const menu = document.getElementById('export-menu');
-          const chevron = document.getElementById('export-chevron');
-          if (menu.classList.contains('hidden')) {
-              menu.classList.remove('hidden');
-              if(chevron) chevron.style.transform = 'rotate(180deg)';
-              setTimeout(() => {
-                  menu.classList.remove('opacity-0', 'scale-95');
-              }, 10);
-          } else {
-              tutupExportMenu();
-          }
-      }
+ <!-- Script Penutup dan Animasi Dropdown -->
+ <script>
+    // ==========================================
+    // KENDALI DROPDOWN TOMBOL "UNDUH" DI MENU REKAP
+    // ==========================================
+    function toggleDropdownUnduhRekap() {
+        const menu = document.getElementById('dropdown-unduh-rekap');
+        const chevron = document.getElementById('ikon-chevron-unduh-rekap');
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            if(chevron) chevron.style.transform = 'rotate(180deg)';
+            setTimeout(() => { menu.classList.remove('opacity-0', 'scale-95'); }, 10);
+        } else {
+            tutupDropdownUnduhRekap();
+        }
+    }
 
-      function tutupExportMenu() {
-          const menu = document.getElementById('export-menu');
-          const chevron = document.getElementById('export-chevron');
-          if(menu) {
-              menu.classList.add('opacity-0', 'scale-95');
-              if(chevron) chevron.style.transform = 'rotate(0deg)';
-              setTimeout(() => {
-                  menu.classList.add('hidden');
-              }, 200); 
-          }
-      }
+    function tutupDropdownUnduhRekap() {
+        const menu = document.getElementById('dropdown-unduh-rekap');
+        const chevron = document.getElementById('ikon-chevron-unduh-rekap');
+        if(menu) {
+            menu.classList.add('opacity-0', 'scale-95');
+            if(chevron) chevron.style.transform = 'rotate(0deg)';
+            setTimeout(() => { menu.classList.add('hidden'); }, 200); 
+        }
+    }
 
-      document.addEventListener('click', function(event) {
-          const container = document.getElementById('dropdown-export-container');
-          if (container && !container.contains(event.target)) {
-              tutupExportMenu();
-          }
-      });
-  </script>
+    // ==========================================
+    // KENDALI DROPDOWN TOMBOL "EXPORT" DI MENU SLIP
+    // ==========================================
+    function toggleExportMenu() {
+        const menu = document.getElementById('export-menu');
+        const chevron = document.getElementById('export-chevron');
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            if(chevron) chevron.style.transform = 'rotate(180deg)';
+            setTimeout(() => {
+                menu.classList.remove('opacity-0', 'scale-95');
+            }, 10);
+        } else {
+            tutupExportMenu();
+        }
+    }
+
+    function tutupExportMenu() {
+        const menu = document.getElementById('export-menu');
+        const chevron = document.getElementById('export-chevron');
+        if(menu) {
+            menu.classList.add('opacity-0', 'scale-95');
+            if(chevron) chevron.style.transform = 'rotate(0deg)';
+            setTimeout(() => {
+                menu.classList.add('hidden');
+            }, 200); 
+        }
+    }
+
+    // ==========================================
+    // PENUTUP OTOMATIS JIKA DIKLIK DI LUAR KOTAK
+    // ==========================================
+    document.addEventListener('click', function(event) {
+        const containerExport = document.getElementById('dropdown-export-container');
+        if (containerExport && !containerExport.contains(event.target)) {
+            tutupExportMenu();
+        }
+        
+        const containerUnduhRekap = document.getElementById('wadah-dropdown-unduh-rekap');
+        if (containerUnduhRekap && !containerUnduhRekap.contains(event.target)) {
+            tutupDropdownUnduhRekap();
+        }
+    });
+</script>
     <!-- TABEL DATA CUSTOMER -->
     <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/50">
         <div class="overflow-x-auto">
@@ -3123,8 +3169,16 @@ function switchTab(t) {
     }
 
 // =======================================================
-// FUNGSI SMART ALARM PRODUKSI (CLOSE & READY)
+// FUNGSI SMART ALARM PRODUKSI (CLOSE & READY) - BISA DIKLIK
 // =======================================================
+// Fungsi jembatan untuk meluncur ke buku catatan dari notif
+function bukaBukuDariNotif(namaSarimbit) {
+    // Simpan nama sarimbit ke memori sementara (sessionStorage) agar diambil oleh halaman pembukuan
+    sessionStorage.setItem('sorot_sarimbit_pembukuan', namaSarimbit);
+    // Jalankan efek pindah halaman
+    pindahHalaman('pembukuan.html');
+}
+
 function cekNotifikasiProduksi() {
     const wadah = document.getElementById('wadah-notif-produksi');
     if (!wadah || !pembukuanData || pembukuanData.length === 0) return;
@@ -3135,21 +3189,18 @@ function cekNotifikasiProduksi() {
     const sekarang = new Date();
     sekarang.setHours(0,0,0,0);
 
-    // FUNGSI PINTAR: Mengakali format tanggal apapun yang masuk dari Supabase/Excel
     const parsingTanggalAman = (tglString) => {
         if (!tglString) return null;
         let str = String(tglString).trim();
-        // Jika pakai garis miring atau titik (contoh: 15/10/2026 atau 15.10.2026)
         if (str.includes('/') || str.includes('.')) {
             const pemisah = str.includes('/') ? '/' : '.';
             const bagian = str.split(pemisah);
-            // Susun paksa menjadi format Internasional (YYYY-MM-DD)
             if (bagian[0].length <= 2 && bagian[2].length === 4) {
                 str = `${bagian[2]}-${bagian[1]}-${bagian[0]}`; 
             }
         }
         const hasilTgl = new Date(str);
-        if (isNaN(hasilTgl.getTime())) return null; // Jika masih gagal terbaca
+        if (isNaN(hasilTgl.getTime())) return null; 
         hasilTgl.setHours(0,0,0,0);
         return hasilTgl;
     };
@@ -3167,18 +3218,19 @@ function cekNotifikasiProduksi() {
                     const teksHari = selisihClose === 0 ? "HARI INI" : "BESOK";
                     const warnaLed = selisihClose === 0 ? "bg-rose-500 shadow-rose-400" : "bg-orange-500 shadow-orange-400";
                     const warnaTeks = selisihClose === 0 ? "text-rose-700" : "text-orange-700";
+                    const amanSarimbitJS = (b.sarimbit || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
 
                     htmlNotif += `
-                    <div class="notif-item glass-notif relative px-3 py-2 rounded-xl flex items-center gap-3 w-full cursor-default overflow-hidden group shadow-lg border border-slate-200">
+                    <div onclick="bukaBukuDariNotif('${amanSarimbitJS}')" class="notif-item glass-notif relative px-3 py-2 rounded-xl flex items-center gap-3 w-full overflow-hidden group shadow-lg border border-slate-200 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="w-2 h-2 rounded-full ${warnaLed} shadow-sm shrink-0"></div>
                         <div class="flex-1 pr-5 min-w-0">
                             <div class="flex items-center gap-1.5 mb-1">
-                                <span class="text-[8px] font-black ${warnaTeks} uppercase tracking-wider">CLOSE ${teksHari}</span>
+                                <span class="text-[8px] font-black ${warnaTeks} uppercase tracking-wider group-hover:underline">CLOSE ${teksHari}</span>
                             </div>
                             <p class="text-[10px] font-bold text-slate-800 truncate leading-tight">${b.sarimbit}</p>
                             <p class="text-[8px] font-semibold text-slate-500 truncate leading-tight">${formatTanggalPanjang(tglClose.toISOString())}</p>
                         </div>
-                        <button onclick="this.closest('.notif-item').remove()" class="btn-close absolute right-2 w-5 h-5 bg-slate-100 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
+                        <button onclick="event.stopPropagation(); this.closest('.notif-item').remove()" class="btn-close absolute right-2 w-5 h-5 bg-slate-100 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
                             <i class="fa-solid fa-xmark text-[9px] font-black"></i>
                         </button>
                     </div>`;
@@ -3196,18 +3248,19 @@ function cekNotifikasiProduksi() {
                     const teksHari = selisihReady === 0 ? "HARI INI" : `H-${selisihReady}`;
                     const warnaLed = selisihReady === 0 ? "bg-emerald-500 shadow-emerald-400" : "bg-blue-500 shadow-blue-400";
                     const warnaTeks = selisihReady === 0 ? "text-emerald-700" : "text-blue-700";
+                    const amanSarimbitJS = (b.sarimbit || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
 
                     htmlNotif += `
-                    <div class="notif-item glass-notif relative px-3 py-2 rounded-xl flex items-center gap-3 w-full cursor-default overflow-hidden group shadow-lg border border-slate-200 mt-2">
+                    <div onclick="bukaBukuDariNotif('${amanSarimbitJS}')" class="notif-item glass-notif relative px-3 py-2 rounded-xl flex items-center gap-3 w-full overflow-hidden group shadow-lg border border-slate-200 mt-2 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="w-2 h-2 rounded-full ${warnaLed} shadow-sm shrink-0"></div>
                         <div class="flex-1 pr-5 min-w-0">
                             <div class="flex items-center gap-1.5 mb-1">
-                                <span class="text-[8px] font-black ${warnaTeks} uppercase tracking-wider">READY ${teksHari}</span>
+                                <span class="text-[8px] font-black ${warnaTeks} uppercase tracking-wider group-hover:underline">READY ${teksHari}</span>
                             </div>
                             <p class="text-[10px] font-bold text-slate-800 truncate leading-tight">${b.sarimbit}</p>
                             <p class="text-[8px] font-semibold text-slate-500 truncate leading-tight">${formatTanggalPanjang(tglReady.toISOString())}</p>
                         </div>
-                        <button onclick="this.closest('.notif-item').remove()" class="btn-close absolute right-2 w-5 h-5 bg-slate-100 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
+                        <button onclick="event.stopPropagation(); this.closest('.notif-item').remove()" class="btn-close absolute right-2 w-5 h-5 bg-slate-100 hover:bg-rose-100 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all outline-none backdrop-blur-sm cursor-pointer shadow-sm">
                             <i class="fa-solid fa-xmark text-[9px] font-black"></i>
                         </button>
                     </div>`;
