@@ -564,10 +564,10 @@
                 <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
                     <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Kurir Ekspedisi</label>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Ekspedisi</label>
                         <div class="relative">
                             <select id="o-ekspedisi" onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-slate-100 border border-transparent hover:bg-slate-200 rounded-full text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-none appearance-none cursor-pointer">
-                                <option value="">-- Pilih Ekspedisi --</option>
+                                <option value="">-- Ekspedisi --</option>
                                 <option value="JNE">JNE</option>
                                 <option value="JNT">JNT</option>
                                 <option value="POS">POS</option>
@@ -581,7 +581,7 @@
                         <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Orderan</label>
                         <div class="relative">
                             <select id="o-sumber" required onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-slate-100 border border-transparent hover:bg-slate-200 rounded-full text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-none appearance-none cursor-pointer">
-                                <option value="">-- Pilih Sumber --</option>
+                                <option value="">-- Sumber --</option>
                                 <option value="WhatsApp">🟢 WhatsApp</option>
                                 <option value="TikTok">🎵 TikTok</option>
                                 <option value="Instagram">📷 Instagram</option>
@@ -591,10 +591,10 @@
                         </div>
                     </div>
                     <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Toko</label>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Toko</label>
                         <div class="relative">
                             <select id="o-toko" required onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-slate-100 border border-transparent hover:bg-slate-200 rounded-full text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-none appearance-none cursor-pointer">
-                                <option value="">-- Pilih Toko --</option>
+                                <option value="">-- Toko --</option>
                                 <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
                                 <option value="MASARA.HIJAB">MASARA.HIJAB</option>
                             </select>
@@ -831,7 +831,7 @@
                   </label>
                   
                   <button onclick="exportMasterFilteredExcel()" class="flex-1 sm:flex-none h-10 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-4 rounded-full text-[10px] font-black shadow-[0_4px_12px_rgba(16,185,129,0.15)] border border-white hover:from-emerald-500 hover:to-emerald-600 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap group hover:shadow-[0_6px_15px_rgba(5,150,105,0.4)]">
-                      <i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> EXCEL
+                      <i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> UNDUH
                   </button>
               </div>
           </div>
@@ -946,9 +946,9 @@
                 <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-server"></i></div> Setor Barang</h4>
                 <div class="relative group">
                     <select id="export-rekap-filter" onchange="renderRekap()" class="w-full px-5 h-11 rounded-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10">
-                        <option value="semua">Semua (Total)</option>
-                        <option value="disetor">Hanya Sudah Disetor</option>
-                        <option value="antre">Hanya Antre (Belum Disetor)</option>
+                        <option value="semua">Semua</option>
+                        <option value="disetor">Sudah Disetor</option>
+                        <option value="antre">Belum Disetor</option>
                     </select>
                     <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-emerald-500 transition-colors z-20 pointer-events-none"></i>
                 </div>
@@ -1009,7 +1009,7 @@
 <div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
     <div class="flex flex-col md:flex-row justify-between items-center mb-5 gap-4 border-b border-slate-200 pb-4">
         <div>
-            <h2 class="text-3xl font-black tracking-tight text-slate-800">Database Pelanggan</h2>
+            <h2 class="text-3xl font-black tracking-tight text-slate-800">Database Costumer</h2>
         </div>
         
         <div class="flex items-center flex-wrap gap-2.5 md:justify-end w-full md:w-auto">
@@ -1084,7 +1084,7 @@
        <!-- Tombol Export Dropdown Pintar (DI LUAR AREA SCROLL FILTER) -->
        <div class="relative shrink-0 w-full lg:w-auto" id="dropdown-export-container">
         <button onclick="toggleExportMenu()" class="w-full lg:w-auto bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 h-10 rounded-full font-black hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all text-[11px] uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_6px_16px_rgba(15,23,42,0.4)] border border-slate-600">
-            <i class="fa-solid fa-cloud-arrow-down text-slate-300"></i> EXPORT <i class="fa-solid fa-chevron-down text-[9px] ml-1 transition-transform text-slate-400" id="export-chevron"></i>
+            <i class="fa-solid fa-cloud-arrow-down text-slate-300"></i> UNDUH <i class="fa-solid fa-chevron-down text-[9px] ml-1 transition-transform text-slate-400" id="export-chevron"></i>
         </button>
             
             <!-- Pop-up Menu Export (Gaya Kaca iOS x Samsung One UI) -->
@@ -4245,7 +4245,7 @@ async function handleOrderSubmit(e) {
               <td class="p-5 text-center align-middle">
                     <div class="flex flex-col gap-3 max-w-[105px] mx-auto">
                         <button onclick="printOneSlip('${c.idCustomer}')" title="Unduh Word" class="w-full py-2.5 px-3 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-full hover:from-blue-500 hover:to-blue-600 hover:text-white shadow-[0_4px_12px_rgba(59,130,246,0.15)] hover:shadow-[0_6px_15px_rgba(37,99,235,0.4)] hover:border-transparent transition-all duration-300 border border-white active:scale-95 flex items-center justify-center gap-2 group">
-                            <i class="fa-solid fa-file-word text-[11px] group-hover:scale-110 transition-transform"></i> <span class="text-[9px] font-black uppercase tracking-widest mt-0.5">Word</span>
+                            <i class="fa-solid fa-file-word text-[11px] group-hover:scale-110 transition-transform"></i> <span class="text-[9px] font-black uppercase tracking-widest mt-0.5">Invoice</span>
                         </button>
                         
                         <button onclick="printPdfNota('${c.idCustomer}')" title="Unduh Nota" class="w-full py-2.5 px-3 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 rounded-full hover:from-emerald-500 hover:to-emerald-600 hover:text-white shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:shadow-[0_6px_15px_rgba(5,150,105,0.4)] hover:border-transparent transition-all duration-300 border border-white active:scale-95 flex items-center justify-center gap-2 group">

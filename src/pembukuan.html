@@ -270,20 +270,17 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
     }
 </style>
 </head>
-<body class="p-2 md:p-6 pb-24 text-slate-800">
+<body class="p-2 md:p-6 pb-24 text-slate-800 relative">
 
-  <div id="connection-banner" class="fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[10px] font-black uppercase tracking-widest hidden shadow-sm transition-opacity duration-300"></div>
-
-  <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-start gap-4 pt-4">
-    <div>
-        <button onclick="pindahHalaman('index.html')" class="text-blue-600 font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 mb-2.5 hover:text-blue-800 transition-all drop-shadow-sm w-fit px-3 py-1.5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full border border-white hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)] active:scale-95 cursor-pointer group">
-          <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> KEMBALI KE PANEL UTAMA
-        </button>
-        <h1 class="text-xl md:text-[26px] font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm mb-0.5 leading-none">DASHBOARD PEMBUKUAN</h1>
-        <p class="text-slate-500 font-bold mt-1 text-[10px] md:text-[11px]">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
+    <div id="connection-banner" class="fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[10px] font-black uppercase tracking-widest hidden shadow-sm transition-opacity duration-300"></div>
+  
+    <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start gap-4 pt-4 relative z-10">
+      <div>
+          <h1 class="text-2xl md:text-[28px] font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm mb-1 leading-none">DASHBOARD PEMBUKUAN</h1>
+          <p class="text-slate-500 font-bold mt-1.5 text-[10px] md:text-xs">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
       </div>
-    
-    <!-- REVISI: NOTIF ONLINE DI ATAS, TOMBOL REFRESH DI BAWAHNYA -->
+      
+      <!-- REVISI: NOTIF ONLINE DI ATAS, TOMBOL REFRESH DI BAWAHNYA -->
     <div class="flex flex-col items-end gap-3 mt-1">
         <div id="status-sync" class="transition-all duration-300 px-5 py-2 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-white bg-white/80 backdrop-blur-md">
            <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-sm"></div> 
@@ -387,18 +384,25 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
                     <span class="text-base">Sedang memuat & menyinkronkan data pembukuan...</span>
                 </div>
             </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+        </tr>
+    </tbody>
+  </table>
+</div>
+</div>
 
-  <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
-      <span id="toast-msg" class="text-xs font-semibold tracking-wide"></span>
-  </div>
+<!-- TOMBOL KEMBALI MELAYANG (KIRI BAWAH) GAYA KACA SAMSUNG CAPSULE -->
+<button onclick="pindahHalaman('index.html')" class="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-[150] h-12 md:h-14 px-5 md:px-6 bg-white/30 backdrop-blur-md text-slate-700 rounded-full font-black text-[10px] md:text-xs tracking-widest uppercase border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/70 hover:border-white hover:text-blue-600 hover:shadow-[0_8px_32px_rgba(59,130,246,0.25)] hover:-translate-y-1 active:scale-90 transition-all duration-300 ease-out flex items-center justify-center gap-2.5 group overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-100/20 to-indigo-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <i class="fa-solid fa-arrow-left group-hover:-translate-x-1.5 transition-transform duration-300 relative z-10 text-xs md:text-sm text-slate-500 group-hover:text-blue-600"></i> 
+    <span class="relative z-10 hidden sm:inline-block transition-colors duration-300">Kembali</span>
+</button>
 
-  <script>
-    let rawSummary = [];
+<div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 transform -translate-y-32 opacity-0 scale-90 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] bg-slate-800 text-white px-5 py-3 rounded-xl shadow-2xl border border-slate-700 pointer-events-none w-max max-w-[90vw]">
+  <span id="toast-msg" class="text-xs font-semibold tracking-wide"></span>
+</div>
+
+<script>
+let rawSummary = [];
 
     // ==========================================
     // FUNGSI BARU: FORMAT RIBUAN DENGAN TITIK (DIHAPUS, DIGANTI NUMBER)
