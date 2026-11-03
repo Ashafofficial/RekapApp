@@ -491,6 +491,11 @@
          <span class="tracking-wide">Sumber</span>
      </button>
 
+    <button onclick="switchTab('notif')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-notif">
+        <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-amber-200 to-amber-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-amber-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(251,191,36,0.3)]"><i class="fa-solid fa-bell-concierge text-[10px] md:text-xs"></i></div>
+        <span class="tracking-wide">Log Aktivitas</span>
+    </button>
+
     <button onclick="switchTab('pengaturan')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-pengaturan">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-gray-200 to-slate-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-slate-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(71,85,105,0.3)] group-hover:scale-110"><i class="fa-solid fa-gear text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Pengaturan</span>
@@ -581,11 +586,11 @@
                         <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Orderan</label>
                         <div class="relative">
                             <select id="o-sumber" required onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-slate-100 border border-transparent hover:bg-slate-200 rounded-full text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-none appearance-none cursor-pointer">
-                                <option value="">-- Sumber --</option>
-                                <option value="WhatsApp">🟢 WhatsApp</option>
-                                <option value="TikTok">🎵 TikTok</option>
-                                <option value="Instagram">📷 Instagram</option>
-                                <option value="Reseller">🤝 Reseller</option>
+                                <option value="">-- Pilih Sumber --</option>
+                                <option value="WhatsApp">💬 WhatsApp</option>
+                                <option value="TikTok">🎶 TikTok</option>
+                                <option value="Instagram">📸 Instagram</option>
+                                <option value="Reseller">🛍️ Reseller</option>
                             </select>
                             <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
                         </div>
@@ -826,13 +831,13 @@
                       <i class="fa-solid fa-download group-hover:scale-110 transition-transform"></i> TEMPLATE
                   </button>
                   
-                  <label class="flex-1 sm:flex-none h-10 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 px-4 rounded-full text-[10px] font-black shadow-[0_4px_12px_rgba(79,70,229,0.15)] border border-white hover:from-indigo-500 hover:to-indigo-600 hover:text-white cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap m-0 group hover:shadow-[0_6px_15px_rgba(79,70,229,0.4)]">
-                      <i class="fa-solid fa-upload group-hover:scale-110 transition-transform"></i> IMPORT<input type="file" id="import-master-excel" class="hidden" accept=".xlsx, .xls" onchange="importMasterExcel(this)">
-                  </label>
+                  <button onclick="document.getElementById('import-excel').click()" class="bg-gradient-to-br from-indigo-50 to-blue-100 text-indigo-700 px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest border border-white shadow-[0_4px_10px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_15px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
+                    <i class="fa-solid fa-file-import group-hover:-translate-y-1 transition-transform"></i> IMPORT
+                </button>
                   
-                  <button onclick="exportMasterFilteredExcel()" class="flex-1 sm:flex-none h-10 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-4 rounded-full text-[10px] font-black shadow-[0_4px_12px_rgba(16,185,129,0.15)] border border-white hover:from-emerald-500 hover:to-emerald-600 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap group hover:shadow-[0_6px_15px_rgba(5,150,105,0.4)]">
-                      <i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> UNDUH
-                  </button>
+                  <button onclick="exportMasterToExcel()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
+                    <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
+                </button>
               </div>
           </div>
       </div>
@@ -905,105 +910,117 @@
       <!-- REVISI GRID: Panel Kiri 3 Porsi (Lebih Ramping), Panel Kanan 9 Porsi (Lebih Lega) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
         
-        <!-- PANEL KIRI (FILTER EFEK KACA TIMBUL) -->
-        <div class="lg:col-span-3 space-y-5">
+       <!-- PANEL KIRI (FILTER LEBIH PADAT & RINGKAS UNTUK HP/SPLIT SCREEN) -->
+       <div class="lg:col-span-3 h-fit sticky top-4 z-[90]">
             
-            <div class="bg-white/80 backdrop-blur-md p-5 md:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mb-4 relative z-[90]">
-                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center shadow-inner"><i class="fa-regular fa-calendar"></i></div> Rentang Waktu</h4>
-                <div class="h-11 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 rounded-full px-4 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 transition-all cursor-pointer w-full flex items-center shadow-sm">
-                    <div class="h-full flex items-center gap-2 w-full">
-                        <i class="fa-regular fa-calendar-days text-slate-400 text-xs ml-1"></i>
-                        <input type="text" id="filter-date-range-rekap" placeholder="Pilih Tanggal..." class="w-full p-0 m-0 bg-transparent border-none outline-none text-xs font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
+        <!-- PANEL GABUNGAN: Menyertakan semua filter dalam 1 wadah agar tidak boros padding -->
+        <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-white flex flex-col gap-4">
+            
+            <!-- RENTANG WAKTU & SETOR BARANG (Dijejerkan di layar kecil/sedang) -->
+            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                <div class="relative group">
+                    <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-regular fa-calendar text-blue-500"></i> Tanggal</label>
+                    <div class="h-10 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 rounded-full px-3 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all cursor-pointer w-full flex items-center shadow-sm">
+                        <input type="text" id="filter-date-range-rekap" placeholder="Pilih..." class="w-full p-0 m-0 bg-transparent border-none outline-none text-[11px] font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
                         <input type="hidden" id="filter-tgl-mulai-rekap">
                         <input type="hidden" id="filter-tgl-akhir-rekap">
                     </div>
                 </div>
-            </div>
-            
-            <div class="bg-white/80 backdrop-blur-md p-5 md:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mb-4 relative z-[80]">
-                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-filter"></i></div> Filter Spesifik</h4>
-                <div class="space-y-3.5">
-                  <div class="relative group">
-                      <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-5 h-11 rounded-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Semua Sarimbit --</option></select>
-                      <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                  </div>
-                  <div class="relative group">
-                      <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-5 h-11 rounded-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Semua Varian --</option></select>
-                      <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                  </div>
-                  <div class="relative group">
-                      <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full px-5 h-11 rounded-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Semua Barang --</option></select>
-                      <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                  </div>
-                  <div class="relative group">
-                      <select id="filter-size-rekap" onchange="renderRekap()" class="w-full px-5 h-11 rounded-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Semua Size --</option></select>
-                      <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                  </div>
-                </div>
-            </div>
-
-            <div class="bg-white/80 backdrop-blur-md p-5 md:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mb-4 relative z-[70]">
-                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-server"></i></div> Setor Barang</h4>
+                
                 <div class="relative group">
-                    <select id="export-rekap-filter" onchange="renderRekap()" class="w-full px-5 h-11 rounded-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10">
+                    <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-server text-emerald-500"></i> Status Setor</label>
+                    <select id="export-rekap-filter" onchange="renderRekap()" class="w-full pl-3 pr-6 h-10 rounded-full text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 hover:border-slate-300 outline-none focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10">
                         <option value="semua">Semua</option>
                         <option value="disetor">Sudah Disetor</option>
                         <option value="antre">Belum Disetor</option>
                     </select>
-                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-emerald-500 transition-colors z-20 pointer-events-none"></i>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-[32px] text-[9px] text-slate-400 group-hover:text-emerald-500 transition-colors z-20 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <!-- GARIS PEMISAH -->
+            <div class="w-full h-px bg-slate-100 my-1"></div>
+
+            <!-- FILTER SPESIFIK (Dibuat Grid 2x2 di layar kecil agar padat) -->
+            <div>
+                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</label>
+                <div class="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
+                    <div class="relative group">
+                        <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-10 rounded-full text-[10px] md:text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Sarimbit --</option></select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
+                    </div>
+                    <div class="relative group">
+                        <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-10 rounded-full text-[10px] md:text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Varian --</option></select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
+                    </div>
+                    <div class="relative group">
+                        <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-10 rounded-full text-[10px] md:text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Barang --</option></select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
+                    </div>
+                    <div class="relative group">
+                        <select id="filter-size-rekap" onchange="renderRekap()" class="w-full pl-3 pr-6 h-10 rounded-full text-[10px] md:text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-sm text-center appearance-none relative z-10"><option value="">-- Size --</option></select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
+                    </div>
                 </div>
             </div>
         </div>
-
-          <!-- PANEL KANAN (TABEL & TOTAL) -->
-          <div class="lg:col-span-9 flex flex-col gap-6">
-              
-              <!-- REVISI WIDGET TOTAL: Menggunakan gradien halus dan efek kedalaman -->
-              <div class="bg-gradient-to-br from-blue-500 via-indigo-500 to-indigo-600 p-6 md:p-8 rounded-[2rem] shadow-xl shadow-indigo-500/20 flex items-center justify-between border border-white/20 relative overflow-hidden">
-                  <div class="absolute right-0 top-0 opacity-10 text-9xl -mt-6 -mr-4 pointer-events-none"><i class="fa-solid fa-chart-pie"></i></div>
-                  <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-2xl pointer-events-none"></div>
-                  
-                  <div class="relative z-10">
-                      <p class="text-blue-100 text-[11px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-white/70"></i> Total Kuantitas Filter</p>
-                      <div class="flex items-baseline gap-2.5">
-                          <h3 id="total-qty-rekap" class="text-5xl md:text-6xl font-black text-white leading-none tracking-tight drop-shadow-md">0</h3>
-                          <span class="text-indigo-200 font-bold text-xl">Pcs</span>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="glass rounded-[2rem] overflow-hidden shadow-sm border border-slate-200/60 bg-white/60 flex-1 flex flex-col relative">
-                  
-                  <!-- TAMBAHAN: PROGRESS BAR CEKLIS PABRIK -->
-                  <div id="progress-ceklis-container" class="px-6 py-4 bg-white/80 border-b border-slate-200/60 flex flex-col gap-2 hidden">
-                      <div class="flex justify-between items-end">
-                          <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-1.5"></i> Pencocokan data</span>
-                          <span id="text-progres-ceklis" class="text-[11px] font-black text-emerald-600 tracking-wider">0 / 0 Item (0%)</span>
-                      </div>
-                      <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
-                          <div id="bar-progres-ceklis" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0 relative overflow-hidden">
-                              <div class="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity"></div>
-                          </div>
-                      </div>
-                  </div>
-
-                  <div class="overflow-x-auto flex-1">
-                    <table class="w-full text-sm text-left min-w-[500px]">
-                        <thead class="bg-slate-50/80 border-b border-slate-200">
-                            <tr class="text-slate-500 uppercase text-[10px] tracking-widest font-bold">
-                                <th class="px-6 py-5 w-[45%]">Koleksi & Barang</th>
-                                <th class="px-6 py-5 w-[30%]">Varian / Size</th>
-                                <th class="px-6 py-5 w-[25%] text-center">Jumlah Qty</th>
-                            </tr>
-                        </thead>
-                          <tbody id="tbody-rekap" class="divide-y divide-slate-100"></tbody>
-                      </table>
-                  </div>
-                  <div id="pagination-rekap" class="border-t border-slate-200/60 bg-white/50 p-2 relative z-10"></div>
-              </div>
-          </div>
-      </div>
+        
     </div>
+
+         <!-- PANEL KANAN (TABEL & TOTAL) -->
+         <div class="lg:col-span-9 flex flex-col gap-5 h-full">
+              
+            <!-- TABEL DENGAN HEADER TOTAL YANG MENYATU (Lebih Hemat Tempat) -->
+            <div class="glass rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 bg-white/60 flex-1 flex flex-col relative h-full">
+                
+                <!-- WIDGET TOTAL BARU (Menyatu sebagai Header Tabel) -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/20 relative z-20 shrink-0">
+                    <div>
+                        <h3 class="text-white font-black text-xl tracking-tight flex items-center gap-2"><i class="fa-solid fa-list-check text-blue-200"></i> Rincian Kuantitas</h3>
+                        <p class="text-blue-100 text-[10px] uppercase tracking-widest font-bold mt-1 opacity-90">Berdasarkan filter aktif</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 px-5 py-2.5 rounded-2xl flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black text-blue-100 uppercase tracking-widest mb-0.5">Total Keseluruhan</span>
+                            <div class="flex items-baseline gap-1.5 leading-none">
+                                <span id="total-qty-rekap" class="text-3xl font-black text-white drop-shadow-sm">0</span>
+                                <span class="text-blue-200 font-bold text-xs">Pcs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROGRESS BAR CEKLIS PABRIK -->
+                <div id="progress-ceklis-container" class="px-6 py-4 bg-white/80 border-b border-slate-200/60 flex flex-col gap-2 hidden shrink-0 relative z-10">
+                    <div class="flex justify-between items-end">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check text-emerald-500 mr-1.5"></i> Pencocokan data</span>
+                        <span id="text-progres-ceklis" class="text-[11px] font-black text-emerald-600 tracking-wider">0 / 0 Item (0%)</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                        <div id="bar-progres-ceklis" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar min-h-[400px]">
+                  <table class="w-full text-sm text-left min-w-[500px]">
+                      <thead class="bg-slate-50/90 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200 shadow-sm">
+                          <tr class="text-slate-500 uppercase text-[10px] tracking-widest font-bold">
+                              <th class="px-6 py-4 w-[45%]">Koleksi & Barang</th>
+                              <th class="px-6 py-4 w-[30%]">Varian / Size</th>
+                              <th class="px-6 py-4 w-[25%] text-center">Jumlah Qty</th>
+                          </tr>
+                      </thead>
+                        <tbody id="tbody-rekap" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+                <div id="pagination-rekap" class="border-t border-slate-200/60 bg-white/80 backdrop-blur-md p-2 relative z-20 shrink-0"></div>
+            </div>
+        </div>
+    </div>
+  </div>
 
   <!-- HALAMAN: RINCIAN CUSTOMER -->
 <div id="page-slip" class="page space-y-6 max-w-7xl mx-auto">
@@ -1301,6 +1318,25 @@
         </div>
     </div>
     </div>
+
+   <!-- HALAMAN: LOG AKTIVITAS (NOTIF) -->
+   <div id="page-notif" class="page space-y-6 max-w-5xl mx-auto w-full pb-10">
+    <div class="mb-4 flex justify-between items-center border-b border-slate-200 pb-4">
+        <div>
+            <h2 class="text-3xl font-black tracking-tight text-slate-800">Log Aktivitas Tim</h2>
+            <p class="text-slate-500 font-medium mt-1">Pantau perubahan data secara real-time dari seluruh perangkat.</p>
+        </div>
+        <button onclick="renderLogAktivitas(true)" class="h-10 px-5 bg-white text-slate-600 rounded-full font-black text-[11px] uppercase tracking-widest border border-slate-200 shadow-sm hover:shadow-md hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all active:scale-95 flex items-center gap-2 group">
+            <i class="fa-solid fa-rotate group-hover:rotate-180 transition-transform duration-500"></i> Sinkron
+        </button>
+    </div>
+    
+    <div class="bg-white/80 backdrop-blur-2xl p-6 md:p-8 rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative z-10 min-h-[60vh]">
+        <div id="wadah-list-notif" class="space-y-3.5 custom-scrollbar">
+            <!-- Data Log Injeksi JS Masuk Sini -->
+        </div>
+    </div>
+   </div>
 
    <!-- HALAMAN: PENGATURAN -->
    <div id="page-pengaturan" class="page space-y-6 max-w-4xl mx-auto w-full pb-10">
@@ -1648,6 +1684,23 @@
        </div>
     </div>
 </div>
+
+<!-- MODAL REGISTRASI NAMA PERANGKAT (TAMPIL SEKALI SAAT BARU BUKA) -->
+<div id="modalNamaPerangkat" class="hidden fixed inset-0 z-[99999] bg-slate-900/80 backdrop-blur-xl flex items-center justify-center px-4 transition-opacity">
+    <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 text-center animate-fade-in-up">
+        <div class="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 shadow-inner border border-blue-100">
+            <i class="fa-solid fa-laptop-medical"></i>
+        </div>
+        <h3 class="font-black text-2xl text-slate-800 tracking-tight mb-2">Nama Perangkat</h3>
+        <p class="text-[11px] font-bold text-slate-500 mb-6 leading-relaxed">Sistem mendeteksi Anda baru pertama kali membuka aplikasi ini. Siapa yang menggunakan perangkat ini? (Contoh: Admin Ayu, Laptop Bos, dll).</p>
+        
+        <input type="text" id="inputNamaPerangkat" placeholder="Ketik nama Anda di sini..." class="w-full h-14 bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 rounded-xl px-5 text-sm font-black text-slate-700 outline-none text-center transition-all mb-4 uppercase placeholder:font-semibold placeholder:text-slate-300">
+        
+        <button onclick="simpanNamaPerangkat()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white h-14 rounded-xl font-black uppercase tracking-widest hover:from-blue-700 hover:to-indigo-700 active:scale-95 transition-all shadow-[0_6px_20px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2">
+            <i class="fa-solid fa-check"></i> Simpan Nama
+        </button>
+    </div>
+</div>
   <!-- MODAL FILTER LANJUTAN SLIP (SAMSUNG ONE UI x iOS GLASS) -->
 <div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-md flex items-center justify-center px-4 transition-opacity">
     <div class="bg-white/85 backdrop-blur-2xl rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col">
@@ -1847,8 +1900,8 @@
                 </div>
                 
                 <div class="w-full md:w-auto">
-                    <button onclick="unduhRekapStatistikExcel()" class="w-full px-6 py-2.5 h-[42px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-xs hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-blue-500">
-                        <i class="fa-solid fa-file-excel"></i> Unduh Excel
+                    <button onclick="exportMasterToExcel()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
+                        <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
                     </button>
                 </div>
             </div>
@@ -2715,7 +2768,7 @@
     let orderData = [];
     let pembukuanData = []; // Tambahan untuk memuat data pintar pop-up tagihan
     let currentScrollPos = 0;
-    let appSettings = JSON.parse(localStorage.getItem('sarimbitSettings')) || { nama: "Habibacollections", kontak: "082320419977", catatan: "Mohon videokan unboxing paket.", allowArchive: false }; 
+    let appSettings = JSON.parse(localStorage.getItem('sarimbitSettings')) || { nama: "Habibacollections", kontak: "08111341234", catatan: "Mohon videokan unboxing paket.", allowArchive: false }; 
     
     let currentPageMaster = 1; let currentPageSlip = 1; let currentPageRekap = 1;
     const rowsPerPageRekap = 150; const rowsPerPageSlip = 100; const rowsPerPageMaster = 300;
@@ -3309,6 +3362,7 @@ async function handleOrderSubmit(e) {
     
     let oldTotalPcs = 0;
     let oldGrandTotal = 0;
+    let oldItemsList = []; // Siapkan keranjang kosong untuk memori barang lama
 
     if (isEditMode) {
         const allLocalOrders = await dbLokal.orders.toArray();
@@ -3316,6 +3370,7 @@ async function handleOrderSubmit(e) {
             (String(o.idcustomer) === String(isEditMode) || String(o.idCustomer) === String(isEditMode)) 
             && o.syncstatus !== -1
         );
+        oldItemsList = oldItems; // Kunci data lama ke keranjang
         
         if (oldItems.length > 0) {
             let oldSubtotal = 0;
@@ -3408,11 +3463,22 @@ async function handleOrderSubmit(e) {
             let pesanLog = "";
             if (isEditMode) {
                 let perubahan = [];
+                
+               // Merekam perubahan item pesanan (Melibatkan Barang, Varian, dan Size)
+               if (typeof oldItemsList !== 'undefined' && oldItemsList.length > 0) {
+                    const strBarangLama = oldItemsList.map(o => `${o.barang} ${o.varian} ${o.size} (${o.jumlah}x)`).join(', ');
+                    const strBarangBaru = items.map(i => `${i.barang} ${i.varian} ${i.size} (${i.jumlah}x)`).join(', ');
+                    
+                    if (strBarangLama !== strBarangBaru) {
+                        perubahan.push(`Detail Barang: [${strBarangLama}] ➔ [${strBarangBaru}]`);
+                    }
+                }
+
                 if (oldTotalPcs !== totalPcsLog) perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
                 if (oldGrandTotal !== grandTotalLog) perubahan.push(`Tagihan: Rp ${oldGrandTotal.toLocaleString('id-ID')} ➔ Rp ${grandTotalLog.toLocaleString('id-ID')}`);
                 
-                if (perubahan.length > 0) pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')}`;
-                else pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian Barang diubah)`;
+                if (perubahan.length > 0) pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')} [ID: ${idToSave}]`;
+                else pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian diubah) [ID: ${idToSave}]`;
                 
                 delete form.dataset.editMode; 
                 btnSave.classList.replace('bg-orange-500', 'bg-[#007AFF]');
@@ -3427,7 +3493,7 @@ async function handleOrderSubmit(e) {
                     }, 50);
                 }
             } else {
-                pesanLog = `Pesanan Baru ${customer} (${toko}) - ${totalPcsLog} Pcs | Total: Rp ${grandTotalLog.toLocaleString('id-ID')}`;
+                pesanLog = `Pesanan Baru dari ${customer} (${toko}) - ${totalPcsLog} Pcs | Total Tagihan: Rp ${grandTotalLog.toLocaleString('id-ID')} [ID: ${idToSave}]`;
                 document.getElementById('o-nama').focus(); 
             }
 
@@ -3488,7 +3554,7 @@ async function handleOrderSubmit(e) {
             idCustomer, field, nilaiBersih,
             () => { // onSuccess
                 showToast(`✅ ${fieldLabel} Berhasil Diperbarui!`);
-                if (teksLama !== teksBaru) catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru})`);
+                if (teksLama !== teksBaru) catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru}) [ID: ${idCustomer}]`);
             },
             (e) => showToast("❌ Gagal memperbarui status!") // onFailure
         );
@@ -3608,10 +3674,24 @@ async function handleOrderSubmit(e) {
                     btn.innerHTML = `<i class="fa-solid fa-check"></i> SIMPAN BARANG`;
                     btn.classList.replace('bg-orange-500', 'bg-slate-800');
                     btn.classList.replace('hover:bg-orange-600', 'hover:bg-slate-900');
-                    if (typeof catatLog === 'function') catatLog('UPDATE', 'MASTER', `Edit Master & Sinkron Order: ${payload.sarimbit} - ${payload.barang}`);
+                    
+                    let memoriLama = {};
+                    try { if (form.dataset.editMode) memoriLama = JSON.parse(form.dataset.editMode); } catch(e){}
+                    
+                    let detilPerubahan = [];
+                    if (memoriLama.sarimbit && memoriLama.sarimbit !== payload.sarimbit) detilPerubahan.push(`Koleksi: ${memoriLama.sarimbit} ➔ ${payload.sarimbit}`);
+                    if (memoriLama.barang && memoriLama.barang !== payload.barang) detilPerubahan.push(`Barang: ${memoriLama.barang} ➔ ${payload.barang}`);
+                    if (memoriLama.varian && memoriLama.varian !== payload.varian) detilPerubahan.push(`Warna: ${memoriLama.varian} ➔ ${payload.varian}`);
+                    if (memoriLama.size && memoriLama.size !== payload.size) detilPerubahan.push(`Ukuran: ${memoriLama.size} ➔ ${payload.size}`);
+                    if (memoriLama.harga && Number(memoriLama.harga) !== Number(payload.harga)) detilPerubahan.push(`Harga: Rp ${Number(memoriLama.harga).toLocaleString('id-ID')} ➔ Rp ${Number(payload.harga).toLocaleString('id-ID')}`);
+                    if (memoriLama.berat && Number(memoriLama.berat) !== Number(payload.berat)) detilPerubahan.push(`Berat: ${memoriLama.berat}g ➔ ${payload.berat}g`);
+                    
+                    const teksPerubahan = detilPerubahan.length > 0 ? detilPerubahan.join(' | ') : "Detail spesifikasi diubah";
+
+                    if (typeof catatLog === 'function') catatLog('UPDATE', 'MASTER', `Edit Master: ${teksPerubahan} [KEY: ${payload.sarimbit}||${payload.varian}||${payload.size}]`);
                 } else {
                     showToast("✅ Master Baru Tersimpan!");
-                    if (typeof catatLog === 'function') catatLog('CREATE', 'MASTER', `Tambah Katalog Baru: ${payload.sarimbit} - ${payload.barang}`);
+                    if (typeof catatLog === 'function') catatLog('CREATE', 'MASTER', `Katalog Baru: ${payload.sarimbit} - ${payload.barang} (Sz: ${payload.size}, Berat: ${payload.berat}gr) [KEY: ${payload.sarimbit}||${payload.varian}||${payload.size}]`);
                 }
                 
                 form.reset(); delete form.dataset.editMode;
@@ -3766,7 +3846,7 @@ async function handleOrderSubmit(e) {
         document.getElementById('m-varian').value = varian; document.getElementById('m-size').value = size; document.getElementById('m-harga').value = harga; document.getElementById('m-berat').value = berat;
 
         const form = document.querySelector('#page-master form');
-        form.dataset.editMode = JSON.stringify({ pusat, sarimbit, barang, varian, size });
+        form.dataset.editMode = JSON.stringify({ pusat, sarimbit, barang, varian, size, harga, berat });
         const btn = form.querySelector('button[type="submit"]');
         btn.innerHTML = `<i class="fa-solid fa-pen"></i> UPDATE DATA`; 
         btn.classList.replace('bg-slate-800', 'bg-orange-500'); 
@@ -4998,7 +5078,7 @@ async function handleOrderSubmit(e) {
             
             // PENGIRIM
             let namaTokoPengirim = head.toko || appSettings.nama; let kontakTokoPengirim = appSettings.kontak; 
-            if (namaTokoPengirim.toUpperCase() === "MASARA.HIJAB") kontakTokoPengirim = "082123846261"; else if (namaTokoPengirim.toUpperCase() === "HABIBACOLLECTIONS") kontakTokoPengirim = "082320419977";
+            if (namaTokoPengirim.toUpperCase() === "MASARA.HIJAB") kontakTokoPengirim = "082123846261"; else if (namaTokoPengirim.toUpperCase() === "HABIBACOLLECTIONS") kontakTokoPengirim = "08111341234";
             invoiceContent.push(new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: `PENGIRIM: ${namaTokoPengirim.toUpperCase()} (${kontakTokoPengirim})`, bold: true, size: 10, font: "Arial", color: "475569" })] }));
 
             // DETAIL PESANAN & TOTAL BERAT
@@ -5141,7 +5221,7 @@ async function handleOrderSubmit(e) {
             namaFileLogo = 'logo-masara.png'; // Pastikan file logo ini ada di folder Bapak
         } 
         else if (namaToko.toUpperCase() === "HABIBACOLLECTIONS") {
-            kontakToko = "082320419977";
+            kontakToko = "08111341234";
             namaFileLogo = 'logo-habiba.png'; // Pastikan file logo ini ada di folder Bapak
         }
 
@@ -5678,7 +5758,7 @@ async function handleOrderSubmit(e) {
 
     function isiOtomatisWA() {
         const toko = document.getElementById('set-nama').value; const kontak = document.getElementById('set-kontak');
-        if (toko === "Habibacollections") kontak.value = "082320419977"; else if (toko === "Masara.Hijab") kontak.value = "082123846261"; else kontak.value = "";
+        if (toko === "Habibacollections") kontak.value = "08111341234"; else if (toko === "Masara.Hijab") kontak.value = "082123846261"; else kontak.value = "";
     }
 
    // Mesin Pengganti Tema
@@ -7749,8 +7829,29 @@ function pilihProdukModal(metaString) {
                             }
                         });
                     }
-                    
+
                     if(typeof showToast === 'function') showToast("✅ Pembayaran Disimpan!");
+                    const namaCustRiwayat = document.getElementById('nama-customer-riwayat') ? document.getElementById('nama-customer-riwayat').innerText : "Customer";
+                    
+                    // Menghitung selisih nominal uang masuk lama vs baru
+                    let totalLama = 0;
+                    if (typeof orderData !== 'undefined') {
+                        const custOrder = orderData.find(o => (o.idcustomer || o.idCustomer) === idCustomer);
+                        if (custOrder) {
+                            const riwayatLama = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(custOrder) : [];
+                            totalLama = riwayatLama.reduce((sum, b) => sum + Number(b.nominal), 0);
+                        }
+                    }
+                    const totalBaru = riwayat.reduce((sum, b) => sum + Number(b.nominal), 0);
+                    
+                    if (typeof catatLog === 'function') {
+                        if (totalLama !== totalBaru) {
+                            catatLog('UPDATE', 'SLIP', `Uang Masuk ${namaCustRiwayat}: Rp ${totalLama.toLocaleString('id-ID')} ➔ Rp ${totalBaru.toLocaleString('id-ID')} [ID: ${idCustomer}]`);
+                        } else {
+                            catatLog('UPDATE', 'SLIP', `Revisi Tanggal Pembayaran: ${namaCustRiwayat} [ID: ${idCustomer}]`);
+                        }
+                    }
+                    
                     if(typeof window.renderSlip === 'function') window.renderSlip(); // PENTING: Refresh tabel slip setelah simpan!
                 };
                 
@@ -7902,6 +8003,335 @@ function pilihProdukModal(metaString) {
             }
         });
         return Object.entries(rincian).sort((a,b) => b[1] - a[1]); 
+    };
+</script>
+<!-- ========================================================================= -->
+<!-- SCRIPT PINTAR: LOG AKTIVITAS, REGISTRASI PERANGKAT, & CATAT LOG           -->
+<!-- ========================================================================= -->
+<script>
+    // 1. MUNCULKAN MODAL JIKA NAMA PERANGKAT BELUM DIISI (ATAU MASIH NAMA DEFAULT PC)
+    document.addEventListener("DOMContentLoaded", () => {
+        const idTersimpan = localStorage.getItem('sarimbit_device_id');
+        if (!idTersimpan || idTersimpan.startsWith('PC-') || idTersimpan === "") {
+            setTimeout(() => { 
+                const modal = document.getElementById('modalNamaPerangkat');
+                if(modal) modal.classList.remove('hidden'); 
+            }, 1000);
+        }
+    });
+
+    // 2. FUNGSI MENYIMPAN NAMA PERANGKAT
+    window.simpanNamaPerangkat = function() {
+        const inputEl = document.getElementById('inputNamaPerangkat');
+        if(!inputEl) return;
+        const val = inputEl.value.trim();
+        if(val) {
+            localStorage.setItem('sarimbit_device_id', val.toUpperCase());
+            document.getElementById('modalNamaPerangkat').classList.add('hidden');
+            if(typeof showToast === 'function') showToast("✅ Nama perangkat berhasil disimpan!");
+        } else {
+            alert("Harap isi nama perangkat terlebih dahulu.");
+        }
+    };
+
+    // 3. MESIN PENCATAT LOG KE SUPABASE DENGAN IDENTITAS PERANGKAT
+    window.catatLog = async function(action, module, detail) {
+        let namaPerangkat = localStorage.getItem('sarimbit_device_id');
+        if (!namaPerangkat || namaPerangkat === "") namaPerangkat = "Perangkat Anonim";
+
+        const logData = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            time: new Date().toISOString(),
+            device: namaPerangkat,
+            action: action,
+            module: module,
+            detail: detail
+        };
+
+        if (typeof dbLokal !== 'undefined' && dbLokal.logs) {
+            try { await dbLokal.logs.put(logData); } catch(e) { }
+        }
+
+        if (navigator.onLine && typeof SUPABASE_URL !== 'undefined') {
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+                    method: 'POST',
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify([logData])
+                });
+            } catch(e) { }
+        }
+    };
+
+   // 4. FUNGSI MENARIK & MENCETAK DATA LOG DARI CLOUD + LOKAL (SAMSUNG ONE UI DESIGN)
+   window.renderLogAktivitas = async function(paksaCloud = false) {
+        const wadah = document.getElementById('wadah-list-notif');
+        if (!wadah) return;
+        
+        // Reset container ke blok biasa untuk loading
+        wadah.className = "space-y-3.5 custom-scrollbar";
+        wadah.innerHTML = `<div class="py-20 text-center text-slate-400 font-bold animate-pulse"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 block text-amber-500"></i>Mencari jejak aktivitas dari awan...</div>`;
+        
+        let dataLokal = [];
+        try { dataLokal = await dbLokal.logs.toArray(); } catch(e){}
+        
+        if (navigator.onLine && paksaCloud && typeof SUPABASE_URL !== 'undefined') {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/logs?select=*&order=time.desc&limit=150`, {
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                if (res.ok) {
+                    const dataCloud = await res.json();
+                    const mapLogs = new Map();
+                    dataLokal.forEach(l => mapLogs.set(String(l.id), l));
+                    dataCloud.forEach(l => mapLogs.set(String(l.id), l));
+                    dataLokal = Array.from(mapLogs.values());
+                    await dbLokal.logs.bulkPut(dataLokal);
+                    if(typeof showToast === 'function') showToast("🔄 Data Log tersinkronisasi.");
+                }
+            } catch(e) {}
+        }
+        
+        dataLokal.sort((a,b) => new Date(b.time) - new Date(a.time));
+        const dataTampil = dataLokal.slice(0, 100);
+        
+        if (dataTampil.length === 0) {
+            wadah.innerHTML = `<div class="py-20 text-center text-slate-400 font-bold"><i class="fa-solid fa-bell-slash text-5xl mb-4 block text-slate-300"></i>Belum ada aktivitas tim yang tercatat.</div>`;
+            return;
+        }
+        
+        // UBAH WADAH MENJADI GRID 2 KOLOM YANG CANTIK
+        wadah.className = "grid grid-cols-1 lg:grid-cols-2 gap-4 custom-scrollbar pb-6";
+        
+        let html = '';
+        dataTampil.forEach(log => {
+            // Styling Dinamis Ala Samsung One UI (Kapsul, Soft Colors, Glow)
+            let pStyle = { 
+                ikon: "fa-bell", bgIkon: "bg-blue-100/60", textIkon: "text-blue-600",
+                bgBadge: "bg-blue-50", textBadge: "text-blue-600", borderBadge: "border-blue-200",
+                hoverShadow: "hover:shadow-[0_8px_25px_rgba(59,130,246,0.15)]", borderCard: "hover:border-blue-300",
+                glow: "bg-blue-500"
+            };
+
+            if (log.action === 'CREATE') { 
+                pStyle = { ikon: "fa-plus", bgIkon: "bg-emerald-100/60", textIkon: "text-emerald-600", bgBadge: "bg-emerald-50", textBadge: "text-emerald-600", borderBadge: "border-emerald-200", hoverShadow: "hover:shadow-[0_8px_25px_rgba(16,185,129,0.15)]", borderCard: "hover:border-emerald-300", glow: "bg-emerald-500" };
+            }
+            else if (log.action === 'UPDATE') { 
+                pStyle = { ikon: "fa-pen", bgIkon: "bg-amber-100/60", textIkon: "text-amber-600", bgBadge: "bg-amber-50", textBadge: "text-amber-600", borderBadge: "border-amber-200", hoverShadow: "hover:shadow-[0_8px_25px_rgba(245,158,11,0.15)]", borderCard: "hover:border-amber-300", glow: "bg-amber-500" };
+            }
+            else if (log.action === 'DELETE') { 
+                pStyle = { ikon: "fa-trash", bgIkon: "bg-rose-100/60", textIkon: "text-rose-600", bgBadge: "bg-rose-50", textBadge: "text-rose-600", borderBadge: "border-rose-200", hoverShadow: "hover:shadow-[0_8px_25px_rgba(225,29,72,0.15)]", borderCard: "hover:border-rose-300", glow: "bg-rose-500" };
+            }
+            else if (log.action === 'DOWNLOAD') { 
+                pStyle = { ikon: "fa-cloud-arrow-down", bgIkon: "bg-indigo-100/60", textIkon: "text-indigo-600", bgBadge: "bg-indigo-50", textBadge: "text-indigo-600", borderBadge: "border-indigo-200", hoverShadow: "hover:shadow-[0_8px_25px_rgba(99,102,241,0.15)]", borderCard: "hover:border-indigo-300", glow: "bg-indigo-500" };
+            }
+            
+            const safeMod = (log.module||"").replace(/'/g, "\\'");
+            const safeAct = (log.action||"").replace(/'/g, "\\'");
+            const safeDetFull = (log.detail||"").replace(/'/g, "\\'").replace(/"/g, '\\"');
+            
+            // Sembunyikan kode ID/KEY rahasia dari tampilan layar
+            const displayDet = (log.detail||"").replace(/\[ID:\s*[^\]]+\]/i, '').replace(/\[KEY:\s*[^\]]+\]/i, '').trim();
+            
+            const jam = new Date(log.time).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+            const tanggal = typeof formatTanggalPanjang === 'function' ? formatTanggalPanjang(log.time) : '';
+
+            html += `
+            <div onclick="klikNotifArahkan('${safeMod}', '${safeAct}', '${safeDetFull}')" class="bg-white/90 backdrop-blur-md p-4 rounded-[1.5rem] shadow-[0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/80 ${pStyle.borderCard} ${pStyle.hoverShadow} cursor-pointer transition-all duration-300 ease-out active:scale-[0.98] hover:-translate-y-1 group flex flex-col gap-3 relative overflow-hidden">
+                
+                <!-- Efek Kapsul / Dot Pinggir Kiri Ala Samsung -->
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 ${pStyle.glow} rounded-r-full opacity-60 group-hover:opacity-100 group-hover:h-12 transition-all duration-300"></div>
+
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3 pl-2.5">
+                        <div class="w-10 h-10 shrink-0 rounded-full ${pStyle.bgIkon} ${pStyle.textIkon} flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                            <i class="fa-solid ${pStyle.ikon} text-[15px]"></i>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[8px] font-black ${pStyle.textBadge} ${pStyle.bgBadge} border ${pStyle.borderBadge} px-2 py-0.5 rounded-md uppercase tracking-widest w-fit">${log.action}</span>
+                            <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-0.5">${log.module}</span>
+                        </div>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <span class="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200"><i class="fa-regular fa-clock mr-1 text-slate-400"></i>${jam}</span>
+                        <span class="text-[7px] font-black text-slate-400 mt-1 uppercase tracking-widest">${tanggal}</span>
+                    </div>
+                </div>
+                
+                <div class="pl-2.5 pr-1 relative z-10 flex-1">
+                    <p class="text-[11px] font-bold text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">${displayDet}</p>
+                </div>
+                
+                <div class="border-t border-slate-100/80 pt-2.5 mt-1.5 mx-2 flex justify-between items-center relative z-10">
+                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="fa-solid fa-laptop-medical text-slate-300"></i> <span class="text-slate-500">${log.device || 'Perangkat Rahasia'}</span>
+                    </p>
+                    <div class="w-5 h-5 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors border border-transparent group-hover:border-blue-100">
+                        <i class="fa-solid fa-arrow-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
+                    </div>
+                </div>
+            </div>`;
+        });
+        wadah.innerHTML = html;
+    };
+
+    // 5. FUNGSI KLIK & MELUNCUR (CERDAS EKSTRAK KATA KUNCI + HIJAU HIDUP)
+    window.klikNotifArahkan = function(module, action, detail) {
+        if (action === 'DOWNLOAD') {
+            if(typeof showToast === 'function') showToast("ℹ️ Catatan unduhan. Beralih halaman...");
+            if (module === 'MASTER') switchTab('master');
+            else if (module === 'SLIP') switchTab('slip');
+            else if (module === 'REKAP') switchTab('rekap');
+            else if (module === 'PEMBUKUAN') pindahHalaman('pembukuan.html');
+            return;
+        }
+
+        let kataKunciNama = "";
+        let idRahasia = "";
+        let keyRahasia = "";
+
+        const matchId = detail.match(/\[ID:\s*([^\]]+)\]/i);
+        if (matchId) idRahasia = matchId[1].trim();
+
+        const matchKey = detail.match(/\[KEY:\s*([^\]]+)\]/i);
+        if (matchKey) keyRahasia = matchKey[1].trim();
+
+        if (module === 'MASTER') {
+            const splitTitikDua = detail.split(':');
+            if (splitTitikDua.length > 1) {
+                const sisa = splitTitikDua[1].trim(); 
+                kataKunciNama = sisa.split('-')[0].trim(); 
+            }
+        } else if (module === 'ORDER' || module === 'SLIP') {
+            if (detail.includes("Customer ID:")) {
+                if(typeof showToast === 'function') showToast("ℹ️ Data ini sudah dihapus permanen.");
+                switchTab('slip');
+                return;
+            }
+            const regexNama = /(?:Pesanan Baru dari|Pesanan Baru|Revisi Pesanan|Revisi Keuangan|Riwayat Pembayaran Uang Masuk:)\s+([^(:]+)/i;
+            const matchNama = detail.match(regexNama);
+            if (matchNama && matchNama[1]) {
+                kataKunciNama = matchNama[1].trim();
+            }
+        }
+
+        if (module === 'MASTER') {
+            switchTab('master');
+            
+            if (keyRahasia) {
+                const parts = keyRahasia.split('||');
+                kataKunciNama = parts[0].trim(); 
+            }
+            
+            if (kataKunciNama) {
+                if (typeof updateGlobalFilters === 'function') updateGlobalFilters();
+                
+                const filterSarimbitEl = document.getElementById('filter-sarimbit-master');
+                const boxSearch = document.getElementById('search-master');
+                
+                if (filterSarimbitEl) {
+                    const opsiCocok = Array.from(filterSarimbitEl.options).find(opt => opt.value.trim().toUpperCase() === kataKunciNama.toUpperCase());
+                    
+                    if (opsiCocok) {
+                        filterSarimbitEl.value = opsiCocok.value;
+                        if (boxSearch) boxSearch.value = ""; 
+                    } else {
+                        filterSarimbitEl.value = "";
+                        if (boxSearch) {
+                            boxSearch.value = kataKunciNama;
+                            boxSearch.classList.add('bg-emerald-50', 'ring-4', 'ring-emerald-400', 'transition-all', 'duration-500');
+                            setTimeout(()=> boxSearch.classList.remove('bg-emerald-50', 'ring-4', 'ring-emerald-400'), 2000);
+                        }
+                    }
+                    
+                    if (typeof renderMaster === 'function') renderMaster();
+                    
+                    setTimeout(() => {
+                        let barisDitemukan = false;
+                        const partsToFind = keyRahasia ? keyRahasia.replace(/\|\|/g, ' ').split(' ') : [kataKunciNama];
+                        
+                        const barisTabel = document.querySelectorAll('#tbody-master tr');
+                        barisTabel.forEach(tr => {
+                            const textBaris = tr.innerText.toUpperCase();
+                            const isMatch = partsToFind.every(p => textBaris.includes(p.toUpperCase().trim()));
+                            
+                            if (isMatch && !barisDitemukan) {
+                                barisDitemukan = true; 
+                                tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                tr.classList.add('bg-emerald-100', 'shadow-[inset_0_0_15px_rgba(16,185,129,0.3)]', 'transition-all', 'duration-[1500ms]');
+                                setTimeout(() => tr.classList.remove('bg-emerald-100', 'shadow-[inset_0_0_15px_rgba(16,185,129,0.3)]'), 2500);
+                            }
+                        });
+                    }, 400); 
+                }
+            }
+        } else if (module === 'ORDER' || module === 'SLIP') {
+            switchTab('slip');
+            
+            if (idRahasia || kataKunciNama) {
+                const boxSearch = document.getElementById('search-customer');
+                
+                if (idRahasia) {
+                    if (boxSearch) boxSearch.value = "";
+                    if (kataKunciNama && boxSearch) boxSearch.value = kataKunciNama; 
+                    
+                    if (typeof renderSlip === 'function') renderSlip();
+                    
+                    setTimeout(() => {
+                        const idAmanTarget = btoa(encodeURIComponent(idRahasia)).replace(/[^a-zA-Z0-9]/g, '');
+                        const trTepat = document.getElementById(`slip-row-${idAmanTarget}`);
+                        
+                        if (trTepat) {
+                            trTepat.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            trTepat.classList.add('bg-emerald-50', 'transition-all', 'duration-[1500ms]');
+                            
+                            const cellNama = trTepat.querySelector('td:first-child > div:first-child > div.font-black');
+                            if (cellNama) {
+                                cellNama.classList.add('bg-gradient-to-r', 'from-emerald-100', 'to-teal-100', 'text-emerald-800', 'px-3', 'py-1', 'rounded-lg', 'shadow-[0_0_20px_rgba(16,185,129,0.6)]', 'border', 'border-emerald-300', 'transition-all', 'duration-[1500ms]', 'w-fit');
+                            }
+                            
+                            setTimeout(() => {
+                                trTepat.classList.remove('bg-emerald-50');
+                                if (cellNama) cellNama.classList.remove('bg-gradient-to-r', 'from-emerald-100', 'to-teal-100', 'text-emerald-800', 'px-3', 'py-1', 'rounded-lg', 'shadow-[0_0_20px_rgba(16,185,129,0.6)]', 'border', 'border-emerald-300');
+                            }, 2500);
+                        } else {
+                            if(typeof showToast === 'function') showToast("ℹ️ Data ini mungkin ada di halaman lain atau sudah diarsipkan.");
+                        }
+                    }, 400);
+                } else if (kataKunciNama) {
+                    if (boxSearch) {
+                        boxSearch.value = kataKunciNama; 
+                        if(typeof renderSlip === 'function') renderSlip();
+                        
+                        boxSearch.classList.add('bg-emerald-50', 'ring-4', 'ring-emerald-400', 'transition-all', 'duration-500');
+                        setTimeout(()=> boxSearch.classList.remove('bg-emerald-50', 'ring-4', 'ring-emerald-400'), 2000);
+                        
+                        setTimeout(() => {
+                            const barisTabel = document.querySelectorAll('#tbody-slip tr.align-top');
+                            barisTabel.forEach(tr => {
+                                const cellNama = tr.querySelector('td:first-child > div:first-child > div.font-black');
+                                if (cellNama && cellNama.innerText.toUpperCase().includes(kataKunciNama.toUpperCase())) {
+                                    tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    cellNama.classList.add('bg-gradient-to-r', 'from-emerald-100', 'to-teal-100', 'text-emerald-800', 'px-3', 'py-1', 'rounded-lg', 'shadow-[0_0_20px_rgba(16,185,129,0.6)]', 'border', 'border-emerald-300', 'transition-all', 'duration-[1500ms]', 'w-fit');
+                                    setTimeout(() => {
+                                        cellNama.classList.remove('bg-gradient-to-r', 'from-emerald-100', 'to-teal-100', 'text-emerald-800', 'px-3', 'py-1', 'rounded-lg', 'shadow-[0_0_20px_rgba(16,185,129,0.6)]', 'border', 'border-emerald-300');
+                                    }, 2500);
+                                }
+                            });
+                        }, 400);
+                    }
+                }
+            }
+        }
+    };
+    
+    // 6. MENGKAITKAN TOMBOL MENU AGAR ME-RENDER LOG AKTIVITAS
+    const fungsiAsliSwitchTabLog = window.switchTab;
+    window.switchTab = function(t) {
+        if(typeof fungsiAsliSwitchTabLog === 'function') fungsiAsliSwitchTabLog(t);
+        if (t === 'notif') {
+            setTimeout(() => { window.renderLogAktivitas(true); }, 250);
+        }
     };
 </script>
 </body>

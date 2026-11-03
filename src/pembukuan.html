@@ -1062,6 +1062,29 @@ if (statusSync && statusTxt) {
 
         dataToSave.id = idValid; 
         await dbLokal.pembukuan.put(dataToSave);
+        
+        // PENCATAT LOG OTOMATIS PEMBUKUAN (Akan dikirim ke Supabase lewat fungsi di index.html jika ada)
+        // Kita simpan manual ke local agar terbaca saat disinkron 
+        try {
+            const namaPerangkat = localStorage.getItem('sarimbit_device_id') || "Perangkat Anonim";
+            const logPembukuan = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                time: new Date().toISOString(),
+                device: namaPerangkat,
+                action: 'UPDATE',
+                module: 'PEMBUKUAN',
+                detail: `Update Jadwal/Status Sarimbit: ${sarimbit} [KEY: ${sarimbit}]`
+            };
+            await dbLokal.logs.put(logPembukuan);
+            // Push ke Supabase
+            if (navigator.onLine && typeof SUPABASE_URL !== 'undefined') {
+                fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+                    method: 'POST',
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify([logPembukuan])
+                }).catch(e => {});
+            }
+        } catch(errLog) {}
 
         if (loader) loader.classList.add('hidden');
         if (check) {
