@@ -268,27 +268,89 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
     body.theme-dark tbody tr:hover {
         background-color: #0f172a !important;
     }
+    /* ANIMASI DIAGRAM STATISTIK (POP-UP) */
+    .donat-svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
+    .donat-track { fill: none; stroke-width: 4.5; stroke-linecap: round; }
+    .donat-isi { fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .stat-bar-isi { transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    /* ==========================================
+       HAPUS BAYANGAN KOTAK KAKU PADA INPUT KAPSUL
+       ========================================== */
+       #table-pembukuan input[type="text"]:focus, 
+    #table-pembukuan input[type="number"]:focus, 
+    #table-pembukuan input[type="date"]:focus, 
+    #table-pembukuan select:focus {
+        background: transparent !important;
+        box-shadow: none !important;
+        transform: none !important;
+        border-color: transparent !important;
+    }
 </style>
 </head>
 <body class="p-2 md:p-6 pb-24 text-slate-800 relative">
 
     <div id="connection-banner" class="fixed top-0 left-0 w-full z-[100] text-center py-1.5 text-[10px] font-black uppercase tracking-widest hidden shadow-sm transition-opacity duration-300"></div>
   
-    <div class="max-w-[98%] mx-auto mb-6 flex flex-col md:flex-row justify-between items-start gap-4 pt-4 relative z-10">
-      <div>
-          <h1 class="text-2xl md:text-[28px] font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm mb-1 leading-none">DASHBOARD PEMBUKUAN</h1>
-          <p class="text-slate-500 font-bold mt-1.5 text-[10px] md:text-xs">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
-      </div>
-      
-      <!-- REVISI: NOTIF ONLINE DI ATAS, TOMBOL REFRESH DI BAWAHNYA -->
-    <div class="flex flex-col items-end gap-3 mt-1">
-        <div id="status-sync" class="transition-all duration-300 px-5 py-2 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-white bg-white/80 backdrop-blur-md">
-           <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-sm"></div> 
-           <span id="status-text">MEMERIKSA...</span>
+    <div class="max-w-[98%] mx-auto mb-2 flex flex-col md:flex-row justify-between items-end gap-4 pt-4 relative z-[110]">
+        <div>
+            <h1 class="text-2xl md:text-[28px] font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-indigo-900 tracking-tight uppercase drop-shadow-sm mb-1 leading-none">DASHBOARD PEMBUKUAN</h1>
+            <p class="text-slate-500 font-bold mt-1.5 text-[10px] md:text-xs">Kelola jadwal produksi, penagihan, pembayaran, dan logistik PO secara terpusat.</p>
         </div>
-        <button onclick="location.reload()" class="h-9 px-4 flex items-center justify-center bg-gradient-to-br from-white to-slate-50 rounded-full hover:from-slate-50 hover:to-slate-100 active:scale-95 transition-all text-slate-500 hover:text-blue-600 border border-white shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_15px_rgba(59,130,246,0.15)] text-[10px] font-black uppercase tracking-widest gap-2 group" title="Refresh Data">
-          <i class="fa-solid fa-rotate text-xs group-hover:rotate-180 transition-transform duration-500"></i> REFRESH
-        </button>
+      
+     <!-- WADAH BAGIAN KANAN ATAS -->
+    <div class="flex flex-col items-end gap-3 mt-1 relative w-full md:w-auto">
+        
+        <!-- Status Online/Offline (Bentuk Tag Persegi & Ditarik ke Pojok Kanan Atas) -->
+        <div class="absolute -top-7 right-0 md:-top-9 md:-right-2 z-50">
+            <div id="status-sync" class="transition-all duration-300 px-2.5 py-1 rounded-md border border-slate-200 bg-white/90 backdrop-blur-md shadow-sm flex items-center gap-1.5 text-[8.5px] font-black tracking-widest uppercase">
+               
+               <!-- Efek Cahaya Radar Berkedip -->
+               <div class="relative flex items-center justify-center">
+                   <div id="status-ping" class="absolute w-2.5 h-2.5 bg-slate-400 rounded-sm animate-ping opacity-75"></div>
+                   <div id="status-dot" class="relative w-1.5 h-1.5 bg-slate-400 rounded-sm z-10 animate-pulse"></div> 
+               </div>
+               
+               <span id="status-text">MEMERIKSA...</span>
+            </div>
+        </div>
+        
+        <!-- Wadah Tombol Berjejer (Berada aman di bawah notif) -->
+        <div class="flex items-center gap-2 mt-2 md:mt-0">
+
+            <!-- TOMBOL STATISTIK -->
+            <button onclick="bukaModalStatistikBuku()" class="h-9 px-5 flex items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-600 rounded-full font-black text-[10px] uppercase tracking-widest shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)] border border-white hover:border-indigo-200 transition-all active:scale-95 gap-2 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <i class="fa-solid fa-chart-pie text-indigo-400 group-hover:scale-110 group-hover:text-indigo-600 transition-transform duration-300 relative z-10"></i> 
+                <span class="relative z-10">STATISTIK</span>
+            </button>
+            <!-- SMART DROPDOWN: Tombol Unduh Gabungan -->
+            <div class="relative z-[100]" id="wadah-dropdown-unduh-buku">
+                <!-- Tombol Utama -->
+                <button onclick="toggleDropdownUnduhBuku()" class="h-9 px-5 flex items-center justify-center bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-full font-black text-[10px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.6)] border border-slate-700 hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 gap-2 group relative overflow-hidden">
+                    <!-- Efek Cahaya Timbul -->
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                    
+                    <i class="fa-solid fa-cloud-arrow-down text-slate-300 group-hover:text-emerald-400 group-hover:-translate-y-0.5 group-hover:scale-110 transition-all duration-300 relative z-10"></i> 
+                    <span class="relative z-10">UNDUH</span>
+                    <i class="fa-solid fa-chevron-down text-[8px] ml-1 text-slate-400 group-hover:text-white transition-all duration-300 relative z-10" id="ikon-chevron-unduh-buku"></i>
+                </button>
+                
+                <!-- Pop-up Menu Transparan (Kaca Blur) -->
+                <div id="dropdown-unduh-buku" class="hidden absolute right-0 top-[calc(100%+10px)] w-44 bg-white/70 backdrop-blur-2xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/80 p-2 opacity-0 scale-95 origin-top-right transition-all duration-300 flex flex-col gap-1.5">
+                    
+                    <button onclick="tutupDropdownUnduhBuku(); exportToExcel()" class="w-full flex items-center justify-between px-3 py-2.5 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500 text-emerald-600 hover:text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all hover:shadow-[0_4px_12px_rgba(16,185,129,0.3)] border border-transparent hover:border-emerald-100 group relative overflow-hidden">
+                        <span class="relative z-10">Excel</span> 
+                        <i class="fa-solid fa-file-excel group-hover:scale-125 transition-transform text-xs relative z-10"></i>
+                    </button>
+                    
+                    <button onclick="tutupDropdownUnduhBuku(); exportToPDF()" class="w-full flex items-center justify-between px-3 py-2.5 hover:bg-gradient-to-r hover:from-rose-500 hover:to-red-500 text-rose-600 hover:text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all hover:shadow-[0_4px_12px_rgba(244,63,94,0.3)] border border-transparent hover:border-rose-100 group relative overflow-hidden">
+                        <span class="relative z-10">PDF</span> 
+                        <i class="fa-solid fa-file-pdf group-hover:scale-125 transition-transform text-xs relative z-10"></i>
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
     </div>
   </div>
 
@@ -344,18 +406,6 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
           </div>
         </div>
         
-        <!-- BORDER SEPARATOR & TOMBOL EXPORT BAWAH (DIPADATKAN) -->
-        <div class="mt-4 pt-3 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-3">
-            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tindakan Laporan:</span>
-            <div class="flex flex-wrap gap-2.5">
-                <button onclick="exportToExcel()" class="bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 px-5 h-8 rounded-full font-black text-[10px] shadow-[0_2px_8px_rgba(16,185,129,0.15)] hover:shadow-[0_4px_12px_rgba(5,150,105,0.4)] hover:from-emerald-500 hover:to-emerald-600 hover:text-white border border-white flex items-center gap-1.5 transition-all active:scale-95 group uppercase tracking-wider">
-                  <i class="fa-solid fa-file-excel text-[11px] group-hover:scale-110 transition-transform"></i> Unduh Excel
-                </button>
-                <button onclick="exportToPDF()" class="bg-gradient-to-br from-rose-50 to-rose-100 text-rose-600 px-5 h-8 rounded-full font-black text-[10px] shadow-[0_2px_8px_rgba(244,63,94,0.15)] hover:shadow-[0_4px_12px_rgba(225,29,72,0.4)] hover:from-rose-500 hover:to-rose-600 hover:text-white border border-white flex items-center gap-1.5 transition-all active:scale-95 group uppercase tracking-wider">
-                  <i class="fa-solid fa-file-pdf text-[11px] group-hover:scale-110 transition-transform"></i> Unduh PDF
-                </button>
-            </div>
-        </div>
     </div>
   </div>
 
@@ -401,6 +451,157 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
   <span id="toast-msg" class="text-xs font-semibold tracking-wide"></span>
 </div>
 
+<!-- MODAL STATISTIK PEMBUKUAN (TEMA HIJAU TUA GRADIENT & ABU) -->
+<div id="modal-statistik-buku" class="hidden fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity duration-300 opacity-0">
+    <div id="konten-statistik-buku" class="bg-slate-50/95 backdrop-blur-3xl rounded-[2.5rem] w-full max-w-5xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white flex flex-col transform scale-95 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden max-h-[90vh]">
+        
+        <!-- Header Transparan (Tombol UNDUH PDF Ditambahkan) -->
+        <div class="p-5 md:p-6 border-b border-slate-200/80 bg-white/60 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-xl flex items-center justify-center text-emerald-100 shadow-md border border-emerald-600/50">
+                    <i class="fa-solid fa-chart-pie text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-xl text-slate-800 tracking-tight leading-none">Insight Kuantitas</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Statistik Real-Time Bebas Finansial</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- TOMBOL UNDUH PDF STATISTIK -->
+                <button onclick="exportStatistikPDF()" class="h-9 px-4 flex items-center justify-center bg-gradient-to-r from-emerald-700 to-emerald-900 hover:from-emerald-800 hover:to-emerald-950 text-white rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-[9px] md:text-[10px] font-black uppercase tracking-widest gap-2 border border-emerald-600/50 group">
+                    <i class="fa-solid fa-file-pdf group-hover:scale-110 transition-transform"></i> <span class="hidden md:inline">Unduh</span> PDF
+                </button>
+                
+                <button onclick="tutupModalStatistikBuku()" class="w-9 h-9 flex items-center justify-center bg-white hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-colors border border-slate-200 shadow-sm active:scale-95">
+                    <i class="fa-solid fa-xmark font-bold"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Body Grid Statistik -->
+        <div class="p-5 md:p-8 overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-6">
+            
+            <!-- KARTU UTAMA: TOTAL KESELURUHAN (TEMA ABU GELAP) -->
+            <div class="bg-gradient-to-r from-slate-700 to-slate-800 p-5 md:p-6 rounded-[2rem] text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-slate-600 group hover:shadow-xl transition-all duration-300 gap-4">
+                <div class="absolute -left-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl group-hover:scale-110 transition-transform duration-500"></div>
+                <div class="absolute right-0 bottom-0 w-48 h-48 bg-slate-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors duration-500"></div>
+                
+                <div class="flex items-center gap-4 relative z-10 w-full md:w-auto">
+                    <div class="w-14 h-14 bg-slate-900/50 backdrop-blur-md rounded-2xl flex items-center justify-center border border-slate-600 shadow-inner group-hover:-translate-y-1 transition-transform duration-300">
+                        <i class="fa-solid fa-boxes-stacked text-2xl text-emerald-400 animate-[pulse_3s_ease-in-out_infinite]"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-300 mb-0.5">Kuantitas Keseluruhan</h4>
+                        <div class="text-3xl md:text-4xl font-black tracking-tight text-white"><span id="stat-qty-all">0</span> <span class="text-sm md:text-base font-bold text-slate-400">Pcs</span></div>
+                    </div>
+                </div>
+
+                <div class="hidden md:block w-px h-12 bg-slate-600 relative z-10"></div>
+                <div class="w-full md:hidden h-px bg-slate-600 relative z-10"></div>
+
+                <div class="flex items-center gap-6 w-full md:w-auto justify-around md:justify-end relative z-10">
+                    <div class="text-center md:text-right">
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-emerald-400 block mb-1">Total Aktif</span>
+                        <div class="text-2xl md:text-3xl font-black text-white"><span id="stat-qty-aktif">0</span> <span class="text-xs font-bold text-slate-400">Pcs</span></div>
+                    </div>
+                    <div class="w-px h-8 bg-slate-600"></div>
+                    <div class="text-center md:text-right">
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Total Arsip</span>
+                        <div class="text-2xl md:text-3xl font-black text-white"><span id="stat-qty-arsip">0</span> <span class="text-xs font-bold text-slate-400">Pcs</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRID 3 KOLOM: STATUS AKTIF, PRODUKSI, BEST SELLER (TEMA HIJAU TUA GRADIENT) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- 1. Status Koleksi (DIUBAH MENJADI KOTAK ANGKA JELAS) -->
+                <div class="bg-white border border-slate-200 p-5 rounded-[2rem] shadow-sm flex flex-col gap-4 relative overflow-hidden">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2"><i class="fa-solid fa-shapes mr-1 text-slate-400"></i> Status Sarimbit</h4>
+
+                    <div class="flex flex-col gap-3 mt-1 h-full">
+                        <!-- Box Total Keseluruhan -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Total Keseluruhan</span>
+                                <div class="text-2xl font-black text-slate-700 leading-none"><span id="stat-total-model">0</span> <span class="text-[10px] font-bold text-slate-400">Sarimbit</span></div>
+                            </div>
+                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-300 text-lg"><i class="fa-solid fa-layer-group"></i></div>
+                        </div>
+
+                        <div class="flex gap-3 flex-1">
+                            <!-- Box Aktif -->
+                            <div class="flex-1 bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100 flex flex-col justify-between">
+                                <span class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest block mb-2"><i class="fa-solid fa-rotate mr-1"></i> Berjalan (Aktif)</span>
+                                <div class="text-2xl font-black text-emerald-700 leading-none"><span id="stat-aktif">0</span> <span class="text-[9px] font-bold text-emerald-500/70">Sarimbit</span></div>
+                            </div>
+
+                            <!-- Box Arsip -->
+                            <div class="flex-1 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-2"><i class="fa-solid fa-box-archive mr-1"></i> Tuntas (Arsip)</span>
+                                <div class="text-2xl font-black text-slate-600 leading-none"><span id="stat-arsip">0</span> <span class="text-[9px] font-bold text-slate-400">Sarimbit</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Status Produksi (DIBERIKAN LABEL KHUSUS AKTIF) -->
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-[2rem] shadow-sm flex flex-col gap-3 relative overflow-hidden">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 flex justify-between items-center">
+                        <span><i class="fa-solid fa-industry mr-1 text-slate-400"></i> Fase Produksi</span>
+                        <span class="text-[8px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Sarimbit Aktif</span>
+                    </h4>
+                    
+                    <div class="space-y-1.5 mt-1">
+                        <!-- Kotak Open PO -->
+                        <div onclick="document.getElementById('det-openpo').classList.toggle('hidden')" class="cursor-pointer group hover:bg-slate-50 p-3 -mx-3 rounded-xl transition-all duration-300 border border-transparent hover:border-slate-200">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-slate-700 transition-colors">Masih Open PO <i class="fa-solid fa-chevron-down text-[8px] ml-1 opacity-50 group-hover:opacity-100"></i></span>
+                                <span class="text-sm font-black text-slate-500" id="stat-open">0</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                                <div id="bar-open" class="h-full bg-slate-400 stat-bar-isi rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <div id="det-openpo" class="hidden mt-3 pt-3 border-t border-slate-100 text-[10px] font-bold space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1"></div>
+                        </div>
+                        
+                        <!-- Kotak Close PO -->
+                        <div onclick="document.getElementById('det-closepo').classList.toggle('hidden')" class="cursor-pointer group hover:bg-emerald-50/50 p-3 -mx-3 rounded-xl transition-all duration-300 border border-transparent hover:border-emerald-100">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-700 transition-colors">Sudah Close PO <i class="fa-solid fa-chevron-down text-[8px] ml-1 opacity-50 group-hover:opacity-100"></i></span>
+                                <span class="text-sm font-black text-emerald-600" id="stat-close">0</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                                <div id="bar-close" class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 stat-bar-isi rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <div id="det-closepo" class="hidden mt-3 pt-3 border-t border-emerald-100/50 text-[10px] font-bold space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1"></div>
+                        </div>
+                        
+                        <!-- Kotak Ready -->
+                        <div onclick="document.getElementById('det-readypo').classList.toggle('hidden')" class="cursor-pointer group hover:bg-emerald-50/80 p-3 -mx-3 rounded-xl transition-all duration-300 border border-transparent hover:border-emerald-200">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-900 transition-colors">Sudah Ready <i class="fa-solid fa-chevron-down text-[8px] ml-1 opacity-50 group-hover:opacity-100"></i></span>
+                                <span class="text-sm font-black text-emerald-800" id="stat-ready">0</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                                <div id="bar-ready" class="h-full bg-gradient-to-r from-emerald-700 to-emerald-900 stat-bar-isi rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <div id="det-readypo" class="hidden mt-3 pt-3 border-t border-emerald-200/60 text-[10px] font-bold space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 3. TOP 3 Best Seller (HIJAU TUA) -->
+                <div class="bg-white border border-slate-200 p-5 rounded-[2rem] shadow-sm flex flex-col gap-3 relative overflow-hidden">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2"><i class="fa-solid fa-crown text-emerald-700 mr-1"></i> Top 3 Best Seller</h4>
+                    <div id="wadah-best-seller" class="space-y-3 mt-1.5">
+                        <!-- JS Inject Animasi -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 let rawSummary = [];
 
@@ -413,33 +614,36 @@ let rawSummary = [];
     }
 
   // SENSOR SINYAL ANTI MACET
-async function periksaSinyal() {
-const statusSync = document.getElementById('status-sync'); // Khusus pembukuan
-const statusDot = document.getElementById('status-dot'); // Khusus pembukuan
-const statusTxt = document.getElementById('status-text'); // Khusus pembukuan
+  async function periksaSinyal() {
+      const statusSync = document.getElementById('status-sync'); 
+      const statusDot = document.getElementById('status-dot'); 
+      const statusTxt = document.getElementById('status-text'); 
+      const statusPing = document.getElementById('status-ping'); // Penarik cahaya berkedip
 
-// Pengecekan Paling Akurat via Fetch Bantuan
-let isOnline = false;
-if (navigator.onLine) {
-try {
-await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
-isOnline = true;
-} catch (e) { isOnline = false; }
-}
+      // Pengecekan Paling Akurat via Fetch Bantuan
+      let isOnline = false;
+      if (navigator.onLine) {
+          try {
+              await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
+              isOnline = true;
+          } catch (e) { isOnline = false; }
+      }
 
-// Terapkan Gaya untuk pembukuan.html
-if (statusSync && statusTxt) {
-            if (isOnline) {
-                statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
-                statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                statusTxt.innerText = "ONLINE";
-            } else {
-                statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
-                statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
-                statusTxt.innerText = "OFFLINE";
-            }
-        }
-    }
+      // Terapkan Gaya untuk pembukuan.html
+      if (statusSync && statusTxt) {
+          if (isOnline) {
+              statusSync.style.backgroundColor = '#eff6ff'; statusSync.style.borderColor = '#bfdbfe'; statusSync.style.color = '#1d4ed8';
+              statusDot.style.backgroundColor = '#3b82f6'; statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+              if (statusPing) statusPing.style.backgroundColor = '#3b82f6'; // Ping biru
+              statusTxt.innerText = "ONLINE";
+          } else {
+              statusSync.style.backgroundColor = '#fff1f2'; statusSync.style.borderColor = '#fecdd3'; statusSync.style.color = '#be123c';
+              statusDot.style.backgroundColor = '#e11d48'; statusDot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
+              if (statusPing) statusPing.style.backgroundColor = '#e11d48'; // Ping merah
+              statusTxt.innerText = "OFFLINE";
+          }
+      }
+  }
 
     // Paksa mesin meraba sinyal setiap 4 detik (Detak Jantung)
     setInterval(periksaSinyal, 4000);
@@ -815,66 +1019,70 @@ if (statusSync && statusTxt) {
                   </div>
                 </td>
                 
+                <!-- KOLOM PRODUKSI (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                   <div class="flex flex-col gap-1.5 w-full">
-                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-blue-300 focus-within:border-blue-500 transition-colors overflow-hidden">
-                          <span class="w-10 px-1.5 py-1.5 text-[8px] font-black text-slate-500 uppercase tracking-wider border-r border-slate-200 text-center">Close</span>
-                          <input type="date" id="close-${idAman}" value="${item.close || ''}" ${autoSave} class="flex-1 w-full bg-transparent px-2 text-[9px] font-bold text-slate-700 outline-none cursor-pointer">
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded-full border border-slate-200 hover:border-blue-300 focus-within:border-blue-500 transition-all shadow-sm overflow-hidden group/input">
+                          <span class="w-[52px] pl-3 pr-1.5 py-1.5 text-[8px] font-black text-slate-500 uppercase tracking-wider border-r border-slate-200 text-center bg-slate-100/50 group-hover/input:bg-blue-50/50 transition-colors">Close</span>
+                          <input type="date" id="close-${idAman}" value="${item.close || ''}" ${autoSave} class="flex-1 w-full bg-transparent px-2.5 text-[9px] font-bold text-slate-700 outline-none cursor-pointer">
                       </div>
-                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-emerald-300 focus-within:border-emerald-500 transition-colors overflow-hidden">
-                          <span class="w-10 px-1.5 py-1.5 text-[8px] font-black text-slate-500 uppercase tracking-wider border-r border-slate-200 text-center">Ready</span>
-                          <input type="date" id="ready-${idAman}" value="${item.ready || ''}" ${autoSave} class="flex-1 w-full bg-transparent px-2 text-[9px] font-bold text-slate-700 outline-none cursor-pointer">
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded-full border border-slate-200 hover:border-emerald-300 focus-within:border-emerald-500 transition-all shadow-sm overflow-hidden group/input">
+                          <span class="w-[52px] pl-3 pr-1.5 py-1.5 text-[8px] font-black text-slate-500 uppercase tracking-wider border-r border-slate-200 text-center bg-slate-100/50 group-hover/input:bg-emerald-50/50 transition-colors">Ready</span>
+                          <input type="date" id="ready-${idAman}" value="${item.ready || ''}" ${autoSave} class="flex-1 w-full bg-transparent px-2.5 text-[9px] font-bold text-slate-700 outline-none cursor-pointer">
                       </div>
                   </div>
                 </td>
                 
+                <!-- KOLOM PENAGIHAN (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                   <div class="flex flex-col gap-1.5 w-full">
-                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-colors overflow-hidden">
-                          <span class="w-7 px-1.5 py-1.5 text-[8px] font-black text-slate-500 border-r border-slate-200 text-center">C1</span>
-                          <input type="text" id="c1-${idAman}" value="${amanTgl(item.c1)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pilih..." class="date-range-picker w-full bg-transparent pl-2 pr-1 text-[9px] font-bold text-slate-700 cursor-pointer outline-none" readonly>
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded-full border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-all shadow-sm overflow-hidden group/input">
+                          <span class="w-10 pl-3 pr-1.5 py-1.5 text-[8px] font-black text-slate-500 border-r border-slate-200 text-center bg-slate-100/50 group-hover/input:bg-indigo-50/50 transition-colors">C1</span>
+                          <input type="text" id="c1-${idAman}" value="${amanTgl(item.c1)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pilih..." class="date-range-picker w-full bg-transparent pl-2.5 pr-2 text-[9px] font-bold text-slate-700 cursor-pointer outline-none" readonly>
                       </div>
-                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-colors overflow-hidden">
-                          <span class="w-7 px-1.5 py-1.5 text-[8px] font-black text-slate-500 border-r border-slate-200 text-center">C2</span>
-                          <input type="text" id="c2-${idAman}" value="${amanTgl(item.c2)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pilih..." class="date-range-picker w-full bg-transparent pl-2 pr-1 text-[9px] font-bold text-slate-700 cursor-pointer outline-none" readonly>
+                      <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded-full border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-all shadow-sm overflow-hidden group/input">
+                          <span class="w-10 pl-3 pr-1.5 py-1.5 text-[8px] font-black text-slate-500 border-r border-slate-200 text-center bg-slate-100/50 group-hover/input:bg-indigo-50/50 transition-colors">C2</span>
+                          <input type="text" id="c2-${idAman}" value="${amanTgl(item.c2)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pilih..." class="date-range-picker w-full bg-transparent pl-2.5 pr-2 text-[9px] font-bold text-slate-700 cursor-pointer outline-none" readonly>
                       </div>
-                      <div class="flex items-center bg-emerald-50/50 hover:bg-white focus-within:bg-white rounded border border-emerald-200 hover:border-emerald-400 focus-within:border-emerald-500 transition-colors overflow-hidden">
-                          <i class="fa-solid fa-check text-emerald-500 text-[8px] w-7 text-center border-r border-emerald-200 py-1.5"></i>
-                          <input type="text" id="lunas-${idAman}" value="${amanTgl(item.Lunas || item.lunas)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pelunasan..." class="date-range-picker w-full bg-transparent pl-2 pr-1 text-[9px] font-bold text-emerald-700 cursor-pointer outline-none" readonly>
+                      <div class="flex items-center bg-emerald-50/40 hover:bg-white focus-within:bg-white rounded-full border border-emerald-200 hover:border-emerald-400 focus-within:border-emerald-500 transition-all shadow-sm overflow-hidden group/input">
+                          <div class="w-10 pl-3 pr-1.5 py-1.5 border-r border-emerald-200 text-center bg-emerald-100/40 group-hover/input:bg-emerald-100/60 transition-colors flex justify-center items-center"><i class="fa-solid fa-check text-emerald-600 text-[8px]"></i></div>
+                          <input type="text" id="lunas-${idAman}" value="${amanTgl(item.Lunas || item.lunas)}" data-id="${idAman}" data-sarimbit="${safeSarimbitAttr}" placeholder="Pelunasan..." class="date-range-picker w-full bg-transparent pl-2.5 pr-2 text-[9px] font-bold text-emerald-700 cursor-pointer outline-none" readonly>
                       </div>
                   </div>
                 </td>
                 
+                <!-- KOLOM PEMBAYARAN (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                   <div class="flex flex-col gap-1.5 w-full">
-                      <div class="flex items-center bg-blue-50/30 hover:bg-white focus-within:bg-white rounded border border-blue-200 hover:border-blue-400 focus-within:border-blue-500 transition-colors overflow-hidden">
-                          <span class="px-2 py-1.5 bg-blue-100/50 text-[8px] font-black text-blue-600 border-r border-blue-200">DP</span>
-                          <span class="pl-1.5 text-[8px] font-bold text-slate-400">Rp</span>
-                          <input type="number" id="dp-${idAman}" value="${item.dp || ''}" ${autoSave} class="input-dp w-full px-1.5 py-1.5 text-[10px] font-black text-blue-700 bg-transparent outline-none">
+                      <div class="flex items-center bg-blue-50/30 hover:bg-white focus-within:bg-white rounded-full border border-blue-200 hover:border-blue-400 focus-within:border-blue-500 transition-all shadow-sm overflow-hidden group/input">
+                          <span class="pl-3 pr-2 py-1.5 bg-blue-100/60 group-hover/input:bg-blue-100 text-[8px] font-black text-blue-700 border-r border-blue-200 transition-colors">DP</span>
+                          <span class="pl-2 text-[8px] font-bold text-slate-400">Rp</span>
+                          <input type="number" id="dp-${idAman}" value="${item.dp || ''}" ${autoSave} class="input-dp w-full pr-3 pl-1 py-1.5 text-[10px] font-black text-blue-700 bg-transparent outline-none">
                       </div>
-                      <div class="flex items-center bg-emerald-50/30 hover:bg-white focus-within:bg-white rounded border border-emerald-200 hover:border-emerald-400 focus-within:border-emerald-500 transition-colors overflow-hidden">
-                          <span class="px-2 py-1.5 bg-emerald-100/50 text-[8px] font-black text-emerald-600 border-r border-emerald-200">LUNAS</span>
-                          <span class="pl-1.5 text-[8px] font-bold text-slate-400">Rp</span>
-                          <input type="number" id="bayar-${idAman}" value="${item.bayar || ''}" ${autoSave} class="input-bayar w-full px-1.5 py-1.5 text-[10px] font-black text-emerald-700 bg-transparent outline-none">
+                      <div class="flex items-center bg-emerald-50/30 hover:bg-white focus-within:bg-white rounded-full border border-emerald-200 hover:border-emerald-400 focus-within:border-emerald-500 transition-all shadow-sm overflow-hidden group/input">
+                          <span class="pl-3 pr-2 py-1.5 bg-emerald-100/60 group-hover/input:bg-emerald-100 text-[8px] font-black text-emerald-700 border-r border-emerald-200 transition-colors">LUNAS</span>
+                          <span class="pl-2 text-[8px] font-bold text-slate-400">Rp</span>
+                          <input type="number" id="bayar-${idAman}" value="${item.bayar || ''}" ${autoSave} class="input-bayar w-full pr-3 pl-1 py-1.5 text-[10px] font-black text-emerald-700 bg-transparent outline-none">
                       </div>
                   </div>
                 </td>
                 
+                <!-- KOLOM LOGISTIK & ALAMAT (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                     <div class="flex flex-col gap-1.5 w-full">
-                        <div class="relative bg-slate-50 hover:bg-white rounded border border-slate-200 hover:border-slate-300 transition-colors">
-                        <select id="kirim-${idAman}" ${autoSave} class="w-full pl-2 pr-5 py-1.5 text-[9px] font-bold rounded text-slate-700 cursor-pointer bg-transparent outline-none appearance-none">
-                            <option value="Langsung" ${item.statusKirim === 'Langsung' ? 'selected' : ''}>🚀 Langsung</option>
-                            <option value="DS" ${item.statusKirim === 'DS' ? 'selected' : ''}>📦 Drop Ship</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-[7px] text-slate-400 pointer-events-none"></i>
+                        <div class="relative bg-slate-50 hover:bg-white rounded-full border border-slate-200 hover:border-slate-300 transition-all shadow-sm overflow-hidden">
+                            <select id="kirim-${idAman}" ${autoSave} class="w-full pl-3 pr-7 py-1.5 text-[9px] font-bold rounded-full text-slate-700 cursor-pointer bg-transparent outline-none appearance-none">
+                                <option value="Langsung" ${item.statusKirim === 'Langsung' ? 'selected' : ''}>🚀 Langsung</option>
+                                <option value="DS" ${item.statusKirim === 'DS' ? 'selected' : ''}>📦 Drop Ship</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 w-7 flex items-center justify-center pointer-events-none bg-gradient-to-l from-slate-50/80 via-slate-50/50 to-transparent"><i class="fa-solid fa-chevron-down text-[7px] text-slate-400 pr-1"></i></div>
                         </div>
-                        <div class="relative bg-slate-50 hover:bg-white rounded border border-slate-200 hover:border-slate-300 transition-colors">
-                        <select id="alamat-${idAman}" ${autoSave} class="w-full pl-2 pr-5 py-1.5 text-[9px] font-bold rounded ${item.statusAlamat === 'Sudah Lengkap' ? 'text-emerald-600' : 'text-rose-500'} cursor-pointer bg-transparent outline-none appearance-none">
-                            <option value="Belum Lengkap" ${item.statusAlamat === 'Belum Lengkap' ? 'selected' : ''}>❌ Alamat Kurang</option>
-                            <option value="Sudah Lengkap" ${item.statusAlamat === 'Sudah Lengkap' ? 'selected' : ''}>✅ Alamat Fix</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-[7px] text-slate-400 pointer-events-none"></i>
+                        <div class="relative bg-slate-50 hover:bg-white rounded-full border border-slate-200 hover:border-slate-300 transition-all shadow-sm overflow-hidden">
+                            <select id="alamat-${idAman}" ${autoSave} class="w-full pl-3 pr-7 py-1.5 text-[9px] font-bold rounded-full ${item.statusAlamat === 'Sudah Lengkap' ? 'text-emerald-600' : 'text-rose-500'} cursor-pointer bg-transparent outline-none appearance-none">
+                                <option value="Belum Lengkap" ${item.statusAlamat === 'Belum Lengkap' ? 'selected' : ''}>❌ Alamat Kurang</option>
+                                <option value="Sudah Lengkap" ${item.statusAlamat === 'Sudah Lengkap' ? 'selected' : ''}>✅ Alamat Fix</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 w-7 flex items-center justify-center pointer-events-none bg-gradient-to-l from-slate-50/80 via-slate-50/50 to-transparent"><i class="fa-solid fa-chevron-down text-[7px] text-slate-400 pr-1"></i></div>
                         </div>
                     </div>
                 </td>
@@ -1241,5 +1449,321 @@ if (statusSync && statusTxt) {
         }, 450);
     }
   </script>
+  <script>
+    // ==========================================
+    // KENDALI DROPDOWN TOMBOL UNDUH PEMBUKUAN
+    // ==========================================
+    function toggleDropdownUnduhBuku() {
+        const menu = document.getElementById('dropdown-unduh-buku');
+        const chevron = document.getElementById('ikon-chevron-unduh-buku');
+        
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            if(chevron) chevron.style.transform = 'rotate(180deg)';
+            setTimeout(() => { menu.classList.remove('opacity-0', 'scale-95'); }, 10);
+        } else {
+            tutupDropdownUnduhBuku();
+        }
+    }
+
+    function tutupDropdownUnduhBuku() {
+        const menu = document.getElementById('dropdown-unduh-buku');
+        const chevron = document.getElementById('ikon-chevron-unduh-buku');
+        
+        if(menu && !menu.classList.contains('hidden')) {
+            menu.classList.add('opacity-0', 'scale-95');
+            if(chevron) chevron.style.transform = 'rotate(0deg)';
+            setTimeout(() => { menu.classList.add('hidden'); }, 200); 
+        }
+    }
+
+    // Tutup klik di luar
+    document.addEventListener('click', function(event) {
+        const container = document.getElementById('wadah-dropdown-unduh-buku');
+        if (container && !container.contains(event.target)) {
+            tutupDropdownUnduhBuku();
+        }
+    });
+   // ==========================================
+// FUNGSI ANIMASI & KALKULASI STATISTIK BUKU
+// ==========================================
+window.bukaModalStatistikBuku = function() {
+    if (!rawSummary || rawSummary.length === 0) {
+        if(typeof showToast === 'function') showToast("⚠️ Belum ada data untuk dianalisis!");
+        return;
+    }
+
+    const modal = document.getElementById('modal-statistik-buku');
+    const konten = document.getElementById('konten-statistik-buku');
+    
+    const totalData = rawSummary.length;
+    let aktif = 0, arsip = 0, totalQtySemua = 0, totalQtyAktif = 0, totalQtyArsip = 0;
+    
+    // Keranjang ini HANYA akan diisi oleh model yang AKTIF
+    const listOpen = [], listClose = [], listReady = [];
+    const sekarang = new Date().getTime();
+
+    const parsingTglAman = (val) => {
+        if (!val) return null;
+        let str = String(val).trim();
+        if (str.includes('/') || str.includes('.')) {
+            const pemisah = str.includes('/') ? '/' : '.';
+            const bgn = str.split(pemisah);
+            if (bgn[0].length <= 2 && bgn[2].length === 4) str = `${bgn[2]}-${bgn[1]}-${bgn[0]}`; 
+        }
+        const date = new Date(str);
+        if(isNaN(date.getTime())) return null;
+        date.setHours(0,0,0,0);
+        return date;
+    };
+
+    rawSummary.forEach(item => {
+        const qtyRow = (Number(item.totalOrder) || 0);
+        totalQtySemua += qtyRow;
+
+        if (item.isarchived || item.isArchived) { 
+            arsip++; 
+            totalQtyArsip += qtyRow; 
+            // Model Arsip TIDAK dimasukkan ke perhitungan Fase Produksi
+        } 
+        else { 
+            aktif++; 
+            totalQtyAktif += qtyRow; 
+            
+            // FASE PRODUKSI: Hanya dihitung untuk Model Aktif
+            const tglClose = parsingTglAman(item.close);
+            const tglReady = parsingTglAman(item.ready);
+            
+            if (tglReady && tglReady.getTime() <= sekarang) listReady.push(item.sarimbit);
+            else if (tglClose && tglClose.getTime() <= sekarang) listClose.push(item.sarimbit);
+            else listOpen.push(item.sarimbit);
+        }
+    });
+
+    listOpen.sort(); listClose.sort(); listReady.sort();
+    const sortedByQty = [...rawSummary].sort((a, b) => (b.totalOrder || 0) - (a.totalOrder || 0)).slice(0, 3);
+
+    document.getElementById('stat-qty-all').innerText = totalQtySemua.toLocaleString('id-ID');
+    document.getElementById('stat-qty-aktif').innerText = totalQtyAktif.toLocaleString('id-ID');
+    document.getElementById('stat-qty-arsip').innerText = totalQtyArsip.toLocaleString('id-ID');
+    
+    document.getElementById('stat-total-model').innerText = totalData;
+    document.getElementById('stat-aktif').innerText = aktif;
+    document.getElementById('stat-arsip').innerText = arsip;
+
+    document.getElementById('stat-open').innerHTML = `${listOpen.length} <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Sarimbit</span>`;
+    document.getElementById('stat-close').innerHTML = `${listClose.length} <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Sarimbit</span>`;
+    document.getElementById('stat-ready').innerHTML = `${listReady.length} <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Sarimbit</span>`;
+
+    const formatListSarimbit = (arr, warnaTeks) => {
+        if(arr.length === 0) return `<div class="italic text-slate-400/80 py-1 pl-1 text-[9px] font-medium">Kosong</div>`;
+        return arr.map(nama => `<div class="flex items-center gap-2 text-slate-600 py-1 pl-1 bg-slate-50/50 rounded-md border border-slate-100 shadow-sm mb-1 hover:bg-white transition-colors"><i class="fa-solid fa-circle text-[4px] ${warnaTeks}"></i> ${nama}</div>`).join('');
+    };
+
+    document.getElementById('det-openpo').innerHTML = formatListSarimbit(listOpen, 'text-slate-400');
+    document.getElementById('det-closepo').innerHTML = formatListSarimbit(listClose, 'text-emerald-500');
+    document.getElementById('det-readypo').innerHTML = formatListSarimbit(listReady, 'text-emerald-800');
+
+    // Progress Bar Fase Produksi sekarang berpatokan ke jumlah 'Aktif', bukan 'Total Data'
+    const pOpen = aktif > 0 ? Math.round((listOpen.length / aktif) * 100) : 0;
+    const pClose = aktif > 0 ? Math.round((listClose.length / aktif) * 100) : 0;
+    const pReady = aktif > 0 ? Math.round((listReady.length / aktif) * 100) : 0;
+
+    let htmlBest = '';
+    const warnaMedali = ['text-emerald-800', 'text-emerald-600', 'text-slate-400'];
+    const barGradient = ['bg-gradient-to-r from-emerald-700 to-emerald-900', 'bg-gradient-to-r from-emerald-500 to-emerald-700', 'bg-slate-400'];
+    
+    sortedByQty.forEach((b, idx) => {
+        const maxOrder = sortedByQty[0].totalOrder || 1;
+        const pBar = Math.round(((b.totalOrder || 0) / maxOrder) * 100);
+        htmlBest += `
+            <div class="flex items-center gap-3 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:bg-white transition-colors group">
+                <div class="w-7 h-7 bg-white flex items-center justify-center font-black ${warnaMedali[idx]} text-sm drop-shadow-sm rounded-full border border-slate-200 group-hover:scale-110 transition-transform"><i class="fa-solid fa-medal"></i></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[11px] font-black text-slate-800 truncate mr-2">${b.sarimbit}</span>
+                        <span class="text-[10px] font-black text-emerald-700 shrink-0">${b.totalOrder} Pcs</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                        <div class="h-full ${barGradient[idx]} rounded-full stat-bar-isi" style="width: 0%" data-width="${pBar}%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    if (htmlBest === '') htmlBest = '<div class="text-xs text-slate-400 font-bold text-center py-2">Data belum tersedia</div>';
+    document.getElementById('wadah-best-seller').innerHTML = htmlBest;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        konten.classList.remove('scale-95');
+        
+        document.getElementById('bar-open').style.width = pOpen + '%';
+        document.getElementById('bar-close').style.width = pClose + '%';
+        document.getElementById('bar-ready').style.width = pReady + '%';
+        
+        document.querySelectorAll('#wadah-best-seller .stat-bar-isi').forEach(bar => {
+            bar.style.width = bar.getAttribute('data-width');
+        });
+    }, 50);
+};
+
+window.tutupModalStatistikBuku = function() {
+    const modal = document.getElementById('modal-statistik-buku');
+    const konten = document.getElementById('konten-statistik-buku');
+    
+    modal.classList.add('opacity-0');
+    konten.classList.add('scale-95');
+    
+    document.querySelectorAll('.stat-bar-isi').forEach(b => b.style.width = '0%');
+    
+    setTimeout(() => { modal.classList.add('hidden'); }, 300); 
+};
+
+// ==========================================
+// FUNGSI PDF: RINGKASAN TABEL STATISTIK
+// ==========================================
+window.exportStatistikPDF = function() {
+    if (!rawSummary || rawSummary.length === 0) {
+        if(typeof showToast === 'function') showToast("⚠️ Tidak ada data statistik untuk diekspor!");
+        return;
+    }
+
+    try {
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        doc.setFontSize(14);
+        doc.text("LAPORAN RINGKASAN STATISTIK PEMBUKUAN", 14, 15);
+        doc.setFontSize(9);
+        doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 21);
+
+        // Kalkulasi Data & Pengumpulan Nama Sarimbit
+        let aktif = 0, arsip = 0, open = 0, close = 0, ready = 0;
+        let totalQty = 0, qtyAktif = 0, qtyArsip = 0;
+        const listOpenNames = [], listCloseNames = [], listReadyNames = [];
+        const sekarang = new Date().getTime();
+
+        const parsingTglAman = (val) => {
+            if (!val) return null;
+            let str = String(val).trim();
+            if (str.includes('/') || str.includes('.')) {
+                const pemisah = str.includes('/') ? '/' : '.';
+                const bgn = str.split(pemisah);
+                if (bgn[0].length <= 2 && bgn[2].length === 4) str = `${bgn[2]}-${bgn[1]}-${bgn[0]}`; 
+            }
+            const date = new Date(str);
+            if(isNaN(date.getTime())) return null;
+            date.setHours(0,0,0,0);
+            return date;
+        };
+
+        rawSummary.forEach(item => {
+            const qty = Number(item.totalOrder) || 0;
+            totalQty += qty;
+            
+            if (item.isarchived || item.isArchived) { 
+                arsip++; 
+                qtyArsip += qty;
+            } else { 
+                aktif++; 
+                qtyAktif += qty;
+                
+                const tglClose = parsingTglAman(item.close);
+                const tglReady = parsingTglAman(item.ready);
+                
+                if (tglReady && tglReady.getTime() <= sekarang) { 
+                    ready++; 
+                    listReadyNames.push(item.sarimbit || "-"); 
+                } else if (tglClose && tglClose.getTime() <= sekarang) { 
+                    close++; 
+                    listCloseNames.push(item.sarimbit || "-"); 
+                } else { 
+                    open++; 
+                    listOpenNames.push(item.sarimbit || "-"); 
+                }
+            }
+        });
+
+        // Urutkan nama agar rapi sesuai abjad
+        listOpenNames.sort(); 
+        listCloseNames.sort(); 
+        listReadyNames.sort();
+
+        // Fungsi khusus agar daftar nama berbaris ke bawah beserta nomor urut
+        const formatNamaVertikal = (arr) => {
+            if (arr.length === 0) return "-";
+            return arr.map((nama, index) => `${index + 1}. ${nama}`).join("\n");
+        };
+
+        // 1. TABEL STATUS & KUANTITAS
+        doc.autoTable({
+            head: [["Kategori Rekapan", "Jumlah Sarimbit", "Total Kuantitas Order"]],
+            body: [
+                ["Total Keseluruhan", rawSummary.length + " Sarimbit", totalQty.toLocaleString('id-ID') + " Pcs"],
+                ["Koleksi Berjalan (Aktif)", aktif + " Sarimbit", qtyAktif.toLocaleString('id-ID') + " Pcs"],
+                ["Koleksi Tuntas (Arsip)", arsip + " Sarimbit", qtyArsip.toLocaleString('id-ID') + " Pcs"]
+            ],
+            startY: 28,
+            theme: 'grid',
+            headStyles: { fillColor: [4, 120, 87], fontSize: 9, halign: 'center' }, // Hijau Tua
+            styles: { fontSize: 8, cellPadding: 4, valign: 'middle' },
+            columnStyles: { 1: { halign: 'center' }, 2: { halign: 'right' } }
+        });
+
+        // 2. TABEL FASE PRODUKSI (Rincian nama berjejer ke bawah)
+        doc.autoTable({
+            head: [["Fase Produksi (Khusus Aktif)", "Jumlah", "Rincian Nama Sarimbit"]],
+            body: [
+                ["Masih Open PO", open + " Sarimbit", formatNamaVertikal(listOpenNames)],
+                ["Sudah Close PO", close + " Sarimbit", formatNamaVertikal(listCloseNames)],
+                ["Sudah Ready", ready + " Sarimbit", formatNamaVertikal(listReadyNames)]
+            ],
+            startY: doc.lastAutoTable.finalY + 10,
+            theme: 'grid',
+            headStyles: { fillColor: [3, 105, 161], fontSize: 9, halign: 'center' }, // Biru
+            styles: { fontSize: 8, cellPadding: 4, valign: 'top' }, // Ubah valign ke top agar rapi
+            columnStyles: { 0: { cellWidth: 35 }, 1: { cellWidth: 25, halign: 'center' }, 2: { cellWidth: 'auto' } },
+            rowPageBreak: 'auto' // Memastikan tabel tidak terpotong error jika list sangat panjang ke bawah halaman baru
+        });
+
+        // 3. TABEL TOP 3 BEST SELLER
+        const sortedByQty = [...rawSummary].sort((a, b) => (b.totalOrder || 0) - (a.totalOrder || 0)).slice(0, 3);
+        const tableTop3 = sortedByQty.map((item, index) => [
+            "Top " + (index + 1),
+            item.sarimbit || "-",
+            item.brand || "-",
+            (item.totalOrder || 0).toLocaleString('id-ID') + " Pcs"
+        ]);
+
+        doc.autoTable({
+            head: [["Peringkat", "Nama Sarimbit Terlaris", "Pusat/Brand", "Total Order"]],
+            body: tableTop3,
+            startY: doc.lastAutoTable.finalY + 10,
+            theme: 'grid',
+            headStyles: { fillColor: [180, 83, 9], fontSize: 9, halign: 'center' }, // Amber/Cokelat
+            styles: { fontSize: 8, cellPadding: 4, valign: 'middle' },
+            columnStyles: { 0: { halign: 'center' }, 3: { halign: 'right' } }
+        });
+        
+        const filename = `Ringkasan_Statistik_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.pdf`;
+        
+        if (window.__TAURI__) {
+            const arrayBuffer = doc.output('arraybuffer');
+            const uint8Array = new Uint8Array(arrayBuffer);
+            window.simpanKeTauriData(uint8Array, filename);
+        } else {
+            doc.save(filename);
+            if(typeof showToast === 'function') showToast("✅ PDF Ringkasan Statistik diunduh");
+        }
+        
+    } catch (e) {
+        console.error(e);
+        alert("Gagal membuat PDF Statistik: " + e.message);
+    }
+};
+</script>
 </body>
 </html>

@@ -4267,9 +4267,9 @@ async function handleOrderSubmit(e) {
                     <!-- Kotak Kontak & Alamat -->
                     <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-3.5 rounded-xl border border-slate-200 mt-4 space-y-2.5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
                         <div class="absolute inset-0 bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <a href="https://wa.me/${String(c.telp).replace(/[^0-9]/g, '').replace(/^0/, '62')}" target="_blank" title="Klik untuk chat WhatsApp langsung" class="text-xs font-black text-slate-700 flex items-center gap-2 hover:text-emerald-600 cursor-pointer w-fit transition-colors relative z-10">
-                            <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-200/50"><i class="fa-brands fa-whatsapp text-[11px]"></i></div> ${c.telp}
-                        </a>
+                       <div onclick="hubungiWA('${c.telp}')" title="Klik untuk chat WhatsApp langsung" class="text-xs font-black text-slate-700 flex items-center gap-2 hover:text-emerald-600 cursor-pointer w-fit transition-colors relative z-10">
+                        <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-200/50"><i class="fa-brands fa-whatsapp text-[11px]"></i></div> ${c.telp}
+                    </div>
                         <div class="text-xs text-slate-500 font-bold leading-relaxed relative z-10 pr-2">${c.alamat}</div>
                     </div>
 
@@ -7346,7 +7346,40 @@ function pilihProdukModal(metaString) {
 
         // 3. FUNGSI RENDER SLIP CERDAS (GAYA SAMSUNG & DROPDOWN BEBAS HAMBATAN)
         const fungsiAsliRenderSlip = window.renderSlip;
+       // ==========================================
+    // FUNGSI PINTAR BUKA WHATSAPP (Tauri + HP + Web)
+    // ==========================================
+    window.hubungiWA = async function(noTelp) {
+        let no = String(noTelp).replace(/[^0-9]/g, '');
+        if (no.startsWith('0')) no = '62' + no.substring(1);
         
+        if (no.length < 9) {
+            if(typeof showToast === 'function') showToast("⚠️ Nomor WhatsApp tidak valid!");
+            return;
+        }
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const waLink = `https://web.whatsapp.com/send?phone=${no}`;
+        
+        // 1. JIKA BERADA DI DALAM APLIKASI TAURI (LAPTOP / MAC)
+        if (window.__TAURI__) {
+            try {
+                // Perintah khusus mem-bypass keamanan Tauri untuk melempar link ke Safari/Chrome
+                await window.__TAURI__.core.invoke('plugin:shell|open', { path: waLink });
+            } catch (e) {
+                console.error("Gagal buka WA di Tauri:", e);
+                window.open(waLink, '_blank'); // Fallback
+            }
+        } 
+        // 2. JIKA DI HP (PWA / BROWSER HP)
+        else if (isMobile) {
+            window.location.href = `whatsapp://send?phone=${no}`;
+        } 
+        // 3. JIKA DI BROWSER WEB LAPTOP BIASA
+        else {
+            window.open(waLink, '_blank');
+        }
+    };
         window.renderSlip = function() {
             // A. EKSEKUSI FUNGSI RENDER UTAMA
             if (typeof fungsiAsliRenderSlip === 'function') {
