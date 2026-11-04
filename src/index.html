@@ -824,21 +824,24 @@
 
               <!-- Kelompok Tombol Aksi Kapsul Bergradasi (Kanan) -->
               <div class="flex items-center gap-2.5 shrink-0 w-full xl:w-auto">
-                  <!-- GARIS PEMISAH HORIZONTAL (Hanya terlihat di layar HP jika turun baris) -->
-                  <div class="xl:hidden w-full h-px bg-slate-200 mb-1"></div>
-                  
-                  <button onclick="downloadMasterTemplate()" class="flex-1 sm:flex-none h-10 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 px-4 rounded-full text-[10px] font-black shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-white hover:from-slate-100 hover:to-slate-200 hover:text-slate-800 transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap group">
-                      <i class="fa-solid fa-download group-hover:scale-110 transition-transform"></i> TEMPLATE
-                  </button>
-                  
-                  <button onclick="document.getElementById('import-excel').click()" class="bg-gradient-to-br from-indigo-50 to-blue-100 text-indigo-700 px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest border border-white shadow-[0_4px_10px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_15px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
-                    <i class="fa-solid fa-file-import group-hover:-translate-y-1 transition-transform"></i> IMPORT
+                <!-- PENANGKAP FILE IMPORT YANG HILANG (DISEMBUNYIKAN) -->
+                <input type="file" id="import-excel" class="hidden" accept=".xlsx, .xls, .csv" onchange="importMasterExcel(this)">
+                
+                <!-- GARIS PEMISAH HORIZONTAL (Hanya terlihat di layar HP jika turun baris) -->
+                <div class="xl:hidden w-full h-px bg-slate-200 mb-1"></div>
+                
+                <button onclick="downloadMasterTemplate()" class="flex-1 sm:flex-none h-10 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 px-4 rounded-full text-[10px] font-black shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-white hover:from-slate-100 hover:to-slate-200 hover:text-slate-800 transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap group">
+                    <i class="fa-solid fa-download group-hover:scale-110 transition-transform"></i> TEMPLATE
                 </button>
-                  
-                  <button onclick="exportMasterToExcel()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
-                    <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
-                </button>
-              </div>
+                
+                <button onclick="document.getElementById('import-excel').click()" class="bg-gradient-to-br from-indigo-50 to-blue-100 text-indigo-700 px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest border border-white shadow-[0_4px_10px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_15px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
+                  <i class="fa-solid fa-file-import group-hover:-translate-y-1 transition-transform"></i> IMPORT
+              </button>
+                
+                <button onclick="exportMasterToExcel()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
+                  <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
+              </button>
+            </div>
           </div>
       </div>
           <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/40 relative">
