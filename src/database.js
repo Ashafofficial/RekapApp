@@ -67,8 +67,8 @@ async function supabaseFetch(endpoint, options = {}) {
 
 window.DatabaseAPI = {
     getAllData: async function(onSuccess, onFailure) {
+        // 1. RENDER LOKAL TERLEBIH DAHULU (BENTENG OFFLINE)
         try {
-            // 1. RENDER LOKAL TERLEBIH DAHULU (INSTAN!)
             let localMasterRaw = await dbLokal.master.toArray();
             let localOrdersRaw = await dbLokal.orders.toArray();
             let localPembukuanRaw = await dbLokal.pembukuan.toArray();
@@ -83,12 +83,18 @@ window.DatabaseAPI = {
                 return a._wkt === b._wkt ? a.id - b.id : b._wkt - a._wkt;
             });
             
+            // TEMBAK DATA LOKAL KE LAYAR SEKARANG JUGA!
             if (onSuccess) onSuccess({ master: localMaster, orders: localOrders, pembukuan: localPembukuan });
+        } catch(e) {
+            console.error("Gagal membaca database lokal:", e);
+        }
 
-          // SINKRONISASI CLOUD DIBELAKANG LAYAR (JIKA ONLINE NYATA)
-          const isOnline = await cekInternetAktif();
-          if (isOnline) {
-              await this.syncOfflineData();
+        // 2. SINKRONISASI CLOUD DIBELAKANG LAYAR (JIKA ONLINE NYATA)
+        try {
+            const isOnline = await cekInternetAktif();
+            if (!isOnline) return; // Hentikan proses jika offline
+            
+            await this.syncOfflineData();
 
             // --- SINKRONISASI MASTER ---
             const lastSyncMaster = (await dbLokal.metadata.get("last_sync_master"))?.value || "1970-01-01T00:00:00Z";
@@ -98,10 +104,8 @@ window.DatabaseAPI = {
                 if (batchMaster && batchMaster.length > 0) { cloudMaster = cloudMaster.concat(batchMaster); if (batchMaster.length < 1000) keepFetchingMaster = false; else offsetMaster += 1000; } else keepFetchingMaster = false;
             }
             if (cloudMaster.length > 0) {
-                // PERCEPATAN EKSTREM: Gunakan Map agar pencocokan instan O(1), bebas lagging!
                 const mapMaster = new Map();
-                localMasterRaw.forEach(l => mapMaster.set(String(l.id), l));
-
+                (await dbLokal.master.toArray()).forEach(l => mapMaster.set(String(l.id), l));
                 const toPutMaster = cloudMaster.filter(cm => {
                     const lm = mapMaster.get(String(cm.id));
                     if (!lm) return true; return new Date(cm.updated_at).getTime() > new Date(lm.updated_at).getTime();
@@ -120,12 +124,9 @@ window.DatabaseAPI = {
             if (cloudOrders.length > 0) {
                 const dataAktif = cloudOrders.filter(o => o.syncstatus !== -1);
                 const dataDihapusPusat = cloudOrders.filter(o => o.syncstatus === -1);
-                
                 if (dataAktif.length > 0) {
-                    // PERCEPATAN EKSTREM: Gunakan Map untuk mempercepat jutaan perhitungan menjadi 0 detik
                     const mapOrder = new Map();
-                    localOrdersRaw.forEach(l => mapOrder.set(String(l.id), l));
-
+                    (await dbLokal.orders.toArray()).forEach(l => mapOrder.set(String(l.id), l));
                     const toPutOrders = dataAktif.filter(co => {
                         const lo = mapOrder.get(String(co.id));
                         if (!lo) return true;
@@ -143,8 +144,7 @@ window.DatabaseAPI = {
             const cloudPembukuan = await supabaseFetch(`/rest/v1/pembukuan?select=*&updated_at=gt.${encodeURIComponent(lastSyncPembukuan)}`);
             if (cloudPembukuan && cloudPembukuan.length > 0) {
                 const mapBuku = new Map();
-                localPembukuanRaw.forEach(l => mapBuku.set(String(l.id), l));
-
+                (await dbLokal.pembukuan.toArray()).forEach(l => mapBuku.set(String(l.id), l));
                 const toPutBuku = cloudPembukuan.filter(cb => {
                     const lb = mapBuku.get(String(cb.id));
                     if (!lb) return true;
@@ -164,19 +164,17 @@ window.DatabaseAPI = {
             }
 
             // 3. RENDER ULANG JIKA ADA PERUBAHAN DARI CLOUD
-            localMaster = await dbLokal.master.toArray();
-            localOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
-            localPembukuan = await dbLokal.pembukuan.toArray(); 
-            localOrders.sort((a, b) => {
+            let finalMaster = await dbLokal.master.toArray();
+            let finalOrders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
+            let finalPembukuan = await dbLokal.pembukuan.toArray(); 
+            finalOrders.sort((a, b) => {
                 const dateA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
                 const dateB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
                 return dateA === dateB ? a.id - b.id : dateB - dateA;
             });
-            if (onSuccess) onSuccess({ master: localMaster, orders: localOrders, pembukuan: localPembukuan });
-        }
+            if (onSuccess) onSuccess({ master: finalMaster, orders: finalOrders, pembukuan: finalPembukuan });
         } catch(e) { console.error("Sinkronisasi gagal, menggunakan data lokal:", e); }
     },
-
     saveOrders: async function(items, onSuccess, onFailure) {
         const now = new Date().toISOString();
         const baseId = Date.now(); 
@@ -612,4 +610,27 @@ document.addEventListener('DOMContentLoaded', () => {
     bersihkanLogLama();  
     inisialisasiSupabaseRealtime();
     cekKapasitasSupabase();
+});
+
+// ==========================================
+// PENDENGAR JARINGAN OTOMATIS (AUTO-RECOVERY)
+// ==========================================
+window.addEventListener('online', async () => {
+    console.log("🌐 Koneksi Internet Terhubung Kembali! Menyinkronkan data...");
+    
+    // Aktifkan ulang koneksi Realtime jika sebelumnya terputus
+    inisialisasiSupabaseRealtime();
+    
+    // Paksa update data ke server lalu refresh layar Windows/Tabel
+    if (typeof jalankanPenyegaranLayarWindows === 'function') {
+        // Beri jeda 1 detik agar koneksi benar-benar stabil sebelum narik data
+        setTimeout(() => {
+            jalankanPenyegaranLayarWindows();
+        }, 1000);
+    }
+});
+
+window.addEventListener('offline', () => {
+    console.log("🚫 Koneksi Internet Terputus! Beralih ke Mode Lokal.");
+    // Supabase Realtime otomatis mati sendiri saat offline, tidak perlu dimatikan manual
 });
