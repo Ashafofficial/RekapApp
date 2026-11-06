@@ -7176,6 +7176,11 @@ function pilihProdukModal(metaString) {
         <i class="fa-solid fa-floppy-disk"></i> SIMPAN PESANAN
     </button>
 </div>
+
+<!-- TOMBOL SCROLL TO TOP MELAYANG (KANAN BAWAH, MUNCUL SAAT SCROLL) -->
+<button id="btn-scroll-top" onclick="document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' })" class="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[150] w-10 h-10 bg-white/80 backdrop-blur-md text-slate-500 rounded-full shadow-md border border-slate-200 hover:bg-white hover:text-blue-600 transition-all duration-500 opacity-0 pointer-events-none translate-y-4 flex items-center justify-center active:scale-90">
+    <i class="fa-solid fa-arrow-up text-sm"></i>
+</button>
 <!-- ========================================================================= -->
 <!-- SCRIPT SUNTIK PAKSA: PERBAIKAN TOTAL QTY, STRUK & MEMORI POP-UP (FINAL)   -->
 <!-- ========================================================================= -->
@@ -8179,6 +8184,26 @@ function pilihProdukModal(metaString) {
                 const modal = document.getElementById('modalNamaPerangkat');
                 if(modal) modal.classList.remove('hidden'); 
             }, 1000);
+        }
+
+        // ==========================================
+        // SENSOR OTOMATIS: TOMBOL SCROLL TO TOP
+        // ==========================================
+        const layarUtama = document.querySelector('main');
+        const tombolNaik = document.getElementById('btn-scroll-top');
+        
+        if (layarUtama && tombolNaik) {
+            layarUtama.addEventListener('scroll', () => {
+                // Jika layar digulir turun lebih dari 250 pixel, tombol muncul di kanan bawah!
+                if (layarUtama.scrollTop > 250) {
+                    tombolNaik.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    tombolNaik.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+                } else {
+                    // Jika layar sudah berada di pucuk atas, tombol sembunyi lagi!
+                    tombolNaik.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    tombolNaik.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+                }
+            });
         }
     });
 
