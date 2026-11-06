@@ -4405,11 +4405,12 @@ async function handleOrderSubmit(e) {
             const totalPcsCustomer = c.items.reduce((sum, it) => sum + Number(it.jumlah || 0), 0);
             const adaTagihanMendesak = c.adaTagihanMendesak;
 
-            const btnAlertHtml = `
-                <button onclick="bukaModalTagihan('${c.idCustomer}')" title="Cek Jadwal Penagihan" class="ml-3 w-6 h-6 flex-shrink-0 inline-flex items-center justify-center rounded-full font-black text-xs transition-all duration-300 ${adaTagihanMendesak ? 'bg-rose-500 text-white shadow-[0_0_12px_4px_rgba(244,63,94,0.5)] animate-pulse border-none' : 'bg-blue-100 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white shadow-sm'}">
+            // Tanda Seru Hanya Muncul Jika Ada Jadwal Mendesak (Merah)
+            const btnAlertHtml = adaTagihanMendesak ? `
+                <button onclick="bukaModalTagihan('${c.idCustomer}')" title="Cek Jadwal Penagihan" class="w-6 h-6 flex-shrink-0 inline-flex items-center justify-center rounded-full font-black text-xs transition-all duration-300 bg-rose-500 text-white shadow-[0_0_12px_4px_rgba(244,63,94,0.5)] animate-pulse border-none">
                     !
                 </button>
-            `;
+            ` : '';
 
             const itemHTML = c.items.map(it => {
                 const safeSarimbit = (it.sarimbit || '').replace(/'/g, "\\'");
