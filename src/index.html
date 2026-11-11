@@ -400,8 +400,8 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
     
-    <!-- WADAH NOTIFIKASI PRODUKSI (SMART ALARM) MENGAMBANG DI POJOK KIRI BAWAH -->
-    <div id="wadah-notif-produksi" class="fixed bottom-8 left-4 md:left-6 z-[120] flex flex-col justify-end gap-1 w-32 md:w-36 pointer-events-none"></div>
+    <!-- WADAH NOTIFIKASI PRODUKSI (SMART ALARM) MENGAMBANG DI POJOK KANAN BAWAH (HP) / KIRI BAWAH (LAPTOP) -->
+    <div id="wadah-notif-produksi" class="fixed bottom-8 right-4 md:right-auto md:left-6 z-[120] flex flex-col justify-end gap-1 w-32 md:w-36 pointer-events-none"></div>
     
      <!-- INDIKATOR SINYAL PERMANEN ANTI HANCUR (Pojok Kanan Atas di HP, Sebelah Logo di Laptop) -->
      <div id="connection-banner" class="fixed top-3.5 right-4 md:top-3 md:right-auto md:left-[170px]" style="z-index: 9999; padding: 5px 10px; border-radius: 20px; font-size: 8px; font-weight: 900; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #bfdbfe; background-color: rgba(239, 246, 255, 0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #1d4ed8; transition: all 0.3s ease;">
@@ -483,10 +483,9 @@
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-sky-200 to-blue-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-blue-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(14,165,233,0.3)] group-hover:scale-110"><i class="fa-solid fa-chart-line text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Dashboard</span>
      </button>
-     <button onclick="pindahHalaman('riwayat.html')" class="android-only-menu hidden nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent">
-        <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-slate-600 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(100,116,139,0.3)] group-hover:scale-110"><i class="fa-solid fa-clock-rotate-left text-[10px] md:text-xs"></i></div>
-        <span class="tracking-wide">Riwayat</span>
-     </button>
+
+     <button onclick="pindahHalaman('datadouble.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-datadouble">
+     ...
 
      <button onclick="pindahHalaman('datadouble.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-datadouble">
       <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-red-200 to-rose-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-rose-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(225,29,72,0.3)] group-hover:scale-110"><i class="fa-solid fa-clone text-[10px] md:text-xs"></i></div>

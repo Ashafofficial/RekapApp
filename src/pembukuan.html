@@ -31,8 +31,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/id.min.js"></script>
   
   <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
-  
-  <!-- 1. PANGGIL DEXIE TERLEBIH DAHULU (Pondasi Lokal) -->
   <script src="dexie.js"></script>
   
   <!-- 2. PANGGIL SUPABASE (Pondasi Awan) -->
@@ -273,17 +271,22 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
     .donat-track { fill: none; stroke-width: 4.5; stroke-linecap: round; }
     .donat-isi { fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .stat-bar-isi { transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    /* ==========================================
-       HAPUS BAYANGAN KOTAK KAKU PADA INPUT KAPSUL
+  /* ==========================================
+       HAPUS BAYANGAN KOTAK KAKU PADA INPUT KAPSUL & POP-UP HP
        ========================================== */
-       #table-pembukuan input[type="text"]:focus, 
-    #table-pembukuan input[type="number"]:focus, 
-    #table-pembukuan input[type="date"]:focus, 
-    #table-pembukuan select:focus {
+       #table-pembukuan input:hover, 
+    #table-pembukuan select:hover,
+    #table-pembukuan input:focus, 
+    #table-pembukuan select:focus,
+    #modal-detail-buku-mobile input:hover,
+    #modal-detail-buku-mobile select:hover,
+    #modal-detail-buku-mobile input:focus,
+    #modal-detail-buku-mobile select:focus {
         background: transparent !important;
         box-shadow: none !important;
         transform: none !important;
         border-color: transparent !important;
+        outline: none !important;
     }
 </style>
 </head>
@@ -303,13 +306,13 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
         <!-- Status Online/Offline (Bentuk Tag Persegi & Ditarik ke Pojok Kanan Atas) -->
         <div class="absolute -top-7 right-0 md:-top-9 md:-right-2 z-50">
             <div id="status-sync" class="transition-all duration-300 px-2.5 py-1 rounded-md border border-slate-200 bg-white/90 backdrop-blur-md shadow-sm flex items-center gap-1.5 text-[8.5px] font-black tracking-widest uppercase">
-               
+                
                <!-- Efek Cahaya Radar Berkedip -->
                <div class="relative flex items-center justify-center">
                    <div id="status-ping" class="absolute w-2.5 h-2.5 bg-slate-400 rounded-sm animate-ping opacity-75"></div>
                    <div id="status-dot" class="relative w-1.5 h-1.5 bg-slate-400 rounded-sm z-10 animate-pulse"></div> 
                </div>
-               
+                
                <span id="status-text">MEMERIKSA...</span>
             </div>
         </div>
@@ -411,9 +414,12 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
 
   <div class="max-w-[98%] mx-auto glass rounded-3xl shadow-xl overflow-hidden border border-slate-200/80 bg-white/40">
     <div class="overflow-x-auto max-h-[75vh]">
-      <table class="w-full text-left min-w-[1050px] xl:min-w-full" id="table-pembukuan">
+      <!-- md:min-w-[1050px] memastikan tabel HP pas 100% di layar, tidak perlu scroll kanan -->
+      <table class="w-full text-left md:min-w-[1050px] xl:min-w-full" id="table-pembukuan">
         <thead class="sticky-head">
-          <tr class="text-slate-500 text-[9px] uppercase tracking-widest font-black">
+          
+          <!-- HEADER DESKTOP (10 Kolom) - Sembunyi di HP -->
+          <tr class="hidden md:table-row text-slate-500 text-[9px] uppercase tracking-widest font-black">
             <th class="p-2.5 2xl:p-3 w-10 text-center">No</th>
             <th class="p-2.5 2xl:p-3 w-[11%]">Koleksi Sarimbit</th>
             <th class="p-2.5 2xl:p-3 w-[8%]">Nama Pusat</th>
@@ -425,6 +431,16 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
             <th class="p-2.5 2xl:p-3 w-[8%]">Status Admin</th>
             <th class="p-2.5 2xl:p-3 w-[5%] text-center">Aksi</th>
           </tr>
+          
+       <!-- HEADER HP / MOBILE (Full Width Layar) - Muncul di HP Saja -->
+       <tr class="md:hidden text-slate-500 text-[8px] uppercase tracking-widest font-black bg-slate-50 border-b border-slate-200">
+        <th class="p-2 w-7 text-center">No</th>
+        <th class="p-2 w-auto text-left">Sarimbit</th>
+        <th class="p-2 w-10 text-center">Qty</th>
+        <th class="p-2 w-[8.5rem] text-left pl-3">Produksi</th>
+        <th class="p-2 w-10 text-center">Aksi</th>
+      </tr>
+          
         </thead>
         <tbody id="pembukuan-body" class="divide-y divide-slate-200">
           <tr>
@@ -451,6 +467,29 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
   <span id="toast-msg" class="text-xs font-semibold tracking-wide"></span>
 </div>
 
+<!-- MODAL DETAIL & EDIT PEMBUKUAN (KHUSUS HP) -->
+<div id="modal-detail-buku-mobile" class="hidden fixed inset-0 z-[250] bg-slate-900/60 backdrop-blur-sm flex flex-col justify-end px-2 pb-2 transition-opacity duration-300 opacity-0 pointer-events-none">
+    <div id="konten-detail-buku-mobile" class="bg-white/80 backdrop-blur-2xl rounded-3xl w-full max-h-[85vh] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] border border-white flex flex-col transform translate-y-full transition-transform duration-300 ease-out overflow-hidden">
+        
+        <!-- Header Transparan Efek Kaca -->
+        <div class="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center shadow-md relative z-20 shrink-0">
+            <div>
+                <h3 id="mobile-detail-title" class="font-black text-sm text-white tracking-wide leading-none truncate max-w-[220px]">Nama Sarimbit</h3>
+                <p id="mobile-detail-brand" class="text-[9px] font-bold text-blue-200 uppercase tracking-widest mt-1">Brand</p>
+            </div>
+            <button onclick="tutupModalDetailMobile()" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors border border-white/30 text-white shadow-sm active:scale-95">
+                <i class="fa-solid fa-xmark font-bold"></i>
+            </button>
+        </div>
+        
+        <!-- Area Konten Form Edit (Scrollable) -->
+        <div class="p-4 overflow-y-auto custom-scrollbar flex-1 relative z-10 flex flex-col gap-4 text-slate-700">
+            <div id="wadah-form-detail-mobile">
+                <!-- Konten input akan disuntikkan oleh JavaScript di sini -->
+            </div>
+        </div>
+    </div>
+</div>
 <!-- MODAL STATISTIK PEMBUKUAN (TEMA HIJAU TUA GRADIENT & ABU) -->
 <div id="modal-statistik-buku" class="hidden fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity duration-300 opacity-0">
     <div id="konten-statistik-buku" class="bg-slate-50/95 backdrop-blur-3xl rounded-[2.5rem] w-full max-w-5xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white flex flex-col transform scale-95 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden max-h-[90vh]">
@@ -602,6 +641,7 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
         </div>
     </div>
 </div>
+
 <script>
 let rawSummary = [];
 
@@ -660,6 +700,7 @@ let rawSummary = [];
         // Restart realtime jika sebelumnya mati
         if (typeof inisialisasiSupabaseRealtime === 'function') inisialisasiSupabaseRealtime();
     });
+    
     async function sinkronisasiSenyap() {
         if (!navigator.onLine) return;
         try {
@@ -783,7 +824,7 @@ let rawSummary = [];
         }
     }
 
-  // ==============================================================
+   // ==============================================================
    // BACA PENGATURAN MODE GELAP DARI LAYAR UTAMA SECARA INSTAN
    // ==============================================================
    window.addEventListener('DOMContentLoaded', () => {
@@ -983,7 +1024,7 @@ let rawSummary = [];
             return true;
         };
 
-        // =========================================================================
+       // =========================================================================
         // 2. FUNGSI PEMBUAT HTML (Hanya dieksekusi jika ada sarimbit baru masuk)
         // =========================================================================
         const buildRowHtml = (item, isArsip) => {
@@ -998,8 +1039,116 @@ let rawSummary = [];
             const autoSave = `onchange="simpanRow('${idAman}', '${safeSarimbitJS}')" onkeypress="if(event.key === 'Enter') this.blur();"`;
             const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
 
+            // PENGUBAH TANGGAL VERSI SANGAT LENGKAP (Contoh: "Senin, 25 Oktober 2026")
+            const formatTglLengkapMobile = (tgl) => {
+                if (!tgl) return '-';
+                const d = new Date(tgl);
+                if(isNaN(d.getTime())) return '-';
+                const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                const bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                return `${hari[d.getDay()]}, ${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
+            };
+            const strClose = formatTglLengkapMobile(item.close);
+            const strReady = formatTglLengkapMobile(item.ready);
+
+            // Simpan seluruh blok edit HTML ke dalam variabel aman (Khusus Pop-up HP)
+            const htmlBentukInput = encodeURIComponent(`
+                <div class="grid grid-cols-1 gap-3 text-xs text-slate-600 pb-4">
+                    
+                    <!-- KELOMPOK PRODUKSI -->
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-2">Produksi (Close/Ready)</span>
+                        <div class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
+                            <div class="flex items-center px-4 py-3 border-b border-slate-200/60">
+                                <span class="w-16 text-[10px] text-slate-500 font-bold">Close</span>
+                                <input type="date" id="close-${idAman}-mobile" value="${item.close || ''}" ${autoSave} class="flex-1 text-[11px] font-bold bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 shadow-none">
+                            </div>
+                            <div class="flex items-center px-4 py-3">
+                                <span class="w-16 text-[10px] text-slate-500 font-bold">Ready</span>
+                                <input type="date" id="ready-${idAman}-mobile" value="${item.ready || ''}" ${autoSave} class="flex-1 text-[11px] font-bold bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 shadow-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KELOMPOK PENAGIHAN -->
+                    <div class="flex flex-col gap-1.5 mt-2">
+                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest pl-2">Penagihan (C1/C2/Lunas)</span>
+                        <div class="bg-indigo-50/40 rounded-2xl border border-indigo-100 overflow-hidden">
+                            <div class="flex items-center px-4 py-3 border-b border-indigo-100/60">
+                                <span class="w-10 text-[10px] text-slate-500 font-bold">C1</span>
+                                <input type="date" id="c1-${idAman}-mobile" value="${amanTgl(item.c1)}" onchange="updateTagihanHp('${idAman}', 'c1', this.value, '${safeSarimbitJS}')" class="flex-1 text-[11px] font-bold bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 text-slate-600 shadow-none">
+                            </div>
+                            <div class="flex items-center px-4 py-3 border-b border-indigo-100/60">
+                                <span class="w-10 text-[10px] text-slate-500 font-bold">C2</span>
+                                <input type="date" id="c2-${idAman}-mobile" value="${amanTgl(item.c2)}" onchange="updateTagihanHp('${idAman}', 'c2', this.value, '${safeSarimbitJS}')" class="flex-1 text-[11px] font-bold bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 text-slate-600 shadow-none">
+                            </div>
+                            <div class="flex items-center px-4 py-3 bg-emerald-50/40">
+                                <span class="w-10 text-[10px] text-emerald-500 font-black"><i class="fa-solid fa-check"></i></span>
+                                <input type="date" id="lunas-${idAman}-mobile" value="${amanTgl(item.Lunas || item.lunas)}" onchange="updateTagihanHp('${idAman}', 'lunas', this.value, '${safeSarimbitJS}')" class="flex-1 text-[11px] font-bold bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 text-emerald-600 shadow-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KELOMPOK PEMBAYARAN -->
+                    <div class="flex flex-col gap-1.5 mt-2">
+                        <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest pl-2">Pembayaran (DP/Lunas)</span>
+                        <div class="bg-blue-50/30 rounded-2xl border border-blue-100 overflow-hidden">
+                            <div class="flex items-center px-4 py-3 border-b border-blue-100/60">
+                                <span class="w-14 text-[10px] text-blue-500 font-black">DP Rp</span>
+                                <input type="number" id="dp-${idAman}-mobile" value="${item.dp || ''}" onchange="updateBayarHp('${idAman}', 'dp', this.value, '${safeSarimbitJS}')" class="flex-1 text-[12px] font-black bg-transparent text-blue-700 outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 shadow-none">
+                            </div>
+                            <div class="flex items-center px-4 py-3 bg-emerald-50/20">
+                                <span class="w-14 text-[10px] text-emerald-500 font-black">Lns Rp</span>
+                                <input type="number" id="bayar-${idAman}-mobile" value="${item.bayar || ''}" onchange="updateBayarHp('${idAman}', 'bayar', this.value, '${safeSarimbitJS}')" class="flex-1 text-[12px] font-black bg-transparent text-emerald-700 outline-none focus:ring-0 focus:outline-none appearance-none border-none p-0 m-0 shadow-none">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- KELOMPOK LOGISTIK & ALAMAT -->
+                    <div class="flex flex-col gap-1.5 mt-2">
+                        <span class="text-[9px] font-black text-amber-500 uppercase tracking-widest pl-2">Logistik & Alamat</span>
+                        <div class="bg-amber-50/20 rounded-2xl border border-amber-100 overflow-hidden">
+                            <div class="relative px-2 py-1.5 border-b border-amber-100/60">
+                                <select id="kirim-${idAman}-mobile" onchange="updateKirimHp('${idAman}', 'kirim', this.value, '${safeSarimbitJS}')" class="w-full px-2 py-2 text-[11px] font-bold text-slate-700 cursor-pointer bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none m-0 shadow-none">
+                                    <option value="Langsung" ${item.statusKirim === 'Langsung' ? 'selected' : ''}>🚀 Kirim Langsung</option>
+                                    <option value="DS" ${item.statusKirim === 'DS' ? 'selected' : ''}>📦 Drop Ship</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-3 w-6 flex items-center justify-end pointer-events-none text-slate-400"><i class="fa-solid fa-chevron-down text-[9px]"></i></div>
+                            </div>
+                            <div class="relative px-2 py-1.5">
+                                <select id="alamat-${idAman}-mobile" onchange="updateKirimHp('${idAman}', 'alamat', this.value, '${safeSarimbitJS}')" class="w-full px-2 py-2 text-[11px] font-bold ${item.statusAlamat === 'Sudah Lengkap' ? 'text-emerald-600' : 'text-rose-500'} cursor-pointer bg-transparent outline-none focus:ring-0 focus:outline-none appearance-none border-none m-0 shadow-none">
+                                    <option value="Belum Lengkap" ${item.statusAlamat === 'Belum Lengkap' ? 'selected' : ''}>❌ Alamat Kurang</option>
+                                    <option value="Sudah Lengkap" ${item.statusAlamat === 'Sudah Lengkap' ? 'selected' : ''}>✅ Alamat Fix</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-3 w-6 flex items-center justify-end pointer-events-none text-slate-400"><i class="fa-solid fa-chevron-down text-[9px]"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- KELOMPOK STATUS CETAK & INFO -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex items-center justify-around mt-3">
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <div class="relative flex items-center justify-center">
+                                <input type="checkbox" id="print-${idAman}-mobile" ${item.isPrinted ? 'checked' : ''} onchange="updateKirimHp('${idAman}', 'print', this.checked, '${safeSarimbitJS}')" class="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-0 focus:outline-none outline-none cursor-pointer checked:bg-blue-500 checked:border-blue-500 transition-all shadow-none">
+                                <i class="fa-solid fa-check absolute text-white text-[10px] opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Sudah Print</span>
+                        </label>
+                        <div class="w-px h-8 bg-slate-200"></div>
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <div class="relative flex items-center justify-center">
+                                <input type="checkbox" id="info-${idAman}-mobile" ${item.isInformed ? 'checked' : ''} onchange="updateKirimHp('${idAman}', 'info', this.checked, '${safeSarimbitJS}')" class="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-0 focus:outline-none outline-none cursor-pointer checked:bg-emerald-500 checked:border-emerald-500 transition-all shadow-none">
+                                <i class="fa-solid fa-check absolute text-white text-[10px] opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-600 group-hover:text-emerald-600 transition-colors">Sudah Info</span>
+                        </label>
+                    </div>
+                </div>
+            `).replace(/'/g, "\\'");
+
             return `
-            <tr id="row-${idAman}" class="item-row hover:bg-blue-50/40 transition-colors border-b border-slate-200/80 ${isArsip ? 'opacity-60 bg-slate-50' : 'bg-white'}">
+            <!-- VERSI LAPTOP / DESKTOP (Sembunyi di HP) -->
+            <tr id="row-${idAman}" class="item-row hidden md:table-row hover:bg-blue-50/40 transition-colors border-b border-slate-200/80 ${isArsip ? 'opacity-60 bg-slate-50' : 'bg-white'}">
                 <td class="p-3 font-black text-slate-400 text-[10px] text-center no-urut">${nomorUrut}</td>
                 
                 <td class="p-3 sarimbit-name align-middle">
@@ -1019,7 +1168,6 @@ let rawSummary = [];
                   </div>
                 </td>
                 
-                <!-- KOLOM PRODUKSI (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                   <div class="flex flex-col gap-1.5 w-full">
                       <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded-full border border-slate-200 hover:border-blue-300 focus-within:border-blue-500 transition-all shadow-sm overflow-hidden group/input">
@@ -1033,7 +1181,6 @@ let rawSummary = [];
                   </div>
                 </td>
                 
-                <!-- KOLOM PENAGIHAN (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                   <div class="flex flex-col gap-1.5 w-full">
                       <div class="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white rounded-full border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 transition-all shadow-sm overflow-hidden group/input">
@@ -1051,7 +1198,6 @@ let rawSummary = [];
                   </div>
                 </td>
                 
-                <!-- KOLOM PEMBAYARAN (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                   <div class="flex flex-col gap-1.5 w-full">
                       <div class="flex items-center bg-blue-50/30 hover:bg-white focus-within:bg-white rounded-full border border-blue-200 hover:border-blue-400 focus-within:border-blue-500 transition-all shadow-sm overflow-hidden group/input">
@@ -1067,7 +1213,6 @@ let rawSummary = [];
                   </div>
                 </td>
                 
-                <!-- KOLOM LOGISTIK & ALAMAT (GAYA KAPSUL) -->
                 <td class="p-3 align-middle">
                     <div class="flex flex-col gap-1.5 w-full">
                         <div class="relative bg-slate-50 hover:bg-white rounded-full border border-slate-200 hover:border-slate-300 transition-all shadow-sm overflow-hidden">
@@ -1107,6 +1252,41 @@ let rawSummary = [];
                       <div id="idle-${idAman}" class="text-slate-300 text-[9px]"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                   </div>
                 </td>
+            </tr>
+
+            <!-- VERSI HP / MOBILE (Tabel Lurus Full Layar dengan Tanggal Produksi Lengkap) -->
+            <tr class="item-row md:hidden border-b border-slate-100 hover:bg-slate-50 transition-colors ${isArsip ? 'opacity-60 bg-slate-50' : 'bg-white'}">
+                
+                <td class="p-2 pt-3 text-center text-slate-300 font-black text-xs align-top w-7">${nomorUrut}.</td>
+                
+                <td class="p-2 pt-3 align-top w-auto max-w-[110px]">
+                    <div class="font-black text-slate-800 text-[10.5px] leading-tight uppercase line-clamp-3 pr-1 break-words">${sarimbitName}</div>
+                </td>
+                
+                <td class="p-2 pt-3 text-center align-top w-10">
+                    <span class="font-black text-blue-600 text-[11px]">${finalQty}</span>
+                </td>
+                
+                <!-- Tanggal Disusun Atas-Bawah (Vertical Stack) agar Tanggal Panjang Bebas Masuk -->
+                <td class="p-2 pt-2.5 align-top w-[8.5rem] pl-3">
+                    <div class="flex flex-col gap-2.5 text-[8px] font-bold">
+                        <div class="leading-tight">
+                            <span class="text-slate-400 font-medium block mb-0.5">Close:</span> 
+                            <span class="text-slate-700 block">${strClose}</span>
+                        </div>
+                        <div class="leading-tight">
+                            <span class="text-emerald-400 font-medium block mb-0.5">Ready:</span> 
+                            <span class="text-emerald-600 block">${strReady}</span>
+                        </div>
+                    </div>
+                </td>
+                
+                <td class="p-2 pt-3 text-center align-top w-10">
+                    <button onclick="bukaModalDetailMobile('${safeSarimbitJS}', '${item.brand || ''}', '${htmlBentukInput}')" class="w-7 h-7 mx-auto rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm active:scale-90">
+                        <i class="fa-solid fa-eye text-[10px]"></i>
+                    </button>
+                </td>
+                
             </tr>
             `;
         };
@@ -1762,6 +1942,50 @@ window.exportStatistikPDF = function() {
     } catch (e) {
         console.error(e);
         alert("Gagal membuat PDF Statistik: " + e.message);
+    }
+};
+// ========================================================
+// FUNGSI POP-UP DETAIL MOBILE (MATA KECIL)
+// ========================================================
+window.bukaModalDetailMobile = function(namaSarimbit, brand, htmlForm) {
+    const modal = document.getElementById('modal-detail-buku-mobile');
+    const konten = document.getElementById('konten-detail-buku-mobile');
+    
+    document.getElementById('mobile-detail-title').innerText = namaSarimbit;
+    document.getElementById('mobile-detail-brand').innerText = brand || "Pusat Tidak Diketahui";
+    
+    // Suntikkan form input khusus HP yang sudah dibuat di baris HTML
+    document.getElementById('wadah-form-detail-mobile').innerHTML = decodeURIComponent(htmlForm);
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+        konten.classList.remove('translate-y-full');
+    }, 10);
+};
+
+window.tutupModalDetailMobile = function() {
+    const modal = document.getElementById('modal-detail-buku-mobile');
+    const konten = document.getElementById('konten-detail-buku-mobile');
+    
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    konten.classList.add('translate-y-full');
+    
+    setTimeout(() => { modal.classList.add('hidden'); }, 300);
+};
+
+window.updateKirimHp = function(idAman, field, value, sarimbit) {
+    const hiddenInputLama = document.getElementById(`${field}-${idAman}`);
+    if (hiddenInputLama) {
+        // Bedakan cara menyimpan jika dia itu Checkbox (isPrinted / isInformed)
+        if (field === 'print' || field === 'info') {
+            hiddenInputLama.checked = value;
+        } else {
+            hiddenInputLama.value = value;
+        }
+        if(typeof simpanRow === 'function') simpanRow(idAman, sarimbit);
     }
 };
 </script>
