@@ -638,6 +638,56 @@ to { opacity: 0; transform: scale(0.95); filter: blur(4px); }
                     </div>
                 </div>
             </div>
+            <!-- GRID 2 KOLOM KEUANGAN: SUDAH DP & SUDAH LUNAS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                
+                <!-- KOTAK SUDAH DP -->
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-[2rem] shadow-sm flex flex-col gap-3 relative overflow-hidden">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 flex justify-between items-center">
+                        <span><i class="fa-solid fa-money-bill-wave mr-1 text-blue-400"></i> Pembayaran DP</span>
+                        <span class="text-[8px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Sarimbit Aktif</span>
+                    </h4>
+                    <div class="space-y-1.5 mt-1">
+                        <div onclick="document.getElementById('det-sudahdp').classList.toggle('hidden')" class="cursor-pointer group hover:bg-blue-50/50 p-3 -mx-3 rounded-xl transition-all duration-300 border border-transparent hover:border-blue-100">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-blue-700 transition-colors">Telah Menyetor Uang (DP) <i class="fa-solid fa-chevron-down text-[8px] ml-1 opacity-50 group-hover:opacity-100"></i></span>
+                                <div class="text-right">
+                                    <span class="text-sm font-black text-blue-600" id="stat-dp-count">0</span>
+                                    <span class="text-[9px] font-bold text-slate-400 ml-0.5" id="stat-dp-persen">(0%)</span>
+                                </div>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                                <div id="bar-dp" class="h-full bg-gradient-to-r from-blue-400 to-blue-600 stat-bar-isi rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <div id="det-sudahdp" class="hidden mt-3 pt-3 border-t border-blue-100/50 text-[10px] font-bold space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KOTAK SUDAH LUNAS -->
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-[2rem] shadow-sm flex flex-col gap-3 relative overflow-hidden">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 flex justify-between items-center">
+                        <span><i class="fa-solid fa-check-double mr-1 text-emerald-400"></i> Pelunasan</span>
+                        <span class="text-[8px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Sarimbit Aktif</span>
+                    </h4>
+                    <div class="space-y-1.5 mt-1">
+                        <div onclick="document.getElementById('det-sudahlunas').classList.toggle('hidden')" class="cursor-pointer group hover:bg-emerald-50/50 p-3 -mx-3 rounded-xl transition-all duration-300 border border-transparent hover:border-emerald-100">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-700 transition-colors">Lunas 100% (Sisa Tagihan Rp 0) <i class="fa-solid fa-chevron-down text-[8px] ml-1 opacity-50 group-hover:opacity-100"></i></span>
+                                <div class="text-right">
+                                    <span class="text-sm font-black text-emerald-600" id="stat-lunas-count">0</span>
+                                    <span class="text-[9px] font-bold text-slate-400 ml-0.5" id="stat-lunas-persen">(0%)</span>
+                                </div>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
+                                <div id="bar-lunas" class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 stat-bar-isi rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <div id="det-sudahlunas" class="hidden mt-3 pt-3 border-t border-emerald-100/50 text-[10px] font-bold space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
@@ -1664,7 +1714,9 @@ let rawSummary = [];
             tutupDropdownUnduhBuku();
         }
     });
-   // ==========================================
+ 
+    
+    // ==========================================
 // FUNGSI ANIMASI & KALKULASI STATISTIK BUKU
 // ==========================================
 window.bukaModalStatistikBuku = function() {
@@ -1679,8 +1731,8 @@ window.bukaModalStatistikBuku = function() {
     const totalData = rawSummary.length;
     let aktif = 0, arsip = 0, totalQtySemua = 0, totalQtyAktif = 0, totalQtyArsip = 0;
     
-    // Keranjang ini HANYA akan diisi oleh model yang AKTIF
     const listOpen = [], listClose = [], listReady = [];
+    const listDP = [], listLunas = []; // Mesin Keranjang Baru
     const sekarang = new Date().getTime();
 
     const parsingTglAman = (val) => {
@@ -1704,23 +1756,34 @@ window.bukaModalStatistikBuku = function() {
         if (item.isarchived || item.isArchived) { 
             arsip++; 
             totalQtyArsip += qtyRow; 
-            // Model Arsip TIDAK dimasukkan ke perhitungan Fase Produksi
         } 
         else { 
             aktif++; 
             totalQtyAktif += qtyRow; 
             
-            // FASE PRODUKSI: Hanya dihitung untuk Model Aktif
+            // FASE PRODUKSI
             const tglClose = parsingTglAman(item.close);
             const tglReady = parsingTglAman(item.ready);
             
             if (tglReady && tglReady.getTime() <= sekarang) listReady.push(item.sarimbit);
             else if (tglClose && tglClose.getTime() <= sekarang) listClose.push(item.sarimbit);
             else listOpen.push(item.sarimbit);
+
+            // FASE KEUANGAN: Evaluasi Uang Masuk dari Admin
+            const uangMasukDP = Number(item.dp) || 0;
+            const uangMasukLunas = Number(item.bayar) || 0;
+            const totalOmsetToko = Number(item.totalOmset) || 0;
+            const akumulasiMasuk = uangMasukDP + uangMasukLunas;
+            
+            // Masukkan ke Keranjang Keuangan jika lulus syarat
+            if (akumulasiMasuk > 0) listDP.push(item.sarimbit);
+            if (akumulasiMasuk > 0 && akumulasiMasuk >= totalOmsetToko) listLunas.push(item.sarimbit);
         }
     });
 
     listOpen.sort(); listClose.sort(); listReady.sort();
+    listDP.sort(); listLunas.sort(); // Urut abjad
+    
     const sortedByQty = [...rawSummary].sort((a, b) => (b.totalOrder || 0) - (a.totalOrder || 0)).slice(0, 3);
 
     document.getElementById('stat-qty-all').innerText = totalQtySemua.toLocaleString('id-ID');
@@ -1736,18 +1799,31 @@ window.bukaModalStatistikBuku = function() {
     document.getElementById('stat-ready').innerHTML = `${listReady.length} <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Sarimbit</span>`;
 
     const formatListSarimbit = (arr, warnaTeks) => {
-        if(arr.length === 0) return `<div class="italic text-slate-400/80 py-1 pl-1 text-[9px] font-medium">Kosong</div>`;
-        return arr.map(nama => `<div class="flex items-center gap-2 text-slate-600 py-1 pl-1 bg-slate-50/50 rounded-md border border-slate-100 shadow-sm mb-1 hover:bg-white transition-colors"><i class="fa-solid fa-circle text-[4px] ${warnaTeks}"></i> ${nama}</div>`).join('');
+        if(arr.length === 0) return `<div class="italic text-slate-400/80 py-1.5 px-2 text-[10px] font-medium">Kosong</div>`;
+        return arr.map(nama => `<div class="flex items-center gap-2.5 text-slate-700 py-1.5 px-2.5 bg-slate-50/50 rounded-md border border-slate-100 shadow-sm mb-1.5 hover:bg-white transition-colors font-medium text-[10.5px] tracking-wide"><i class="fa-solid fa-circle text-[5px] ${warnaTeks}"></i> ${nama}</div>`).join('');
     };
 
     document.getElementById('det-openpo').innerHTML = formatListSarimbit(listOpen, 'text-slate-400');
     document.getElementById('det-closepo').innerHTML = formatListSarimbit(listClose, 'text-emerald-500');
     document.getElementById('det-readypo').innerHTML = formatListSarimbit(listReady, 'text-emerald-800');
+    
+    // SUNTIK HTML RINCIAN NAMA SARIMBIT KEUANGAN
+    document.getElementById('det-sudahdp').innerHTML = formatListSarimbit(listDP, 'text-blue-500');
+    document.getElementById('det-sudahlunas').innerHTML = formatListSarimbit(listLunas, 'text-emerald-500');
 
-    // Progress Bar Fase Produksi sekarang berpatokan ke jumlah 'Aktif', bukan 'Total Data'
+    // Kalkulasi Persentase Berpatokan pada Sarimbit Aktif
     const pOpen = aktif > 0 ? Math.round((listOpen.length / aktif) * 100) : 0;
     const pClose = aktif > 0 ? Math.round((listClose.length / aktif) * 100) : 0;
     const pReady = aktif > 0 ? Math.round((listReady.length / aktif) * 100) : 0;
+    const pDP = aktif > 0 ? Math.round((listDP.length / aktif) * 100) : 0;
+    const pLunas = aktif > 0 ? Math.round((listLunas.length / aktif) * 100) : 0;
+
+    // SUNTIK ANGKA & PERSEN KEUANGAN KE LAYAR
+    document.getElementById('stat-dp-count').innerHTML = `${listDP.length}`;
+    document.getElementById('stat-dp-persen').innerText = `(${pDP}%)`;
+    
+    document.getElementById('stat-lunas-count').innerHTML = `${listLunas.length}`;
+    document.getElementById('stat-lunas-persen').innerText = `(${pLunas}%)`;
 
     let htmlBest = '';
     const warnaMedali = ['text-emerald-800', 'text-emerald-600', 'text-slate-400'];
@@ -1783,6 +1859,10 @@ window.bukaModalStatistikBuku = function() {
         document.getElementById('bar-open').style.width = pOpen + '%';
         document.getElementById('bar-close').style.width = pClose + '%';
         document.getElementById('bar-ready').style.width = pReady + '%';
+        
+        // PENGGERAK ANIMASI BAR KEUANGAN
+        document.getElementById('bar-dp').style.width = pDP + '%';
+        document.getElementById('bar-lunas').style.width = pLunas + '%';
         
         document.querySelectorAll('#wadah-best-seller .stat-bar-isi').forEach(bar => {
             bar.style.width = bar.getAttribute('data-width');

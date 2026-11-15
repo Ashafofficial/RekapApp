@@ -255,9 +255,11 @@
     .glass-input:hover { background: #ffffff !important; border-color: #93c5fd !important; box-shadow: 0 6px 16px -4px rgba(59, 130, 246, 0.25), inset 0 1px 2px rgba(0,0,0,0.01) !important; transform: translateY(-2px); }
     .glass-input:focus { background: #ffffff !important; border-color: #3b82f6 !important; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25), 0 8px 24px -4px rgba(59, 130, 246, 0.2) !important; transform: translateY(-3px); }
 
-    .nav-btn { margin: 2px 16px; border-radius: 999px; /* Bentuk Kapsul Bulat Penuh */ width: calc(100% - 32px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: visible; background-color: transparent; }
-    .nav-btn:hover:not(.active-link) { transform: translateX(6px); } /* Hanya menggeser tulisan, tanpa backgound abu-abu kaku */
-    .nav-btn:hover:not(.active-link) span { color: #3b82f6; transition: color 0.3s; }
+    .nav-btn { margin: 0px 16px; border-radius: 999px; width: calc(100% - 32px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: visible; background-color: transparent; }
+    
+    /* SOLUSI ANTI GETAR: Menggeser menggunakan bantalan dalam (padding) agar area sentuh mouse tidak pernah bergeser */
+    .nav-btn:hover:not(.active-link) { padding-left: 28px !important; background-color: rgba(241, 245, 249, 0.5); }
+    .nav-btn:hover:not(.active-link) span { color: #3b82f6; transition: color 0.3s ease; }
     
     /* GAYA MENU AKTIF (SAMSUNG ONE UI KAPSUL GLOW) */
     .active-link { 
@@ -448,66 +450,57 @@
       </div>
 
     <!-- Area Navigasi Adaptif (Padding menyusut di HP) -->
-  <nav class="flex-1 overflow-y-auto overflow-x-hidden px-1 md:px-2 pt-0 md:pt-1 pb-24 relative w-full h-full custom-scrollbar">
-    <div class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest px-5 md:px-6 mb-2 md:mb-3">Menu Utama</div>
+ <nav class="flex-1 overflow-y-auto overflow-x-hidden px-1 md:px-2 pt-0 md:pt-1 pb-24 relative w-full h-full custom-scrollbar space-y-1">
+    <div class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest px-5 md:px-6 mb-1 md:mb-2 mt-2">Menu Utama</div>
     
-    <button onclick="switchTab('order')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm active-link" id="nav-order">
+    <button onclick="switchTab('order')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm active-link" id="nav-order">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-blue-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]"><i class="fa-solid fa-cart-plus text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Input Order</span>
     </button>
     
-    <button onclick="switchTab('master')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-master">
+    <button onclick="switchTab('master')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-master">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-indigo-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(79,70,229,0.3)]"><i class="fa-solid fa-box-open text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Master Barang</span>
     </button>
     
-    <button onclick="switchTab('rekap')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-rekap">
+    <button onclick="switchTab('rekap')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-rekap">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-emerald-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]"><i class="fa-solid fa-list-check text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Rekap Barang</span>
     </button>
     
-    <button onclick="switchTab('slip')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-slip">
+    <button onclick="switchTab('slip')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-slip">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-rose-200 to-rose-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-rose-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]"><i class="fa-solid fa-users text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Rincian Customer</span>
     </button>
 
-    <div class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest px-5 md:px-6 mt-6 md:mt-8 mb-2 md:mb-3">Lainnya</div>
+    <div class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest px-5 md:px-6 mt-4 md:mt-6 mb-1 md:mb-2">Lainnya</div>
 
-    <button onclick="pindahHalaman('pembukuan.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent">
+    <button onclick="pindahHalaman('pembukuan.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-orange-200 to-orange-300 border-[1.5px] border-white shadow-sm text-orange-700 flex items-center justify-center transition-all duration-300 drop-shadow-[0_2px_4px_rgba(249,115,22,0.3)] group-hover:scale-110"><i class="fa-solid fa-chart-pie text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Pembukuan</span>
-      </button>
+    </button>
 
-     <!-- MENU KHUSUS ANDROID -->
-     <button onclick="pindahHalaman('dashboard.html')" class="android-only-menu hidden nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent">
-        <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-sky-200 to-blue-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-blue-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(14,165,233,0.3)] group-hover:scale-110"><i class="fa-solid fa-chart-line text-[10px] md:text-xs"></i></div>
-        <span class="tracking-wide">Dashboard</span>
-     </button>
-
-     <button onclick="pindahHalaman('datadouble.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-datadouble">
-     ...
-
-     <button onclick="pindahHalaman('datadouble.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-datadouble">
+     <button onclick="pindahHalaman('datadouble.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-datadouble">
       <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-red-200 to-rose-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-rose-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(225,29,72,0.3)] group-hover:scale-110"><i class="fa-solid fa-clone text-[10px] md:text-xs"></i></div>
       <span class="tracking-wide">Audit Data Ganda</span>
      </button>
 
-     <button onclick="switchTab('dashboardsumber')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-dashboardsumber">
+     <button onclick="switchTab('dashboardsumber')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-dashboardsumber">
          <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-violet-200 to-fuchsia-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-violet-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(139,92,246,0.3)] group-hover:scale-110"><i class="fa-solid fa-chart-pie text-[10px] md:text-xs"></i></div>
          <span class="tracking-wide">Sumber</span>
      </button>
 
-    <button onclick="switchTab('notif')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-notif">
+    <button onclick="switchTab('notif')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm" id="nav-notif">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-amber-200 to-amber-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-amber-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(251,191,36,0.3)]"><i class="fa-solid fa-bell-concierge text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Log Aktivitas</span>
     </button>
 
-    <button onclick="switchTab('pengaturan')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2.5 md:py-3.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-pengaturan">
+    <button onclick="switchTab('pengaturan')" class="nav-btn flex items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-pengaturan">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-gray-200 to-slate-300 border-[1.5px] border-white shadow-sm flex items-center justify-center text-slate-700 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(71,85,105,0.3)] group-hover:scale-110"><i class="fa-solid fa-gear text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Pengaturan</span>
     </button>
         <!-- WIDGET KAPASITAS SERVER -->
-        <div class="px-5 mt-10 mb-2">
+        <div class="px-5 mt-8 mb-2">
             <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest"><i class="fa-solid fa-cloud text-blue-500 mr-1"></i> Cloud Storage</span>
@@ -685,7 +678,7 @@
         <!-- KUNCI STICKY: Kotak ini akan menempel saat di-scroll -->
         <div class="sticky top-24 bg-white p-6 rounded-[2rem] border border-slate-200/80 shadow-xl shadow-slate-200/40 flex flex-col h-fit max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-none">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4 shrink-0">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-receipt"></i> RANGKUMAN NOTA</span>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-receipt"></i>NOTA</span>
                 <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             </div>
               
@@ -813,6 +806,7 @@
                     <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors pointer-events-none"></i>
                 </div>
 
+                <!-- FILTER CUSTOM SARIMBIT (GLASSMORPHISM) -->
                 <div class="relative group">
                     <select id="filter-sarimbit-master" onchange="renderMaster()" class="shrink-0 h-10 bg-white border border-slate-200 hover:border-slate-300 pl-4 pr-7 rounded-full text-[11px] font-bold text-slate-700 cursor-pointer outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 hover:bg-slate-50 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 appearance-none shadow-md w-[130px]">
                         <option value="">Sarimbit</option>
@@ -921,58 +915,57 @@
        <!-- PANEL KIRI (FILTER LEBIH PADAT & RINGKAS UNTUK HP/SPLIT SCREEN) -->
        <div class="lg:col-span-3 h-fit sticky top-4 z-[90]">
             
-        <!-- PANEL GABUNGAN: Menyertakan semua filter dalam 1 wadah agar tidak boros padding -->
-        <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-white flex flex-col gap-4">
+       <!-- PANEL GABUNGAN: Menyertakan semua filter dalam 1 wadah agar tidak boros padding -->
+       <div class="ios-glass p-4 md:p-5 rounded-[1.5rem] border border-white/60 flex flex-col gap-4">
             
-            <!-- RENTANG WAKTU & SETOR BARANG (Dijejerkan di layar kecil/sedang) -->
-            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                <div class="relative group">
-                    <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-regular fa-calendar text-blue-500"></i> Tanggal</label>
-                    <div class="h-8 md:h-10 bg-white border border-slate-200/80 hover:bg-slate-50 rounded-full px-3 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all cursor-pointer w-full flex items-center shadow-md">
-                        <input type="text" id="filter-date-range-rekap" placeholder="Pilih..." class="w-full p-0 m-0 bg-transparent border-none outline-none text-[9px] md:text-[11px] font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
-                        <input type="hidden" id="filter-tgl-mulai-rekap">
-                        <input type="hidden" id="filter-tgl-akhir-rekap">
-                    </div>
-                </div>
-                
-                <div class="relative group">
-                    <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-server text-emerald-500"></i> Status Setor</label>
-                    <select id="export-rekap-filter" onchange="renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 outline-none focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all cursor-pointer shadow-md text-center appearance-none relative z-10">
-                        <option value="semua">Semua</option>
-                        <option value="disetor">Sudah Disetor</option>
-                        <option value="antre">Belum Disetor</option>
-                    </select>
-                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-emerald-500 transition-colors z-20 pointer-events-none"></i>
+        <!-- RENTANG WAKTU & SETOR BARANG -->
+        <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+            <div class="relative group">
+                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-regular fa-calendar text-blue-500"></i> Tanggal</label>
+                <div class="h-8 md:h-10 ios-glass rounded-full px-3 transition-all cursor-pointer w-full flex items-center">
+                    <input type="text" id="filter-date-range-rekap" placeholder="Pilih..." class="w-full p-0 m-0 bg-transparent border-none outline-none text-[9px] md:text-[11px] font-bold text-slate-800 cursor-pointer focus:ring-0 text-center placeholder-slate-500">
+                    <input type="hidden" id="filter-tgl-mulai-rekap">
+                    <input type="hidden" id="filter-tgl-akhir-rekap">
                 </div>
             </div>
+            
+            <div class="relative group">
+                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-server text-emerald-500"></i> Status Setor</label>
+                <select id="export-rekap-filter" onchange="renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all cursor-pointer text-center appearance-none relative z-10">
+                    <option value="semua">Semua</option>
+                    <option value="disetor">Sudah Disetor</option>
+                    <option value="antre">Belum Disetor</option>
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none z-20"></i>
+            </div>
+        </div>
 
-            <!-- GARIS PEMISAH -->
-            <div class="w-full h-px bg-slate-100 my-1"></div>
+        <!-- GARIS PEMISAH -->
+        <div class="w-full h-px bg-slate-200/50 my-1"></div>
 
-            <!-- FILTER SPESIFIK (Dibuat Grid 2x2 di layar kecil agar padat) -->
-            <div>
-                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</label>
-                <div class="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
-                    <div class="relative group">
-                        <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-md text-center appearance-none relative z-10"><option value="">-- Sarimbit --</option></select>
-                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                    </div>
-                    <div class="relative group">
-                        <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-md text-center appearance-none relative z-10"><option value="">-- Varian --</option></select>
-                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                    </div>
-                    <div class="relative group">
-                        <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-md text-center appearance-none relative z-10"><option value="">-- Barang --</option></select>
-                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                    </div>
-                    <div class="relative group">
-                        <select id="filter-size-rekap" onchange="renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer shadow-md text-center appearance-none relative z-10"><option value="">-- Size --</option></select>
-                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-indigo-500 transition-colors z-20 pointer-events-none"></i>
-                    </div>
+        <!-- FILTER SPESIFIK -->
+        <div>
+            <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</label>
+            <div class="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
+                <div class="relative group">
+                    <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all cursor-pointer text-center appearance-none relative z-10"><option value="">-- Sarimbit --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none z-20"></i>
+                </div>
+                <div class="relative group">
+                    <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all cursor-pointer text-center appearance-none relative z-10"><option value="">-- Varian --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none z-20"></i>
+                </div>
+                <div class="relative group">
+                    <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all cursor-pointer text-center appearance-none relative z-10"><option value="">-- Barang --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none z-20"></i>
+                </div>
+                <div class="relative group">
+                    <select id="filter-size-rekap" onchange="renderRekap()" class="w-full pl-3 pr-6 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all cursor-pointer text-center appearance-none relative z-10"><option value="">-- Size --</option></select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none z-20"></i>
                 </div>
             </div>
         </div>
-        
+    </div>
     </div>
 
          <!-- PANEL KANAN (TABEL & TOTAL) -->
@@ -1040,62 +1033,62 @@
         </div>
     </div>
     
-  <!-- KOTAK PENCARIAN & FILTER (DIBUAT FLAT/RATA) -->
-  <div class="bg-white/80 backdrop-blur-md p-4 md:p-5 rounded-3xl flex flex-col shadow-none border border-slate-200/60 mb-6 relative z-[100]">
-        
+ <!-- KOTAK PENCARIAN & FILTER (GAYA KACA / GLASSMORPHISM) -->
+ <div class="ios-glass p-4 md:p-5 rounded-3xl flex flex-col mb-6 relative z-[100] border-white/60">
+       
     <!-- Wadah Flex: Memaksa semua elemen sejajar 1 baris (horizontal) -->
     <div class="flex flex-col lg:flex-row items-center gap-3 w-full">
         
-        <!-- Kotak Pencarian Manual (Tetap Besar: h-11) -->
-        <div class="relative flex-1 w-full min-w-[200px]">
-            <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Cari nama, WA, atau sarimbit..." class="w-full pl-11 pr-5 h-11 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-xs lg:text-sm font-bold text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none shadow-none">
+        <!-- Kotak Pencarian Manual (Efek Kaca Kapsul) -->
+        <div class="relative flex-1 w-full min-w-[200px] ios-glass rounded-full flex items-center h-11">
+            <i class="fa-solid fa-search text-slate-500 text-sm ml-4 shrink-0"></i>
+            <input type="text" id="search-customer" onkeyup="renderSlip()" placeholder="Cari nama, WA, atau sarimbit..." class="w-full pl-3 pr-5 h-full bg-transparent border-none text-xs lg:text-sm font-bold text-slate-800 outline-none focus:ring-0 placeholder-slate-500">
         </div>
 
         <!-- Wadah Filter Dinamis -->
         <div class="flex items-center gap-2 overflow-x-auto scrollbar-none w-full lg:w-auto shrink-0 py-2">
             
             <div class="text-[10px] lg:text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 shrink-0 mr-1">
-                <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center shadow-none"><i class="fa-solid fa-filter text-[10px]"></i></div>
+                <div class="w-6 h-6 rounded-full bg-indigo-100/50 text-indigo-700 flex items-center justify-center shadow-none border border-indigo-200/50"><i class="fa-solid fa-filter text-[10px]"></i></div>
             </div>
 
-           <!-- Filter Dropdowns (Kini ukurannya h-9, Timbul dan Melayang) -->
+           <!-- Filter Dropdowns (Kini ukurannya h-9, Efek Kaca) -->
            <div class="relative group">
-            <select id="filter-toko-slip" onchange="renderSlip()" class="shrink-0 h-9 bg-white border border-slate-200 hover:border-slate-300 pl-3 pr-6 rounded-full text-[10px] lg:text-[11px] font-bold text-slate-700 cursor-pointer outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 hover:bg-slate-50 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 w-[85px] lg:w-[95px] appearance-none text-center relative z-10">
-             <option value="">Toko</option>
-             <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
-             <option value="MASARA.HIJAB">MASARA.HIJAB</option>
-         </select>
-         <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-blue-500 transition-colors z-20 pointer-events-none"></i>
-     </div>
-     
-     <div class="relative group">
-         <select id="filter-sarimbit-slip" onchange="renderSlip()" class="shrink-0 h-9 bg-white border border-slate-200 hover:border-slate-300 pl-3 pr-6 rounded-full text-[10px] lg:text-[11px] font-bold text-slate-700 cursor-pointer outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 hover:bg-slate-50 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 w-[100px] lg:w-[120px] appearance-none text-center relative z-10">
-             <option value="">Sarimbit</option>
-         </select>
-         <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-blue-500 transition-colors z-20 pointer-events-none"></i>
-     </div>
-     
-     <div class="relative group">
-         <select id="filter-tagihan-slip" onchange="renderSlip()" class="shrink-0 h-9 bg-white border border-slate-200 hover:border-slate-300 pl-3 pr-6 rounded-full text-[10px] lg:text-[11px] font-bold text-slate-700 cursor-pointer outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 hover:bg-slate-50 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 w-[95px] lg:w-[110px] appearance-none text-center relative z-10">
-             <option value="">Jadwal</option>
-             <option value="aktif">Tagihan!</option>
-         </select>
-         <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 group-hover:text-rose-500 transition-colors z-20 pointer-events-none"></i>
-     </div>
+            <select id="filter-toko-slip" onchange="renderSlip()" class="shrink-0 h-9 ios-glass pl-3 pr-6 rounded-full text-[10px] lg:text-[11px] font-bold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 w-[85px] lg:w-[95px] appearance-none text-center relative z-10">
+                <option value="">Toko</option>
+                <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
+                <option value="MASARA.HIJAB">MASARA.HIJAB</option>
+            </select>
+            <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 transition-colors z-20 pointer-events-none"></i>
+        </div>
         
-        <!-- Filter Tanggal -->
-        <div id="slip-date-filter-wrapper" class="hidden shrink-0 h-9 bg-white border border-slate-200 hover:border-slate-300 rounded-full px-3 shadow-none hover:bg-slate-50 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-300 cursor-pointer">
-            <div class="h-full flex items-center gap-1.5">
-                <i class="fa-regular fa-calendar-days text-slate-400 text-[10px]"></i>
-                <div class="flex items-center w-full">
-                    <input type="text" id="filter-date-range-slip" placeholder="Pilih Tanggal..." class="w-[120px] p-0 m-0 bg-transparent border-none outline-none text-[10px] font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
-                    <input type="hidden" id="filter-tgl-mulai-slip">
-                    <input type="hidden" id="filter-tgl-akhir-slip">
+        <div class="relative group">
+            <select id="filter-sarimbit-slip" onchange="renderSlip()" class="shrink-0 h-9 ios-glass pl-3 pr-6 rounded-full text-[10px] lg:text-[11px] font-bold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 w-[100px] lg:w-[120px] appearance-none text-center relative z-10">
+                <option value="">Sarimbit</option>
+            </select>
+            <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 transition-colors z-20 pointer-events-none"></i>
+        </div>
+        
+        <div class="relative group">
+            <select id="filter-tagihan-slip" onchange="renderSlip()" class="shrink-0 h-9 ios-glass pl-3 pr-6 rounded-full text-[10px] lg:text-[11px] font-bold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 w-[95px] lg:w-[110px] appearance-none text-center relative z-10">
+                <option value="">Jadwal</option>
+                <option value="aktif">Tagihan!</option>
+            </select>
+            <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 transition-colors z-20 pointer-events-none"></i>
+        </div>
+            
+            <!-- Filter Tanggal (Kaca) -->
+            <div id="slip-date-filter-wrapper" class="hidden shrink-0 h-9 ios-glass rounded-full px-3 transition-all duration-300 cursor-pointer flex items-center">
+                <div class="h-full flex items-center gap-1.5 w-full">
+                    <i class="fa-regular fa-calendar-days text-slate-600 text-[10px]"></i>
+                    <div class="flex items-center w-full h-full">
+                        <input type="text" id="filter-date-range-slip" placeholder="Pilih Tanggal..." class="w-[120px] p-0 m-0 bg-transparent border-none outline-none text-[10px] font-bold text-slate-800 cursor-pointer focus:ring-0 text-center placeholder-slate-600">
+                        <input type="hidden" id="filter-tgl-mulai-slip">
+                        <input type="hidden" id="filter-tgl-akhir-slip">
+                    </div>
                 </div>
             </div>
-        </div>
-        </div>
+            </div>
 
        <!-- Tombol Export Dropdown Pintar (Juga diturunkan tingginya ke h-9) -->
        <div class="relative shrink-0 w-full lg:w-auto" id="dropdown-export-container">
@@ -1146,8 +1139,8 @@
     function toggleDropdownUnduhRekap() {
         // KUNCI KEAMANAN: Cek apakah Sarimbit sudah dipilih!
         const filterSarimbit = document.getElementById('filter-sarimbit-rekap');
-        if (!filterSarimbit || filterSarimbit.value === "") {
-            if(typeof showToast === 'function') showToast("⚠️ Pilih Sarimbit terlebih dahulu!");
+        if (!appSettings.unduhBebas && (!filterSarimbit || filterSarimbit.value === "")) {
+            if(typeof showToast === 'function') showToast("⚠️ Pilih Sarimbit dahulu! (Atau aktifkan izin Unduh Bebas di Pengaturan)");
             return; // Tolak pembukaan dropdown
         }
 
@@ -1180,8 +1173,8 @@
     function toggleExportMenu() {
         // KUNCI KEAMANAN: Cek apakah Sarimbit sudah dipilih!
         const filterSarimbit = document.getElementById('filter-sarimbit-slip');
-        if (!filterSarimbit || filterSarimbit.value === "") {
-            if(typeof showToast === 'function') showToast("⚠️ Pilih Sarimbit terlebih dahulu!");
+        if (!appSettings.unduhBebas && (!filterSarimbit || filterSarimbit.value === "")) {
+            if(typeof showToast === 'function') showToast("⚠️ Pilih Sarimbit dahulu! (Atau aktifkan izin Unduh Bebas di Pengaturan)");
             return; // Tolak pembukaan dropdown
         }
 
@@ -1442,16 +1435,29 @@
   
                 <!-- SAKELAR HAPUS MASTER -->
                 <label class="flex items-center justify-between cursor-pointer bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
-                  <div class="absolute inset-0 bg-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                  <div class="relative z-10 flex-1 pr-4">
-                      <span class="text-sm font-black text-slate-800 flex items-center gap-2 group-hover:text-rose-700 transition-colors"><i class="fa-solid fa-trash-can text-rose-500"></i> AKTIFKAN HAPUS KOLEKSI MASTER</span>
-                      <p class="text-[10px] md:text-[11px] text-slate-500 mt-1 font-bold leading-relaxed">Memunculkan tombol hapus pada menu Master Barang untuk menghapus satu koleksi sarimbit sekaligus.</p>
-                  </div>
-                  <div class="relative ml-4 z-10 shrink-0">
-                      <input type="checkbox" id="set-allow-delete-master" class="sr-only peer">
-                      <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-red-400 shadow-inner peer-checked:shadow-[0_0_10px_rgba(244,63,94,0.4)]"></div>
-                  </div>
-                </label>
+                    <div class="absolute inset-0 bg-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    <div class="relative z-10 flex-1 pr-4">
+                        <span class="text-sm font-black text-slate-800 flex items-center gap-2 group-hover:text-rose-700 transition-colors"><i class="fa-solid fa-trash-can text-rose-500"></i> AKTIFKAN HAPUS KOLEKSI MASTER</span>
+                        <p class="text-[10px] md:text-[11px] text-slate-500 mt-1 font-bold leading-relaxed">Memunculkan tombol hapus pada menu Master Barang untuk menghapus satu koleksi sarimbit sekaligus.</p>
+                    </div>
+                    <div class="relative ml-4 z-10 shrink-0">
+                        <input type="checkbox" id="set-allow-delete-master" class="sr-only peer">
+                        <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-red-400 shadow-inner peer-checked:shadow-[0_0_10px_rgba(244,63,94,0.4)]"></div>
+                    </div>
+                  </label>
+  
+                  <!-- SAKELAR UNDUH BEBAS (TANPA FILTER) -->
+                  <label class="flex items-center justify-between cursor-pointer bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                    <div class="absolute inset-0 bg-emerald-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    <div class="relative z-10 flex-1 pr-4">
+                        <span class="text-sm font-black text-slate-800 flex items-center gap-2 group-hover:text-emerald-700 transition-colors"><i class="fa-solid fa-file-export text-emerald-500"></i> IZINKAN UNDUH BEBAS (TANPA FILTER)</span>
+                        <p class="text-[10px] md:text-[11px] text-slate-500 mt-1 font-bold leading-relaxed">Jika ON, Anda bisa mengunduh file Laporan & Nota secara massal tanpa harus memilih Koleksi Sarimbit terlebih dahulu.</p>
+                    </div>
+                    <div class="relative ml-4 z-10 shrink-0">
+                        <input type="checkbox" id="set-unduh-bebas" class="sr-only peer">
+                        <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 shadow-inner peer-checked:shadow-[0_0_10px_rgba(16,185,129,0.4)]"></div>
+                    </div>
+                  </label>
               </div>
           
               <!-- KELOMPOK TOMBOL AKSI PENGATURAN (KAPSUL GRADASI) -->
@@ -1534,90 +1540,92 @@
     </div>
 </template>
   <!-- Struktur Pop-up Modal Unduh -->
-  <div id="modal-unduh-pdf" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-center items-center z-[100] px-4 transition-opacity">
-    <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl border border-white">
+<div id="modal-unduh-pdf" class="hidden fixed inset-0 bg-slate-900/40 flex justify-center items-center z-[100] px-4 transition-opacity">
+    <!-- PENGGUNAAN IOS-GLASS -->
+    <div class="ios-glass rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl border border-white/60 flex flex-col relative">
         <h3 class="text-xl font-black text-slate-800 mb-2">Pilih Format Unduhan</h3>
-        <p class="text-sm text-slate-500 font-medium mb-6">Silakan pilih jenis rekapitulasi laporan yang ingin Anda cetak atau unduh.</p>
+        <p class="text-[11px] text-slate-600 font-bold mb-6">Silakan pilih jenis rekapitulasi laporan yang ingin Anda cetak atau unduh.</p>
         
         <div class="flex flex-col gap-3">
-            <button onclick="prosesUnduh('bulan')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+            <button onclick="prosesUnduh('bulan')" class="w-full bg-blue-600/90 hover:bg-blue-600 text-white py-3.5 rounded-full font-black shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 border border-blue-500/50">
                 <i class="fa-solid fa-calendar-days"></i> Rekap Per Bulan
             </button>
-            <button onclick="prosesUnduh('hari')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+            <button onclick="prosesUnduh('hari')" class="w-full bg-emerald-600/90 hover:bg-emerald-600 text-white py-3.5 rounded-full font-black shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 border border-emerald-500/50">
                 <i class="fa-solid fa-calendar-day"></i> Rekap Per Hari
             </button>
-            <button onclick="toggleModalUnduh(false)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-3.5 rounded-xl font-bold mt-2 active:scale-95 transition-all">
+            <button onclick="toggleModalUnduh(false)" class="w-full bg-white/50 hover:bg-white/80 text-slate-600 py-3.5 rounded-full font-black mt-2 active:scale-95 transition-all border border-white/60 shadow-sm">
                 Batal
             </button>
         </div>
     </div>
 </div>
 <!-- MODAL AUDIT CEKLIS DIGITAL PABRIK (GAYA KACA iOS X SAMSUNG CAPSULE) -->
-<div id="modalKonfirmasiCeklis" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-md flex justify-center items-end md:items-center z-[130] transition-opacity duration-300 opacity-0 pointer-events-none p-0 md:p-4">
+<div id="modalKonfirmasiCeklis" class="hidden fixed inset-0 bg-slate-900/40 flex justify-center items-end md:items-center z-[130] transition-opacity duration-300 opacity-0 pointer-events-none p-0 md:p-4">
     
-    <div class="bg-white/90 backdrop-blur-2xl rounded-t-[2.5rem] md:rounded-[2.5rem] w-full max-w-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.3)] border border-white flex flex-col h-[90vh] md:h-[85vh] transform translate-y-full md:translate-y-10 transition-transform duration-300" id="modalKonfirmasiCeklisContent">
+    <!-- Wadah Kaca Utama (Blur Lembut) -->
+    <div class="bg-white/60 backdrop-blur-md rounded-t-[2.5rem] md:rounded-[2.5rem] w-full max-w-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-white/60 flex flex-col h-[90vh] md:h-[85vh] transform translate-y-full md:translate-y-10 transition-transform duration-300" id="modalKonfirmasiCeklisContent">
         
-        <!-- Header Gradasi Tajam (Mengunci Posisi Atas) -->
-        <div class="p-5 md:p-6 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex justify-between items-center shadow-md relative z-20 shrink-0 rounded-t-[2.5rem] md:rounded-t-[2.5rem]">
+        <!-- Header Pop-Up Transparan (Gaya Kaca iOS) -->
+        <div class="p-5 md:p-6 bg-transparent text-slate-800 flex justify-between items-center relative z-20 shrink-0 border-b border-white/50">
             <div>
-                <h3 class="font-black text-lg flex items-center gap-2.5 tracking-wide leading-none"><i class="fa-solid fa-clipboard-check text-indigo-200"></i> Audit Pabrik Digital</h3>
-                <p id="teks-sarimbit-ceklis" class="text-[10px] font-bold text-indigo-100 uppercase tracking-widest mt-1.5 opacity-90 truncate max-w-[200px] md:max-w-md">Koleksi Aktif</p>
+                <h3 class="font-black text-lg flex items-center gap-2.5 tracking-wide leading-none drop-shadow-sm"><i class="fa-solid fa-clipboard-check text-indigo-600 drop-shadow-sm"></i> Audit Pabrik Digital</h3>
+                <p id="teks-sarimbit-ceklis" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5 truncate max-w-[200px] md:max-w-md">Koleksi Aktif</p>
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- Tombol Unduh PDF Dipindah Ke Atas -->
-                <button onclick="exportCeklisPDF()" class="h-9 px-4 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm border border-white/30 text-[10px] font-black uppercase tracking-wider group" title="Unduh PDF Kertas">
-                    <i class="fa-solid fa-download group-hover:-translate-y-0.5 transition-transform"></i> <span class="hidden md:inline">PDF</span>
+                <!-- Tombol Unduh PDF -->
+                <button onclick="exportCeklisPDF()" class="h-9 px-4 bg-slate-100/50 hover:bg-slate-200/80 text-slate-600 rounded-full flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm border border-slate-200/60 text-[10px] font-black uppercase tracking-wider group" title="Unduh PDF Kertas">
+                    <i class="fa-solid fa-download group-hover:-translate-y-0.5 transition-transform text-indigo-600"></i> <span class="hidden md:inline">PDF</span>
                 </button>
-                <button onclick="tutupModalCeklis()" class="w-9 h-9 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors active:scale-95 shadow-sm border border-white/30 group">
+                <button onclick="tutupModalCeklis()" class="w-9 h-9 flex items-center justify-center bg-slate-100/50 hover:bg-slate-200/80 text-slate-500 rounded-full transition-colors active:scale-95 shadow-sm border border-slate-200/60 group">
                     <i class="fa-solid fa-xmark font-bold group-hover:scale-110 transition-transform text-sm"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Indikator Kemajuan (Progress Bar) -->
-        <div class="px-6 py-4 bg-white/60 border-b border-slate-200/60 flex flex-col gap-2 shrink-0 z-10 shadow-[0_4px_15px_rgba(0,0,0,0.02)] backdrop-blur-sm">
+        <!-- Indikator Kemajuan (Progress Bar) Transparan -->
+        <div class="px-6 py-4 bg-transparent border-b border-slate-200/50 flex flex-col gap-2 shrink-0 z-10">
             <div class="flex justify-between items-end">
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Progres Audit</span>
-                <span id="teks-progres-modal" class="text-[11px] font-black text-indigo-600 tracking-wider">0 / 0 Item (0%)</span>
+                <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">Progres Audit</span>
+                <span id="teks-progres-modal" class="text-[11px] font-black text-indigo-700 tracking-wider">0 / 0 Item (0%)</span>
             </div>
-            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-200/50">
-                <div id="bar-progres-modal" class="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0 relative overflow-hidden">
+            <div class="w-full h-2.5 bg-slate-200/50 rounded-full overflow-hidden shadow-inner border border-slate-300/30">
+                <div id="bar-progres-modal" class="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0 relative overflow-hidden shadow-sm">
                     <div class="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity"></div>
                 </div>
             </div>
         </div>
         
-        <!-- Area List Barang Interaktif (Bisa Di-Scroll) -->
-        <div id="wadah-list-ceklis-modal" class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50/50 custom-scrollbar relative z-0">
+        <!-- Area List Barang Interaktif (Tembus ke kaca utama) -->
+        <div id="wadah-list-ceklis-modal" class="flex-1 overflow-y-auto p-4 md:p-6 bg-transparent custom-scrollbar relative z-0">
             <!-- Data Injeksi JS Masuk Sini -->
         </div>
         
-        <!-- Footer Tombol -->
-        <div class="p-5 md:p-6 bg-white/80 border-t border-slate-200/50 flex justify-end shrink-0 backdrop-blur-md">
-            <button onclick="tutupModalCeklis()" class="w-full py-3.5 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-full font-black text-sm hover:from-slate-800 hover:to-slate-900 transition-all active:scale-95 shadow-[0_6px_15px_rgba(15,23,42,0.3)] border border-slate-600 flex items-center justify-center gap-2 group tracking-wide">
+        <!-- Footer Tombol Transparan -->
+        <div class="p-5 md:p-6 bg-transparent border-t border-white/50 flex justify-end shrink-0">
+            <button onclick="tutupModalCeklis()" class="w-full py-3.5 bg-gradient-to-r from-slate-700/90 to-slate-800/90 text-white rounded-full font-black text-sm hover:from-slate-800 hover:to-slate-900 transition-all active:scale-95 shadow-md border border-slate-500/50 flex items-center justify-center gap-2 group tracking-wide">
                 <i class="fa-solid fa-check group-hover:scale-125 transition-transform"></i> Tutup Pengecekan
             </button>
         </div>
     </div>
 </div>
 <!-- MODAL RIWAYAT PEMBAYARAN (SLIP) - iOS GLASS x SAMSUNG CAPSULE -->
-<div id="modalRiwayatSlip" class="hidden fixed inset-0 z-[130] bg-slate-900/50 flex items-center justify-center px-4 transition-opacity">
+<div id="modalRiwayatSlip" class="hidden fixed inset-0 z-[130] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
     
     <!-- MENGGUNAKAN CLASS 'ios-glass' MURNI YANG SUPER TEMBUS PANDANG -->
-    <div class="ios-glass rounded-[2.5rem] w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col relative">
+    <div class="ios-glass rounded-[2.5rem] w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col relative">
         
-        <!-- Header Gradasi Tajam -->
-        <div class="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex justify-between items-center shadow-md relative z-10 shrink-0">
-            <h3 class="font-black text-lg flex items-center gap-2.5 tracking-wide"><i class="fa-solid fa-wallet text-blue-200"></i> Riwayat Pembayaran</h3>
-            <button onclick="tutupModalRiwayatSlip()" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors active:scale-95 shadow-sm border border-white/30 group">
+        <!-- Header Transparan Kaca -->
+        <div class="p-5 bg-transparent border-b border-white/50 text-slate-800 flex justify-between items-center relative z-10 shrink-0">
+            <h3 class="font-black text-lg flex items-center gap-2.5 tracking-wide"><i class="fa-solid fa-wallet text-indigo-600 drop-shadow-sm"></i> Riwayat Pembayaran</h3>
+            <button onclick="tutupModalRiwayatSlip()" class="w-8 h-8 flex items-center justify-center bg-white/40 text-slate-600 rounded-full hover:bg-white/60 transition-colors active:scale-95 shadow-sm border border-white/60 group">
                 <i class="fa-solid fa-xmark font-bold group-hover:scale-110 transition-transform"></i>
             </button>
         </div>
         
         <div class="p-6 relative flex flex-col gap-5 flex-1 bg-transparent">
-            <!-- Customer Info (Capsule Efek Kaca) -->
-            <div class="flex justify-between items-center bg-white/60 backdrop-blur-md p-4 rounded-full border border-white shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
+            <!-- Customer Info (Capsule Efek Kaca Lebih Solid) -->
+            <div class="flex justify-between items-center bg-white/70 backdrop-blur-md p-4 rounded-full border border-white shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
                 <div class="pl-2">
                     <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-0.5">Customer</span>
                     <span class="text-[12px] font-black text-slate-800 uppercase tracking-widest leading-none tracking-tight" id="nama-customer-riwayat">NAMA CUSTOMER</span>
@@ -1628,7 +1636,7 @@
                 </div>
             </div>
             
-            <div class="flex justify-between items-center pb-2 border-b border-white/50">
+            <div class="flex justify-between items-center pb-2 border-b border-white/40">
                 <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-2">Daftar Uang Masuk</span>
                 <!-- Tombol Tambah Kapsul Menyala -->
                 <button id="btn-tambah-riwayat-modal" class="text-[10px] bg-gradient-to-br from-blue-500 to-blue-600 text-white px-3.5 py-1.5 rounded-full font-black hover:from-blue-600 hover:to-blue-700 transition-all shadow-[0_4px_10px_rgba(59,130,246,0.3)] active:scale-95 flex items-center gap-1.5 border border-blue-400 group uppercase tracking-wider"><i class="fa-solid fa-plus group-hover:scale-110 transition-transform"></i> Tambah</button>
@@ -1639,9 +1647,9 @@
             </div>
         </div>
         
-        <!-- Tombol Selesai Kapsul -->
-        <div class="p-5 bg-white/20 border-t border-white/50 flex justify-end shrink-0 backdrop-blur-md">
-            <button onclick="tutupModalRiwayatSlip()" class="w-full py-4 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-full font-black text-sm hover:from-slate-800 hover:to-slate-900 transition-all active:scale-95 shadow-[0_6px_15px_rgba(15,23,42,0.3)] border border-slate-500/50 flex items-center justify-center gap-2 group tracking-wide">
+        <!-- Tombol Selesai Transparan -->
+        <div class="p-5 bg-transparent border-t border-white/50 flex justify-end shrink-0">
+            <button onclick="tutupModalRiwayatSlip()" class="w-full py-4 bg-gradient-to-r from-slate-700/90 to-slate-800/90 backdrop-blur-md text-white rounded-full font-black text-sm hover:from-slate-800 hover:to-slate-900 transition-all active:scale-95 shadow-[0_6px_15px_rgba(15,23,42,0.3)] border border-slate-500/50 flex items-center justify-center gap-2 group tracking-wide">
                 <i class="fa-solid fa-check group-hover:scale-125 transition-transform"></i> Selesai & Simpan
             </button>
         </div>
@@ -1649,17 +1657,21 @@
 </div>
 
 <!-- MODAL INFO TAGIHAN (SMART ALERT) -->
-<div id="modalInfoTagihan" class="hidden fixed inset-0 z-[110] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity">
-    <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-white">
-        <div class="p-6 bg-gradient-to-r from-rose-500 to-orange-500 text-white flex justify-between items-center shadow-md relative z-10">
-            <h3 class="font-black text-lg flex items-center gap-2 tracking-wide"><i class="fa-solid fa-bell animate-bounce"></i> Info Penagihan</h3>
-            <button onclick="tutupModalTagihan()" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/40 transition-colors active:scale-95">
-                <i class="fa-solid fa-xmark"></i>
+<div id="modalInfoTagihan" class="hidden fixed inset-0 z-[110] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
+    <!-- PENGGUNAAN IOS-GLASS -->
+    <div class="ios-glass rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden flex flex-col relative">
+        <!-- HEADER KACA TRANSPARAN -->
+        <div class="p-5 md:p-6 bg-transparent text-slate-800 flex justify-between items-center border-b border-white/50 relative z-10 shrink-0">
+            <h3 class="font-black text-lg flex items-center gap-2 tracking-wide"><i class="fa-solid fa-bell text-rose-500 animate-bounce"></i> Info Penagihan</h3>
+            <button onclick="tutupModalTagihan()" class="w-8 h-8 flex items-center justify-center bg-white/40 text-slate-600 rounded-full hover:bg-white/60 transition-colors active:scale-95 shadow-sm border border-white/60">
+                <i class="fa-solid fa-xmark font-bold"></i>
             </button>
         </div>
-        <div id="kontenInfoTagihan" class="p-6 space-y-4 max-h-[60vh] overflow-y-auto bg-slate-50 relative"></div>
-        <div class="p-4 bg-white border-t border-slate-200 flex justify-end">
-            <button onclick="tutupModalTagihan()" class="px-5 py-2.5 bg-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-300 transition-colors active:scale-95">Tutup</button>
+        <!-- KONTEN MENYATU DENGAN KACA -->
+        <div id="kontenInfoTagihan" class="p-6 space-y-4 max-h-[60vh] overflow-y-auto bg-transparent relative custom-scrollbar"></div>
+        
+        <div class="p-5 bg-transparent border-t border-white/50 flex justify-end shrink-0">
+            <button onclick="tutupModalTagihan()" class="w-full py-3.5 bg-slate-800/90 text-white rounded-full font-black text-sm hover:bg-slate-900 transition-all active:scale-95 shadow-md border border-slate-600/50">Tutup</button>
         </div>
     </div>
 </div>
@@ -1724,44 +1736,48 @@
     </div>
 </div>
   <!-- MODAL FILTER LANJUTAN SLIP (SAMSUNG ONE UI x iOS GLASS) -->
-<div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-md flex items-center justify-center px-4 transition-opacity">
-    <div class="bg-white/85 backdrop-blur-2xl rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col">
+ <!-- REVISI 1: Latar belakang luar dibuat transparan (gelap tapi tidak blur) -->
+<div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
+    
+    <!-- REVISI 3: Gunakan ios-glass agar kebal di Windows/Laptop -->
+    <div class="ios-glass rounded-[2rem] w-full max-w-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col">
         
-        <!-- HEADER ALA iOS (Transparan dengan Blur) -->
-        <div class="p-5 flex justify-between items-center border-b border-slate-200/50 relative z-10 bg-white/40 shrink-0">
+        <!-- HEADER ALA iOS (Transparan murni) -->
+        <div class="p-5 flex justify-between items-center border-b border-white/50 relative z-10 bg-transparent shrink-0">
             <h3 class="font-black text-lg flex items-center gap-2 text-slate-800"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Lanjutan</h3>
-            <button onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-slate-200/50 text-slate-500 rounded-full hover:bg-slate-300/60 hover:text-slate-700 transition-colors active:scale-95">
+            <button onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-slate-200/50 text-slate-500 rounded-full hover:bg-slate-300/60 hover:text-slate-700 transition-colors active:scale-95 border border-white/40">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
         
-        <div class="p-6 max-h-[65vh] overflow-y-auto space-y-7 custom-scrollbar relative flex-1">
+        <!-- BODY (Otomatis tembus pandang mengikuti wadah) -->
+        <div class="p-6 max-h-[65vh] overflow-y-auto space-y-7 custom-scrollbar relative flex-1 bg-transparent">
             
             <!-- STATUS KEUANGAN -->
             <div>
-                <h4 class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-money-bill-wave text-indigo-400 mr-1.5"></i> Status Keuangan</h4>
+                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-money-bill-wave text-indigo-400 mr-1.5"></i> Status Keuangan</h4>
                 <div class="grid grid-cols-2 md:grid-cols-2 gap-2.5">
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmbayar" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Belum Bayar (Belum DP)
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmlunas" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Belum Lunas (Nyicil)
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmongkir" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Belum Ongkir
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-sdhongkir" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Sudah Ongkir
                         </div>
                     </label>
@@ -1770,23 +1786,23 @@
 
             <!-- LOGISTIK EKSPEDISI -->
             <div>
-                <h4 class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-truck text-blue-400 mr-1.5"></i> Logistik Ekspedisi</h4>
+                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-truck text-blue-400 mr-1.5"></i> Logistik Ekspedisi</h4>
                 <div class="flex flex-wrap gap-2.5">
                     <label class="cursor-pointer flex-1 min-w-[100px]">
                         <input type="checkbox" id="fc-jne" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Hanya JNE
                         </div>
                     </label>
                     <label class="cursor-pointer flex-1 min-w-[100px]">
                         <input type="checkbox" id="fc-jnt" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-rose-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-rose-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Hanya JNT
                         </div>
                     </label>
                     <label class="cursor-pointer flex-1 min-w-[100px]">
                         <input type="checkbox" id="fc-pos" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-yellow-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-yellow-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Hanya POS
                         </div>
                     </label>
@@ -1795,23 +1811,23 @@
 
             <!-- WILAYAH PENGIRIMAN -->
             <div>
-                <h4 class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-map-location-dot text-emerald-400 mr-1.5"></i> Wilayah Pengiriman</h4>
+                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-map-location-dot text-emerald-400 mr-1.5"></i> Wilayah Pengiriman</h4>
                 <div class="grid grid-cols-2 gap-2.5">
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-jawa" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Hanya Pulau Jawa
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-luarjawa" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-white/60 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-slate-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
                             Hanya Luar Jawa
                         </div>
                     </label>
                     <label class="cursor-pointer col-span-2">
                         <input type="checkbox" id="fc-noalamat" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-rose-200 bg-rose-50/50 text-rose-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-rose-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-rose-200/80 bg-rose-50/70 text-rose-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-rose-100 active:scale-95 shadow-sm">
                             Belum Ada Alamat Lengkap (Kosong)
                         </div>
                     </label>
@@ -1820,11 +1836,11 @@
             
             <!-- INFORMASI BERAT BARANG -->
             <div>
-                <h4 class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-weight-scale text-orange-400 mr-1.5"></i> Informasi Berat Barang</h4>
+                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-weight-scale text-orange-400 mr-1.5"></i> Informasi Berat Barang</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmgram" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-orange-200 bg-orange-50/50 text-orange-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-amber-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-orange-100 active:scale-95">
+                        <div class="px-4 py-3 rounded-full border border-orange-200/80 bg-orange-50/70 text-orange-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-amber-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-orange-100 active:scale-95 shadow-sm">
                             Belum Ada Total Gram (0 gr)
                         </div>
                     </label>
@@ -1832,48 +1848,51 @@
             </div>
         </div>
 
-        <!-- FOOTER (TOMBOL AKSI KAPSUL) -->
-        <div class="p-5 border-t border-slate-200/50 bg-white/40 flex justify-between gap-3 shrink-0">
-          <button onclick="resetFilterLanjutan()" class="flex-1 py-3 bg-slate-200/60 text-slate-600 rounded-full font-bold text-xs hover:bg-slate-300 transition-colors active:scale-95 shadow-sm">Reset</button>
-          <button onclick="terapkanFilterLanjutan()" class="flex-[2] py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-full font-bold text-xs hover:from-indigo-700 hover:to-blue-600 shadow-[0_6px_15px_rgba(79,70,229,0.4)] transition-all active:scale-95"><i class="fa-solid fa-check mr-1.5"></i> Terapkan Filter</button>
+        <!-- FOOTER (TOMBOL AKSI KAPSUL) TRANSPARAN -->
+        <div class="p-5 border-t border-white/50 bg-transparent flex justify-between gap-3 shrink-0">
+          <button onclick="resetFilterLanjutan()" class="flex-1 py-3.5 bg-slate-200/60 text-slate-600 rounded-full font-bold text-xs hover:bg-slate-300 transition-colors active:scale-95 shadow-sm border border-slate-300/40 backdrop-blur-sm">Reset</button>
+          <button onclick="terapkanFilterLanjutan()" class="flex-[2] py-3.5 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-full font-bold text-xs hover:from-indigo-700 hover:to-blue-600 shadow-[0_4px_15px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400"><i class="fa-solid fa-check mr-1.5"></i> Terapkan Filter</button>
         </div>
     </div>
 </div>
 
 <!-- MODAL STATISTIK PROGRESS PELANGGAN (GAYA KACA iOS) -->
-<div id="modalStatistikProgress" class="hidden fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-md flex items-center justify-center px-4 transition-opacity">
-    <div class="bg-white/70 backdrop-blur-2xl rounded-[2rem] w-full max-w-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden border border-white/60 flex flex-col">
+<!-- REVISI 1: Latar belakang luar dibuat transparan (gelap tapi tidak blur) -->
+<div id="modalStatistikProgress" class="hidden fixed inset-0 z-[120] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
+    
+    <!-- REVISI 3: Gunakan ios-glass agar kebal di Windows/Laptop -->
+    <div class="ios-glass rounded-[2rem] w-full max-w-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col">
         
         <!-- HEADER TRANSPARAN EFEK KACA -->
-        <div class="p-5 md:p-6 bg-white/40 border-b border-slate-200/50 flex justify-between items-center relative z-10 shrink-0">
+        <div class="p-5 md:p-6 bg-transparent border-b border-white/50 flex justify-between items-center relative z-10 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
                     <i class="fa-solid fa-chart-simple text-lg"></i>
                 </div>
                 <div>
                     <h3 class="font-black text-lg md:text-xl tracking-tight text-slate-800 leading-none">Statistik Progress Pelanggan</h3>
-                    <p id="subjudul-statistik" class="text-[11px] text-slate-500 font-bold mt-1">Berdasarkan filter aktif saat ini</p>
+                    <p id="subjudul-statistik" class="text-[11px] text-slate-600 font-bold mt-1">Berdasarkan filter aktif saat ini</p>
                 </div>
             </div>
-            <button onclick="document.getElementById('modalStatistikProgress').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-slate-200/60 text-slate-500 rounded-full hover:bg-rose-100 hover:text-rose-600 transition-colors border border-slate-300/30 active:scale-95 shadow-sm">
+            <button onclick="document.getElementById('modalStatistikProgress').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-white/40 text-slate-600 rounded-full hover:bg-white/60 transition-colors border border-white/60 active:scale-95 shadow-sm">
                 <i class="fa-solid fa-xmark font-bold"></i>
             </button>
         </div>
         
-        <!-- LATAR BELAKANG KONTEN DIBUAT TRANSPARAN -->
-        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1">
+        <!-- LATAR BELAKANG KONTEN DIBUAT TRANSPARAN MENYATU DENGAN KACA -->
+        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-200/80 -translate-x-1/2"></div>
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-300/50 -translate-x-1/2"></div>
                 
                 <div class="space-y-5 pr-0 md:pr-4">
-                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-white/60 pb-2.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Progres Selesai
                     </h4>
                     <div id="wadah-stat-selesai" class="space-y-4"></div>
                 </div>
 
                 <div class="space-y-5 pl-0 md:pl-4">
-                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-white/60 pb-2.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Kekurangan / Belum
                     </h4>
                     <div id="wadah-stat-kurang" class="space-y-4"></div>
@@ -1882,11 +1901,11 @@
         </div>
 
         <!-- FOOTER: PILIHAN UNDUHAN & TOMBOL EXCEL (GAYA KACA) -->
-        <div class="p-4 md:p-5 bg-white/40 border-t border-slate-200/50 flex flex-col gap-4 shrink-0">
+        <div class="p-4 md:p-5 bg-transparent border-t border-white/50 flex flex-col gap-4 shrink-0">
             <div class="flex flex-col md:flex-row gap-4 items-end">
                 <div class="flex-1 w-full">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-list-check mr-1 text-indigo-500"></i> Kategori Data:</label>
-                    <select id="kategori-unduh-stat" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50/50 border border-slate-300/50 outline-none focus:bg-white focus:border-blue-500 cursor-pointer shadow-inner">
+                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-list-check mr-1 text-indigo-500"></i> Kategori Data:</label>
+                    <select id="kategori-unduh-stat" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-white/50 border border-white/60 outline-none focus:bg-white focus:border-blue-500 cursor-pointer shadow-sm">
                         <option value="semua">Semua Pelanggan (Sesuai Filter)</option>
                         <optgroup label="Status Produksi">
                             <option value="prod_close">Sudah Close PO</option>
@@ -1914,22 +1933,22 @@
                 </div>
                 
                 <div class="flex-1 w-full">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-file-export mr-1 text-emerald-500"></i> Format Laporan:</label>
-                    <select id="format-unduh-stat" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50/50 border border-slate-300/50 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer shadow-inner">
+                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-file-export mr-1 text-emerald-500"></i> Format Laporan:</label>
+                    <select id="format-unduh-stat" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-white/50 border border-white/60 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer shadow-sm">
                         <option value="lengkap">📋 Rincian Lengkap per Customer</option>
                         <option value="sarimbit">📊 Rekap Daftar Nama Sarimbit Saja</option>
                     </select>
                 </div>
                 
                 <div class="w-full md:w-auto">
-                    <button onclick="unduhRekapStatistikExcel()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
+                    <button onclick="unduhRekapStatistikExcel()" class="w-full bg-gradient-to-r from-slate-700 to-slate-800 text-white px-5 py-2 md:py-2.5 rounded-xl font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] border border-slate-600 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2.5 group">
                         <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
                     </button>
-                </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <script>
@@ -3962,17 +3981,18 @@ async function handleOrderSubmit(e) {
                 ? `<span class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded border border-rose-200 animate-pulse shadow-sm">0 gr</span>` 
                 : `${m.berat} gr`;
                 
-            return `
+                return `
             <tr>
                 <td class="px-5 py-4 border-b border-slate-100">
                     <div class="font-bold text-slate-800 text-sm mb-1">${escapeHTML(m.sarimbit)}</div>
-                    <div class="text-[9px] text-blue-600 font-bold uppercase tracking-wider bg-blue-50 w-fit px-2 py-0.5 rounded border border-blue-100">${escapeHTML(m.pusat)}</div>
+                    <div class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">${escapeHTML(m.pusat)}</div>
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100">
                     <div class="font-bold text-slate-700 text-sm mb-1">${escapeHTML(m.barang)}</div>
-                    <div class="flex gap-1.5">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${escapeHTML(m.varian)}</span>
-                        <span class="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">SZ: ${escapeHTML(m.size)}</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">${escapeHTML(m.varian)}</span>
+                        <span class="text-[10px] font-black text-slate-300">|</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">SZ: ${escapeHTML(m.size)}</span>
                     </div>
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100 text-right">
@@ -4304,9 +4324,9 @@ async function handleOrderSubmit(e) {
                             </div>
                         </div>
 
-                        <div class="absolute inset-0 bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+                       <div class="absolute inset-0 bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
                         <!-- Teks Alamat -->
-                        <div class="text-[11px] text-slate-500 font-bold leading-snug text-center relative z-10 px-2">${c.alamat}</div>
+                        <div class="text-[11.5px] text-slate-600 font-medium leading-relaxed text-center relative z-10 px-3 py-1">${c.alamat}</div>
                     </div>
 
                     <!-- ONGKIR & RIWAYAT SEJAJAR VERTICAL -->
@@ -4608,9 +4628,9 @@ async function handleOrderSubmit(e) {
             const memoriCeklis = JSON.parse(localStorage.getItem('DataCeklisPabrik')) || {};
             const isChecked = memoriCeklis[key] ? true : false;
             
-            // GAYA CSS DINAMIS SESUAI STATUS CEKLIS (Tampilan tetap ter-update walau di-ceklis lewat pop-up)
+            // GAYA CSS DINAMIS SESUAI STATUS CEKLIS (Background Kotak Dihilangkan)
             const rowClass = isChecked ? "bg-emerald-50/50 opacity-80" : "hover:bg-slate-50";
-            const labelSizeClass = isChecked ? "bg-emerald-100/50 text-emerald-600 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200";
+            const labelSizeClass = isChecked ? "text-emerald-600 line-through decoration-emerald-300" : "text-slate-700";
 
             return `
             <tr id="rekap-rowA-${idAman}" class="${rowClass} transition-all duration-300 group">
@@ -4623,7 +4643,7 @@ async function handleOrderSubmit(e) {
                     </div>
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100">
-                    <span class="border px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider transition-colors ${labelSizeClass}">${varian} / ${size}</span>
+                    <span class="text-[13px] font-semibold uppercase tracking-wide transition-colors ${labelSizeClass}">${varian} / ${size}</span>
                 </td>
                 <td class="px-5 py-4 border-b border-slate-100 text-center font-black ${isChecked ? 'text-emerald-500' : 'text-blue-600'} text-xl transition-colors" id="rekap-qtytampil-${idAman}">${data.qtyTampil}</td>
             </tr>
@@ -5897,7 +5917,8 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             allowArchive: document.getElementById('set-allow-archive').checked,
             showSlipDate: document.getElementById('set-show-slip-date').checked,
             allowDeleteMaster: document.getElementById('set-allow-delete-master').checked,
-            darkMode: document.getElementById('set-dark-mode').checked
+            darkMode: document.getElementById('set-dark-mode').checked,
+            unduhBebas: document.getElementById('set-unduh-bebas').checked
         };
         localStorage.setItem('sarimbitSettings', JSON.stringify(appSettings));
         document.getElementById('app-title-side').innerText = appSettings.nama;
@@ -5932,7 +5953,10 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
         if (typeof appSettings.showSlipDate === 'undefined') appSettings.showSlipDate = false;
         if (typeof appSettings.allowDeleteMaster === 'undefined') appSettings.allowDeleteMaster = false;
         if (typeof appSettings.darkMode === 'undefined') appSettings.darkMode = false;
+        if (typeof appSettings.unduhBebas === 'undefined') appSettings.unduhBebas = false;
         
+        document.getElementById('set-unduh-bebas').checked = appSettings.unduhBebas || false;
+
         // Kembalikan tema sesuai memori
         document.getElementById('set-dark-mode').checked = appSettings.darkMode || false;
         toggleDarkModeSeketika(appSettings.darkMode);
@@ -7557,8 +7581,8 @@ function pilihProdukModal(metaString) {
                 });
             }
 
-            // Susun ulang pilihan Dropdown Sarimbit secara mandiri
-            if (filterSarimbitEl) {
+          // Susun ulang pilihan Dropdown Sarimbit secara mandiri
+          if (filterSarimbitEl) {
                 const tempVal = filterSarimbitEl.value; 
                 let optionsHTML = `<option value="">Sarimbit</option>`;
                 [...sarimbitTersedia].sort().forEach(s => {
@@ -7611,8 +7635,8 @@ function pilihProdukModal(metaString) {
                 fungsiAsliRenderSlip();
             }
             
-            // --- LOGIKA PEWARNAAN GAYA GRADASI MENYALA ---
-            const warnaMati = ['bg-slate-50', 'text-slate-700', 'border-slate-200/60', 'hover:bg-slate-100', 'hover:border-slate-300'];
+           // --- LOGIKA PEWARNAAN GAYA GRADASI MENYALA ---
+           const warnaMati = ['ios-glass', 'text-slate-800'];
             
             // Gradasi Biru untuk Toko & Sarimbit
             const warnaHidupBiru = ['bg-gradient-to-r', 'from-blue-500', 'to-indigo-600', 'text-white', 'border-transparent', 'shadow-[0_4px_12px_rgba(59,130,246,0.3)]', 'hover:from-blue-600', 'hover:to-indigo-700'];
@@ -7629,11 +7653,12 @@ function pilihProdukModal(metaString) {
                     if (el.value !== "") {
                         el.classList.remove(...warnaMati);
                         el.classList.add(...classWarnaHidup);
-                        if(chevron) chevron.classList.replace('text-slate-400', 'text-white/80');
+                        if(chevron) chevron.classList.replace('text-slate-600', 'text-white/80');
+                        if(chevron) chevron.classList.replace('text-slate-500', 'text-white/80');
                     } else {
                         el.classList.remove(...classWarnaHidup);
                         el.classList.add(...warnaMati);
-                        if(chevron) chevron.classList.replace('text-white/80', 'text-slate-400');
+                        if(chevron) chevron.classList.replace('text-white/80', 'text-slate-600');
                     }
                 }
             };
@@ -7960,6 +7985,30 @@ function pilihProdukModal(metaString) {
                         if (nom > 0) riwayat.push({ nominal: nom, tgl: tgl });
                     });
                     
+                    // ==============================================================
+                    // LOGIKA BARU: CEK APAKAH ADA PERUBAHAN SEBELUM MENYIMPAN!
+                    // ==============================================================
+                    let totalLama = 0;
+                    let riwayatLama = [];
+                    if (typeof orderData !== 'undefined') {
+                        const custOrder = orderData.find(o => (o.idcustomer || o.idCustomer) === idCustomer);
+                        if (custOrder) {
+                            // Menarik data asli sebelum dimodifikasi
+                            riwayatLama = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(custOrder) : [];
+                            totalLama = riwayatLama.reduce((sum, b) => sum + Number(b.nominal), 0);
+                        }
+                    }
+                    
+                    // Standarisasi tipe data (ubah ke format mutlak) untuk perbandingan yang akurat
+                    const teksRiwayatLama = JSON.stringify(riwayatLama.map(b => ({ nominal: Number(b.nominal), tgl: b.tgl })));
+                    const teksRiwayatBaru = JSON.stringify(riwayat.map(b => ({ nominal: Number(b.nominal), tgl: b.tgl })));
+                    
+                    // Jika riwayat baru persis sama dengan riwayat lama, hentikan proses (Jangan simpan, notif, atau log)
+                    if (teksRiwayatLama === teksRiwayatBaru) {
+                        return;
+                    }
+                    // ==============================================================
+                    
                     // Hitung c1, c2, c3 untuk fallback fungsi lama
                     const c1 = riwayat.length > 0 ? riwayat[0].nominal : 0;
                     const c2 = riwayat.length > 1 ? riwayat[1].nominal : 0;
@@ -8000,15 +8049,6 @@ function pilihProdukModal(metaString) {
                     if(typeof showToast === 'function') showToast("✅ Pembayaran Disimpan!");
                     const namaCustRiwayat = document.getElementById('nama-customer-riwayat') ? document.getElementById('nama-customer-riwayat').innerText : "Customer";
                     
-                    // Menghitung selisih nominal uang masuk lama vs baru
-                    let totalLama = 0;
-                    if (typeof orderData !== 'undefined') {
-                        const custOrder = orderData.find(o => (o.idcustomer || o.idCustomer) === idCustomer);
-                        if (custOrder) {
-                            const riwayatLama = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(custOrder) : [];
-                            totalLama = riwayatLama.reduce((sum, b) => sum + Number(b.nominal), 0);
-                        }
-                    }
                     const totalBaru = riwayat.reduce((sum, b) => sum + Number(b.nominal), 0);
                     
                     if (typeof catatLog === 'function') {
@@ -8317,11 +8357,85 @@ function pilihProdukModal(metaString) {
             const safeAct = (log.action||"").replace(/'/g, "\\'");
             const safeDetFull = (log.detail||"").replace(/'/g, "\\'").replace(/"/g, '\\"');
             
-            // Sembunyikan kode ID/KEY rahasia dari tampilan layar
-            const displayDet = (log.detail||"").replace(/\[ID:\s*[^\]]+\]/i, '').replace(/\[KEY:\s*[^\]]+\]/i, '').trim();
+           // Sembunyikan kode ID/KEY rahasia dari tampilan layar
+           const displayDet = (log.detail||"").replace(/\[ID:\s*[^\]]+\]/i, '').replace(/\[KEY:\s*[^\]]+\]/i, '').trim();
             
             const jam = new Date(log.time).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
             const tanggal = typeof formatTanggalPanjang === 'function' ? formatTanggalPanjang(log.time) : '';
+
+            // --- MESIN PEMISAH 2 KOLOM (KHUSUS PERUBAHAN DATA/UPDATE) ---
+            let detailAreaHTML = `<p class="text-[12px] font-medium text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">${displayDet}</p>`;
+
+            if (log.action === 'UPDATE' && displayDet.includes('➔')) {
+                let judulLog = displayDet;
+                let daftarPerubahan = [];
+                
+                const titikDuaPertama = displayDet.indexOf(':');
+                if (titikDuaPertama !== -1 && titikDuaPertama < 50) { 
+                    judulLog = displayDet.substring(0, titikDuaPertama).trim();
+                    const sisaTeks = displayDet.substring(titikDuaPertama + 1).trim();
+                    daftarPerubahan = sisaTeks.split('|').map(s => s.trim());
+                } else {
+                    judulLog = "Rincian Perubahan Data";
+                    daftarPerubahan = displayDet.split('|').map(s => s.trim());
+                }
+
+                let barisPerubahanHTML = '';
+                daftarPerubahan.forEach(ubah => {
+                    if (ubah.includes('➔')) {
+                        let atribut = "";
+                        let lama = "";
+                        let baru = "";
+                        
+                        const kurungMatch = ubah.match(/^(.*?)\s*\((.*?)➔(.*?)\)$/);
+                        if (kurungMatch) {
+                            atribut = kurungMatch[1].trim();
+                            lama = kurungMatch[2].trim();
+                            baru = kurungMatch[3].trim();
+                        } else {
+                            const partsColon = ubah.split(':');
+                            if (partsColon.length > 1 && partsColon[0].length < 25) {
+                                atribut = partsColon[0].trim();
+                                const sisaArrow = partsColon[1].split('➔');
+                                lama = sisaArrow[0] ? sisaArrow[0].trim() : "-";
+                                baru = sisaArrow[1] ? sisaArrow[1].trim() : "-";
+                            } else {
+                                const partsArrow = ubah.split('➔');
+                                lama = partsArrow[0] ? partsArrow[0].trim() : "-";
+                                baru = partsArrow[1] ? partsArrow[1].trim() : "-";
+                            }
+                        }
+
+                        let atributHTML = atribut ? `<div class="col-span-2 text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 border-b border-slate-200/60 pb-1">${atribut}</div>` : '';
+                        
+                        barisPerubahanHTML += `
+                            <div class="mb-2 last:mb-0 bg-slate-50 p-2.5 rounded-xl border border-slate-100 shadow-sm">
+                                ${atributHTML}
+                                <div class="grid grid-cols-2 gap-3 text-[10px]">
+                                    <div class="flex flex-col pr-1">
+                                        <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Data Lama</span>
+                                        <span class="font-medium text-slate-500 line-through decoration-slate-400 leading-relaxed">${lama}</span>
+                                    </div>
+                                    <div class="flex flex-col border-l border-slate-200 pl-3 relative">
+                                        <div class="absolute -left-[9px] top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border border-slate-200 flex items-center justify-center text-slate-300 z-10"><i class="fa-solid fa-arrow-right text-[7px]"></i></div>
+                                        <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Data Baru</span>
+                                        <span class="font-medium text-slate-700 leading-relaxed">${baru}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        barisPerubahanHTML += `<div class="mb-2 text-[11px] font-medium text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">${ubah}</div>`;
+                    }
+                });
+
+                detailAreaHTML = `
+                    <div class="mb-2 font-black text-[11px] text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-file-pen text-amber-500"></i> ${judulLog.toUpperCase()}</div>
+                    <div class="flex flex-col">
+                        ${barisPerubahanHTML}
+                    </div>
+                `;
+            }
 
             html += `
             <div onclick="klikNotifArahkan('${safeMod}', '${safeAct}', '${safeDetFull}')" class="bg-white/90 backdrop-blur-md p-4 rounded-[1.5rem] shadow-[0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/80 ${pStyle.borderCard} ${pStyle.hoverShadow} cursor-pointer transition-all duration-300 ease-out active:scale-[0.98] hover:-translate-y-1 group flex flex-col gap-3 relative overflow-hidden">
@@ -8335,22 +8449,22 @@ function pilihProdukModal(metaString) {
                             <i class="fa-solid ${pStyle.ikon} text-[15px]"></i>
                         </div>
                         <div class="flex flex-col gap-1">
-                            <span class="text-[8px] font-black ${pStyle.textBadge} ${pStyle.bgBadge} border ${pStyle.borderBadge} px-2 py-0.5 rounded-md uppercase tracking-widest w-fit">${log.action}</span>
-                            <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-0.5">${log.module}</span>
+                            <span class="text-[8px] font-bold ${pStyle.textBadge} ${pStyle.bgBadge} border ${pStyle.borderBadge} px-2 py-0.5 rounded-md uppercase tracking-widest w-fit">${log.action}</span>
+                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-0.5">${log.module}</span>
                         </div>
                     </div>
                     <div class="text-right flex flex-col items-end">
-                        <span class="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200"><i class="fa-regular fa-clock mr-1 text-slate-400"></i>${jam}</span>
-                        <span class="text-[7px] font-black text-slate-400 mt-1 uppercase tracking-widest">${tanggal}</span>
+                        <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200"><i class="fa-regular fa-clock mr-1 text-slate-400"></i>${jam}</span>
+                        <span class="text-[7px] font-bold text-slate-400 mt-1 uppercase tracking-widest">${tanggal}</span>
                     </div>
                 </div>
                 
                 <div class="pl-2.5 pr-1 relative z-10 flex-1">
-                    <p class="text-[11px] font-bold text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">${displayDet}</p>
+                    ${detailAreaHTML}
                 </div>
                 
                 <div class="border-t border-slate-100/80 pt-2.5 mt-1.5 mx-2 flex justify-between items-center relative z-10">
-                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                         <i class="fa-solid fa-laptop-medical text-slate-300"></i> <span class="text-slate-500">${log.device || 'Perangkat Rahasia'}</span>
                     </p>
                     <div class="w-5 h-5 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors border border-transparent group-hover:border-blue-100">
@@ -8520,6 +8634,26 @@ function pilihProdukModal(metaString) {
             setTimeout(() => { window.renderLogAktivitas(true); }, 250);
         }
     };
+</script>
+<script>
+    // ==========================================
+    // FUNGSI KENDALI CUSTOM DROPDOWN SARIMBIT
+    // ==========================================
+    window.pilihCustomSarimbit = function(nilai) {
+        const btn = document.getElementById('filter-sarimbit-slip');
+        if(btn) btn.value = nilai;
+        document.getElementById('drop-sarimbit-slip').classList.add('hidden');
+        renderSlip(); // Refresh tabel setelah memilih!
+    };
+
+    // Fungsi canggih untuk menutup pop-up saat mengklik layar di luar kotak
+    document.addEventListener('click', function(e) {
+        const wadah = document.getElementById('wadah-custom-sarimbit');
+        const drop = document.getElementById('drop-sarimbit-slip');
+        if (wadah && drop && !wadah.contains(e.target)) {
+            drop.classList.add('hidden');
+        }
+    });
 </script>
 </body>
 </html>
