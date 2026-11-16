@@ -565,65 +565,86 @@
                     <textarea id="o-alamat" list="saran-alamat" oninput="updateLiveStruk()" placeholder="Ketik alamat lengkap beserta RT/RW dan Kodepos..." class="w-full p-4 bg-white border border-slate-200 hover:border-slate-300 rounded-[1.5rem] text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-sm h-24 resize-none placeholder:text-slate-400"></textarea>
                 </div>
                 
-                <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Ekspedisi</label>
-                        <div class="relative group">
-                            <select id="o-ekspedisi" onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-sm font-bold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 appearance-none cursor-pointer text-center">
-                                <option value="">Ekspedisi</option>
-                                <option value="JNE">JNE</option>
-                                <option value="JNT">JNT</option>
-                                <option value="POS">POS</option>
-                                <option value="LION">LION</option>
-                                <option value="Ambil Sendiri">Ambil Sendiri</option>
-                            </select>
-                            <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-blue-500 transition-colors pointer-events-none z-10"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Orderan</label>
-                        <div class="relative group">
-                            <select id="o-sumber" required onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-sm font-bold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 appearance-none cursor-pointer text-center">
-                                <option value="">Sumber</option>
-                                <option value="WhatsApp">💬 WhatsApp</option>
-                                <option value="TikTok">🎶 TikTok</option>
-                                <option value="Instagram">📸 Instagram</option>
-                                <option value="Reseller">🛍️ Reseller</option>
-                            </select>
-                            <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-blue-500 transition-colors pointer-events-none z-10"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Toko</label>
-                        <div class="relative group">
-                            <select id="o-toko" required onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-sm font-bold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 appearance-none cursor-pointer text-center">
-                                <option value="">Toko</option>
-                                <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
-                                <option value="MASARA.HIJAB">MASARA.HIJAB</option>
-                            </select>
-                            <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-hover:text-blue-500 transition-colors pointer-events-none z-10"></i>
-                        </div>
+               <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom - Custom Glassmorphism) -->
+               <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                <!-- 1. Custom Dropdown Ekspedisi -->
+                <div class="relative" id="wadah-custom-order-ekspedisi">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Ekspedisi</label>
+                    <select id="o-ekspedisi" onchange="updateLiveStruk()" class="hidden">
+                        <option value="">Ekspedisi</option>
+                        <option value="JNE">JNE</option>
+                        <option value="JNT">JNT</option>
+                        <option value="POS">POS</option>
+                        <option value="LION">LION</option>
+                        <option value="Ambil Sendiri">Ambil Sendiri</option>
+                    </select>
+                    <button type="button" id="btn-custom-order-ekspedisi" onclick="toggleCustomFilterSlip('order-ekspedisi')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-order-ekspedisi" class="truncate w-full text-center pointer-events-none">Ekspedisi</span>
+                        <i id="chevron-order-ekspedisi" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-order-ekspedisi-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                        <div id="list-custom-order-ekspedisi" class="flex flex-col gap-1"></div>
                     </div>
                 </div>
 
-                <h3 class="text-base font-black text-slate-800 tracking-tight flex items-center gap-2 mb-5 pt-5 border-t border-slate-100">
-                    <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-wallet"></i></div> Detail Keuangan
-                </h3>
-
-                <!-- Baris 4: Diskon -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Tipe Diskon</label>
-                        <div class="relative">
-                            <select id="o-tipe-diskon" onchange="updateLiveStruk()" class="w-full pl-5 pr-10 h-12 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-sm font-bold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-sm appearance-none cursor-pointer text-center">
-                                <option value="none">Tanpa Diskon</option>
-                                <option value="persen">Persen (%)</option>
-                                <option value="angka">Tunai (Rp)</option>
-                            </select>
-                            <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
-                        </div>
+                <!-- 2. Custom Dropdown Asal Orderan -->
+                <div class="relative" id="wadah-custom-order-sumber">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Orderan</label>
+                    <select id="o-sumber" onchange="updateLiveStruk()" class="hidden">
+                        <option value="">Sumber</option>
+                        <option value="WhatsApp">💬 WhatsApp</option>
+                        <option value="TikTok">🎶 TikTok</option>
+                        <option value="Instagram">📸 Instagram</option>
+                        <option value="Reseller">🛍️ Reseller</option>
+                    </select>
+                    <button type="button" id="btn-custom-order-sumber" onclick="toggleCustomFilterSlip('order-sumber')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-order-sumber" class="truncate w-full text-center pointer-events-none">Sumber</span>
+                        <i id="chevron-order-sumber" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-order-sumber-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                        <div id="list-custom-order-sumber" class="flex flex-col gap-1"></div>
                     </div>
+                </div>
+
+                <!-- 3. Custom Dropdown Toko -->
+                <div class="relative" id="wadah-custom-order-toko">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Toko</label>
+                    <select id="o-toko" onchange="updateLiveStruk()" class="hidden">
+                        <option value="">Toko</option>
+                        <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
+                        <option value="MASARA.HIJAB">MASARA.HIJAB</option>
+                    </select>
+                    <button type="button" id="btn-custom-order-toko" onclick="toggleCustomFilterSlip('order-toko')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-order-toko" class="truncate w-full text-center pointer-events-none">Toko</span>
+                        <i id="chevron-order-toko" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-order-toko-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                        <div id="list-custom-order-toko" class="flex flex-col gap-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-base font-black text-slate-800 tracking-tight flex items-center gap-2 mb-5 pt-5 border-t border-slate-100">
+                <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-wallet"></i></div> Detail Keuangan
+            </h3>
+
+            <!-- Baris 4: Diskon (Custom Glassmorphism) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                <div class="relative" id="wadah-custom-order-diskon">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Tipe Diskon</label>
+                    <select id="o-tipe-diskon" onchange="updateLiveStruk()" class="hidden">
+                        <option value="none">Tanpa Diskon</option>
+                        <option value="persen">Persen (%)</option>
+                        <option value="angka">Tunai (Rp)</option>
+                    </select>
+                    <button type="button" id="btn-custom-order-diskon" onclick="toggleCustomFilterSlip('order-diskon')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-sm hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-order-diskon" class="truncate w-full text-center pointer-events-none">Tanpa Diskon</span>
+                        <i id="chevron-order-diskon" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-order-diskon-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                        <div id="list-custom-order-diskon" class="flex flex-col gap-1"></div>
+                    </div>
+                </div>
                     <div>
                         <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Nilai Diskon</label>
                         <input type="number" id="o-nilai-diskon" oninput="updateLiveStruk()" placeholder="0" class="w-full px-5 h-12 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-[15px] font-black text-rose-600 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all outline-none shadow-sm text-right placeholder:font-medium placeholder:text-slate-400">
@@ -1789,17 +1810,40 @@
                 <i class="fa-solid fa-search text-slate-400 text-sm ml-3 mr-2"></i>
                 <input type="text" id="inputPencarianBesar" oninput="cariProdukBesar()" placeholder="Ketik ukuran atau keyword..." class="w-full bg-transparent border-none ring-0 focus:ring-0 focus:border-none py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-[#8E8E93]">
             </div>
-                <div class="relative md:w-[22%]">
-                    <select id="filterSarimbitModal" onchange="cariProdukBesar()" class="w-full bg-white/50 border border-white/60 rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer appearance-none shadow-sm"><option value="">-- Sarimbit --</option></select>
-                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none"></i>
+                <!-- 1. Filter Sarimbit Modal Katalog -->
+                <div class="relative md:w-[22%]" id="wadah-custom-modal-sarimbit">
+                    <select id="filterSarimbitModal" onchange="cariProdukBesar()" class="hidden"><option value="">Sarimbit</option></select>
+                    <button type="button" id="btn-custom-modal-sarimbit" onclick="toggleCustomFilterSlip('modal-sarimbit')" class="w-full ios-glass rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-modal-sarimbit" class="truncate w-full text-center pointer-events-none">Sarimbit</span>
+                        <i id="chevron-modal-sarimbit" class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-modal-sarimbit-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-full md:w-60 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[45vh]">
+                        <div id="list-custom-modal-sarimbit" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                    </div>
                 </div>
-                <div class="relative md:w-[22%]">
-                    <select id="filterBarangModal" onchange="cariProdukBesar()" class="w-full bg-white/50 border border-white/60 rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer appearance-none shadow-sm"><option value="">-- Barang --</option></select>
-                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none"></i>
+
+                <!-- 2. Filter Barang Modal Katalog -->
+                <div class="relative md:w-[22%]" id="wadah-custom-modal-barang">
+                    <select id="filterBarangModal" onchange="cariProdukBesar()" class="hidden"><option value="">Barang</option></select>
+                    <button type="button" id="btn-custom-modal-barang" onclick="toggleCustomFilterSlip('modal-barang')" class="w-full ios-glass rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-modal-barang" class="truncate w-full text-center pointer-events-none">Barang</span>
+                        <i id="chevron-modal-barang" class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-modal-barang-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-full md:w-60 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[45vh]">
+                        <div id="list-custom-modal-barang" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                    </div>
                 </div>
-                <div class="relative md:w-[20%]">
-                    <select id="filterWarnaModal" onchange="cariProdukBesar()" class="w-full bg-white/50 border border-white/60 rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer appearance-none shadow-sm"><option value="">-- Warna --</option></select>
-                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 pointer-events-none"></i>
+
+                <!-- 3. Filter Warna Modal Katalog -->
+                <div class="relative md:w-[20%]" id="wadah-custom-modal-warna">
+                    <select id="filterWarnaModal" onchange="cariProdukBesar()" class="hidden"><option value="">Warna</option></select>
+                    <button type="button" id="btn-custom-modal-warna" onclick="toggleCustomFilterSlip('modal-warna')" class="w-full ios-glass rounded-full pl-4 pr-8 py-3.5 text-xs font-bold text-slate-700 outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                        <span id="label-modal-warna" class="truncate w-full text-center pointer-events-none">Warna</span>
+                        <i id="chevron-modal-warna" class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-modal-warna-slip" class="hidden opacity-0 scale-95 origin-top-right transition-all duration-200 absolute right-0 top-[calc(100%+8px)] w-full md:w-56 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[45vh]">
+                        <div id="list-custom-modal-warna" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2929,11 +2973,11 @@
             if (isOnline) {
                 banner.style.backgroundColor = '#eff6ff'; banner.style.borderColor = '#bfdbfe'; banner.style.color = '#1d4ed8';
                 dot.style.backgroundColor = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
-                txt.innerText = "ONLINE";
+                txt.innerText = "ON";
             } else {
                 banner.style.backgroundColor = '#fff1f2'; banner.style.borderColor = '#fecdd3'; banner.style.color = '#be123c';
                 dot.style.backgroundColor = '#e11d48'; dot.style.boxShadow = '0 0 8px rgba(225,29,72,0.8)';
-                txt.innerText = "OFFLINE (MODE LOKAL)";
+                txt.innerText = "OFF(LOKAL)";
             }
         }
 
@@ -8728,19 +8772,21 @@ function pilihProdukModal(metaString) {
 </script>
 <script>
     // =========================================================================
-    // MESIN UNIVERSAL CUSTOM DROPDOWN (SLIP, MASTER, & REKAP) - GLASSMORPHISM
+    // MESIN UNIVERSAL CUSTOM DROPDOWN (SEMUA MENU + INPUT ORDER) - HIJAU TUA
     // =========================================================================
     const SEMUA_TIPE_FILTER_CUSTOM = [
         'toko', 'sarimbit', 'tagihan',
         'berat-master', 'sarimbit-master',
-        'setor-rekap', 'sarimbit-rekap', 'varian-rekap', 'barang-rekap', 'size-rekap'
+        'setor-rekap', 'sarimbit-rekap', 'varian-rekap', 'barang-rekap', 'size-rekap',
+        'order-ekspedisi', 'order-sumber', 'order-toko', 'order-diskon',
+        'modal-sarimbit', 'modal-barang', 'modal-warna'
     ];
 
     window.tutupSemuaDropdownFilterSlip = function(kecualiTipe = null) {
         SEMUA_TIPE_FILTER_CUSTOM.forEach(t => {
             const wadah = document.getElementById(`wadah-custom-${t}-slip`) || document.getElementById(`wadah-custom-${t}`);
             if (t === kecualiTipe) {
-                if (wadah) wadah.style.zIndex = "9999"; // Angkat tombol aktif agar pop-up tidak tertutup tombol di bawahnya
+                if (wadah) wadah.style.zIndex = "9999";
                 return;
             }
             if (wadah) wadah.style.zIndex = "";
@@ -8782,7 +8828,14 @@ function pilihProdukModal(metaString) {
             'sarimbit-rekap': 'filter-sarimbit-rekap',
             'varian-rekap': 'filter-varian-rekap',
             'barang-rekap': 'filter-barang-rekap',
-            'size-rekap': 'filter-size-rekap'
+            'size-rekap': 'filter-size-rekap',
+            'order-ekspedisi': 'o-ekspedisi',
+            'order-sumber': 'o-sumber',
+            'order-toko': 'o-toko',
+            'order-diskon': 'o-tipe-diskon',
+            'modal-sarimbit': 'filterSarimbitModal',
+            'modal-barang': 'filterBarangModal',
+            'modal-warna': 'filterWarnaModal'
         };
 
         const selectAsli = document.getElementById(petaIdSelect[tipe]);
@@ -8791,7 +8844,6 @@ function pilihProdukModal(metaString) {
         }
         window.tutupSemuaDropdownFilterSlip();
 
-        // Jalankan fungsi render sesuai menu tempat filter berada
         if (tipe === 'berat-master' || tipe === 'sarimbit-master') {
             if (typeof window.renderMaster === 'function') window.renderMaster();
         } else if (tipe === 'sarimbit-rekap' || tipe === 'varian-rekap' || tipe === 'barang-rekap') {
@@ -8799,6 +8851,10 @@ function pilihProdukModal(metaString) {
             if (typeof window.renderRekap === 'function') window.renderRekap();
         } else if (tipe === 'setor-rekap' || tipe === 'size-rekap') {
             if (typeof window.renderRekap === 'function') window.renderRekap();
+        } else if (tipe.startsWith('order-')) {
+            if (typeof window.updateLiveStruk === 'function') window.updateLiveStruk();
+        } else if (tipe.startsWith('modal-')) {
+            if (typeof window.cariProdukBesar === 'function') window.cariProdukBesar();
         } else {
             if (typeof window.renderSlip === 'function') window.renderSlip();
         }
@@ -8807,7 +8863,6 @@ function pilihProdukModal(metaString) {
 
     window.sinkronisasiUIFilterSlip = function() {
         const warnaMati = ['ios-glass', 'text-slate-800', 'text-slate-700'];
-        // Gradien Hijau Tua Elegan
         const warnaHidupHijauTua = ['bg-gradient-to-r', 'from-emerald-700', 'to-emerald-900', 'text-white', 'border-transparent', 'shadow-[0_4px_12px_rgba(4,120,87,0.3)]'];
         const warnaHidupMerah = ['bg-gradient-to-r', 'from-rose-500', 'to-red-500', 'text-white', 'border-transparent', 'shadow-[0_4px_12px_rgba(244,63,94,0.3)]', 'animate-pulse'];
 
@@ -8831,7 +8886,6 @@ function pilihProdukModal(metaString) {
             }
         };
 
-        // Helper pembuat daftar opsi dinamis (Dilengkapi Penyaring Anti-Duplikat)
         const bangunOpsiDariSelect = (tipe, idSelect, idList, idLabel, idBtn, idChev, teksDefault, ikonDefault, ikonItem, modeWarna = 'hijau') => {
             const sel = document.getElementById(idSelect);
             const list = document.getElementById(idList);
@@ -8842,24 +8896,26 @@ function pilihProdukModal(metaString) {
 
             const valAktif = String(sel.value || '').trim();
             
-            // PENYARING ANTI-DUPLIKAT: Mencegah "Semua Sarimbit" muncul dua kali
+            // Penyaring Anti-Duplikat
             const nilaiTerpakai = new Set();
             const opsiUnik = [];
             Array.from(sel.options).forEach((opt, idx) => {
                 const valBersih = String(opt.value || '').trim();
-                // Abaikan opsi kosong liar setelah opsi pertama (default)
                 if (idx > 0 && valBersih === '') return;
                 if (nilaiTerpakai.has(valBersih)) return;
                 nilaiTerpakai.add(valBersih);
-                opsiUnik.push({ value: valBersih, text: opt.text });
+                // Bersihkan strip "-- Sarimbit --" pada opsi bawaan modal
+                const teksBersih = String(opt.text || '').replace(/^--\s*|\s*--$/g, '').trim();
+                opsiUnik.push({ value: valBersih, text: teksBersih });
             });
 
             list.innerHTML = opsiUnik.map(opt => {
                 const nilai = opt.value;
-                const teks = (nilai === '' || nilai === 'semua') ? teksDefault : opt.text;
+                const isDef = (nilai === '' || nilai === 'semua' || nilai === 'none');
+                const teks = isDef ? teksDefault : opt.text;
                 const aktif = nilai === valAktif;
                 const safeNilai = String(nilai).replace(/'/g, "\\'");
-                const ikon = (nilai === '' || nilai === 'semua') ? ikonDefault : ikonItem;
+                const ikon = isDef ? ikonDefault : ikonItem;
                 
                 const warnaBarisAktif = (modeWarna === 'merah' && nilai === 'aktif')
                     ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-md shadow-rose-500/25'
@@ -8873,7 +8929,7 @@ function pilihProdukModal(metaString) {
             }).join('');
 
             const opsiTerpilih = opsiUnik.find(o => o.value === valAktif);
-            const isDefault = (valAktif === '' || valAktif === 'semua');
+            const isDefault = (valAktif === '' || valAktif === 'semua' || valAktif === 'none');
             if (lbl) lbl.innerText = isDefault ? teksDefault.replace(/^Semua\s+/i, '') : (opsiTerpilih ? opsiTerpilih.text : valAktif);
             aturWarnaTombol(btn, chev, !isDefault, modeWarna);
         };
@@ -8893,11 +8949,49 @@ function pilihProdukModal(metaString) {
         bangunOpsiDariSelect('varian-rekap', 'filter-varian-rekap', 'list-custom-varian-rekap', 'label-varian-rekap', 'btn-custom-varian-rekap', 'chevron-varian-rekap', 'Semua Varian', 'fa-palette', 'fa-droplet', 'hijau');
         bangunOpsiDariSelect('barang-rekap', 'filter-barang-rekap', 'list-custom-barang-rekap', 'label-barang-rekap', 'btn-custom-barang-rekap', 'chevron-barang-rekap', 'Semua Barang', 'fa-boxes-stacked', 'fa-tag', 'hijau');
         bangunOpsiDariSelect('size-rekap', 'filter-size-rekap', 'list-custom-size-rekap', 'label-size-rekap', 'btn-custom-size-rekap', 'chevron-size-rekap', 'Semua Size', 'fa-ruler-combined', 'fa-maximize', 'hijau');
+
+        // --- D. MENU INPUT ORDER (FORMULIR PESANAN) ---
+        bangunOpsiDariSelect('order-ekspedisi', 'o-ekspedisi', 'list-custom-order-ekspedisi', 'label-order-ekspedisi', 'btn-custom-order-ekspedisi', 'chevron-order-ekspedisi', 'Pilih Ekspedisi', 'fa-truck-fast', 'fa-box', 'hijau');
+        bangunOpsiDariSelect('order-sumber', 'o-sumber', 'list-custom-order-sumber', 'label-order-sumber', 'btn-custom-order-sumber', 'chevron-order-sumber', 'Pilih Sumber', 'fa-bullhorn', 'fa-hashtag', 'hijau');
+        bangunOpsiDariSelect('order-toko', 'o-toko', 'list-custom-order-toko', 'label-order-toko', 'btn-custom-order-toko', 'chevron-order-toko', 'Pilih Toko', 'fa-store', 'fa-bag-shopping', 'hijau');
+        bangunOpsiDariSelect('order-diskon', 'o-tipe-diskon', 'list-custom-order-diskon', 'label-order-diskon', 'btn-custom-order-diskon', 'chevron-order-diskon', 'Tanpa Diskon', 'fa-tag', 'fa-percent', 'hijau');
+
+        // --- E. POP-UP KATALOG PENCARIAN PRODUK (INPUT ORDER) ---
+        bangunOpsiDariSelect('modal-sarimbit', 'filterSarimbitModal', 'list-custom-modal-sarimbit', 'label-modal-sarimbit', 'btn-custom-modal-sarimbit', 'chevron-modal-sarimbit', 'Semua Sarimbit', 'fa-layer-group', 'fa-shirt', 'hijau');
+        bangunOpsiDariSelect('modal-barang', 'filterBarangModal', 'list-custom-modal-barang', 'label-modal-barang', 'btn-custom-modal-barang', 'chevron-modal-barang', 'Semua Barang', 'fa-boxes-stacked', 'fa-tag', 'hijau');
+        bangunOpsiDariSelect('modal-warna', 'filterWarnaModal', 'list-custom-modal-warna', 'label-modal-warna', 'btn-custom-modal-warna', 'chevron-modal-warna', 'Semua Warna', 'fa-palette', 'fa-droplet', 'hijau');
     };
 
-    // Kaitkan otomatis ke seluruh fungsi render & update opsi
     document.addEventListener('DOMContentLoaded', function() {
-        ['renderSlip', 'renderMaster', 'renderRekap', 'updateRekapOptions', 'updateGlobalFilters'].forEach(namaFungsi => {
+        // Bebaskan overflow-hidden pada kartu formulir order agar pop-up dropdown tidak terpotong
+        const kartuOrder = document.getElementById('o-ekspedisi')?.closest('.overflow-hidden');
+        if (kartuOrder) kartuOrder.classList.replace('overflow-hidden', 'overflow-visible');
+
+        // Validasi cerdas untuk Sumber & Toko sebelum Simpan Pesanan
+        const formOrder = document.getElementById('form-order');
+        if (formOrder) {
+            formOrder.addEventListener('submit', function(e) {
+                const valSumber = document.getElementById('o-sumber')?.value;
+                const valToko = document.getElementById('o-toko')?.value;
+                if (!valSumber) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (typeof showToast === 'function') showToast("⚠️ Pilih Asal Orderan (Sumber) terlebih dahulu!");
+                    window.toggleCustomFilterSlip('order-sumber');
+                    return false;
+                }
+                if (!valToko) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (typeof showToast === 'function') showToast("⚠️ Pilih Toko terlebih dahulu!");
+                    window.toggleCustomFilterSlip('order-toko');
+                    return false;
+                }
+            }, true);
+        }
+
+        // Kaitkan otomatis ke seluruh fungsi utama aplikasi
+        ['renderSlip', 'renderMaster', 'renderRekap', 'updateRekapOptions', 'updateGlobalFilters', 'updateLiveStruk', 'cariProdukBesar', 'bukaModalPencarian', 'editOrderan'].forEach(namaFungsi => {
             const fnAsli = window[namaFungsi];
             if (typeof fnAsli === 'function') {
                 window[namaFungsi] = function(...args) {
@@ -8911,8 +9005,8 @@ function pilihProdukModal(metaString) {
         setTimeout(window.sinkronisasiUIFilterSlip, 300);
     });
 
-   // Tutup pop-up otomatis saat mengklik area di luar tombol filter
-   document.addEventListener('click', function(e) {
+    // Tutup pop-up otomatis saat mengklik area di luar tombol filter
+    document.addEventListener('click', function(e) {
         const klikDiDalamFilter = SEMUA_TIPE_FILTER_CUSTOM.some(t => {
             const wadah = document.getElementById(`wadah-custom-${t}-slip`) || document.getElementById(`wadah-custom-${t}`);
             return wadah && wadah.contains(e.target);
