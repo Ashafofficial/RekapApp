@@ -757,23 +757,20 @@ let rawSummary = [];
             const headersJSON = { 
                 "Content-Type": "application/json", 
                 "Prefer": "resolution=merge-duplicates",
-                "x-sacha-token": tokenPerangkat // <-- TAMBAHAN VVIP
+                "x-sacha-token": tokenPerangkat
             };
             
-            // 1. MENGINTIP DATA PEMBUKUAN SERVER
             let dataServerBuku = [];
             if (typeof supabaseFetch === 'function') {
                 const resServer = await supabaseFetch('/rest/v1/pembukuan?select=id,updated_at');
                 if (resServer) dataServerBuku = resServer;
             }
 
-            // 2. PROSES PENYARINGAN CERDAS (SMART FILTER)
             const semuaBukuLokal = await dbLokal.pembukuan.toArray();
             const dataSiapKirimBuku = [];
 
             semuaBukuLokal.forEach(lokal => {
                 const serverMatch = dataServerBuku.find(s => String(s.id) === String(lokal.id));
-                
                 if (!serverMatch) {
                     dataSiapKirimBuku.push(lokal);
                 } else {
@@ -783,14 +780,37 @@ let rawSummary = [];
                 }
             });
 
-            // 3. EKSEKUSI PENGIRIMAN (Hanya yang tersaring)
             if (dataSiapKirimBuku.length > 0 && typeof supabaseFetch === 'function') {
-                await supabaseFetch('/rest/v1/pembukuan?on_conflict=id', {
-                    method: "POST", headers: headersJSON, body: JSON.stringify(dataSiapKirimBuku)
+            // PEMBERSIHAN DATA MUTLAK (MENYESUAIKAN PERSIS DENGAN KOLOM SUPABASE)
+            const payloadBukuBersih = dataSiapKirimBuku.map(b => {
+                    return {
+                        id: b.id,
+                        sarimbit: b.sarimbit || "",
+                        brand: b.brand || "",
+                        total: Number(b.total) || 0,
+                        close: b.close || "",
+                        ready: b.ready || "",
+                        c1: b.c1 || "", 
+                        c2: b.c2 || "", 
+                        bayar: Number(b.bayar) || 0, 
+                        dp: Number(b.dp) || 0,       
+                        Lunas: b.Lunas || b.lunas || "", 
+                        statusKirim: b.statusKirim || b.statuskirim || "",
+                        statusAlamat: b.statusAlamat || b.statusalamat || "",
+                        isarchived: (b.isArchived === true || b.isarchived === true),
+                        updated_at: b.updated_at || new Date().toISOString(),
+                        isPrinted: (b.isPrinted === true || b.isprinted === true),
+                        isInformed: (b.isInformed === true || b.isinformed === true),
+                        omset: Number(b.omset) || 0
+                    };
                 });
-                console.log(`✅ Smart Auto-Sync: Berhasil menembakkan ${dataSiapKirimBuku.length} data Pembukuan ke Supabase.`);
+                
+                await supabaseFetch('/rest/v1/pembukuan?on_conflict=id', {
+                    method: "POST", headers: headersJSON, body: JSON.stringify(payloadBukuBersih)
+                });
+                console.log(`✅ Smart Auto-Sync: Berhasil menembakkan ${payloadBukuBersih.length} data Pembukuan ke Supabase.`);
             } else {
-                console.log("✅ Smart Auto-Sync: Pembukuan Selesai. Tidak ada bentrok.");
+                console.log("✅ Smart Auto-Sync: Pembukuan Selesai. Tidak ada data yang tertinggal.");
             }
         } catch (error) {
             console.error("❌ Gagal Smart Auto-Sync Pembukuan:", error);
@@ -1305,7 +1325,7 @@ let rawSummary = [];
             </tr>
 
             <!-- VERSI HP / MOBILE (Tabel Lurus Full Layar dengan Tanggal Produksi Lengkap) -->
-            <tr class="item-row md:hidden border-b border-slate-100 hover:bg-slate-50 transition-colors ${isArsip ? 'opacity-60 bg-slate-50' : 'bg-white'}">
+            <tr id="row-${idAman}-mobile" class="item-row md:hidden border-b border-slate-100 hover:bg-slate-50 transition-colors ${isArsip ? 'opacity-60 bg-slate-50' : 'bg-white'}">
                 
                 <td class="p-2 pt-3 text-center text-slate-300 font-black text-xs align-top w-7">${nomorUrut}.</td>
                 
@@ -1420,7 +1440,6 @@ let rawSummary = [];
         if (typeof filterTable === 'function') filterTable();
     }
     async function simpanRow(idAman, sarimbit) {
-      // PROTEKSI DOM: Pastikan inputnya memang benar-benar ada di layar sebelum data direkam
       const c1El = document.getElementById(`c1-${idAman}`);
       const c2El = document.getElementById(`c2-${idAman}`);
       if (!c1El || !c2El) return; 
@@ -1437,72 +1456,130 @@ let rawSummary = [];
 
       const dpBersih = Number(document.getElementById(`dp-${idAman}`).value) || 0;
       const bayarBersih = Number(document.getElementById(`bayar-${idAman}`).value) || 0;
+      
+      const brandBaru = document.getElementById(`brand-${idAman}`).value || "";
+      const kirimBaru = document.getElementById(`kirim-${idAman}`).value || "";
+      const alamatBaru = document.getElementById(`alamat-${idAman}`).value || "";
+      const isPrintedBaru = document.getElementById(`print-${idAman}`).checked;
+      const isInformedBaru = document.getElementById(`info-${idAman}`).checked;
 
       const activeData = rawSummary.find(item => item.sarimbit === sarimbit);
 
       let statusArsipAsli = false;
+      let idValidTarget = null;
       try {
           const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
-          if (existingData) statusArsipAsli = existingData.isarchived || existingData.isArchived || false;
+          if (existingData) {
+              statusArsipAsli = existingData.isarchived || existingData.isArchived || false;
+              idValidTarget = existingData.id;
+          }
       } catch (err) { }
+      if (!idValidTarget && activeData && activeData.id) idValidTarget = activeData.id;
+      if (!idValidTarget) idValidTarget = Date.now() + Math.floor(Math.random() * 1000);
 
+      // ==============================================================
+      // CEK PERUBAHAN DATA (SMART COMPARATOR) - Mencegah Spam Save & Log
+      // ==============================================================
+      let isChanged = false;
+      if (!activeData) {
+          isChanged = true;
+      } else {
+          if (
+              (activeData.close || "") !== valClose ||
+              (activeData.ready || "") !== valReady ||
+              (activeData.c1 || "") !== valC1 ||
+              (activeData.c2 || "") !== valC2 ||
+              (activeData.Lunas || activeData.lunas || "") !== valLunas ||
+              (Number(activeData.dp) || 0) !== dpBersih ||
+              (Number(activeData.bayar) || 0) !== bayarBersih ||
+              (activeData.statusKirim || "") !== kirimBaru ||
+              (activeData.statusAlamat || "") !== alamatBaru ||
+              (activeData.isPrinted === true) !== isPrintedBaru ||
+              (activeData.isInformed === true) !== isInformedBaru ||
+              (activeData.brand || "") !== brandBaru
+          ) {
+              isChanged = true;
+          }
+      }
+
+      // JIKA TIDAK ADA PERUBAHAN, SISTEM DIAM 100% (Tanpa loader, tanpa notif, tanpa log)
+      if (!isChanged) return;
+      // ==============================================================
+
+      // 1. DATA UNTUK LOKAL
       const dataToSave = {
+        id: idValidTarget,
         sarimbit: sarimbit || "",
-        brand: document.getElementById(`brand-${idAman}`).value || "",
+        brand: brandBaru,
         total: activeData ? (Number(activeData.totalOrder) || 0) : 0, 
-        close: valClose || "", 
-        ready: valReady || "", 
-        c1: valC1 || "",
-        c2: valC2 || "",
-        Lunas: valLunas || "",
+        close: valClose, 
+        ready: valReady, 
+        c1: valC1,
+        c2: valC2,
+        lunas: valLunas, 
         dp: dpBersih,
         bayar: bayarBersih,
-        statusKirim: document.getElementById(`kirim-${idAman}`).value || "",
-        statusAlamat: document.getElementById(`alamat-${idAman}`).value || "",
+        statusKirim: kirimBaru,
+        statusAlamat: alamatBaru,
         isarchived: statusArsipAsli,
-        isPrinted: document.getElementById(`print-${idAman}`).checked,
-        isInformed: document.getElementById(`info-${idAman}`).checked,
+        isPrinted: isPrintedBaru,
+        isInformed: isInformedBaru,
         omset: activeData ? (Number(activeData.omset) || 0) : 0,
         updated_at: new Date().toISOString()
+      };
+
+      // 2. DATA UNTUK SUPABASE (Wajib Kapital Sesuai Kolom Database)
+      const payloadSupabase = {
+        id: dataToSave.id,
+        sarimbit: dataToSave.sarimbit,
+        brand: dataToSave.brand,
+        total: dataToSave.total,
+        close: dataToSave.close,
+        ready: dataToSave.ready,
+        c1: dataToSave.c1,
+        c2: dataToSave.c2,
+        Lunas: dataToSave.lunas,
+        dp: dataToSave.dp,
+        bayar: dataToSave.bayar,
+        statusKirim: dataToSave.statusKirim,
+        statusAlamat: dataToSave.statusAlamat,
+        isarchived: dataToSave.isarchived,
+        isPrinted: dataToSave.isPrinted,
+        isInformed: dataToSave.isInformed,
+        omset: dataToSave.omset,
+        updated_at: dataToSave.updated_at
       };
 
       if (idle) idle.classList.add('hidden');
       if (loader) loader.classList.remove('hidden');
       
       try {
-        const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
-        let idValid = (activeData && activeData.id) ? activeData.id : (existingData ? existingData.id : null);
         let resServer = null;
+        let suksesKeAwan = false; 
 
         if (navigator.onLine) {
-            if (idValid) {
-                resServer = await supabaseFetch(`/rest/v1/pembukuan?id=eq.${idValid}`, { 
-                    method: 'PATCH', 
-                    headers: { "Content-Type": "application/json", "Prefer": "return=representation" },
-                    body: JSON.stringify(dataToSave) 
-                });
+            // Minta Supabase memberikan bukti balasan (return=representation) agar tidak dianggap gagal
+            resServer = await supabaseFetch('/rest/v1/pembukuan?on_conflict=id', { 
+                method: 'POST', 
+                headers: { "Content-Type": "application/json", "Prefer": "return=representation,resolution=merge-duplicates" },
+                body: JSON.stringify([payloadSupabase]) 
+            });
+            if (resServer === null || resServer.error) {
+                throw new Error("Ditolak Server");
             } else {
-                dataToSave.id = Date.now() + Math.floor(Math.random() * 1000);
-                idValid = dataToSave.id;
-                resServer = await supabaseFetch('/rest/v1/pembukuan', { 
-                    method: 'POST', 
-                    headers: { "Content-Type": "application/json", "Prefer": "return=representation" },
-                    body: JSON.stringify([dataToSave]) 
-                });
-            }
-            if (resServer === null || resServer.error) throw new Error("Ditolak Server");
-        } else {
-            if (!idValid) {
-                dataToSave.id = Date.now() + Math.floor(Math.random() * 1000);
-                idValid = dataToSave.id;
+                suksesKeAwan = true;
             }
         }
 
-        dataToSave.id = idValid; 
         await dbLokal.pembukuan.put(dataToSave);
+
+        // NOTIFIKASI JUJUR
+        if (suksesKeAwan) {
+            if(typeof showToast === 'function') showToast("✅  Data tersimpan!");
+        } else {
+            if(typeof showToast === 'function') showToast("💾 Data Tersimpan.");
+        }
         
-        // PENCATAT LOG OTOMATIS PEMBUKUAN (Akan dikirim ke Supabase lewat fungsi di index.html jika ada)
-        // Kita simpan manual ke local agar terbaca saat disinkron 
         try {
             const namaPerangkat = localStorage.getItem('sarimbit_device_id') || "Perangkat Anonim";
             const logPembukuan = {
@@ -1514,7 +1591,6 @@ let rawSummary = [];
                 detail: `Update Jadwal/Status Sarimbit: ${sarimbit} [KEY: ${sarimbit}]`
             };
             await dbLokal.logs.put(logPembukuan);
-            // Push ke Supabase
             if (navigator.onLine && typeof SUPABASE_URL !== 'undefined') {
                 fetch(`${SUPABASE_URL}/rest/v1/logs`, {
                     method: 'POST',
@@ -1539,13 +1615,10 @@ let rawSummary = [];
 
     function filterTable() {
       const sQuery = document.getElementById('filter-sarimbit').value.toLowerCase();
-      
       const filterPusatEl = document.getElementById('filter-pusat');
       const bQuery = filterPusatEl ? filterPusatEl.value.toLowerCase() : "";
-      
       const filterStatusArsipEl = document.getElementById('filter-status-arsip');
       const statusArsipQuery = filterStatusArsipEl ? filterStatusArsipEl.value : "semua";
-
       const filterStatusPrintEl = document.getElementById('filter-status-print');
       const statusPrintQuery = filterStatusPrintEl ? filterStatusPrintEl.value : "semua";
       
@@ -1553,9 +1626,14 @@ let rawSummary = [];
       let jumlahArsipTerlihat = 0;
 
       document.querySelectorAll('.item-row').forEach(row => {
+        // PERBAIKAN: Fokus meraba baris Desktop saja, baris HP dilewati dari pindaian
+        if (row.id && row.id.endsWith('-mobile')) return; 
+
+        // Hubungkan dengan baris HP pasangannya
+        const rowMobile = document.getElementById(row.id + "-mobile");
+
         const elSarimbit = row.querySelector('.sarimbit-name');
         const sName = elSarimbit ? elSarimbit.innerText.toLowerCase() : "";
-        
         const elBrand = row.querySelector('.brand-name');
         const bName = elBrand ? elBrand.value.toLowerCase() : "";
         
@@ -1574,11 +1652,14 @@ let rawSummary = [];
         if (statusPrintQuery === "sudah" && !isPrinted) cocokPrint = false;
         if (statusPrintQuery === "belum" && isPrinted) cocokPrint = false;
 
+        // PERBAIKAN: Jika Lulus Uji, tampilkan KEDUA baris (Desktop & HP) secara bersamaan!
         if (cocokTeks && cocokStatus && cocokPrint) {
             row.style.display = "";
+            if (rowMobile) rowMobile.style.display = ""; 
             if (isArsip) jumlahArsipTerlihat++;
         } else {
             row.style.display = "none";
+            if (rowMobile) rowMobile.style.display = "none"; 
         }
       });
 
@@ -1594,6 +1675,7 @@ let rawSummary = [];
       const rows = document.querySelectorAll('.item-row');
       const dataForExcel = [["No", "Koleksi Sarimbit", "Nama Pusat", "Total Pcs", "Tgl Close", "Tgl Ready", "Jadwal C1", "Jadwal C2", "Pelunasan", "Nominal DP", "Nominal Pelunasan", "Status Kirim", "Status Alamat", "Sudah Diprint", "Info Lunas"]];
       rows.forEach((row, i) => {
+        if (row.id && row.id.endsWith('-mobile')) return; // Mencegah Data Ganda/Error dari HP
         if (row.style.display !== 'none') {
           dataForExcel.push([
             i + 1, 
