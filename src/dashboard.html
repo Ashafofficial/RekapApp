@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sarimbit Pro - Dashboard Analitik</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sarimbit Pro - Dashboard Analitik & Grafik Omset</title>
     <link rel="icon" type="image/png" href="logo.png">
     
     <link rel="manifest" href="manifest.json">
@@ -13,44 +13,78 @@
       }
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Menggunakan Font Inter agar persis seperti antarmuka Android Modern -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+            colors: {
+              brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+              accent: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#8b5cf6', 600: '#7c3aed' }
+            },
+            boxShadow: { 'soft': '0 10px 40px -10px rgba(0,0,0,0.05)', 'glow': '0 0 15px rgba(16, 185, 129, 0.3)' }
+          }
+        }
+      }
+    </script>
+
+    <!-- Flatpickr untuk Filter Rentang Tanggal -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+
+    <!-- Chart.js & jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
-    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <!-- Pondasi Database Lokal & Cloud -->
+    <script src="dexie.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="database.js?v=999"></script>
 
     <style>
         body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f2f4f7; /* Abu-abu super terang kebiruan ala One UI */
-            color: #1e293b; /* Warna teks abu-abu gelap pekat */
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e5eaff 100%);
+            background-attachment: fixed;
+            color: #1e293b;
             -webkit-tap-highlight-color: transparent; 
             overflow-x: hidden;
         }
 
-        /* Desain Kartu Putih Minimalis */
-        .glass-panel, .kpi-card {
-            background: #ffffff;
+        .glass-panel, .kpi-card, .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 28px;
-            border: 1px solid rgba(0, 0, 0, 0.03);
-            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05); /* Bayangan super halus */
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 35px -10px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         
-        .kpi-card { padding: 24px; }
+        .kpi-card { padding: 20px; }
         .kpi-card:active { transform: scale(0.98); }
 
+        .ios-glass {
+            background: rgba(255, 255, 255, 0.75) !important;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.9) !important;
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
         .glass-header { 
-            background: rgba(242, 244, 247, 0.9) !important; 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); 
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important; 
+            background: rgba(240, 244, 255, 0.88) !important; 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important; 
         }
 
         .glass-input { 
@@ -59,28 +93,19 @@
             color: #334155 !important;
             transition: all 0.2s ease; 
             outline: none; 
-            border-radius: 9999px !important; /* Membuat form membulat sempurna ala Android */
+            border-radius: 9999px !important;
         }
         .glass-input:focus { 
             background: #ffffff !important; 
-            border-color: #3b82f6 !important; 
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important; 
+            border-color: #047857 !important; 
+            box-shadow: 0 0 0 4px rgba(4, 120, 87, 0.12) !important; 
         }
 
-        .btn-modern {
-            border-radius: 9999px;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .btn-modern:active { transform: scale(0.96); }
-
-        .animate-enter { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-enter { animation: slideUpFade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Progress Bar Simple */
-        .progress-bar-bg { background-color: #f1f5f9; border-radius: 9999px; overflow: hidden; height: 12px; }
-        .progress-bar-fill { background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 1s ease-out; }
+        .progress-bar-bg { background-color: #e2e8f0; border-radius: 9999px; overflow: hidden; height: 12px; }
+        .progress-bar-fill { background: linear-gradient(90deg, #047857, #10b981); height: 100%; border-radius: 9999px; transition: width 1s ease-out; }
 
         #loadingOverlay { transition: opacity 0.4s ease; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -90,19 +115,18 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Ukuran Grafik Dipadatkan untuk Layar HP */
-        .chart-container { position: relative; height: 180px; width: 100%; }
+        .chart-container { position: relative; height: 220px; width: 100%; }
         
-        /* Tabel Terang Minimalis (Padding & Font Dikecilkan) */
         .table-cantik th {
             background: #f8fafc; color: #64748b;
-            font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.05em; padding: 12px; border-bottom: 2px solid #e2e8f0;
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; padding: 14px 16px; border-bottom: 2px solid #e2e8f0;
         }
         .table-cantik td {
-            padding: 12px; font-size: 0.75rem; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155;
+            padding: 14px 16px; font-size: 0.8rem; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155;
         }
         .table-cantik tr:hover td { background: #f8fafc; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="relative min-h-screen pb-20">
@@ -111,25 +135,31 @@
 
     <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] flex flex-col items-center justify-center text-white">
         <div class="bg-white p-8 flex flex-col items-center rounded-3xl shadow-xl">
-            <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-blue-500"></i>
-            <h2 class="text-xl font-bold text-slate-800">Memuat Data...</h2>
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-700"></i>
+            <h2 class="text-xl font-bold text-slate-800">Memuat Analitik & Grafik...</h2>
         </div>
     </div>
 
     <!-- Header Transparan Minimalis -->
-    <nav class="glass-header sticky top-0 z-50 pt-4 pb-2 px-4 sm:px-6 lg:px-8 mb-6">
+    <nav class="glass-header sticky top-0 z-50 pt-4 pb-3 px-4 sm:px-6 lg:px-8 mb-6 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors">
+            <div class="flex items-center gap-3.5">
+                <a href="index.html" class="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200/80 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-all active:scale-95">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
-                <h1 class="text-xl font-black tracking-tight text-slate-800">Dashboard Analitik</h1>
+                <div>
+                    <h1 class="text-lg md:text-xl font-black tracking-tight text-slate-800 leading-none">Dashboard Analitik & Grafik</h1>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Laporan Omset, Provite & Performa Sarimbit</p>
+                </div>
             </div>
             <div class="flex items-center gap-2">
-                <button id="btnDownload" onclick="downloadPDF()" class="w-10 h-10 bg-white rounded-full text-slate-600 shadow-sm flex items-center justify-center hover:bg-slate-50 transition-colors">
-                    <i class="fa-solid fa-file-pdf"></i>
+                <button onclick="bukaModalMargin()" class="h-10 px-4 bg-white rounded-full text-emerald-800 font-extrabold text-xs shadow-sm border border-emerald-200 flex items-center gap-2 hover:bg-emerald-50 transition-all active:scale-95" title="Atur Margin Provite (%)">
+                    <i class="fa-solid fa-sliders text-emerald-600"></i> <span class="hidden sm:inline">Margin Provite</span>
                 </button>
-                <button id="btnSync" onclick="fetchDataFromBackend()" class="w-10 h-10 bg-white rounded-full text-slate-600 shadow-sm flex items-center justify-center hover:bg-slate-50 transition-colors">
+                <button id="btnDownload" onclick="downloadPDF()" class="h-10 px-4 bg-gradient-to-r from-emerald-700 to-emerald-900 rounded-full text-white font-extrabold text-xs shadow-md flex items-center gap-2 hover:from-emerald-800 hover:to-emerald-950 transition-all active:scale-95" title="Unduh Laporan PDF">
+                    <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Unduh PDF</span>
+                </button>
+                <button id="btnSync" onclick="fetchDataFromBackend()" class="w-10 h-10 bg-white rounded-full text-slate-600 shadow-sm border border-slate-200/80 flex items-center justify-center hover:bg-slate-50 hover:text-emerald-700 transition-all active:scale-95" title="Muat Ulang Data">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
@@ -138,29 +168,49 @@
 
     <main id="dashboard-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Filter Baris Satu (Minimalis Melengkung) -->
-        <div class="glass-panel p-5 mb-6 flex flex-col lg:flex-row gap-4 justify-between items-center animate-enter" data-html2canvas-ignore="false">
-            <div class="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
-                <div class="relative w-full md:w-56">
-                    <select id="filterBulan" onchange="updateDashboard()" class="glass-input w-full pl-5 pr-10 py-3 text-sm font-bold appearance-none cursor-pointer">
+        <!-- BARIS FILTER TERPUSAT (BULAN, RENTANG TANGGAL FLATPICKR, & PILIHAN TOKO) -->
+        <div class="glass-panel p-4 md:p-5 mb-6 flex flex-col lg:flex-row gap-4 justify-between items-center animate-enter relative z-40">
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full lg:w-auto">
+                
+                <!-- 1. Custom Dropdown Filter Bulan -->
+                <div class="relative w-full sm:w-52" id="wadah-custom-bulan-dash">
+                    <select id="filterBulan" onchange="updateDashboard()" class="hidden">
                         <option value="Semua">Semua Waktu</option>
                     </select>
-                    <i class="fa-solid fa-calendar-day absolute right-5 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    <button type="button" id="btn-custom-bulan-dash" onclick="toggleCustomDash('bulan')" class="w-full h-11 ios-glass pl-4 pr-9 rounded-full text-xs font-extrabold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-md flex items-center justify-center relative">
+                        <i class="fa-regular fa-calendar-check mr-2 text-emerald-700 text-xs pointer-events-none" id="ikon-bulan-dash"></i>
+                        <span id="label-bulan-dash" class="truncate pointer-events-none">Semua Waktu</span>
+                        <i id="chevron-bulan-dash" class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-bulan-dash" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-full sm:w-60 bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white z-[9999] p-2 flex flex-col max-h-[45vh]">
+                        <div id="list-custom-bulan-dash" class="overflow-y-auto flex flex-col gap-1 pr-0.5"></div>
+                    </div>
                 </div>
+
+                <!-- 2. Filter Rentang Tanggal (Flatpickr ala Buku Omset Pro) -->
+                <div class="relative w-full sm:w-64 flex items-center">
+                    <i class="fa-solid fa-calendar-alt absolute left-4 text-emerald-700 text-xs pointer-events-none z-10"></i>
+                    <input type="text" id="dateRangeGrafik" placeholder="Pilih Rentang Tanggal..." class="glass-input w-full h-11 pl-10 pr-8 text-xs font-bold cursor-pointer" readonly>
+                    <button type="button" onclick="resetRentangTanggal()" id="btnClearDate" class="hidden absolute right-3 text-slate-400 hover:text-rose-500 text-xs">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+
             </div>
             
-            <div id="storeFilterContainer" class="flex items-center gap-2 overflow-x-auto whitespace-nowrap w-full lg:w-auto hide-scrollbar"></div>
+            <!-- 3. Tombol Filter Toko -->
+            <div id="storeFilterContainer" class="flex items-center gap-2 overflow-x-auto whitespace-nowrap w-full lg:w-auto hide-scrollbar py-1"></div>
         </div>
 
-        <!-- Kartu Target Lebar (Promo Card Style) -->
-        <div class="glass-panel bg-gradient-to-br from-blue-50 to-indigo-50 p-8 mb-6 animate-enter border-blue-100">
+        <!-- KARTU TARGET TAHUNAN -->
+        <div class="glass-panel bg-gradient-to-br from-emerald-50/90 to-teal-50/90 p-6 md:p-8 mb-6 animate-enter border border-emerald-200/60">
             <div class="flex flex-col md:flex-row justify-between md:items-end mb-4 gap-2">
                 <div>
-                    <span class="text-blue-500 font-black text-[10px] uppercase tracking-widest block mb-1">Target Tahunan</span>
+                    <span class="text-emerald-700 font-black text-[10px] uppercase tracking-widest block mb-1">Target Tahunan</span>
                     <h2 class="text-2xl font-black text-slate-800 tracking-tight">Omset Sarimbit 2026</h2>
                 </div>
                 <div class="text-left md:text-right">
-                    <span class="text-3xl font-black text-blue-600 block" id="target-omset-current">Rp 0</span>
+                    <span class="text-2xl md:text-3xl font-black text-emerald-800 block" id="target-omset-current">Rp 0</span>
                     <span class="text-xs font-bold text-slate-500 mt-1">dari target Rp 10 Miliar</span>
                 </div>
             </div>
@@ -168,50 +218,371 @@
             <div class="progress-bar-bg mb-2 mt-4">
                 <div class="progress-bar-fill" style="width: 0%" id="target-omset-bar"></div>
             </div>
-            <div class="flex justify-between items-center text-[10px] font-bold text-slate-500">
-                <span id="target-omset-percent" class="text-blue-600">0% Tercapai</span>
-                <span id="target-omset-lack">Kurang: Rp 10M</span>
+            <div class="flex justify-between items-center text-[11px] font-extrabold text-slate-500">
+                <span id="target-omset-percent" class="text-emerald-700">0% Tercapai</span>
+                <span id="target-omset-lack">Kekurangan: Rp 10M</span>
             </div>
         </div>
 
-        <!-- Kartu KPI Minimalis Android (Grid 2 Kolom di HP) -->
+       <!-- 3 KARTU UTAMA DARI MENU GRAFIK (OMSET NETTO, TOTAL DISKON, PROVITE BERSIH) -->
+       <div class="dash-cards grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-4 animate-enter">
+        <div class="glass-card rounded-2xl md:rounded-[24px] p-4 md:p-5 flex items-center justify-between border-l-[3px] md:border-l-4 border-l-brand-500 relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 opacity-5"><i class="fa-solid fa-wallet text-7xl md:text-8xl"></i></div>
+            <div class="z-10 relative">
+                <p class="text-[9px] md:text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-0.5 md:mb-1">Total Omset Netto</p>
+                <h3 id="dashOmset" class="text-[17px] md:text-2xl font-black text-slate-800 tracking-tight">Rp 0</h3>
+                <p id="dashBrutoSub" class="text-[9px] md:text-[10px] font-bold text-slate-400 mt-1">Bruto: Rp 0</p>
+            </div>
+            <div class="w-9 h-9 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shadow-sm z-10 shrink-0"><i class="fa-solid fa-rupiah-sign text-sm md:text-lg"></i></div>
+        </div>
+        
+        <div class="glass-card rounded-2xl md:rounded-[24px] p-4 md:p-5 flex items-center justify-between border-l-[3px] md:border-l-4 border-l-rose-500 relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 opacity-5"><i class="fa-solid fa-tags text-7xl md:text-8xl"></i></div>
+            <div class="z-10 relative">
+                <p class="text-[9px] md:text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-0.5 md:mb-1">Total Diskon Diberikan</p>
+                <h3 id="dashDiskon" class="text-[17px] md:text-2xl font-black text-rose-600 tracking-tight">Rp 0</h3>
+                <p id="dashResellerCount" class="text-[9px] md:text-[10px] font-bold text-rose-400 mt-1">0 Pesanan Berdiskon</p>
+            </div>
+            <div class="w-9 h-9 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shadow-sm z-10 shrink-0"><i class="fa-solid fa-percent text-sm md:text-lg"></i></div>
+        </div>
+
+        <div class="glass-card rounded-2xl md:rounded-[24px] p-4 md:p-5 flex items-center justify-between border-l-[3px] md:border-l-4 border-l-emerald-600 relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 opacity-5"><i class="fa-solid fa-piggy-bank text-7xl md:text-8xl"></i></div>
+            <div class="z-10 relative">
+                <p class="text-[9px] md:text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-0.5 md:mb-1">Total Provite Bersih</p>
+                <h3 id="dashProvite" class="text-[17px] md:text-2xl font-black text-emerald-700 tracking-tight">Rp 0</h3>
+                <p class="text-[9px] md:text-[10px] font-bold text-emerald-600/80 mt-1">Sesuai Margin Sarimbit</p>
+            </div>
+            <div class="w-9 h-9 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-sm z-10 shrink-0"><i class="fa-solid fa-arrow-trend-up text-sm md:text-lg"></i></div>
+        </div>
+    </div>
+
+        <!-- 4 KARTU KPI PENDUKUNG (TOTAL PCS, INVOICE, DANA MASUK, PIUTANG) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-enter" id="kpiContainer"></div>
 
-        <!-- Chart Platform & Pelunasan -->
+        <!-- ============================================================== -->
+        <!-- BAGIAN 1 DARI REFERENSI GRAFIK: KURVA OMSET GLOBAL             -->
+        <!-- ============================================================== -->
+        <div class="glass-card rounded-[32px] p-6 lg:p-8 mb-6 animate-enter relative z-30">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-5">
+                <div>
+                    <h2 class="text-lg md:text-[20px] font-extrabold text-slate-800 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm"><i class="fa-solid fa-chart-area"></i></span> Kurva Omset & Provite Global
+                    </h2>
+                    <p class="text-xs font-semibold text-slate-400 mt-1 ml-11">Perbandingan Omset Netto, Provite, Toko, serta Konsumen vs Reseller</p>
+                </div>
+
+                <!-- Custom Dropdown Jenis Grafik (Harian / Bulanan) -->
+                <div class="relative w-full sm:w-44" id="wadah-custom-jenis-dash">
+                    <select id="jenisGrafik" onchange="updateDashboard()" class="hidden">
+                        <option value="harian">Mode Harian</option>
+                        <option value="bulanan" selected>Mode Bulanan</option>
+                    </select>
+                    <button type="button" id="btn-custom-jenis-dash" onclick="toggleCustomDash('jenis')" class="w-full h-10 ios-glass pl-4 pr-8 rounded-full text-xs font-extrabold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-md flex items-center justify-center relative">
+                        <i class="fa-solid fa-chart-line mr-2 text-emerald-700 text-xs pointer-events-none" id="ikon-jenis-dash"></i>
+                        <span id="label-jenis-dash" class="truncate pointer-events-none">Mode Bulanan</span>
+                        <i id="chevron-jenis-dash" class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                    </button>
+                    <div id="drop-jenis-dash" class="hidden opacity-0 scale-95 origin-top-right transition-all duration-200 absolute right-0 top-[calc(100%+8px)] w-48 bg-white/95 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white z-[9999] p-2 flex flex-col gap-1">
+                        <div id="list-custom-jenis-dash" class="flex flex-col gap-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative w-full" style="height: 360px;">
+                <canvas id="omsetChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- BAGIAN 2 DARI REFERENSI GRAFIK: PERFORMA SARIMBIT              -->
+        <!-- ============================================================== -->
+        <div class="glass-card rounded-[32px] p-6 lg:p-8 mb-6 animate-enter relative z-20">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 pb-5 border-b border-slate-100">
+                <div>
+                    <h3 class="text-lg md:text-[20px] font-extrabold text-slate-800 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-accent-100 text-accent-600 flex items-center justify-center text-sm"><i class="fa-solid fa-shirt"></i></span> Performa Koleksi Sarimbit
+                    </h3>
+                    <p class="text-xs font-semibold text-slate-400 mt-1 ml-11">Analisis Omset Netto, Diskon, Konsumen, Reseller & Provite per Koleksi</p>
+                </div>
+
+                <!-- Custom Dropdown Pilih Model Sarimbit -->
+                <div class="flex items-center gap-2.5 w-full md:w-auto">
+                    <span class="text-xs font-extrabold text-slate-500 whitespace-nowrap hidden sm:inline">Pilih Model:</span>
+                    <div class="relative w-full md:w-64" id="wadah-custom-sarimbit-dash">
+                        <select id="filterSarimbitGrafik" onchange="updateSarimbitChart()" class="hidden">
+                            <option value="">Bandingkan Semua</option>
+                        </select>
+                        <button type="button" id="btn-custom-sarimbit-dash" onclick="toggleCustomDash('sarimbit')" class="w-full h-10 ios-glass pl-4 pr-8 rounded-full text-xs font-extrabold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-md flex items-center justify-center relative">
+                            <i class="fa-solid fa-layer-group mr-2 text-emerald-700 text-xs pointer-events-none" id="ikon-sarimbit-dash"></i>
+                            <span id="label-sarimbit-dash" class="truncate pointer-events-none">Bandingkan Semua</span>
+                            <i id="chevron-sarimbit-dash" class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                        </button>
+                        <div id="drop-sarimbit-dash" class="hidden opacity-0 scale-95 origin-top-right transition-all duration-200 absolute right-0 top-[calc(100%+8px)] w-full md:w-64 bg-white/95 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white z-[9999] p-2 flex flex-col max-h-[45vh]">
+                            <div id="list-custom-sarimbit-dash" class="overflow-y-auto flex flex-col gap-1 pr-0.5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 Kotak Ringkasan Performa Sarimbit -->
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-7">
+                <div class="bg-brand-50/80 border border-brand-100 p-4 rounded-2xl">
+                    <span class="text-[10px] font-black text-brand-600 uppercase tracking-widest block mb-1">Total Netto</span>
+                    <span id="srmTotOmset" class="text-[15px] lg:text-[17px] font-black text-slate-800">Rp 0</span>
+                </div>
+                <div class="bg-slate-100/80 border border-slate-200 p-4 rounded-2xl">
+                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Total Diskon</span>
+                    <span id="srmTotDiskon" class="text-[15px] lg:text-[17px] font-black text-slate-600">Rp 0</span>
+                </div>
+                <div class="bg-rose-50/80 border border-rose-100 p-4 rounded-2xl">
+                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">Order Berdiskon (Reseller)</span>
+                    <span id="srmTotReseller" class="text-[15px] lg:text-[17px] font-black text-rose-600">Rp 0</span>
+                </div>
+                <div class="bg-orange-50/80 border border-orange-100 p-4 rounded-2xl">
+                    <span class="text-[10px] font-black text-orange-600 uppercase tracking-widest block mb-1">Order Normal (Konsumen)</span>
+                    <span id="srmTotKonsumen" class="text-[15px] lg:text-[17px] font-black text-orange-600">Rp 0</span>
+                </div>
+                <div class="bg-emerald-50/90 border border-emerald-200 p-4 rounded-2xl lg:col-span-1 col-span-2">
+                    <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest block mb-1">Total Provite</span>
+                    <span id="srmTotProvite" class="text-[15px] lg:text-[17px] font-black text-emerald-700">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="relative w-full" style="height: 340px;">
+                <canvas id="sarimbitChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- BAGIAN 3 DARI REFERENSI GRAFIK: RANKING PENJUALAN SARIMBIT     -->
+        <!-- ============================================================== -->
+        <div class="glass-card rounded-[32px] p-6 lg:p-8 mb-6 animate-enter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+                <h3 class="text-lg md:text-[20px] font-extrabold text-slate-800 flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm"><i class="fa-solid fa-trophy"></i></span> Ranking Penjualan & Provite Sarimbit
+                </h3>
+                <button onclick="bukaModalMargin()" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-full border border-emerald-200 transition-all w-fit">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Ubah Margin (%)
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-[14px] text-left">
+                    <thead class="text-slate-500 uppercase text-[11px] font-extrabold tracking-wider border-b-2 border-slate-100 bg-slate-50/70">
+                        <tr>
+                            <th class="px-5 py-4 rounded-tl-xl whitespace-nowrap">Nama Sarimbit</th>
+                            <th class="px-5 py-4 text-center whitespace-nowrap">Total PCS</th>
+                            <th class="px-5 py-4 text-right whitespace-nowrap">Total Omset Netto</th>
+                            <th class="px-5 py-4 text-center whitespace-nowrap">Margin (%)</th>
+                            <th class="px-5 py-4 text-right rounded-tr-xl whitespace-nowrap">Total Provite</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyTabelGrafik2" class="divide-y divide-slate-100/70"></tbody>
+                    <tfoot id="footTabelGrafik2" class="bg-slate-50/90 text-slate-800 font-black border-t-4 border-slate-200"></tfoot>
+                </table>
+            </div>
+            <div id="btn-container-ranking" class="pt-4 text-center border-t border-slate-100 hidden">
+                <button onclick="toggleTable('ranking')" id="btn-toggle-ranking" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-900 transition-colors">
+                    Lihat Semua Ranking
+                </button>
+            </div>
+        </div>
+
+        <!-- GRAFIK PENDUKUNG: DISTRIBUSI TOKO, STATUS PELUNASAN, & TREN OMSET vs QTY -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 animate-enter">
             <div class="glass-panel p-6 flex flex-col">
-                <h3 class="text-sm font-bold text-slate-800 mb-6">Distribusi Platform</h3>
+                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-store text-emerald-600"></i> Distribusi Platform Toko</h3>
                 <div class="chart-container flex-1" style="height: 220px;">
                     <canvas id="canvasDistribusiToko"></canvas>
                 </div>
             </div>
 
             <div class="glass-panel p-6 flex flex-col">
-                <h3 class="text-sm font-bold text-slate-800 mb-6">Status Pelunasan</h3>
+                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-check text-blue-600"></i> Status Pelunasan Tagihan</h3>
                 <div class="chart-container flex-1" style="height: 220px;">
                     <canvas id="canvasStatusPelunasan"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Chart Kombinasi Tren Omset -->
-        <div class="glass-panel p-5 mb-6 animate-enter">
-            <h3 id="judul-trend" class="text-sm font-bold text-slate-800 mb-1">Tren Analitik</h3>
-            <p id="subjudul-trend" class="text-[10px] font-medium text-slate-500 mb-4">Pergerakan omset dan qty.</p>
-            <div class="chart-container">
+        <div class="glass-panel p-6 mb-6 animate-enter">
+            <h3 id="judul-trend" class="text-sm font-extrabold text-slate-800 mb-1">Kombinasi Tren Omset & Kuantitas (PCS)</h3>
+            <p id="subjudul-trend" class="text-[11px] font-medium text-slate-500 mb-4">Perbandingan balok omset terhadap garis jumlah potong pakaian (PCS).</p>
+            <div class="chart-container" style="height: 240px;">
                 <canvas id="canvasHarianMix"></canvas>
             </div>
         </div>
 
-        <!-- Tabel Rincian Data Aktif yang Bersih -->
-        <div class="glass-panel overflow-hidden mb-8 animate-enter flex flex-col">
-            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-html2canvas-ignore="true">
+        <!-- ============================================================== -->
+        <!--SEKSI BARU: ANALITIK & DIAGRAM PEMBAYARAN PEMBUKUAN (DP/LUNAS)  -->
+        <!-- ============================================================== -->
+        <div class="glass-card rounded-[32px] p-5 lg:p-8 mb-8 animate-enter border border-emerald-100/80">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-100">
                 <div>
-                    <h3 class="text-base font-bold text-slate-800">Rincian Data Aktif</h3>
+                    <h2 class="text-lg md:text-[20px] font-extrabold text-slate-800 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm"><i class="fa-solid fa-book-open-reader"></i></span> Analitik Pembayaran Pembukuan PO (DP & Lunas)
+                    </h2>
+                    <p class="text-xs font-semibold text-slate-400 mt-1 ml-11">Rekapitulasi setoran DP dan Pelunasan langsung dari data Dashboard Pembukuan</p>
+                </div>
+
+               <!-- Filter Status, Dropdown Sarimbit Masih DP, Sudah Lunas, & Pusat Pembukuan -->
+               <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end relative z-40">
+                    
+                <!-- 1. Dropdown Daftar Sarimbit MASIH DP -->
+                <div class="relative w-full sm:w-auto" id="wadah-drop-dp-buku">
+                    <button type="button" id="btn-drop-dp-buku" onclick="toggleDropdownBukuDP('dp')" class="w-full sm:w-auto h-10 px-4 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold flex items-center justify-between gap-2.5 transition-all shadow-sm cursor-pointer">
+                        <span class="flex items-center gap-1.5 truncate">
+                            <i class="fa-solid fa-clock text-[11px]"></i>
+                            <span id="label-drop-dp-buku" class="truncate max-w-[150px]">Masih DP (0)</span>
+                        </span>
+                        <i id="chev-drop-dp-buku" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+
+                    <div id="menu-drop-dp-buku" class="hidden absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+8px)] w-72 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-blue-100 z-[9999] p-2.5 flex flex-col gap-2">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" id="cari-drop-dp-buku" oninput="saringListDropdownBuku('dp')" placeholder="Cari sarimbit masih DP..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 outline-none focus:border-blue-500">
+                        </div>
+                        <div id="list-drop-dp-buku" class="overflow-y-auto max-h-64 flex flex-col gap-1 pr-0.5"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Dropdown Daftar Sarimbit SUDAH LUNAS -->
+                <div class="relative w-full sm:w-auto" id="wadah-drop-lunas-buku">
+                    <button type="button" id="btn-drop-lunas-buku" onclick="toggleDropdownBukuDP('lunas')" class="w-full sm:w-auto h-10 px-4 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold flex items-center justify-between gap-2.5 transition-all shadow-sm cursor-pointer">
+                        <span class="flex items-center gap-1.5 truncate">
+                            <i class="fa-solid fa-check-double text-[11px]"></i>
+                            <span id="label-drop-lunas-buku" class="truncate max-w-[150px]">Sudah Lunas (0)</span>
+                        </span>
+                        <i id="chev-drop-lunas-buku" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+
+                    <div id="menu-drop-lunas-buku" class="hidden absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+8px)] w-72 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-emerald-100 z-[9999] p-2.5 flex flex-col gap-2">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" id="cari-drop-lunas-buku" oninput="saringListDropdownBuku('lunas')" placeholder="Cari sarimbit sudah lunas..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 outline-none focus:border-emerald-600">
+                        </div>
+                        <div id="list-drop-lunas-buku" class="overflow-y-auto max-h-64 flex flex-col gap-1 pr-0.5"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Filter Koleksi Aktif & Arsip -->
+                <select id="filterStatusBukuDash" onchange="resetFilterKhususBuku(); renderAnalitikPembukuan()" class="glass-input h-10 px-4 text-xs font-extrabold cursor-pointer w-full sm:w-auto">
+                    <option value="semua">Semua Koleksi (Aktif & Arsip)</option>
+                    <option value="aktif">Hanya Koleksi Aktif</option>
+                    <option value="arsip">Hanya Koleksi Arsip</option>
+                </select>
+
+                <!-- 4. Filter Pusat / Brand -->
+                <select id="filterPusatBukuDash" onchange="resetFilterKhususBuku(); renderAnalitikPembukuan()" class="glass-input h-10 px-4 text-xs font-extrabold cursor-pointer w-full sm:w-auto">
+                    <option value="">Semua Pusat / Brand</option>
+                </select>
+            </div>
+            </div>
+
+            <!-- 4 Kartu Ringkas Pembayaran Pembukuan (DP, Pelunasan, Total Masuk, Sisa) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <div class="bg-blue-50/70 border border-blue-100 p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-blue-600 uppercase tracking-widest">Total Setoran DP</span>
+                        <span id="badgeCountDPBuku" class="text-[9px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">0 Sarimbit</span>
+                    </div>
+                    <div id="bukuTotDP" class="text-[16px] md:text-xl font-black text-blue-700 tracking-tight">Rp 0</div>
+                </div>
+
+                <div class="bg-emerald-50/70 border border-emerald-100 p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest">Total Pelunasan</span>
+                        <span id="badgeCountLunasBuku" class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">0 Lunas</span>
+                    </div>
+                    <div id="bukuTotLunas" class="text-[16px] md:text-xl font-black text-emerald-700 tracking-tight">Rp 0</div>
+                </div>
+
+                <div class="bg-indigo-50/70 border border-indigo-100 p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest">Total Terbayar (DP+Lunas)</span>
+                        <i class="fa-solid fa-vault text-indigo-400 text-xs"></i>
+                    </div>
+                    <div id="bukuTotGabungan" class="text-[16px] md:text-xl font-black text-indigo-700 tracking-tight">Rp 0</div>
+                </div>
+
+                <div class="bg-rose-50/70 border border-rose-100 p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-rose-600 uppercase tracking-widest">Sisa Belum Terbayar</span>
+                        <span id="badgeCountBlmBuku" class="text-[9px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">0 Belum</span>
+                    </div>
+                    <div id="bukuTotSisa" class="text-[16px] md:text-xl font-black text-rose-600 tracking-tight">Rp 0</div>
+                </div>
+            </div>
+
+            <!-- 2 Diagram Pembayaran Pembukuan: Donat Proporsi & Batang Komparasi per Sarimbit -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                <div class="lg:col-span-5 bg-white/90 border border-slate-100 rounded-2xl p-5 flex flex-col shadow-sm">
+                    <h4 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-blue-600"></i> Proporsi Dana DP vs Pelunasan
+                    </h4>
+                    <p class="text-[10px] font-medium text-slate-400 mb-4">Perbandingan nominal DP, Pelunasan, dan Sisa Tagihan</p>
+                    <div class="relative flex-1 w-full" style="height: 230px;">
+                        <canvas id="canvasDonatBukuDP"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 bg-white/90 border border-slate-100 rounded-2xl p-5 flex flex-col shadow-sm">
+                    <h4 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-emerald-600"></i> Grafik DP & Pelunasan per Koleksi Sarimbit
+                    </h4>
+                    <p class="text-[10px] font-medium text-slate-400 mb-4">Komparasi uang masuk DP (Biru) dan Pelunasan (Hijau) pada tiap sarimbit</p>
+                    <div class="relative flex-1 w-full" style="height: 230px;">
+                        <canvas id="canvasBarBukuDP"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Rincian DP & Lunas Pembukuan -->
+            <div class="bg-white/90 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h4 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-emerald-700"></i> Tabel Rincian Pembayaran DP & Lunas Pembukuan
+                    </h4>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchBukuDash" oninput="renderAnalitikPembukuan()" placeholder="Cari sarimbit atau pusat..." class="glass-input w-full pl-9 pr-4 py-2 text-xs font-semibold">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[720px] table-cantik">
+                        <thead>
+                            <tr>
+                                <th class="pl-5">Koleksi Sarimbit</th>
+                                <th>Pusat / Brand</th>
+                                <th class="text-center">Total PCS</th>
+                                <th class="text-right text-blue-600">Nominal DP</th>
+                                <th class="text-right text-emerald-700">Nominal Lunas</th>
+                                <th class="text-right">Total Terbayar</th>
+                                <th class="text-center pr-5">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyBukuDash"></tbody>
+                        <tfoot id="tableFootBukuDash" class="bg-slate-50 font-black border-t-2 border-slate-200"></tfoot>
+                    </table>
+                </div>
+                <div id="btn-container-buku-dash" class="p-3.5 text-center border-t border-slate-100 hidden">
+                    <button onclick="toggleTable('buku')" id="btn-toggle-buku-dash" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-900 transition-colors">
+                        Lihat Semua Koleksi Pembukuan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABEL RINCIAN DATA AKTIF -->
+        <div class="glass-panel overflow-hidden mb-8 animate-enter flex flex-col">
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-800">Rincian Piutang & Dana Masuk (Koleksi Aktif)</h3>
                 </div>
                 <div class="relative w-full sm:w-64">
-                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="Cari pesanan..." class="glass-input w-full pl-10 pr-4 py-2.5 text-xs font-semibold">
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" placeholder="Cari koleksi aktif..." class="glass-input w-full pl-10 pr-4 py-2.5 text-xs font-semibold">
                 </div>
             </div>
             <div class="overflow-x-auto flex-1 p-0">
@@ -220,29 +591,29 @@
                         <tr>
                             <th class="pl-6">Nama Sarimbit</th>
                             <th class="text-right">Total PCS</th>
-                            <th class="text-right">Total Nilai</th>
+                            <th class="text-right">Total Nilai Netto</th>
                             <th class="text-right">Dana Masuk</th>
-                            <th class="text-right pr-6">Piutang</th>
+                            <th class="text-right pr-6">Sisa Piutang</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
             <div id="btn-container-aktif" class="p-4 text-center border-t border-slate-100 hidden">
-                <button onclick="toggleTable('aktif')" id="btn-toggle-aktif" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                <button onclick="toggleTable('aktif')" id="btn-toggle-aktif" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-900 transition-colors">
                     Lihat Selengkapnya
                 </button>
             </div>
         </div>
 
-        <!-- Tabel Arsip Terang -->
-        <div class="glass-panel bg-slate-50 border-dashed border-slate-200 overflow-hidden mb-8 animate-enter flex flex-col">
-            <div class="p-6 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-html2canvas-ignore="true">
+        <!-- TABEL RINCIAN ARSIP -->
+        <div class="glass-panel bg-slate-50/90 border-dashed border-slate-200 overflow-hidden mb-8 animate-enter flex flex-col">
+            <div class="p-6 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h3 class="text-base font-bold text-slate-500"><i class="fa-solid fa-box-archive mr-2"></i>Rincian Arsip</h3>
+                    <h3 class="text-base font-extrabold text-slate-500"><i class="fa-solid fa-box-archive mr-2"></i>Rincian Koleksi Diarsip</h3>
                 </div>
                 <div class="relative w-full sm:w-64">
-                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
                     <input type="text" id="searchInputArsip" placeholder="Cari arsip..." class="glass-input w-full pl-10 pr-4 py-2.5 text-xs font-semibold">
                 </div>
             </div>
@@ -252,7 +623,7 @@
                         <tr>
                             <th class="pl-6">Nama Sarimbit</th>
                             <th class="text-right">Total PCS</th>
-                            <th class="text-right">Total Nilai</th>
+                            <th class="text-right">Total Nilai Netto</th>
                             <th class="text-right">Dana Masuk</th>
                             <th class="text-right pr-6">Piutang</th>
                         </tr>
@@ -261,7 +632,7 @@
                 </table>
             </div>
             <div id="btn-container-arsip" class="p-4 text-center border-t border-slate-200/50 hidden">
-                <button onclick="toggleTable('arsip')" id="btn-toggle-arsip" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                <button onclick="toggleTable('arsip')" id="btn-toggle-arsip" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 transition-colors">
                     Lihat Arsip Selengkapnya
                 </button>
             </div>
@@ -269,16 +640,129 @@
 
     </main>
 
+    <!-- MODAL PENGATURAN PARAMETER MARGIN PROVITE SARIMBIT (%) -->
+    <div id="modalMarginProvite" class="fixed inset-0 z-[120] bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-2xl rounded-[32px] max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-white max-h-[88vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm"><i class="fa-solid fa-sliders"></i></span> Parameter Margin Provite Sarimbit
+                </h3>
+                <button onclick="tutupModalMargin()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="formMarginProvite" onsubmit="simpanMarginSarimbit(event)" class="bg-slate-50 p-4 rounded-2xl border border-slate-200/70 mb-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Koleksi Sarimbit</label>
+                        <input type="text" id="inputMarginNama" list="datalistSarimbitMargin" required placeholder="Pilih atau ketik nama sarimbit..." class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-emerald-600">
+                        <datalist id="datalistSarimbitMargin"></datalist>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Margin Provite (%)</label>
+                        <div class="relative">
+                            <input type="number" step="0.1" id="inputMarginPersen" required placeholder="30" class="w-full px-4 py-2.5 pr-8 rounded-xl bg-white border border-slate-200 text-sm font-black text-emerald-700 outline-none focus:border-emerald-600">
+                            <span class="absolute right-3 top-2.5 text-xs font-bold text-slate-400">%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 flex justify-end gap-2">
+                    <button type="submit" class="bg-gradient-to-r from-emerald-700 to-emerald-900 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-sm hover:opacity-95 transition-all">
+                        <i class="fa-solid fa-check mr-1"></i> Simpan Margin
+                    </button>
+                </div>
+            </form>
+
+            <div class="overflow-y-auto flex-1 rounded-2xl border border-slate-100">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-extrabold sticky top-0">
+                        <tr>
+                            <th class="px-4 py-3">Nama Sarimbit</th>
+                            <th class="px-4 py-3 text-center">Margin (%)</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyTabelMargin" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Ubah Font Chart JS Menjadi Inter
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.color = '#64748b'; // Warna teks chart abu-abu sedang
-        Chart.defaults.animation = false;
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        let rawData = [];
+        let rawArsip = []; 
+        let currentFilter = 'Semua';
+        let globalPengaturan = JSON.parse(localStorage.getItem('MarginProviteSarimbit')) || [];
+        
+        let isTableAktifExpanded = false;
+        let isTableArsipExpanded = false;
+        let isTableRankingExpanded = false;
+        
+        let charts = {}; 
+        let myChart = null;
+        let mySarimbitChart = null;
+
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(angka) || 0);
+        const formatK = (angka) => {
+            if(angka >= 1000000) return (angka / 1000000).toFixed(1) + ' Jt';
+            if(angka >= 1000) return (angka / 1000).toFixed(0) + ' Rb';
+            return angka;
+        };
+        function formatTitik(angka) { return (Number(angka) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+        
+        // FUNGSI BARU: Mengubah deretan nol menjadi kata "Juta" atau "Miliar" agar muat di layar HP
+        function formatSingkatResponsive(angka) {
+            const num = Number(angka) || 0;
+            // Jika dibuka di layar HP (kurang dari 768px lebar layar), otomatis disingkat!
+            if (window.innerWidth < 768) {
+                if (num >= 1000000000) return 'Rp ' + (num / 1000000000).toFixed(2).replace('.', ',') + ' Miliar';
+                if (num >= 1000000) return 'Rp ' + (num / 1000000).toFixed(2).replace('.', ',') + ' Juta';
+            }
+            // Jika di laptop, atau angkanya kecil, tampilkan wujud aslinya
+            return formatRp(num);
+        }
+
+        // --- HELPER MARGIN PROVITE DINAMIS ---
+        function getPersenMargin(namaSarimbit) {
+            if (!namaSarimbit || namaSarimbit === '-' || namaSarimbit === '') return 30;
+            const found = globalPengaturan.find(item => item.namaSarimbit.trim().toLowerCase() === String(namaSarimbit).trim().toLowerCase());
+            return found ? Number(found.persentase) : 30;
+        }
+
+        function hitungProvite(valNetto, namaSarimbit) {
+            const persen = getPersenMargin(namaSarimbit);
+            return Math.round(Number(valNetto || 0) * (persen / 100));
+        }
+
+        // --- HELPER RENTANG TANGGAL FLATPICKR ---
+        function getRangeDates(rangeStr) {
+            if (!rangeStr) return { s: '', e: '' };
+            if (rangeStr.includes(' - ')) {
+                const parts = rangeStr.split(' - ');
+                return { s: parts[0].trim(), e: parts[1].trim() };
+            } else if (rangeStr.includes(' to ')) {
+                const parts = rangeStr.split(' to ');
+                return { s: parts[0].trim(), e: parts[1].trim() };
+            }
+            return { s: rangeStr.trim(), e: rangeStr.trim() };
+        }
+
+        function resetRentangTanggal() {
+            const fp = document.getElementById('dateRangeGrafik')._flatpickr;
+            if (fp) fp.clear();
+            document.getElementById('dateRangeGrafik').value = '';
+            document.getElementById('btnClearDate').classList.add('hidden');
+            updateDashboard();
+        }
 
         function updateConnectionStatus() {
             const banner = document.getElementById('connection-banner');
             if (navigator.onLine) {
-                banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-blue-50 text-blue-600 block shadow-sm";
+                banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-700 block shadow-sm";
                 banner.innerText = "SINKRONISASI AKTIF";
                 setTimeout(() => banner.classList.add('hidden'), 2500);
             } else {
@@ -286,33 +770,20 @@
                 banner.className = "fixed top-0 left-0 w-full z-[100] text-center py-1 text-[9px] font-bold uppercase tracking-widest bg-rose-50 text-rose-600 block shadow-sm";
             }
         }
-        
-        window.addEventListener('online', () => { 
-            updateConnectionStatus(); 
-            if (typeof window.google !== 'undefined' && window.google.script && window.google.script.run && typeof window.google.script.run.syncOfflineData === 'function') {
-                window.google.script.run.syncOfflineData();
-            }
-        });
+        window.addEventListener('online', updateConnectionStatus);
         window.addEventListener('offline', updateConnectionStatus);
-
-        let rawData = [];
-        let rawArsip = []; 
-        let currentFilter = 'Semua';
-        
-        let isTableAktifExpanded = false;
-        let isTableArsipExpanded = false;
-        
-        let charts = {}; 
-
-        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-        const formatK = (angka) => {
-            if(angka >= 1000000) return (angka / 1000000).toFixed(1) + ' Jt';
-            if(angka >= 1000) return (angka / 1000).toFixed(0) + ' Rb';
-            return angka;
-        };
 
         window.onload = () => {
             updateConnectionStatus();
+            flatpickr("#dateRangeGrafik", {
+                mode: "range",
+                locale: "id",
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr) {
+                    document.getElementById('btnClearDate').classList.toggle('hidden', !dateStr);
+                    updateDashboard();
+                }
+            });
             fetchDataFromBackend();
         };
 
@@ -323,7 +794,6 @@
             overlay.style.opacity = '1';
 
             if(!dbInstance) {
-                console.error("Database engine tidak ditemukan.");
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.classList.add('hidden'), 400);
                 return;
@@ -340,9 +810,36 @@
                         .map(p => p.sarimbit);
                 }
 
+                // Kelompokkan per idcustomer terlebih dahulu agar perhitungan diskon nota & dana masuk presisi
+                const invoiceGroups = {};
+                orders.forEach(o => {
+                    if (o.syncstatus === -1) return;
+                    const idCust = String(o.idcustomer || o.idCustomer || o.customer || o.id || "TMP").trim();
+                    if (!invoiceGroups[idCust]) invoiceGroups[idCust] = [];
+                    invoiceGroups[idCust].push(o);
+                });
+
                 let semuaOrderan = [];
-                if (orders && orders.length > 0) {
-                    semuaOrderan = orders.map(order => {
+                Object.keys(invoiceGroups).forEach(idCust => {
+                    const items = invoiceGroups[idCust];
+                    const head = items[0];
+                    const grossInvoice = items.reduce((s, it) => s + ((Number(it.jumlah) || 0) * (Number(it.harga) || 0)), 0);
+                    const dTipe = head.diskonTipe || 'none';
+                    const dNilai = Number(head.diskonNilai) || 0;
+
+                    let totalDiskonInvoice = 0;
+                    if (dTipe === 'persen') totalDiskonInvoice = Math.round((grossInvoice * dNilai) / 100);
+                    else if (dTipe === 'angka' || dTipe === 'rp') totalDiskonInvoice = dNilai;
+
+                    // Hitung Dana Masuk dari riwayat_pembayaran atau cicilan1+2+3
+                    let danaMasukInvoice = 0;
+                    if (Array.isArray(head.riwayat_pembayaran) && head.riwayat_pembayaran.length > 0) {
+                        danaMasukInvoice = head.riwayat_pembayaran.reduce((s, r) => s + (Number(r.nominal) || 0), 0);
+                    } else {
+                        danaMasukInvoice = (Number(head.cicilan1) || Number(head.dp) || 0) + (Number(head.cicilan2) || 0) + (Number(head.cicilan3) || Number(head.bayar) || 0);
+                    }
+
+                    items.forEach(order => {
                         let safeDate = "";
                         try {
                             let rawDate = order.tanggal || order.created_at || new Date();
@@ -355,7 +852,7 @@
                                 const d = String(dtObj.getDate()).padStart(2, '0');
                                 safeDate = `${y}-${m}-${d}`;
                             }
-                        } catch(e) { 
+                        } catch(e) {
                             const dtFallback = new Date();
                             safeDate = `${dtFallback.getFullYear()}-${String(dtFallback.getMonth() + 1).padStart(2, '0')}-${String(dtFallback.getDate()).padStart(2, '0')}`;
                         }
@@ -368,52 +865,134 @@
                                               order.isarchived === 1;
 
                         let harga = Number(order.harga) || Number(order.price) || 0;
-                        let qty = Number(order.jumlah) || Number(order.qty) || Number(order.quantity) || 0;
-                        let net = Number(order.total_harga) || Number(order.total) || (qty * harga); 
+                        let qty = Number(order.jumlah) || Number(order.qty) || 0;
+                        let brutoItem = qty * harga;
+                        if (brutoItem === 0 && Number(order.total) > 0) brutoItem = Number(order.total);
+
+                        // Proporsi diskon per item dalam nota
+                        let potonganItem = 0;
+                        if (grossInvoice > 0 && totalDiskonInvoice > 0) {
+                            potonganItem = Math.round((brutoItem / grossInvoice) * totalDiskonInvoice);
+                        }
+                        let netItem = Math.max(0, brutoItem - potonganItem);
+                        let namaSarimbit = order.sarimbit || order.koleksi || "Lainnya";
                         
-                        let cicilan1 = Number(order.cicilan1) || Number(order.dp) || 0;
-                        let cicilan2 = Number(order.cicilan2) || 0;
-                        let cicilan3 = Number(order.cicilan3) || Number(order.pelunasan) || Number(order.bayar) || 0;
+                        // PERBAIKAN: Identifikasi nama Toko asli dan jangan biarkan nama Brand (order.pusat) menyusup
+                        let namaTokoAsli = order.toko || "";
+                        let tokoStandar = "Lainnya";
+                        if (namaTokoAsli.toLowerCase().includes("habiba")) tokoStandar = "Habibacollections";
+                        else if (namaTokoAsli.toLowerCase().includes("masara")) tokoStandar = "Masara.hijab";
 
-                        let idCust = order.idcustomer || order.idCustomer || order.customer || order.nama_customer || order.id || ("TMP-" + Math.random());
-                        let namaSarimbit = order.sarimbit || order.koleksi || order.nama_sarimbit || "Lainnya";
-
-                        return {
-                            idcustomer: String(idCust).trim(), 
+                        semuaOrderan.push({
+                            idcustomer: idCust,
+                            customer: order.customer || "-",
                             sarimbit: namaSarimbit,
-                            toko: order.toko || order.pusat || "Pusat",
+                            toko: tokoStandar,
+                            asal_order: order.asal_order || "",
                             pcs: qty,
                             harga: harga,
-                            netTotal: net,
-                            cicilan1: cicilan1,
-                            cicilan2: cicilan2,
-                            cicilan3: cicilan3,
+                            brutoTotal: brutoItem,
+                            potongan: potonganItem,
+                            netTotal: netItem,
+                            danaMasukInvoice: danaMasukInvoice,
                             tanggal: safeDate,
-                            isArchived: apakahDiarsip,
-                            syncstatus: order.syncstatus
-                        };
-                    }).filter(item => item.pcs > 0 && item.sarimbit !== "Lainnya" && item.syncstatus !== -1);
-                }
-                
+                            isArchived: apakahDiarsip
+                        });
+                    });
+                });
+
+                semuaOrderan = semuaOrderan.filter(item => item.pcs > 0 && item.sarimbit !== "Lainnya");
                 rawData = semuaOrderan.filter(o => o.isArchived === false);
                 rawArsip = semuaOrderan.filter(o => o.isArchived === true);
 
+                // Tambahkan koleksi arsip yang hanya tersimpan di tabel pembukuan
                 if (pembukuan && pembukuan.length > 0) {
                     const arsipBuku = pembukuan.filter(p => (p.isarchived === true || p.isArchived === true || String(p.isarchived).toLowerCase() === 'true') && !semuaOrderan.some(o => o.sarimbit === p.sarimbit));
                     arsipBuku.forEach(p => {
+                        const netVal = Number(p.omset) || Number(p.total_harga) || 0;
+                        const dpMasuk = (Number(p.dp) || 0) + (Number(p.bayar) || 0);
+
                         rawArsip.push({
-                            idcustomer: "ARSIP-" + Math.random(), 
+                            idcustomer: "ARSIP-" + (p.id || Math.random()),
+                            customer: "Arsip Pembukuan",
                             sarimbit: p.sarimbit || "Lainnya",
-                            toko: "Semua", 
-                            pcs: Number(p.total) || Number(p.qty) || 0, 
-                            netTotal: Number(p.omset) || Number(p.total_harga) || 0, 
-                            cicilan1: Number(p.dp) || Number(p.cicilan1) || 0,
-                            cicilan2: 0,
-                            cicilan3: Number(p.bayar) || Number(p.pelunasan) || Number(p.cicilan3) || 0,
+                            toko: "Semua", // PERBAIKAN: Jangan panggil p.brand karena itu adalah nama merk pakaian (AALHIJAZ dkk)
+                            asal_order: "",
+                            pcs: Number(p.total) || 0,
+                            brutoTotal: netVal,
+                            potongan: 0,
+                            netTotal: netVal,
+                            danaMasukInvoice: dpMasuk,
+                            tanggal: (p.ready || p.close || p.updated_at || new Date().toISOString()).substring(0, 10),
                             isArchived: true
                         });
                     });
                 }
+
+               // OLAH DATA PEMBUKUAN (DP & LUNAS) PERSIS SEPERTI HALAMAN PEMBUKUAN.HTML
+               const mapBuku = {};
+                if (pembukuan && pembukuan.length > 0) {
+                    pembukuan.forEach(p => {
+                        if (!p.sarimbit) return;
+                        const isArs = p.isarchived === true || p.isArchived === true || String(p.isarchived).toLowerCase() === 'true' || p.isarchived === 1;
+                        mapBuku[p.sarimbit] = {
+                            sarimbit: p.sarimbit,
+                            brand: p.brand || p.pusat || "-",
+                            pcs: Number(p.total) || 0,
+                            omset: Number(p.omset) || 0,
+                            dp: Number(p.dp) || 0,
+                            bayar: Number(p.bayar) || 0,
+                            tglLunas: p.Lunas || p.lunas || "",
+                            isArchived: isArs
+                        };
+                    });
+                }
+
+                // Sinkronkan kuantitas & omset aktif dari orderan yang sedang berjalan
+                const groupOrderSrm = {};
+                rawData.forEach(o => {
+                    if (!groupOrderSrm[o.sarimbit]) groupOrderSrm[o.sarimbit] = { pcs: 0, omset: 0, brand: "" };
+                    groupOrderSrm[o.sarimbit].pcs += o.pcs;
+                    groupOrderSrm[o.sarimbit].omset += o.netTotal;
+                });
+
+                Object.keys(groupOrderSrm).forEach(srm => {
+                    if (!mapBuku[srm]) {
+                        mapBuku[srm] = {
+                            sarimbit: srm,
+                            brand: "-",
+                            pcs: groupOrderSrm[srm].pcs,
+                            omset: groupOrderSrm[srm].omset,
+                            dp: 0,
+                            bayar: 0,
+                            tglLunas: "",
+                            isArchived: false
+                        };
+                    } else {
+                        if (groupOrderSrm[srm].pcs > 0) mapBuku[srm].pcs = groupOrderSrm[srm].pcs;
+                        if (groupOrderSrm[srm].omset > 0) mapBuku[srm].omset = groupOrderSrm[srm].omset;
+                    }
+                });
+
+                rawPembukuan = Object.values(mapBuku);
+                populatePusatBukuFilter();
+
+                // Pastikan semua koleksi sarimbit terdaftar di pengaturan margin (default 30%)
+                let adaMarginBaru = false;
+                [...rawData, ...rawArsip].forEach(d => {
+                    const srm = (d.sarimbit || '').trim();
+                    if (srm && srm !== '-' && srm !== 'Lainnya') {
+                        const exists = globalPengaturan.some(p => p.namaSarimbit.trim().toLowerCase() === srm.toLowerCase());
+                        if (!exists) {
+                            globalPengaturan.push({ namaSarimbit: srm, persentase: 30 });
+                            adaMarginBaru = true;
+                        }
+                    }
+                });
+                if (adaMarginBaru) {
+                    localStorage.setItem('MarginProviteSarimbit', JSON.stringify(globalPengaturan));
+                }
+
             } catch(err) {
                 console.error("Gagal mapping data lokal:", err);
             } finally {
@@ -421,6 +1000,7 @@
                 setTimeout(() => overlay.classList.add('hidden'), 400);
                 
                 populateBulanFilter();
+                populateSarimbitGrafikFilter();
                 generateStoreFilterButtons();
                 updateDashboard();
             }
@@ -431,16 +1011,18 @@
             const currentSelection = selectBulan.value; 
 
             const dataGabungan = [...rawData, ...rawArsip];
-            const months = [...new Set(dataGabungan.map(d => {
-                if(!d.tanggal) return "";
-                return d.tanggal.substring(0, 7);
-            }))].filter(m => m !== "").sort().reverse(); 
+            const months = [...new Set(dataGabungan.map(d => d.tanggal ? d.tanggal.substring(0, 7) : ""))]
+                .filter(m => m && /^\d{4}-\d{2}$/.test(m))
+                .sort()
+                .reverse(); 
 
-            let html = `<option value="Semua" class="text-slate-800 font-bold" selected>Semua Bulan</option>`;
+            let html = `<option value="Semua" selected>Semua Waktu</option>`;
             months.forEach(m => {
                 const date = new Date(m + '-01');
-                const label = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-                html += `<option value="${m}" class="text-slate-800 font-bold">${label}</option>`;
+                if (!isNaN(date.getTime())) {
+                    const label = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                    html += `<option value="${m}">${label}</option>`;
+                }
             });
 
             selectBulan.innerHTML = html;
@@ -448,20 +1030,30 @@
             else selectBulan.value = "Semua";
         }
 
-        function generateStoreFilterButtons() {
-            const dataGabungan = [...rawData, ...rawArsip];
+        function populateSarimbitGrafikFilter() {
+            const select = document.getElementById('filterSarimbitGrafik');
+            const currentVal = select.value;
+            const semuaNama = [...new Set([...rawData, ...rawArsip].map(d => d.sarimbit))].filter(Boolean).sort();
             
-            // Saring ketat: Hanya ambil toko yang valid
-            const storesRaw = [...new Set(dataGabungan.map(d => d.toko))];
-            const stores = storesRaw.filter(t => t && t.trim() !== "" && t.toLowerCase() !== "semua" && t.toLowerCase() !== "pusat").sort();
+            let html = `<option value="">Bandingkan Semua</option>`;
+            semuaNama.forEach(nama => {
+                html += `<option value="${nama}" ${nama === currentVal ? 'selected' : ''}>${nama}</option>`;
+            });
+            select.innerHTML = html;
+
+            const dl = document.getElementById('datalistSarimbitMargin');
+            if (dl) dl.innerHTML = semuaNama.map(n => `<option value="${n}">`).join('');
+        }
+
+        function generateStoreFilterButtons() {
+            // PERBAIKAN: Kunci paksa daftar toko (Hardcode) agar nama Brand/Pusat tidak bocor ke sini
+            const stores = ["Habibacollections", "Masara.hijab"];
             
             const container = document.getElementById('storeFilterContainer');
-            
-            // CSS tombol filter diubah menjadi style Bubble minimalis
-            let html = `<button onclick="setToko('Semua')" id="btn-toko-Semua" class="store-btn px-5 py-2.5 rounded-full text-xs font-bold transition-all bg-blue-500 text-white shadow-sm whitespace-nowrap shrink-0 border border-blue-500">Semua Toko</button>`;
+            let html = `<button onclick="setToko('Semua')" id="btn-toko-Semua" class="store-btn px-5 py-2.5 rounded-full text-xs font-extrabold transition-all bg-gradient-to-r from-emerald-700 to-emerald-900 text-white shadow-md whitespace-nowrap shrink-0 border border-transparent">Semua Toko</button>`;
             
             stores.forEach(toko => {
-                html += `<button onclick="setToko('${toko}')" id="btn-toko-${toko.replace(/[^a-zA-Z0-9]/g, '')}" class="store-btn px-5 py-2.5 rounded-full text-xs font-bold text-slate-500 bg-white hover:bg-slate-50 transition-all border border-slate-200 whitespace-nowrap shrink-0 shadow-sm">${toko}</button>`;
+                html += `<button onclick="setToko('${toko}')" id="btn-toko-${toko.replace(/[^a-zA-Z0-9]/g, '')}" class="store-btn px-5 py-2.5 rounded-full text-xs font-extrabold text-slate-600 bg-white hover:bg-emerald-50 hover:text-emerald-800 transition-all border border-slate-200 whitespace-nowrap shrink-0 shadow-sm">${toko}</button>`;
             });
             container.innerHTML = html;
         }
@@ -471,29 +1063,31 @@
             const safeTokoId = tokoName === 'Semua' ? 'Semua' : tokoName.replace(/[^a-zA-Z0-9]/g, '');
             
             document.querySelectorAll('.store-btn').forEach(btn => {
-                // Reset semua ke gaya default putih
-                btn.className = "store-btn px-5 py-2.5 rounded-full text-xs font-bold text-slate-500 bg-white hover:bg-slate-50 transition-all border border-slate-200 whitespace-nowrap shrink-0 shadow-sm";
-                
-                // Warnai biru pada yang aktif
+                btn.className = "store-btn px-5 py-2.5 rounded-full text-xs font-extrabold text-slate-600 bg-white hover:bg-emerald-50 hover:text-emerald-800 transition-all border border-slate-200 whitespace-nowrap shrink-0 shadow-sm";
                 if(btn.id === `btn-toko-${safeTokoId}`) {
-                    btn.className = "store-btn px-5 py-2.5 rounded-full text-xs font-bold transition-all bg-blue-500 text-white shadow-sm whitespace-nowrap shrink-0 border border-blue-500";
+                    btn.className = "store-btn px-5 py-2.5 rounded-full text-xs font-extrabold transition-all bg-gradient-to-r from-emerald-700 to-emerald-900 text-white shadow-md whitespace-nowrap shrink-0 border border-transparent";
                 }
             });
             updateDashboard();
         }
 
-        function getFilteredData() { 
-            let filtered = rawData;
-            if (currentFilter !== 'Semua') filtered = filtered.filter(d => d.toko === currentFilter);
-            
+        function filterItemByWaktuDanToko(list) {
+            let filtered = list;
+            if (currentFilter !== 'Semua') {
+                filtered = filtered.filter(d => d.toko.toLowerCase() === currentFilter.toLowerCase());
+            }
             const bulanFilter = document.getElementById('filterBulan').value;
             if (bulanFilter !== 'Semua') {
-                filtered = filtered.filter(d => {
-                    if(!d.tanggal) return false;
-                    return d.tanggal.substring(0, 7) === bulanFilter;
-                });
+                filtered = filtered.filter(d => d.tanggal && d.tanggal.substring(0, 7) === bulanFilter);
             }
-            return filtered; 
+            const range = getRangeDates(document.getElementById('dateRangeGrafik').value);
+            if (range.s) filtered = filtered.filter(d => d.tanggal && d.tanggal >= range.s);
+            if (range.e) filtered = filtered.filter(d => d.tanggal && d.tanggal <= range.e);
+            return filtered;
+        }
+
+        function getFilteredData() {
+            return filterItemByWaktuDanToko(rawData);
         }
 
         function toggleTable(type) {
@@ -501,78 +1095,261 @@
                 isTableAktifExpanded = !isTableAktifExpanded;
                 renderTable(getFilteredData(), false, 'tableBody', 'searchInput');
                 document.getElementById('btn-toggle-aktif').innerText = isTableAktifExpanded ? 'Tutup Daftar' : 'Lihat Selengkapnya';
-            } else {
+            } else if (type === 'arsip') {
                 isTableArsipExpanded = !isTableArsipExpanded;
-                renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip');
+                renderTable(filterItemByWaktuDanToko(rawArsip), true, 'tableBodyArsip', 'searchInputArsip');
                 document.getElementById('btn-toggle-arsip').innerText = isTableArsipExpanded ? 'Tutup Daftar' : 'Lihat Arsip Selengkapnya';
+            } else if (type === 'ranking') {
+                isTableRankingExpanded = !isTableRankingExpanded;
+                renderTabelGrafik2();
+                document.getElementById('btn-toggle-ranking').innerText = isTableRankingExpanded ? 'Sembunyikan Sebagian' : 'Lihat Semua Ranking';
             }
         }
 
-        function renderChart(canvasId, type, chartLabels, dataA, colorIndex, isHorizontal = false) {
-            try {
-                const canvasElement = document.getElementById(canvasId);
-                if (!canvasElement) return;
+        // ==============================================================
+        // GRAFIK 1 DARI REFERENSI: KURVA OMSET GLOBAL (omsetChart)
+        // ==============================================================
+        function updateChartGlobal(dataSemesta) {
+            const jG = document.getElementById('jenisGrafik').value;
+            const rkp = {};
 
-                const ctx = canvasElement.getContext('2d');
-                if (charts[canvasId]) charts[canvasId].destroy();
+            dataSemesta.forEach(d => {
+                if (!d.tanggal) return;
+                const key = jG === 'bulanan' ? d.tanggal.substring(0, 7) : d.tanggal;
+                if (!rkp[key]) rkp[key] = { total: 0, provite: 0, reseller: 0, konsumen: 0, habiba: 0, masara: 0 };
+                
+                const prv = hitungProvite(d.netTotal, d.sarimbit);
+                rkp[key].total += d.netTotal;
+                rkp[key].provite += prv;
 
-                const warnaGrafik = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
-                const warnaUtama = warnaGrafik[colorIndex % warnaGrafik.length];
-                const warnaBg = warnaUtama + '20'; // Opacity 20%
+                const isReseller = d.potongan > 0 || String(d.asal_order).toLowerCase() === 'reseller';
+                if (isReseller) rkp[key].reseller += d.netTotal;
+                else rkp[key].konsumen += d.netTotal;
 
-                let datasets = [{ 
-                    label: "Data", 
-                    data: dataA, 
-                    backgroundColor: type === 'bar' ? warnaUtama : warnaBg, 
-                    borderColor: warnaUtama, 
-                    borderRadius: type === 'bar' ? 4 : 0, 
-                    tension: 0.4, 
-                    borderWidth: type === 'bar' ? 0 : 3, 
-                    fill: type === 'line',
-                    barPercentage: 0.5
-                }];
+                const tk = String(d.toko || '').toLowerCase();
+                if (tk.includes('habiba')) rkp[key].habiba += d.netTotal;
+                if (tk.includes('masara')) rkp[key].masara += d.netTotal;
+            });
 
-                charts[canvasId] = new Chart(ctx, {
-                    type: type, 
-                    data: { labels: chartLabels, datasets: datasets },
-                    options: {
-                        indexAxis: isHorizontal ? 'y' : 'x',
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        interaction: { mode: 'index', intersect: false, axis: isHorizontal ? 'y' : 'x' },
-                        scales: { 
-                            x: { 
-                                grid: { display: false }, 
-                                border: { display: false },
-                                ticks: { font: { weight: '600'} }
-                            }, 
-                            y: { 
-                                beginAtZero: true, 
-                                border: { display: false }, 
-                                grid: { display: !isHorizontal, color: '#f1f5f9' },
-                                ticks: { font: { weight: '600'} } 
-                            } 
-                        },
-                        plugins: { 
-                            legend: { display: false }, 
-                            tooltip: { 
-                                backgroundColor: '#ffffff', 
-                                titleColor: '#1e293b',
-                                bodyColor: '#475569',
-                                borderColor: '#e2e8f0',
-                                borderWidth: 1,
-                                padding: 12, cornerRadius: 12,
-                                titleFont: { size: 13, family: 'Inter', weight: 'bold' }, bodyFont: { size: 14, family: 'Inter', weight: 'bold' } 
-                            } 
+            const labelsData = Object.keys(rkp).sort();
+            const namaBulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+            const displayLabels = labelsData.map(l => {
+                if (jG === 'bulanan' && l.includes('-')) {
+                    const parts = l.split('-');
+                    return `${namaBulan[parseInt(parts[1]) - 1] || parts[1]} ${parts[0]}`;
+                }
+                return l;
+            });
+
+            const valTotal = labelsData.map(l => rkp[l].total);
+            const valProvite = labelsData.map(l => rkp[l].provite);
+            const valReseller = labelsData.map(l => rkp[l].reseller);
+            const valKonsumen = labelsData.map(l => rkp[l].konsumen);
+            const valHabiba = labelsData.map(l => rkp[l].habiba);
+            const valMasara = labelsData.map(l => rkp[l].masara);
+
+            if (myChart) myChart.destroy();
+            const ctx = document.getElementById('omsetChart').getContext('2d');
+            
+            let gradTotal = ctx.createLinearGradient(0, 0, 0, 360);
+            gradTotal.addColorStop(0, 'rgba(59, 130, 246, 0.45)');
+            gradTotal.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            let gradProvite = ctx.createLinearGradient(0, 0, 0, 360);
+            gradProvite.addColorStop(0, 'rgba(16, 185, 129, 0.45)');
+            gradProvite.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            let datasets = (currentFilter === 'Semua') ? [
+                { label: 'Total Omset Netto', data: valTotal, borderColor: '#3b82f6', backgroundColor: gradTotal, tension: 0.4, borderWidth: 3.5, fill: true, pointRadius: 2, pointHoverRadius: 6 },
+                { label: 'Total Provite', data: valProvite, borderColor: '#10b981', backgroundColor: gradProvite, tension: 0.4, borderWidth: 3.5, fill: true, pointRadius: 2, pointHoverRadius: 6 },
+                { label: 'Habibacollections', data: valHabiba, borderColor: '#7c3aed', tension: 0.4, borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0 },
+                { label: 'Masara.hijab', data: valMasara, borderColor: '#f43f5e', tension: 0.4, borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0 }
+            ] : [
+                { label: `Omset (${currentFilter})`, data: valTotal, borderColor: '#3b82f6', backgroundColor: gradTotal, tension: 0.4, borderWidth: 3.5, fill: true, pointRadius: 2 },
+                { label: 'Provite', data: valProvite, borderColor: '#10b981', backgroundColor: gradProvite, tension: 0.4, borderWidth: 3.5, fill: true, pointRadius: 2 },
+                { label: 'Konsumen (Normal)', data: valKonsumen, borderColor: '#f59e0b', tension: 0.4, borderWidth: 2, fill: false, pointRadius: 0 },
+                { label: 'Reseller (Diskon)', data: valReseller, borderColor: '#f43f5e', tension: 0.4, borderWidth: 2, fill: false, pointRadius: 0 }
+            ];
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: displayLabels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, padding: 18, font: { weight: 'bold', size: 11 } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                            padding: 12,
+                            cornerRadius: 12,
+                            callbacks: { label: c => `${c.dataset.label}: ${formatRp(c.parsed.y)}` }
                         }
+                    },
+                    scales: {
+                        y: { border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'Rp ' + formatK(v), font: { weight: '600' } } },
+                        x: { grid: { display: false }, ticks: { font: { weight: '600' } } }
                     }
-                });
-            } catch (error) {}
+                }
+            });
         }
 
         // ==============================================================
-        // FUNGSI KHUSUS UNTUK GRAFIK DONAT (GAYA APLIKASI MODERN)
+        // GRAFIK 2 DARI REFERENSI: PERFORMA SARIMBIT (sarimbitChart)
         // ==============================================================
+        function updateSarimbitChart() {
+            const dataSemesta = filterItemByWaktuDanToko([...rawData, ...rawArsip]);
+            const jG = document.getElementById('jenisGrafik').value;
+            const fSrm = document.getElementById('filterSarimbitGrafik').value;
+            const filtered = dataSemesta.filter(d => !fSrm || d.sarimbit === fSrm);
+
+            let tO = 0, oR = 0, oK = 0, tP = 0, tD = 0;
+            const rkp = {};
+
+            filtered.forEach(d => {
+                const prv = hitungProvite(d.netTotal, d.sarimbit);
+                const isReseller = d.potongan > 0 || String(d.asal_order).toLowerCase() === 'reseller';
+                tO += d.netTotal;
+                tP += prv;
+                tD += d.potongan;
+                if (isReseller) oR += d.netTotal;
+                else oK += d.netTotal;
+
+                if (!d.tanggal) return;
+                const key = jG === 'bulanan' ? d.tanggal.substring(0, 7) : d.tanggal;
+                if (!rkp[key]) rkp[key] = { total: 0, provite: 0, reseller: 0, konsumen: 0 };
+                rkp[key].total += d.netTotal;
+                rkp[key].provite += prv;
+                if (isReseller) rkp[key].reseller += d.netTotal;
+                else rkp[key].konsumen += d.netTotal;
+            });
+
+            document.getElementById('srmTotOmset').innerText = formatRp(tO);
+            document.getElementById('srmTotDiskon').innerText = formatRp(tD);
+            document.getElementById('srmTotReseller').innerText = formatRp(oR);
+            document.getElementById('srmTotKonsumen').innerText = formatRp(oK);
+            document.getElementById('srmTotProvite').innerText = formatRp(tP);
+
+            const labelsData = Object.keys(rkp).sort();
+            const nBulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+            const displayLabels = labelsData.map(l => {
+                if (jG === 'bulanan' && l.includes('-')) {
+                    const parts = l.split('-');
+                    return `${nBulan[parseInt(parts[1]) - 1] || parts[1]} ${parts[0]}`;
+                }
+                return l;
+            });
+
+            if (mySarimbitChart) mySarimbitChart.destroy();
+            const ctx = document.getElementById('sarimbitChart').getContext('2d');
+            
+            let gradTotal = ctx.createLinearGradient(0, 0, 0, 340);
+            gradTotal.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradTotal.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            let gradProvite = ctx.createLinearGradient(0, 0, 0, 340);
+            gradProvite.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+            gradProvite.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            mySarimbitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: displayLabels,
+                    datasets: [
+                        { label: 'Omset Sarimbit', data: labelsData.map(l => rkp[l].total), borderColor: '#3b82f6', backgroundColor: gradTotal, tension: 0.4, borderWidth: 3.5, fill: true, pointRadius: 2 },
+                        { label: 'Provite', data: labelsData.map(l => rkp[l].provite), borderColor: '#10b981', backgroundColor: gradProvite, tension: 0.4, borderWidth: 3.5, fill: true, pointRadius: 2 },
+                        { label: 'Konsumen', data: labelsData.map(l => rkp[l].konsumen), borderColor: '#f59e0b', tension: 0.4, borderWidth: 2, fill: false, pointRadius: 0 },
+                        { label: 'Reseller', data: labelsData.map(l => rkp[l].reseller), borderColor: '#f43f5e', tension: 0.4, borderWidth: 2, fill: false, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, padding: 18, font: { weight: 'bold', size: 11 } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                            padding: 12,
+                            cornerRadius: 12,
+                            callbacks: { label: c => `${c.dataset.label}: ${formatRp(c.parsed.y)}` }
+                        }
+                    },
+                    scales: {
+                        y: { border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'Rp ' + formatK(v), font: { weight: '600' } } },
+                        x: { grid: { display: false }, ticks: { font: { weight: '600' } } }
+                    }
+                }
+            });
+            sinkronisasiUIDash();
+        }
+
+        // ==============================================================
+        // TABEL RANKING PENJUALAN SARIMBIT DARI REFERENSI
+        // ==============================================================
+        function renderTabelGrafik2() {
+            const dataSemesta = filterItemByWaktuDanToko([...rawData, ...rawArsip]);
+            const rkp = {};
+            let gtO = 0, gtP = 0, gtPcs = 0;
+
+            dataSemesta.forEach(d => {
+                const srm = (d.sarimbit && d.sarimbit !== '-' && d.sarimbit !== '') ? d.sarimbit : 'Tanpa Sarimbit';
+                if (!rkp[srm]) {
+                    rkp[srm] = { nama: srm, pcs: 0, omset: 0, provite: 0, persen: getPersenMargin(srm) };
+                }
+                const prv = hitungProvite(d.netTotal, srm);
+                rkp[srm].pcs += d.pcs;
+                rkp[srm].omset += d.netTotal;
+                rkp[srm].provite += prv;
+                gtPcs += d.pcs;
+                gtO += d.netTotal;
+                gtP += prv;
+            });
+
+            const sortedRank = Object.values(rkp).sort((a, b) => b.omset - a.omset);
+            const limit = isTableRankingExpanded ? 9999 : 10;
+            const tampilRank = sortedRank.slice(0, limit);
+
+            let html = '';
+            tampilRank.forEach((item, idx) => {
+                let rankIkon = idx === 0
+                    ? '<i class="fa-solid fa-medal text-yellow-500 mr-2.5 text-lg"></i>'
+                    : (idx === 1
+                        ? '<i class="fa-solid fa-medal text-slate-400 mr-2.5 text-lg"></i>'
+                        : (idx === 2
+                            ? '<i class="fa-solid fa-medal text-amber-600 mr-2.5 text-lg"></i>'
+                            : '<span class="mr-3 text-slate-400 font-extrabold text-xs">' + (idx + 1) + '.</span>'));
+
+                const safeName = item.nama.replace(/'/g, "\\'");
+                html += `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-5 py-4 font-extrabold text-slate-700 flex items-center whitespace-nowrap">${rankIkon} ${item.nama}</td>
+                        <td class="px-5 py-4 text-center font-bold text-slate-600 whitespace-nowrap">${formatTitik(item.pcs)} Pcs</td>
+                        <td class="px-5 py-4 text-right font-black text-brand-600 whitespace-nowrap">${formatRp(item.omset)}</td>
+                        <td class="px-5 py-4 text-center whitespace-nowrap">
+                            <button onclick="pilihEditMargin('${safeName}', ${item.persen})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-lg font-extrabold text-xs transition-colors" title="Klik untuk ubah margin">
+                                ${item.persen}% <i class="fa-solid fa-pen text-[9px] ml-1 opacity-60"></i>
+                            </button>
+                        </td>
+                        <td class="px-5 py-4 text-right font-black text-emerald-600 whitespace-nowrap">${formatRp(item.provite)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('bodyTabelGrafik2').innerHTML = html || '<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold">Belum ada ranking sarimbit pada periode ini.</td></tr>';
+            document.getElementById('footTabelGrafik2').innerHTML = html ? `
+                <tr>
+                    <td class="px-5 py-5 uppercase text-[11px] font-black">TOTAL KESELURUHAN (${sortedRank.length} Koleksi)</td>
+                    <td class="px-5 py-5 text-center text-[14px] font-black text-slate-800 whitespace-nowrap">${formatTitik(gtPcs)} Pcs</td>
+                    <td class="px-5 py-5 text-right text-[15px] font-black text-brand-700 whitespace-nowrap">${formatRp(gtO)}</td>
+                    <td></td>
+                    <td class="px-5 py-5 text-right text-[15px] font-black text-emerald-700 whitespace-nowrap">${formatRp(gtP)}</td>
+                </tr>` : '';
+
+            document.getElementById('btn-container-ranking').classList.toggle('hidden', sortedRank.length <= 10);
+        }
+
         function renderPieChart(canvasId, chartLabels, chartData, bgColors) {
             try {
                 const canvasElement = document.getElementById(canvasId);
@@ -584,31 +1361,18 @@
                     type: 'doughnut',
                     data: {
                         labels: chartLabels,
-                        datasets: [{
-                            data: chartData,
-                            backgroundColor: bgColors,
-                            borderWidth: 0,
-                            hoverOffset: 4
-                        }]
+                        datasets: [{ data: chartData, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4 }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '75%', // Lubang tengah lebih besar ala UI modern
+                        cutout: '72%',
                         plugins: {
-                            legend: { 
-                                position: 'right', 
-                                labels: { font: { weight: '600', size: 12, family: 'Inter' }, padding: 15, color: '#475569', usePointStyle: true, pointStyle: 'circle' } 
-                            },
+                            legend: { position: 'right', labels: { font: { weight: '700', size: 11 }, padding: 14, color: '#475569', usePointStyle: true, pointStyle: 'circle' } },
                             tooltip: {
-                                backgroundColor: '#ffffff', 
-                                titleColor: '#1e293b', bodyColor: '#475569',
-                                borderColor: '#e2e8f0', borderWidth: 1,
-                                padding: 12, cornerRadius: 12,
-                                titleFont: { size: 13, family: 'Inter' }, bodyFont: { size: 14, weight: 'bold', family: 'Inter' },
-                                callbacks: {
-                                    label: function(context) { return ' Rp ' + formatK(context.raw); }
-                                }
+                                backgroundColor: '#ffffff', titleColor: '#1e293b', bodyColor: '#475569',
+                                borderColor: '#e2e8f0', borderWidth: 1, padding: 12, cornerRadius: 12,
+                                callbacks: { label: context => ' ' + formatRp(context.raw) }
                             }
                         }
                     }
@@ -629,13 +1393,13 @@
                         labels: labels,
                         datasets: [
                             {
-                                type: 'line', label: 'QTY', data: dataQty,
+                                type: 'line', label: 'Total PCS', data: dataQty,
                                 borderColor: '#f43f5e', backgroundColor: '#f43f5e', borderWidth: 3, tension: 0.4,
-                                yAxisID: 'y1', pointBackgroundColor: '#ffffff', pointBorderColor: '#f43f5e', pointBorderWidth: 2, pointRadius: 5, z: 10 
+                                yAxisID: 'y1', pointBackgroundColor: '#ffffff', pointBorderColor: '#f43f5e', pointBorderWidth: 2, pointRadius: 4, z: 10 
                             },
                             {
-                                type: 'bar', label: 'Omset', data: dataOmset,
-                                backgroundColor: '#3b82f6', borderRadius: 4, yAxisID: 'y', barPercentage: 0.4, z: 1
+                                type: 'bar', label: 'Omset Netto', data: dataOmset,
+                                backgroundColor: '#047857', borderRadius: 6, yAxisID: 'y', barPercentage: 0.45, z: 1
                             }
                         ]
                     },
@@ -643,15 +1407,14 @@
                         responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                         scales: {
                             x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: '600' } } },
-                            y: { type: 'linear', display: true, position: 'left', border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { font: { weight: '600' }, color: '#94a3b8' } },
-                            y1: { type: 'linear', display: false, position: 'right' }
+                            y: { type: 'linear', display: true, position: 'left', border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'Rp ' + formatK(v), font: { weight: '600' }, color: '#64748b' } },
+                            y1: { type: 'linear', display: true, position: 'right', border: { display: false }, grid: { display: false }, ticks: { callback: v => v + ' Pcs', font: { weight: '600' }, color: '#f43f5e' } }
                         },
                         plugins: {
-                            legend: { display: false },
+                            legend: { display: true, position: 'top', labels: { usePointStyle: true, font: { weight: 'bold', size: 11 } } },
                             tooltip: {
                                 backgroundColor: '#ffffff', titleColor: '#1e293b', bodyColor: '#475569',
-                                borderColor: '#e2e8f0', borderWidth: 1, padding: 12, cornerRadius: 12,
-                                titleFont: { size: 13, family: 'Inter' }, bodyFont: { size: 14, weight: 'bold', family: 'Inter' }
+                                borderColor: '#e2e8f0', borderWidth: 1, padding: 12, cornerRadius: 12
                             }
                         }
                     }
@@ -662,131 +1425,480 @@
         function updateDashboard() {
             try {
                 const data = getFilteredData(); 
-                
-                let arsipFiltered = rawArsip;
-                if (currentFilter !== 'Semua') arsipFiltered = arsipFiltered.filter(d => d.toko === currentFilter);
-                const bulanFilter = document.getElementById('filterBulan').value;
-                if (bulanFilter !== 'Semua') {
-                    arsipFiltered = arsipFiltered.filter(d => d.tanggal && d.tanggal.substring(0, 7) === bulanFilter);
-                }
-
+                const arsipFiltered = filterItemByWaktuDanToko(rawArsip);
                 const dataSemesta = [...data, ...arsipFiltered];
                 
-                const idTerfilter = [...new Set(dataSemesta.map(d => d.idcustomer))];
-                let totalDanaMasuk = 0;
-                
+                // Hitung Dana Masuk Unik per Invoice (Customer)
                 const uniqueOrders = new Map();
+                const uniqueDiscountedInvoices = new Set();
                 dataSemesta.forEach(item => {
-                    if (idTerfilter.includes(item.idcustomer) && !uniqueOrders.has(item.idcustomer)) {
-                        uniqueOrders.set(item.idcustomer, item.cicilan1 + item.cicilan2 + item.cicilan3);
-                        totalDanaMasuk += (item.cicilan1 + item.cicilan2 + item.cicilan3);
+                    if (!uniqueOrders.has(item.idcustomer)) {
+                        uniqueOrders.set(item.idcustomer, item.danaMasukInvoice || 0);
+                    }
+                    if (item.potongan > 0) {
+                        uniqueDiscountedInvoices.add(item.idcustomer);
                     }
                 });
 
-                const totalPcs = dataSemesta.reduce((sum, item) => sum + item.pcs, 0);
-                const totalNilaiOrder = dataSemesta.reduce((sum, item) => sum + item.netTotal, 0); 
-                const sisaTagihan = totalNilaiOrder - totalDanaMasuk;
-                const aov = uniqueOrders.size > 0 ? (totalNilaiOrder / uniqueOrders.size) : 0;
+                let totalDanaMasuk = 0;
+                uniqueOrders.forEach(val => totalDanaMasuk += val);
 
-               // ==============================================================
-                // REVISI 1: TARGET TAHUNAN (MENGGUNAKAN NILAI PESANAN/OMSET)
-                // ==============================================================
+                const totalPcs = dataSemesta.reduce((sum, item) => sum + item.pcs, 0);
+                const totalBruto = dataSemesta.reduce((sum, item) => sum + (item.brutoTotal || item.netTotal), 0);
+                const totalDiskon = dataSemesta.reduce((sum, item) => sum + (item.potongan || 0), 0);
+                const totalNilaiOrder = dataSemesta.reduce((sum, item) => sum + item.netTotal, 0); 
+                const totalProvite = dataSemesta.reduce((sum, item) => sum + hitungProvite(item.netTotal, item.sarimbit), 0);
+                const sisaTagihan = Math.max(0, totalNilaiOrder - totalDanaMasuk);
+
+               // 1. UPDATE 3 KARTU UTAMA DARI MENU GRAFIK (MENGGUNAKAN FORMAT SINGKAT DI HP)
+               document.getElementById('dashOmset').innerText = formatSingkatResponsive(totalNilaiOrder);
+                document.getElementById('dashBrutoSub').innerText = `Bruto: ${formatSingkatResponsive(totalBruto)}`;
+                document.getElementById('dashDiskon').innerText = formatSingkatResponsive(totalDiskon);
+                document.getElementById('dashResellerCount').innerText = `${uniqueDiscountedInvoices.size} Nota Berdiskon`;
+                document.getElementById('dashProvite').innerText = formatSingkatResponsive(totalProvite);
+
+                // 2. UPDATE 4 KARTU KPI PENDUKUNG (PADDING DIKECILKAN DI HP LEWAT CLASS)
+                document.getElementById('kpiContainer').innerHTML = `
+                    <div class="glass-card p-4 md:p-5 flex flex-col justify-between rounded-2xl md:rounded-[24px]">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Total Terjual</span>
+                        <div class="text-[17px] md:text-2xl font-black text-slate-800 mt-1 tracking-tight">${formatTitik(totalPcs)} <span class="text-[10px] md:text-xs font-bold text-slate-400">Pcs</span></div>
+                    </div>
+                    <div class="glass-card p-4 md:p-5 flex flex-col justify-between rounded-2xl md:rounded-[24px]">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Total Pesanan</span>
+                        <div class="text-[17px] md:text-2xl font-black text-indigo-600 mt-1 tracking-tight">${formatTitik(uniqueOrders.size)} <span class="text-[10px] md:text-xs font-bold text-slate-400">Nota</span></div>
+                    </div>
+                    <div class="glass-card p-4 md:p-5 flex flex-col justify-between rounded-2xl md:rounded-[24px]">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Dana Masuk</span>
+                        <div class="text-[16px] md:text-xl font-black text-emerald-600 mt-1 tracking-tight">${formatSingkatResponsive(totalDanaMasuk)}</div>
+                    </div>
+                    <div class="glass-card p-4 md:p-5 flex flex-col justify-between rounded-2xl md:rounded-[24px]">
+                        <span class="text-[9px] md:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Sisa Piutang</span>
+                        <div class="text-[16px] md:text-xl font-black text-rose-500 mt-1 tracking-tight">${formatSingkatResponsive(sisaTagihan)}</div>
+                    </div>
+                `;
+
+                // 3. TARGET TAHUNAN (Rp 10 Miliar)
                 const TARGET_OMSET = 10000000000;
-                let persentase = (totalNilaiOrder / TARGET_OMSET) * 100;
-                if (persentase > 100) persentase = 100; 
-                
-                let kekurangan = TARGET_OMSET - totalNilaiOrder;
-                if (kekurangan < 0) kekurangan = 0;
+                let persentase = Math.min(100, (totalNilaiOrder / TARGET_OMSET) * 100);
+                let kekurangan = Math.max(0, TARGET_OMSET - totalNilaiOrder);
 
                 const omsetBar = document.getElementById('target-omset-bar');
                 if (omsetBar) {
-                    setTimeout(() => { omsetBar.style.width = persentase + '%'; }, 300); 
+                    setTimeout(() => { omsetBar.style.width = persentase + '%'; }, 200); 
                     document.getElementById('target-omset-percent').innerText = (totalNilaiOrder / TARGET_OMSET * 100).toFixed(1) + '% Tercapai';
-                    // Diubah dari totalDanaMasuk menjadi totalNilaiOrder:
                     document.getElementById('target-omset-current').innerText = formatRp(totalNilaiOrder);
                     document.getElementById('target-omset-lack').innerText = 'Kekurangan: ' + formatRp(kekurangan);
                 }
 
-                // ... (Script untuk KPI dan Donat tetap sama seperti sebelumnya) ...
-                
-                // RENDER GRAFIK DISTRIBUSI TOKO
+                // 4. UPDATE GRAFIK KURVA OMSET GLOBAL, PERFORMA SARIMBIT, & TABEL RANKING
+                updateChartGlobal(dataSemesta);
+                updateSarimbitChart();
+                renderTabelGrafik2();
+
+                // 5. UPDATE GRAFIK DISTRIBUSI TOKO & PELUNASAN
                 const dataPlatformMurni = dataSemesta.filter(d => d.toko && d.toko.trim() !== "" && d.toko.toLowerCase() !== "semua" && d.toko.toLowerCase() !== "pusat");
                 const tokoNames = [...new Set(dataPlatformMurni.map(d => d.toko))];
                 const omsetPerToko = tokoNames.map(t => dataPlatformMurni.filter(d => d.toko === t).reduce((s, x) => s + x.netTotal, 0));
                 
-                const tokoColors = ['#4ade80', '#60a5fa', '#c084fc', '#fbbf24', '#f87171'];
-                renderPieChart('canvasDistribusiToko', tokoNames, omsetPerToko, tokoColors);
-                renderPieChart('canvasStatusPelunasan', ['Telah Lunas', 'Belum Dibayar'], [totalDanaMasuk, sisaTagihan], ['#3b82f6', '#cbd5e1']);
+                renderPieChart('canvasDistribusiToko', tokoNames, omsetPerToko, ['#047857', '#3b82f6', '#8b5cf6', '#f59e0b', '#f43f5e']);
+                renderPieChart('canvasStatusPelunasan', ['Dana Masuk', 'Sisa Piutang'], [totalDanaMasuk, sisaTagihan], ['#10b981', '#cbd5e1']);
 
-                // ==============================================================
-                // REVISI 2: GRAFIK TREN OMSET & QTY (CERDAS: TAHUNAN / BULANAN)
-                // ==============================================================
-                let harianData = [...rawData, ...rawArsip];
-                if (currentFilter !== 'Semua') harianData = harianData.filter(d => d.toko === currentFilter);
-
-                let trendLabels = [];
-                let trendOmset = [];
-                let trendQty = [];
-                
-                // Urutkan data berdasarkan tanggal agar grafiknya maju ke depan
-                harianData.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+                // 6. GRAFIK KOMBINASI OMSET & PCS
+                const bulanFilter = document.getElementById('filterBulan').value;
+                let trendLabels = [], trendOmset = [], trendQty = [];
+                const sortedSemesta = [...dataSemesta].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
                 if (bulanFilter === 'Semua') {
-                    // MODE SEMUA BULAN: Tampilkan Rekap Per Bulan
-                    document.getElementById('judul-trend').innerText = "Tren Bulanan";
-                    document.getElementById('subjudul-trend').innerText = "Pergerakan omset dan kuantitas per bulan.";
-                    
+                    document.getElementById('judul-trend').innerText = "Kombinasi Tren Bulanan (Omset & PCS)";
                     const groupBulan = {};
-                    harianData.forEach(d => {
+                    sortedSemesta.forEach(d => {
                         if(!d.tanggal) return;
-                        const bln = d.tanggal.substring(0, 7); // Contoh: 2026-08
+                        const bln = d.tanggal.substring(0, 7);
                         if (!groupBulan[bln]) groupBulan[bln] = { omset: 0, qty: 0 };
                         groupBulan[bln].omset += d.netTotal;
                         groupBulan[bln].qty += d.pcs;
                     });
-                    
                     Object.keys(groupBulan).sort().forEach(bln => {
                         const dateObj = new Date(bln + '-01');
-                        trendLabels.push(dateObj.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })); // Hasil: "Ags 26"
+                        trendLabels.push(dateObj.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
                         trendOmset.push(groupBulan[bln].omset);
                         trendQty.push(groupBulan[bln].qty);
                     });
                 } else {
-                    // MODE BULAN SPESIFIK: Tampilkan Rekap Per Hari dalam bulan tersebut
-                    document.getElementById('judul-trend').innerText = "Tren Harian";
-                    document.getElementById('subjudul-trend').innerText = `Pergerakan omset dan kuantitas harian bulan ini.`;
-                    
+                    document.getElementById('judul-trend').innerText = "Kombinasi Tren Harian (Omset & PCS)";
                     const groupHari = {};
-                    harianData.filter(d => d.tanggal && d.tanggal.substring(0, 7) === bulanFilter).forEach(d => {
+                    sortedSemesta.forEach(d => {
+                        if(!d.tanggal) return;
                         const tgl = d.tanggal.substring(0, 10);
                         if (!groupHari[tgl]) groupHari[tgl] = { omset: 0, qty: 0 };
                         groupHari[tgl].omset += d.netTotal;
                         groupHari[tgl].qty += d.pcs;
                     });
-                    
                     Object.keys(groupHari).sort().forEach(tgl => {
                         const dateObj = new Date(tgl);
-                        trendLabels.push(dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })); // Hasil: "21 Ags"
+                        trendLabels.push(dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
                         trendOmset.push(groupHari[tgl].omset);
                         trendQty.push(groupHari[tgl].qty);
                     });
                 }
-
-                // Render grafik dengan data yang sudah diolah
                 renderMixedChart('canvasHarianMix', trendLabels, trendOmset, trendQty);
 
-                // ... (Script di bawah ini untuk render tabel tetap dibiarkan) ...
-                renderTable(data, false, 'tableBody', 'searchInput');
-                renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip');
+               // 7. UPDATE TABEL AKTIF, ARSIP, & ANALITIK PEMBUKUAN (DP/LUNAS)
+               renderTable(data, false, 'tableBody', 'searchInput');
+                renderTable(arsipFiltered, true, 'tableBodyArsip', 'searchInputArsip');
+                renderAnalitikPembukuan();
 
+                sinkronisasiUIDash();
             } catch (error) {
                 console.error("Gagal memperbarui Dashboard:", error);
             }
         }
 
-        // =============================================================
-        // DESAIN TABEL CANTIK
-        // =============================================================
+        let rawPembukuan = [];
+        let isTableBukuExpanded = false;
+        let filterKategoriBayarBuku = ''; // '', 'dp', atau 'lunas'
+        let filterNamaSarimbitBuku = '';  // nama sarimbit spesifik jika dipilih
+
+        function cekStatusBayarItemBuku(item) {
+            const dp = Number(item.dp) || 0;
+            const bayar = Number(item.bayar) || 0;
+            const terbayar = dp + bayar;
+            const omset = Number(item.omset) || 0;
+            if (bayar > 0 || (terbayar > 0 && omset > 0 && terbayar >= omset)) return 'lunas';
+            if (dp > 0) return 'dp';
+            return 'belum';
+        }
+
+        function resetFilterKhususBuku() {
+            filterKategoriBayarBuku = '';
+            filterNamaSarimbitBuku = '';
+        }
+
+        function toggleDropdownBukuDP(tipe) {
+            const menuDP = document.getElementById('menu-drop-dp-buku');
+            const menuLunas = document.getElementById('menu-drop-lunas-buku');
+            const chevDP = document.getElementById('chev-drop-dp-buku');
+            const chevLunas = document.getElementById('chev-drop-lunas-buku');
+
+            if (tipe === 'dp') {
+                if (menuLunas) menuLunas.classList.add('hidden');
+                if (chevLunas) chevLunas.style.transform = 'rotate(0deg)';
+                if (menuDP) {
+                    const isHidden = menuDP.classList.toggle('hidden');
+                    if (chevDP) chevDP.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                    if (!isHidden) setTimeout(() => document.getElementById('cari-drop-dp-buku')?.focus(), 50);
+                }
+            } else {
+                if (menuDP) menuDP.classList.add('hidden');
+                if (chevDP) chevDP.style.transform = 'rotate(0deg)';
+                if (menuLunas) {
+                    const isHidden = menuLunas.classList.toggle('hidden');
+                    if (chevLunas) chevLunas.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                    if (!isHidden) setTimeout(() => document.getElementById('cari-drop-lunas-buku')?.focus(), 50);
+                }
+            }
+        }
+
+        function tutupDropdownBukuDP() {
+            document.getElementById('menu-drop-dp-buku')?.classList.add('hidden');
+            document.getElementById('menu-drop-lunas-buku')?.classList.add('hidden');
+            const chevDP = document.getElementById('chev-drop-dp-buku');
+            const chevLunas = document.getElementById('chev-drop-lunas-buku');
+            if (chevDP) chevDP.style.transform = 'rotate(0deg)';
+            if (chevLunas) chevLunas.style.transform = 'rotate(0deg)';
+        }
+
+        function pilihFilterBukuDP(kategori, namaSarimbit = '') {
+            filterKategoriBayarBuku = kategori;
+            filterNamaSarimbitBuku = namaSarimbit;
+            tutupDropdownBukuDP();
+            renderAnalitikPembukuan();
+        }
+
+        function saringListDropdownBuku(tipe) {
+            const q = (document.getElementById(`cari-drop-${tipe}-buku`)?.value || '').toLowerCase();
+            const container = document.getElementById(`list-drop-${tipe}-buku`);
+            if (!container) return;
+            container.querySelectorAll('.item-opsi-buku').forEach(btn => {
+                const nama = (btn.getAttribute('data-nama') || '').toLowerCase();
+                btn.classList.toggle('hidden', !nama.includes(q));
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            const wDP = document.getElementById('wadah-drop-dp-buku');
+            const wLunas = document.getElementById('wadah-drop-lunas-buku');
+            if (wDP && !wDP.contains(e.target) && wLunas && !wLunas.contains(e.target)) {
+                tutupDropdownBukuDP();
+            }
+        });
+
+        function populatePusatBukuFilter() {
+            const el = document.getElementById('filterPusatBukuDash');
+            if (!el) return;
+            const currentVal = el.value;
+            const brands = [...new Set(rawPembukuan.map(b => b.brand).filter(b => b && b !== '-'))].sort();
+            let html = `<option value="">Semua Pusat / Brand</option>`;
+            brands.forEach(b => {
+                html += `<option value="${b}" ${b === currentVal ? 'selected' : ''}>${b}</option>`;
+            });
+            el.innerHTML = html;
+        }
+
+        function renderAnalitikPembukuan() {
+            const tbody = document.getElementById('tableBodyBukuDash');
+            if (!tbody) return;
+
+            const statusFilter = document.getElementById('filterStatusBukuDash')?.value || 'semua';
+            const pusatFilter = document.getElementById('filterPusatBukuDash')?.value || '';
+            const search = (document.getElementById('searchBukuDash')?.value || '').toLowerCase();
+
+            // 1. Saring dasar berdasarkan Status (Aktif/Arsip) & Pusat/Brand untuk mengisi daftar di dalam Dropdown DP & Lunas
+            const baseFiltered = rawPembukuan.filter(item => {
+                if (statusFilter === 'aktif' && item.isArchived) return false;
+                if (statusFilter === 'arsip' && !item.isArchived) return false;
+                if (pusatFilter && item.brand !== pusatFilter) return false;
+                return true;
+            });
+
+            const listMasihDP = baseFiltered.filter(x => cekStatusBayarItemBuku(x) === 'dp').sort((a, b) => a.sarimbit.localeCompare(b.sarimbit));
+            const listSudahLunas = baseFiltered.filter(x => cekStatusBayarItemBuku(x) === 'lunas').sort((a, b) => a.sarimbit.localeCompare(b.sarimbit));
+
+            // Bangun isi Dropdown "Masih DP"
+            const elListDP = document.getElementById('list-drop-dp-buku');
+            if (elListDP) {
+                let htmlDP = `
+                    <button type="button" onclick="pilihFilterBukuDP('', '')" class="flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-[11px] font-extrabold ${filterKategoriBayarBuku === '' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:bg-slate-50'}">
+                        <span>🔄 Reset / Tampilkan Semua</span>
+                    </button>
+                    <button type="button" onclick="pilihFilterBukuDP('dp', '')" class="flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-[11px] font-extrabold ${filterKategoriBayarBuku === 'dp' && !filterNamaSarimbitBuku ? 'bg-blue-600 text-white shadow-sm' : 'bg-blue-50/70 text-blue-700 hover:bg-blue-100'}">
+                        <span>🔵 Semua Masih DP (${listMasihDP.length} Sarimbit)</span>
+                        ${filterKategoriBayarBuku === 'dp' && !filterNamaSarimbitBuku ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+                    </button>
+                    <div class="border-t border-slate-100 my-1"></div>
+                `;
+                if (listMasihDP.length === 0) {
+                    htmlDP += `<div class="p-3 text-center text-[11px] font-bold text-slate-400">Tidak ada sarimbit yang masih DP</div>`;
+                } else {
+                    listMasihDP.forEach((item, idx) => {
+                        const safeName = item.sarimbit.replace(/'/g, "\\'");
+                        const isSelected = filterKategoriBayarBuku === 'dp' && filterNamaSarimbitBuku === item.sarimbit;
+                        htmlDP += `
+                            <button type="button" data-nama="${item.sarimbit}" onclick="pilihFilterBukuDP('dp', '${safeName}')" class="item-opsi-buku flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-[11px] font-bold transition-all ${isSelected ? 'bg-blue-600 text-white shadow-sm' : 'hover:bg-blue-50 text-slate-700'}">
+                                <span class="truncate pr-2">${idx + 1}. ${item.sarimbit}</span>
+                                <span class="text-[10px] font-extrabold shrink-0 ${isSelected ? 'text-blue-100' : 'text-blue-600'}">Rp ${formatK(item.dp)}</span>
+                            </button>
+                        `;
+                    });
+                }
+                elListDP.innerHTML = htmlDP;
+            }
+
+            // Bangun isi Dropdown "Sudah Lunas"
+            const elListLunas = document.getElementById('list-drop-lunas-buku');
+            if (elListLunas) {
+                let htmlLunas = `
+                    <button type="button" onclick="pilihFilterBukuDP('', '')" class="flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-[11px] font-extrabold ${filterKategoriBayarBuku === '' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:bg-slate-50'}">
+                        <span>🔄 Reset / Tampilkan Semua</span>
+                    </button>
+                    <button type="button" onclick="pilihFilterBukuDP('lunas', '')" class="flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-[11px] font-extrabold ${filterKategoriBayarBuku === 'lunas' && !filterNamaSarimbitBuku ? 'bg-emerald-700 text-white shadow-sm' : 'bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100'}">
+                        <span>🟢 Semua Sudah Lunas (${listSudahLunas.length} Sarimbit)</span>
+                        ${filterKategoriBayarBuku === 'lunas' && !filterNamaSarimbitBuku ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+                    </button>
+                    <div class="border-t border-slate-100 my-1"></div>
+                `;
+                if (listSudahLunas.length === 0) {
+                    htmlLunas += `<div class="p-3 text-center text-[11px] font-bold text-slate-400">Tidak ada sarimbit yang lunas</div>`;
+                } else {
+                    listSudahLunas.forEach((item, idx) => {
+                        const safeName = item.sarimbit.replace(/'/g, "\\'");
+                        const isSelected = filterKategoriBayarBuku === 'lunas' && filterNamaSarimbitBuku === item.sarimbit;
+                        const nominalTampil = item.bayar > 0 ? item.bayar : item.dp;
+                        htmlLunas += `
+                            <button type="button" data-nama="${item.sarimbit}" onclick="pilihFilterBukuDP('lunas', '${safeName}')" class="item-opsi-buku flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-[11px] font-bold transition-all ${isSelected ? 'bg-emerald-700 text-white shadow-sm' : 'hover:bg-emerald-50 text-slate-700'}">
+                                <span class="truncate pr-2">${idx + 1}. ${item.sarimbit}</span>
+                                <span class="text-[10px] font-extrabold shrink-0 ${isSelected ? 'text-emerald-100' : 'text-emerald-700'}">Rp ${formatK(nominalTampil)}</span>
+                            </button>
+                        `;
+                    });
+                }
+                elListLunas.innerHTML = htmlLunas;
+            }
+
+            // Update Label & Warna Tombol Dropdown DP & Lunas
+            const btnDP = document.getElementById('btn-drop-dp-buku');
+            const lblDP = document.getElementById('label-drop-dp-buku');
+            const btnLunas = document.getElementById('btn-drop-lunas-buku');
+            const lblLunas = document.getElementById('label-drop-lunas-buku');
+
+            if (lblDP && btnDP) {
+                if (filterKategoriBayarBuku === 'dp') {
+                    lblDP.innerText = filterNamaSarimbitBuku ? `DP: ${filterNamaSarimbitBuku}` : `Semua Masih DP (${listMasihDP.length})`;
+                    btnDP.className = "w-full sm:w-auto h-10 px-4 rounded-full bg-blue-600 text-white border border-blue-600 text-xs font-extrabold flex items-center justify-between gap-2.5 transition-all shadow-md cursor-pointer";
+                } else {
+                    lblDP.innerText = `Masih DP (${listMasihDP.length})`;
+                    btnDP.className = "w-full sm:w-auto h-10 px-4 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold flex items-center justify-between gap-2.5 transition-all shadow-sm cursor-pointer";
+                }
+            }
+
+            if (lblLunas && btnLunas) {
+                if (filterKategoriBayarBuku === 'lunas') {
+                    lblLunas.innerText = filterNamaSarimbitBuku ? `Lunas: ${filterNamaSarimbitBuku}` : `Semua Lunas (${listSudahLunas.length})`;
+                    btnLunas.className = "w-full sm:w-auto h-10 px-4 rounded-full bg-gradient-to-r from-emerald-700 to-emerald-900 text-white border border-transparent text-xs font-extrabold flex items-center justify-between gap-2.5 transition-all shadow-md cursor-pointer";
+                } else {
+                    lblLunas.innerText = `Sudah Lunas (${listSudahLunas.length})`;
+                    btnLunas.className = "w-full sm:w-auto h-10 px-4 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold flex items-center justify-between gap-2.5 transition-all shadow-sm cursor-pointer";
+                }
+            }
+
+            // 2. Saring penuh untuk Kartu, Grafik, & Tabel berdasarkan pilihan Dropdown DP / Lunas & Pencarian
+            const filtered = baseFiltered.filter(item => {
+                if (filterKategoriBayarBuku && cekStatusBayarItemBuku(item) !== filterKategoriBayarBuku) return false;
+                if (filterNamaSarimbitBuku && item.sarimbit !== filterNamaSarimbitBuku) return false;
+                if (search && !item.sarimbit.toLowerCase().includes(search) && !(item.brand || '').toLowerCase().includes(search)) return false;
+                return true;
+            });
+
+            let totDP = 0, totLunas = 0, totOmset = 0, totPcs = 0;
+            let countSudahDP = 0, countSudahLunas = 0, countBelumBayar = 0;
+
+            filtered.forEach(item => {
+                const dp = Number(item.dp) || 0;
+                const bayar = Number(item.bayar) || 0;
+                const omset = Number(item.omset) || 0;
+                const st = cekStatusBayarItemBuku(item);
+
+                totDP += dp;
+                totLunas += bayar;
+                totOmset += omset;
+                totPcs += (Number(item.pcs) || 0);
+
+                if (st === 'lunas') countSudahLunas++;
+                else if (st === 'dp') countSudahDP++;
+                else countBelumBayar++;
+            });
+
+            const totGabungan = totDP + totLunas;
+            const totSisa = Math.max(0, totOmset - totGabungan);
+
+            // Update 4 Kartu Ringkasan Pembukuan
+            document.getElementById('bukuTotDP').innerText = formatSingkatResponsive(totDP);
+            document.getElementById('bukuTotLunas').innerText = formatSingkatResponsive(totLunas);
+            document.getElementById('bukuTotGabungan').innerText = formatSingkatResponsive(totGabungan);
+            document.getElementById('bukuTotSisa').innerText = formatSingkatResponsive(totSisa);
+
+            document.getElementById('badgeCountDPBuku').innerText = `${countSudahDP} Masih DP`;
+            document.getElementById('badgeCountLunasBuku').innerText = `${countSudahLunas} Lunas`;
+            document.getElementById('badgeCountBlmBuku').innerText = `${countBelumBayar} Belum`;
+
+            // Render Diagram Donat Proporsi Pembayaran Pembukuan
+            renderPieChart(
+                'canvasDonatBukuDP',
+                ['Setoran DP', 'Setoran Lunas', 'Sisa Belum Setor'],
+                [totDP, totLunas, totSisa],
+                ['#3b82f6', '#10b981', '#e2e8f0']
+            );
+
+            // Render Diagram Batang Komparasi DP vs Lunas per Koleksi (Top 10 Koleksi)
+            const sortedForChart = [...filtered]
+                .sort((a, b) => ((b.dp + b.bayar) - (a.dp + a.bayar)) || (b.pcs - a.pcs))
+                .slice(0, 10);
+
+            const ctxBar = document.getElementById('canvasBarBukuDP')?.getContext('2d');
+            if (ctxBar) {
+                if (charts['canvasBarBukuDP']) charts['canvasBarBukuDP'].destroy();
+                charts['canvasBarBukuDP'] = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedForChart.map(x => x.sarimbit.length > 14 ? x.sarimbit.substring(0, 14) + '…' : x.sarimbit),
+                        datasets: [
+                            {
+                                label: 'Nominal DP',
+                                data: sortedForChart.map(x => x.dp),
+                                backgroundColor: '#3b82f6',
+                                borderRadius: 5,
+                                barPercentage: 0.65
+                            },
+                            {
+                                label: 'Nominal Lunas',
+                                data: sortedForChart.map(x => x.bayar),
+                                backgroundColor: '#10b981',
+                                borderRadius: 5,
+                                barPercentage: 0.65
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 10, weight: '700' } } },
+                            y: { beginAtZero: true, border: { display: false }, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'Rp ' + formatK(v), font: { size: 10, weight: '600' } } }
+                        },
+                        plugins: {
+                            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11, weight: 'bold' } } },
+                            tooltip: {
+                                backgroundColor: '#ffffff', titleColor: '#1e293b', bodyColor: '#475569',
+                                borderColor: '#e2e8f0', borderWidth: 1, padding: 10, cornerRadius: 10,
+                                callbacks: { label: c => `${c.dataset.label}: ${formatRp(c.raw)}` }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Render Tabel Rincian Pembayaran Pembukuan
+            const sortedTable = [...filtered].sort((a, b) => (b.dp + b.bayar) - (a.dp + a.bayar));
+            const limit = isTableBukuExpanded ? 9999 : 8;
+            const tampil = sortedTable.slice(0, limit);
+
+            let html = '';
+            tampil.forEach(item => {
+                const dp = Number(item.dp) || 0;
+                const bayar = Number(item.bayar) || 0;
+                const totBayar = dp + bayar;
+                const st = cekStatusBayarItemBuku(item);
+
+                let statusBadge = `<span class="bg-rose-50 text-rose-600 border border-rose-200 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase">Belum Setor</span>`;
+                if (st === 'lunas') {
+                    statusBadge = `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase"><i class="fa-solid fa-check-double mr-1"></i>Sudah Lunas</span>`;
+                } else if (st === 'dp') {
+                    statusBadge = `<span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase"><i class="fa-solid fa-clock mr-1"></i>Masih DP</span>`;
+                }
+
+                html += `
+                    <tr>
+                        <td class="pl-5 font-extrabold text-slate-800">
+                            ${item.sarimbit}
+                            ${item.isArchived ? '<span class="ml-1.5 text-[8px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-black uppercase">Arsip</span>' : ''}
+                        </td>
+                        <td class="text-slate-500 font-bold text-xs uppercase">${item.brand || '-'}</td>
+                        <td class="text-center font-bold text-slate-600">${formatTitik(item.pcs)}</td>
+                        <td class="text-right font-extrabold text-blue-600">${formatRp(dp)}</td>
+                        <td class="text-right font-extrabold text-emerald-700">${formatRp(bayar)}</td>
+                        <td class="text-right font-black text-slate-800">${formatRp(totBayar)}</td>
+                        <td class="text-center pr-5">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html || `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">Tidak ada koleksi sarimbit yang sesuai filter.</td></tr>`;
+            document.getElementById('tableFootBukuDash').innerHTML = html ? `
+                <tr>
+                    <td colspan="2" class="pl-5 py-4 text-[11px] font-black text-slate-800 uppercase">TOTAL (${sortedTable.length} Koleksi)</td>
+                    <td class="text-center py-4 font-black text-slate-800">${formatTitik(totPcs)}</td>
+                    <td class="text-right py-4 font-black text-blue-600">${formatRp(totDP)}</td>
+                    <td class="text-right py-4 font-black text-emerald-700">${formatRp(totLunas)}</td>
+                    <td class="text-right py-4 font-black text-indigo-700">${formatRp(totGabungan)}</td>
+                    <td></td>
+                </tr>
+            ` : '';
+
+            const btnCont = document.getElementById('btn-container-buku-dash');
+            if (btnCont) btnCont.classList.toggle('hidden', sortedTable.length <= 8);
+        }
+
         function renderTable(data, isArchivedTable, tableBodyId, searchInputId) {
             const tbody = document.getElementById(tableBodyId);
             const search = document.getElementById(searchInputId).value.toLowerCase();
@@ -807,10 +1919,10 @@
                 const tOrder = items.reduce((s, x) => s + x.netTotal, 0);
                 
                 const uniqueCust = new Map();
-                items.forEach(it => { if (!uniqueCust.has(it.idcustomer)) uniqueCust.set(it.idcustomer, it.cicilan1 + it.cicilan2 + it.cicilan3); });
+                items.forEach(it => { if (!uniqueCust.has(it.idcustomer)) uniqueCust.set(it.idcustomer, it.danaMasukInvoice || 0); });
                 
                 let tMasuk = 0; uniqueCust.forEach(val => tMasuk += val);
-                const tSisa = isArchivedTable ? 0 : (tOrder - tMasuk);
+                const tSisa = isArchivedTable ? 0 : Math.max(0, tOrder - tMasuk);
 
                 grandTotalPcs += tPcs; grandTotalOrder += tOrder; grandTotalMasuk += tMasuk; grandTotalSisa += tSisa;
 
@@ -848,11 +1960,258 @@
             document.getElementById(isArchivedTable ? 'btn-container-arsip' : 'btn-container-aktif').classList.toggle('hidden', matchingNamesCount <= 5);
         }
 
-        function formatTitik(angka) { return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
         document.getElementById('searchInput').addEventListener('keyup', () => renderTable(getFilteredData(), false, 'tableBody', 'searchInput'));
-        document.getElementById('searchInputArsip').addEventListener('keyup', () => renderTable(rawArsip, true, 'tableBodyArsip', 'searchInputArsip'));
+        document.getElementById('searchInputArsip').addEventListener('keyup', () => renderTable(filterItemByWaktuDanToko(rawArsip), true, 'tableBodyArsip', 'searchInputArsip'));
 
-        function downloadPDF() { alert("Fitur unduh diaktifkan jika dibuka lewat komputer/tablet."); }
+        // ==============================================================
+        // MODAL PARAMETER MARGIN PROVITE SARIMBIT (%)
+        // ==============================================================
+        function bukaModalMargin() {
+            renderTabelMarginModal();
+            const m = document.getElementById('modalMarginProvite');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function tutupModalMargin() {
+            const m = document.getElementById('modalMarginProvite');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function pilihEditMargin(nama, persen) {
+            bukaModalMargin();
+            document.getElementById('inputMarginNama').value = nama;
+            document.getElementById('inputMarginPersen').value = persen;
+            document.getElementById('inputMarginPersen').focus();
+        }
+
+        function simpanMarginSarimbit(e) {
+            e.preventDefault();
+            const nama = document.getElementById('inputMarginNama').value.trim();
+            const persen = parseFloat(document.getElementById('inputMarginPersen').value) || 0;
+            if (!nama) return;
+
+            const idx = globalPengaturan.findIndex(i => i.namaSarimbit.trim().toLowerCase() === nama.toLowerCase());
+            if (idx !== -1) globalPengaturan[idx].persentase = persen;
+            else globalPengaturan.push({ namaSarimbit: nama, persentase: persen });
+
+            localStorage.setItem('MarginProviteSarimbit', JSON.stringify(globalPengaturan));
+            document.getElementById('formMarginProvite').reset();
+            renderTabelMarginModal();
+            updateDashboard();
+        }
+
+        function hapusMarginSarimbit(nama) {
+            globalPengaturan = globalPengaturan.filter(i => i.namaSarimbit.trim().toLowerCase() !== nama.trim().toLowerCase());
+            localStorage.setItem('MarginProviteSarimbit', JSON.stringify(globalPengaturan));
+            renderTabelMarginModal();
+            updateDashboard();
+        }
+
+        function renderTabelMarginModal() {
+            const tbody = document.getElementById('bodyTabelMargin');
+            const sorted = [...globalPengaturan].sort((a, b) => a.namaSarimbit.localeCompare(b.namaSarimbit));
+            tbody.innerHTML = sorted.map(item => {
+                const safeName = item.namaSarimbit.replace(/'/g, "\\'");
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3 font-bold text-slate-700">${item.namaSarimbit}</td>
+                        <td class="px-4 py-3 text-center"><span class="bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg">${item.persentase}%</span></td>
+                        <td class="px-4 py-3 text-center flex justify-center gap-1.5">
+                            <button type="button" onclick="pilihEditMargin('${safeName}', ${item.persentase})" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-bold hover:bg-blue-100">Edit</button>
+                            <button type="button" onclick="hapusMarginSarimbit('${safeName}')" class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg font-bold hover:bg-rose-100">Reset</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="3" class="p-6 text-center text-slate-400 font-bold">Semua koleksi menggunakan margin default 30%.</td></tr>';
+        }
+
+        // ==============================================================
+        // UNDUH LAPORAN PDF ANALITIK & RANKING SARIMBIT
+        // ==============================================================
+        function downloadPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const dataSemesta = filterItemByWaktuDanToko([...rawData, ...rawArsip]);
+
+                if (dataSemesta.length === 0) {
+                    alert("Tidak ada data pada periode filter ini untuk diunduh.");
+                    return;
+                }
+
+                doc.setFontSize(15);
+                doc.text("LAPORAN ANALITIK OMSET & PROVITE SARIMBIT", 14, 16);
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                const bln = document.getElementById('filterBulan').value;
+                doc.text(`Toko: ${currentFilter}   |   Periode: ${bln}   |   Dicetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 22);
+
+                const rkp = {};
+                let gtPcs = 0, gtO = 0, gtP = 0;
+                dataSemesta.forEach(d => {
+                    const srm = d.sarimbit || 'Lainnya';
+                    if (!rkp[srm]) rkp[srm] = { nama: srm, pcs: 0, omset: 0, provite: 0, persen: getPersenMargin(srm) };
+                    const prv = hitungProvite(d.netTotal, srm);
+                    rkp[srm].pcs += d.pcs;
+                    rkp[srm].omset += d.netTotal;
+                    rkp[srm].provite += prv;
+                    gtPcs += d.pcs;
+                    gtO += d.netTotal;
+                    gtP += prv;
+                });
+
+                const rows = Object.values(rkp).sort((a, b) => b.omset - a.omset).map((item, i) => [
+                    i + 1,
+                    item.nama,
+                    formatTitik(item.pcs) + ' Pcs',
+                    formatRp(item.omset),
+                    item.persen + '%',
+                    formatRp(item.provite)
+                ]);
+
+                rows.push([
+                    { content: 'TOTAL KESELURUHAN', colSpan: 2, styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
+                    { content: formatTitik(gtPcs) + ' Pcs', styles: { fontStyle: 'bold', halign: 'center', fillColor: [241, 245, 249] } },
+                    { content: formatRp(gtO), styles: { fontStyle: 'bold', halign: 'right', fillColor: [241, 245, 249] } },
+                    { content: '-', styles: { halign: 'center', fillColor: [241, 245, 249] } },
+                    { content: formatRp(gtP), styles: { fontStyle: 'bold', halign: 'right', fillColor: [241, 245, 249] } }
+                ]);
+
+                doc.autoTable({
+                    startY: 27,
+                    head: [['No', 'Nama Koleksi Sarimbit', 'Total PCS', 'Total Omset Netto', 'Margin', 'Total Provite']],
+                    body: rows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [4, 120, 87] },
+                    styles: { fontSize: 8.5 },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 10 },
+                        2: { halign: 'center' },
+                        3: { halign: 'right' },
+                        4: { halign: 'center' },
+                        5: { halign: 'right' }
+                    }
+                });
+
+                doc.save(`Analitik_Omset_Sarimbit_${currentFilter}.pdf`);
+            } catch (err) {
+                alert("Gagal mengunduh PDF: " + err.message);
+            }
+        }
+
+        // ==============================================================
+        // MESIN CUSTOM DROPDOWN GLASSMORPHISM HIJAU TUA (DASHBOARD)
+        // ==============================================================
+        const TIPE_DROPDOWN_DASH = ['bulan', 'jenis', 'sarimbit'];
+
+        function tutupSemuaDropdownDash(kecuali = null) {
+            TIPE_DROPDOWN_DASH.forEach(t => {
+                const wadah = document.getElementById(`wadah-custom-${t}-dash`);
+                if (t === kecuali) {
+                    if (wadah) wadah.style.zIndex = "9999";
+                    return;
+                }
+                if (wadah) wadah.style.zIndex = "";
+                const drop = document.getElementById(`drop-${t}-dash`);
+                const chev = document.getElementById(`chevron-${t}-dash`);
+                if (drop && !drop.classList.contains('hidden')) {
+                    drop.classList.add('opacity-0', 'scale-95');
+                    if (chev) chev.style.transform = 'rotate(0deg)';
+                    setTimeout(() => drop.classList.add('hidden'), 180);
+                }
+            });
+        }
+
+        function toggleCustomDash(tipe) {
+            tutupSemuaDropdownDash(tipe);
+            sinkronisasiUIDash();
+            const drop = document.getElementById(`drop-${tipe}-dash`);
+            const chev = document.getElementById(`chevron-${tipe}-dash`);
+            if (!drop) return;
+
+            if (drop.classList.contains('hidden')) {
+                drop.classList.remove('hidden');
+                if (chev) chev.style.transform = 'rotate(180deg)';
+                setTimeout(() => drop.classList.remove('opacity-0', 'scale-95'), 10);
+            } else {
+                tutupSemuaDropdownDash();
+            }
+        }
+
+        function pilihCustomDash(tipe, nilai) {
+            const petaSelect = {
+                'bulan': 'filterBulan',
+                'jenis': 'jenisGrafik',
+                'sarimbit': 'filterSarimbitGrafik'
+            };
+            const sel = document.getElementById(petaSelect[tipe]);
+            if (sel) sel.value = nilai;
+            tutupSemuaDropdownDash();
+
+            if (tipe === 'sarimbit') updateSarimbitChart();
+            else updateDashboard();
+        }
+
+        function sinkronisasiUIDash() {
+            const warnaMati = ['ios-glass', 'text-slate-800'];
+            const warnaHidupHijau = ['bg-gradient-to-r', 'from-emerald-700', 'to-emerald-900', 'text-white', 'border-transparent', 'shadow-md'];
+
+            const bangunDropdown = (tipe, idSelect, idList, idLabel, idBtn, idChev, idIkon, defVal, ikonItem) => {
+                const sel = document.getElementById(idSelect);
+                const list = document.getElementById(idList);
+                const lbl = document.getElementById(idLabel);
+                const btn = document.getElementById(idBtn);
+                const chev = document.getElementById(idChev);
+                const ikon = document.getElementById(idIkon);
+                if (!sel || !list) return;
+
+                const valAktif = String(sel.value || '');
+                const semuaOpsi = Array.from(sel.options);
+
+                list.innerHTML = semuaOpsi.map(opt => {
+                    const nilai = opt.value;
+                    const aktif = nilai === valAktif;
+                    const safeVal = String(nilai).replace(/'/g, "\\'");
+                    return `
+                    <button type="button" onclick="pilihCustomDash('${tipe}', '${safeVal}')" class="flex items-center justify-between w-full text-left px-3.5 py-2.5 rounded-2xl transition-all text-xs font-extrabold ${aktif ? 'bg-gradient-to-r from-emerald-700 to-emerald-900 text-white shadow-sm' : 'hover:bg-emerald-50/80 text-slate-700 hover:text-emerald-800'}">
+                        <span class="flex items-center gap-2.5 truncate"><i class="fa-solid ${ikonItem} text-[10px] ${aktif ? 'text-white' : 'text-emerald-700'}"></i> <span class="truncate">${opt.text}</span></span>
+                        ${aktif ? '<i class="fa-solid fa-check text-[10px] shrink-0 ml-1"></i>' : ''}
+                    </button>`;
+                }).join('');
+
+                const terpilih = semuaOpsi.find(o => o.value === valAktif);
+                if (lbl) lbl.innerText = terpilih ? terpilih.text : valAktif;
+
+                const isAktif = valAktif !== defVal;
+                if (btn) {
+                    if (isAktif) {
+                        btn.classList.remove(...warnaMati);
+                        btn.classList.add(...warnaHidupHijau);
+                        if (chev) chev.classList.replace('text-slate-600', 'text-white/90');
+                        if (ikon) ikon.classList.replace('text-emerald-700', 'text-white');
+                    } else {
+                        btn.classList.remove(...warnaHidupHijau);
+                        btn.classList.add(...warnaMati);
+                        if (chev) chev.classList.replace('text-white/90', 'text-slate-600');
+                        if (ikon) ikon.classList.replace('text-white', 'text-emerald-700');
+                    }
+                }
+            };
+
+            bangunDropdown('bulan', 'filterBulan', 'list-custom-bulan-dash', 'label-bulan-dash', 'btn-custom-bulan-dash', 'chevron-bulan-dash', 'ikon-bulan-dash', 'Semua', 'fa-calendar-day');
+            bangunDropdown('jenis', 'jenisGrafik', 'list-custom-jenis-dash', 'label-jenis-dash', 'btn-custom-jenis-dash', 'chevron-jenis-dash', 'ikon-jenis-dash', 'bulanan', 'fa-chart-line');
+            bangunDropdown('sarimbit', 'filterSarimbitGrafik', 'list-custom-sarimbit-dash', 'label-sarimbit-dash', 'btn-custom-sarimbit-dash', 'chevron-sarimbit-dash', 'ikon-sarimbit-dash', '', 'fa-shirt');
+        }
+
+        document.addEventListener('click', function(e) {
+            const klikDalam = TIPE_DROPDOWN_DASH.some(t => {
+                const w = document.getElementById(`wadah-custom-${t}-dash`);
+                return w && w.contains(e.target);
+            });
+            if (!klikDalam) tutupSemuaDropdownDash();
+        });
     </script>
 </body>
 </html>
