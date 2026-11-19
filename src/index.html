@@ -571,11 +571,11 @@
                     <textarea id="o-alamat" list="saran-alamat" oninput="updateLiveStruk()" placeholder="Ketik alamat lengkap beserta RT/RW dan Kodepos..." class="w-full p-4 bg-white border border-slate-200 hover:border-slate-300 rounded-[1.5rem] text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none shadow-sm h-24 resize-none placeholder:text-slate-400"></textarea>
                 </div>
                 
-               <!-- Baris 3: Logistik & Sumber (Grid 3 Kolom - Custom Glassmorphism) -->
-               <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+              <!-- Baris 3: Logistik & Sumber (Sejajar 3 Kolom Ringkas di Android) -->
+              <div class="grid grid-cols-3 gap-2 md:gap-5 mb-6 md:mb-8">
                 <!-- 1. Custom Dropdown Ekspedisi -->
                 <div class="relative" id="wadah-custom-order-ekspedisi">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Ekspedisi</label>
+                    <label class="text-[9px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider md:tracking-widest mb-1 md:mb-1.5 ml-1 block truncate">Ekspedisi</label>
                     <select id="o-ekspedisi" onchange="updateLiveStruk()" class="hidden">
                         <option value="">Ekspedisi</option>
                         <option value="JNE">JNE</option>
@@ -584,18 +584,18 @@
                         <option value="LION">LION</option>
                         <option value="Ambil Sendiri">Ambil Sendiri</option>
                     </select>
-                    <button type="button" id="btn-custom-order-ekspedisi" onclick="toggleCustomFilterSlip('order-ekspedisi')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
+                    <button type="button" id="btn-custom-order-ekspedisi" onclick="toggleCustomFilterSlip('order-ekspedisi')" class="w-full pl-2.5 pr-5 md:pl-5 md:pr-10 h-9 md:h-12 ios-glass rounded-full text-[10px] md:text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-sm md:shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
                         <span id="label-order-ekspedisi" class="truncate w-full text-center pointer-events-none">Ekspedisi</span>
-                        <i id="chevron-order-ekspedisi" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                        <i id="chevron-order-ekspedisi" class="fa-solid fa-chevron-down absolute right-2 md:right-5 top-1/2 -translate-y-1/2 text-[8px] md:text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
                     </button>
-                    <div id="drop-order-ekspedisi-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                    <div id="drop-order-ekspedisi-slip" class="hidden opacity-0 scale-95 origin-top-left md:origin-top transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-44 md:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
                         <div id="list-custom-order-ekspedisi" class="flex flex-col gap-1"></div>
                     </div>
                 </div>
 
-                <!-- 2. Custom Dropdown Asal Orderan -->
+                <!-- 2. Custom Dropdown Sumber -->
                 <div class="relative" id="wadah-custom-order-sumber">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Asal Orderan</label>
+                    <label class="text-[9px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider md:tracking-widest mb-1 md:mb-1.5 ml-1 block truncate">Sumber</label>
                     <select id="o-sumber" onchange="updateLiveStruk()" class="hidden">
                         <option value="">Sumber</option>
                         <option value="WhatsApp">💬 WhatsApp</option>
@@ -603,28 +603,28 @@
                         <option value="Instagram">📸 Instagram</option>
                         <option value="Reseller">🛍️ Reseller</option>
                     </select>
-                    <button type="button" id="btn-custom-order-sumber" onclick="toggleCustomFilterSlip('order-sumber')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
+                    <button type="button" id="btn-custom-order-sumber" onclick="toggleCustomFilterSlip('order-sumber')" class="w-full pl-2.5 pr-5 md:pl-5 md:pr-10 h-9 md:h-12 ios-glass rounded-full text-[10px] md:text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-sm md:shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
                         <span id="label-order-sumber" class="truncate w-full text-center pointer-events-none">Sumber</span>
-                        <i id="chevron-order-sumber" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                        <i id="chevron-order-sumber" class="fa-solid fa-chevron-down absolute right-2 md:right-5 top-1/2 -translate-y-1/2 text-[8px] md:text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
                     </button>
-                    <div id="drop-order-sumber-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                    <div id="drop-order-sumber-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 top-[calc(100%+8px)] w-44 md:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
                         <div id="list-custom-order-sumber" class="flex flex-col gap-1"></div>
                     </div>
                 </div>
 
                 <!-- 3. Custom Dropdown Toko -->
                 <div class="relative" id="wadah-custom-order-toko">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1 block">Toko</label>
+                    <label class="text-[9px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider md:tracking-widest mb-1 md:mb-1.5 ml-1 block truncate">Toko</label>
                     <select id="o-toko" onchange="updateLiveStruk()" class="hidden">
                         <option value="">Toko</option>
                         <option value="HABIBACOLLECTIONS">HABIBACOLLECTIONS</option>
                         <option value="MASARA.HIJAB">MASARA.HIJAB</option>
                     </select>
-                    <button type="button" id="btn-custom-order-toko" onclick="toggleCustomFilterSlip('order-toko')" class="w-full pl-5 pr-10 h-12 ios-glass rounded-full text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
+                    <button type="button" id="btn-custom-order-toko" onclick="toggleCustomFilterSlip('order-toko')" class="w-full pl-2.5 pr-5 md:pl-5 md:pr-10 h-9 md:h-12 ios-glass rounded-full text-[10px] md:text-sm font-bold text-slate-800 transition-all duration-300 outline-none shadow-sm md:shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center relative z-10">
                         <span id="label-order-toko" class="truncate w-full text-center pointer-events-none">Toko</span>
-                        <i id="chevron-order-toko" class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                        <i id="chevron-order-toko" class="fa-solid fa-chevron-down absolute right-2 md:right-5 top-1/2 -translate-y-1/2 text-[8px] md:text-[10px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
                     </button>
-                    <div id="drop-order-toko-slip" class="hidden opacity-0 scale-95 origin-top transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-full bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                    <div id="drop-order-toko-slip" class="hidden opacity-0 scale-95 origin-top-right md:origin-top transition-all duration-200 absolute right-0 md:left-0 md:right-auto top-[calc(100%+8px)] w-48 md:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
                         <div id="list-custom-order-toko" class="flex flex-col gap-1"></div>
                     </div>
                 </div>
@@ -815,94 +815,92 @@
                 <input type="text" id="search-master" onkeyup="renderMaster()" placeholder="Cari barang atau koleksi..." class="w-full pl-11 pr-5 h-11 bg-white border border-slate-200 hover:border-slate-300 rounded-full text-xs font-bold text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none shadow-sm">
             </div>
 
-         <!-- BARIS 2: Filter & Tombol Aksi (Kiri & Kanan) -->
-         <div class="flex flex-wrap items-center justify-between gap-3 w-full">
+        <!-- BARIS 2: Filter & Tombol Aksi (Kecil & Rapi di Android) -->
+        <div class="flex flex-wrap items-center justify-between gap-2 md:gap-3 w-full">
               
-           <!-- Wadah Filter Dinamis (Overflow Visible agar Pop-up Kaca Melayang Bebas) -->
-           <div class="flex flex-wrap items-center gap-2 overflow-visible shrink-0 py-2 flex-1">
-            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 shrink-0 mr-1">
-                <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-filter text-[10px]"></i></div>
-            </div>
-
-            <!-- 1. CUSTOM DROPDOWN FILTER GRAMASI (MASTER) -->
-            <div class="relative" id="wadah-custom-berat-master">
-                <select id="filter-berat-master" onchange="renderMaster()" class="hidden">
-                    <option value="">Gram</option>
-                    <option value="nol">0 gr (Kosong)</option>
-                    <option value="ada">Sudah Terisi</option>
-                </select>
-
-                <button type="button" id="btn-custom-berat-master" onclick="toggleCustomFilterSlip('berat-master')" class="shrink-0 h-10 ios-glass pl-4 pr-8 rounded-full text-[11px] font-bold text-slate-700 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[110px] flex items-center justify-center relative z-10">
-                    <span id="label-berat-master" class="truncate w-full text-center pointer-events-none">Gram</span>
-                    <i id="chevron-berat-master" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-                </button>
-
-                <div id="drop-berat-master-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-52 bg-white/75 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
-                    <div id="list-custom-berat-master" class="flex flex-col gap-1"></div>
-                </div>
-            </div>
-
-            <!-- 2. CUSTOM DROPDOWN FILTER SARIMBIT (MASTER) -->
-            <div class="relative" id="wadah-custom-sarimbit-master">
-                <select id="filter-sarimbit-master" onchange="renderMaster()" class="hidden">
-                    <option value="">Sarimbit</option>
-                </select>
-
-                <button type="button" id="btn-custom-sarimbit-master" onclick="toggleCustomFilterSlip('sarimbit-master')" class="shrink-0 h-10 ios-glass pl-4 pr-8 rounded-full text-[11px] font-bold text-slate-700 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[130px] max-w-[190px] flex items-center justify-center relative z-10">
-                    <span id="label-sarimbit-master" class="truncate w-full text-center pointer-events-none">Sarimbit</span>
-                    <i id="chevron-sarimbit-master" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-                </button>
-
-                <div id="drop-sarimbit-master-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+10px)] w-60 bg-white/75 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[45vh]">
-                    <div id="list-custom-sarimbit-master" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
-                </div>
-            </div>
-                
-                <button id="btn-delete-sarimbit" onclick="hapusSarimbitTerpilih()" class="hidden w-10 h-10 bg-gradient-to-br from-rose-50 to-rose-100 text-rose-500 rounded-full font-bold border border-white shadow-[0_4px_10px_rgba(244,63,94,0.15)] hover:from-rose-500 hover:to-rose-600 hover:text-white hover:shadow-[0_4px_12px_rgba(225,29,72,0.4)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 text-sm shrink-0 flex items-center justify-center" title="Hapus Koleksi Ini">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-
-                <!-- GARIS PEMISAH VERTIKAL (Hanya terlihat di layar Laptop/Tablet) -->
-                <div class="hidden xl:block w-px h-6 bg-slate-200 mx-2 shrink-0"></div>
-            </div>
-
-            <!-- Kelompok Tombol Aksi Kapsul Bergradasi (Kanan) -->
-            <div class="flex items-center gap-2.5 shrink-0 w-full xl:w-auto">
-              <!-- PENANGKAP FILE IMPORT YANG HILANG (DISEMBUNYIKAN) -->
-              <input type="file" id="import-excel" class="hidden" accept=".xlsx, .xls, .csv" onchange="importMasterExcel(this)">
-              
-              <!-- GARIS PEMISAH HORIZONTAL (Hanya terlihat di layar HP jika turun baris) -->
-              <div class="xl:hidden w-full h-px bg-slate-200 mb-1"></div>
-              
-              <button onclick="downloadMasterTemplate()" class="flex-1 sm:flex-none h-10 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 px-4 rounded-full text-[10px] font-black shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 border border-white hover:from-slate-100 hover:to-slate-200 hover:text-slate-800 transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap group">
-                  <i class="fa-solid fa-download group-hover:scale-110 transition-transform duration-300"></i> TEMPLATE
-              </button>
-              
-              <button onclick="document.getElementById('import-excel').click()" class="bg-gradient-to-br from-indigo-50 to-blue-100 text-indigo-700 px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest border border-white shadow-[0_4px_10px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_15px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
-                <i class="fa-solid fa-file-import group-hover:-translate-y-1 transition-transform duration-300"></i> IMPORT
-            </button>
-              
-            <button onclick="exportMasterFilteredExcel()" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-5 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center gap-2.5 group">
-              <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
-          </button>
-            </div>
-        </div>
-      </div>
-          <div class="glass rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/40 relative">
-              <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left min-w-[600px]">
-                        <thead>
-                          <tr class="text-slate-500 uppercase text-[10px] tracking-wider font-bold">
-                              <th class="px-5 py-4">Informasi Koleksi</th>
-                              <th class="px-5 py-4">Detail Produk</th>
-                              <th class="px-5 py-4 text-right">Harga & Berat</th>
-                              <th class="px-5 py-4 text-center">Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tbody-master" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
-            </div>
+            <!-- Wadah Filter Dinamis -->
+            <div class="flex flex-wrap items-center gap-1.5 md:gap-2 overflow-visible shrink-0 py-1 md:py-2 flex-1">
+             <div class="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1 shrink-0">
+                 <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-filter text-[8px] md:text-[10px]"></i></div>
+             </div>
+ 
+             <!-- 1. CUSTOM DROPDOWN FILTER GRAMASI (MASTER) -->
+             <div class="relative" id="wadah-custom-berat-master">
+                 <select id="filter-berat-master" onchange="renderMaster()" class="hidden">
+                     <option value="">Gram</option>
+                     <option value="nol">0 gr (Kosong)</option>
+                     <option value="ada">Sudah Terisi</option>
+                 </select>
+ 
+                 <button type="button" id="btn-custom-berat-master" onclick="toggleCustomFilterSlip('berat-master')" class="shrink-0 h-8 md:h-10 ios-glass pl-2.5 pr-6 md:pl-4 md:pr-8 rounded-full text-[9.5px] md:text-[11px] font-bold text-slate-700 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[76px] md:min-w-[110px] flex items-center justify-center relative z-10">
+                     <span id="label-berat-master" class="truncate w-full text-center pointer-events-none">Gram</span>
+                     <i id="chevron-berat-master" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[8px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+                 </button>
+ 
+                 <div id="drop-berat-master-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-48 md:w-52 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                     <div id="list-custom-berat-master" class="flex flex-col gap-1"></div>
+                 </div>
+             </div>
+ 
+             <!-- 2. CUSTOM DROPDOWN FILTER SARIMBIT (MASTER) -->
+             <div class="relative" id="wadah-custom-sarimbit-master">
+                 <select id="filter-sarimbit-master" onchange="renderMaster()" class="hidden">
+                     <option value="">Sarimbit</option>
+                 </select>
+ 
+                 <button type="button" id="btn-custom-sarimbit-master" onclick="toggleCustomFilterSlip('sarimbit-master')" class="shrink-0 h-8 md:h-10 ios-glass pl-2.5 pr-6 md:pl-4 md:pr-8 rounded-full text-[9.5px] md:text-[11px] font-bold text-slate-700 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[95px] md:min-w-[130px] max-w-[140px] md:max-w-[190px] flex items-center justify-center relative z-10">
+                     <span id="label-sarimbit-master" class="truncate w-full text-center pointer-events-none">Sarimbit</span>
+                     <i id="chevron-sarimbit-master" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[8px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+                 </button>
+ 
+                 <div id="drop-sarimbit-master-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-56 md:w-60 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[45vh]">
+                     <div id="list-custom-sarimbit-master" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                 </div>
+             </div>
+                 
+                 <button id="btn-delete-sarimbit" onclick="hapusSarimbitTerpilih()" class="hidden w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-rose-50 to-rose-100 text-rose-500 rounded-full font-bold border border-white shadow-[0_4px_10px_rgba(244,63,94,0.15)] hover:from-rose-500 hover:to-rose-600 hover:text-white hover:shadow-[0_4px_12px_rgba(225,29,72,0.4)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 text-xs md:text-sm shrink-0 flex items-center justify-center" title="Hapus Koleksi Ini">
+                     <i class="fa-solid fa-trash-can"></i>
+                 </button>
+ 
+                 <!-- GARIS PEMISAH VERTIKAL -->
+                 <div class="hidden xl:block w-px h-6 bg-slate-200 mx-2 shrink-0"></div>
+             </div>
+ 
+             <!-- Kelompok Tombol Aksi Kapsul Bergradasi (Lebih Ramping di Android) -->
+             <div class="flex flex-wrap items-center gap-1.5 md:gap-2.5 shrink-0 w-full xl:w-auto">
+               <input type="file" id="import-excel" class="hidden" accept=".xlsx, .xls, .csv" onchange="importMasterExcel(this)">
+               
+               <div class="xl:hidden w-full h-px bg-slate-200/70 mb-0.5"></div>
+               
+               <button onclick="downloadMasterTemplate()" class="flex-1 sm:flex-none h-8 md:h-10 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 px-2.5 md:px-4 rounded-full text-[9px] md:text-[10px] font-black shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 border border-white hover:from-slate-100 hover:to-slate-200 hover:text-slate-800 transition-all duration-300 active:scale-95 flex items-center justify-center gap-1 whitespace-nowrap group">
+                   <i class="fa-solid fa-download group-hover:scale-110 transition-transform duration-300"></i> TEMPLATE
+               </button>
+               
+               <button onclick="document.getElementById('import-excel').click()" class="flex-1 sm:flex-none h-8 md:h-10 bg-gradient-to-br from-indigo-50 to-blue-100 text-indigo-700 px-3 md:px-5 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-wider md:tracking-widest border border-white shadow-[0_4px_10px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_15px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2.5 group">
+                 <i class="fa-solid fa-file-import group-hover:-translate-y-1 transition-transform duration-300"></i> IMPORT
+             </button>
+               
+             <button onclick="exportMasterFilteredExcel()" class="flex-1 sm:flex-none h-8 md:h-10 bg-gradient-to-r from-slate-800 to-slate-900 text-white px-3 md:px-5 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-wider md:tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] hover:border-slate-500 border border-slate-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2.5 group">
+               <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
+           </button>
+             </div>
+         </div>
+       </div>
+           <div class="glass rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/40 relative">
+               <div class="overflow-x-auto">
+                     <table class="w-full text-xs md:text-sm text-left min-w-[390px] md:min-w-[600px]">
+                         <thead>
+                           <tr class="text-slate-500 uppercase text-[8.5px] md:text-[10px] tracking-wider font-semibold md:font-bold">
+                               <th class="px-2.5 py-2.5 md:px-5 md:py-4">Koleksi</th>
+                               <th class="px-2.5 py-2.5 md:px-5 md:py-4">Detail Produk</th>
+                               <th class="px-2.5 py-2.5 md:px-5 md:py-4 text-right">Harga & Berat</th>
+                               <th class="px-2 py-2.5 md:px-5 md:py-4 text-center">Aksi</th>
+                           </tr>
+                         </thead>
+                         <tbody id="tbody-master" class="divide-y divide-slate-100"></tbody>
+                     </table>
+                 </div>
+             </div>
             <div id="pagination-master" class="pt-1"></div>
         </div>
       </div>
@@ -959,99 +957,99 @@
        <!-- PANEL KIRI (FILTER LEBIH PADAT & RINGKAS UNTUK HP/SPLIT SCREEN) -->
        <div class="lg:col-span-3 h-fit sticky top-4 z-[90]">
             
-       <!-- PANEL GABUNGAN: Menyertakan semua filter dalam 1 wadah agar tidak boros padding -->
-       <div class="ios-glass p-4 md:p-5 rounded-[1.5rem] border border-white/60 flex flex-col gap-4">
+       <!-- PANEL GABUNGAN: Ringkas Khusus di Layar Android, Tetap Lega di Desktop -->
+       <div class="ios-glass p-2.5 md:p-5 rounded-2xl md:rounded-[1.5rem] border border-white/60 flex flex-col gap-2 md:gap-4">
             
-       <!-- RENTANG WAKTU & SETOR BARANG -->
-       <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
-        <div class="relative group">
-            <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-regular fa-calendar text-blue-500"></i> Tanggal</label>
-            <div class="h-8 md:h-10 ios-glass rounded-full px-3 transition-all cursor-pointer w-full flex items-center">
-                <input type="text" id="filter-date-range-rekap" placeholder="Pilih..." class="w-full p-0 m-0 bg-transparent border-none outline-none text-[9px] md:text-[11px] font-bold text-slate-800 cursor-pointer focus:ring-0 text-center placeholder-slate-500">
-                <input type="hidden" id="filter-tgl-mulai-rekap">
-                <input type="hidden" id="filter-tgl-akhir-rekap">
-            </div>
-        </div>
-        
-        <!-- 1. CUSTOM DROPDOWN STATUS SETOR (REKAP) -->
-        <div class="relative" id="wadah-custom-setor-rekap">
-            <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-server text-emerald-500"></i> Status Setor</label>
-            <select id="export-rekap-filter" onchange="renderRekap()" class="hidden">
-                <option value="semua">Semua</option>
-                <option value="disetor">Sudah Disetor</option>
-                <option value="antre">Belum Disetor</option>
-            </select>
-
-            <button type="button" id="btn-custom-setor-rekap" onclick="toggleCustomFilterSlip('setor-rekap')" class="w-full pl-3.5 pr-7 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
-                <span id="label-setor-rekap" class="truncate w-full text-center pointer-events-none">Semua</span>
-                <i id="chevron-setor-rekap" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-            </button>
-
-            <div id="drop-setor-rekap-slip" class="hidden opacity-0 scale-95 origin-top-right lg:origin-top-left transition-all duration-200 absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+8px)] w-52 lg:w-full bg-white/80 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
-                <div id="list-custom-setor-rekap" class="flex flex-col gap-1"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- GARIS PEMISAH -->
-    <div class="w-full h-px bg-slate-200/50 my-1"></div>
-
-    <!-- FILTER SPESIFIK (CUSTOM GLASSMORPHISM) -->
-    <div>
-        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2.5 ml-1 flex items-center gap-1.5"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</label>
-        <div class="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
-            
-            <!-- 2. CUSTOM DROPDOWN SARIMBIT (REKAP) -->
-            <div class="relative" id="wadah-custom-sarimbit-rekap">
-                <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="hidden"><option value="">Sarimbit</option></select>
-                <button type="button" id="btn-custom-sarimbit-rekap" onclick="toggleCustomFilterSlip('sarimbit-rekap')" class="w-full pl-3.5 pr-7 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
-                    <span id="label-sarimbit-rekap" class="truncate w-full text-center pointer-events-none">Sarimbit</span>
-                    <i id="chevron-sarimbit-rekap" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-                </button>
-                <div id="drop-sarimbit-rekap-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-60 lg:w-full bg-white/80 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
-                    <div id="list-custom-sarimbit-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
-                </div>
-            </div>
-
-            <!-- 3. CUSTOM DROPDOWN VARIAN (REKAP) -->
-            <div class="relative" id="wadah-custom-varian-rekap">
-                <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="hidden"><option value="">Varian</option></select>
-                <button type="button" id="btn-custom-varian-rekap" onclick="toggleCustomFilterSlip('varian-rekap')" class="w-full pl-3.5 pr-7 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
-                    <span id="label-varian-rekap" class="truncate w-full text-center pointer-events-none">Varian</span>
-                    <i id="chevron-varian-rekap" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-                </button>
-                <div id="drop-varian-rekap-slip" class="hidden opacity-0 scale-95 origin-top-right lg:origin-top-left transition-all duration-200 absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+8px)] w-56 lg:w-full bg-white/80 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
-                    <div id="list-custom-varian-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
-                </div>
-            </div>
-
-            <!-- 4. CUSTOM DROPDOWN BARANG (REKAP) -->
-            <div class="relative" id="wadah-custom-barang-rekap">
-                <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="hidden"><option value="">Nama Barang</option></select>
-                <button type="button" id="btn-custom-barang-rekap" onclick="toggleCustomFilterSlip('barang-rekap')" class="w-full pl-3.5 pr-7 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
-                    <span id="label-barang-rekap" class="truncate w-full text-center pointer-events-none">Nama Barang</span>
-                    <i id="chevron-barang-rekap" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-                </button>
-                <div id="drop-barang-rekap-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+8px)] w-60 lg:w-full bg-white/80 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
-                    <div id="list-custom-barang-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
-                </div>
-            </div>
-
-            <!-- 5. CUSTOM DROPDOWN SIZE (REKAP) -->
-            <div class="relative" id="wadah-custom-size-rekap">
-                <select id="filter-size-rekap" onchange="renderRekap()" class="hidden"><option value="">Size</option></select>
-                <button type="button" id="btn-custom-size-rekap" onclick="toggleCustomFilterSlip('size-rekap')" class="w-full pl-3.5 pr-7 h-8 md:h-10 rounded-full text-[9px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
-                    <span id="label-size-rekap" class="truncate w-full text-center pointer-events-none">Size</span>
-                    <i id="chevron-size-rekap" class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
-                </button>
-                <div id="drop-size-rekap-slip" class="hidden opacity-0 scale-95 origin-top-right lg:origin-top-left transition-all duration-200 absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+8px)] w-48 lg:w-full bg-white/80 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
-                    <div id="list-custom-size-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-    </div>
+        <!-- RENTANG WAKTU & SETOR BARANG -->
+        <div class="grid grid-cols-2 lg:grid-cols-1 gap-1.5 md:gap-3">
+         <div class="relative group">
+             <label class="text-[8px] md:text-[9px] font-bold md:font-black text-slate-500 uppercase tracking-wider md:tracking-widest mb-1 md:mb-1.5 ml-1 flex items-center gap-1"><i class="fa-regular fa-calendar text-blue-500"></i> Tanggal</label>
+             <div class="h-7 md:h-10 ios-glass rounded-full px-2 md:px-3 transition-all cursor-pointer w-full flex items-center">
+                 <input type="text" id="filter-date-range-rekap" placeholder="Pilih..." class="w-full p-0 m-0 bg-transparent border-none outline-none text-[8.5px] md:text-[11px] font-bold text-slate-800 cursor-pointer focus:ring-0 text-center placeholder-slate-500">
+                 <input type="hidden" id="filter-tgl-mulai-rekap">
+                 <input type="hidden" id="filter-tgl-akhir-rekap">
+             </div>
+         </div>
+         
+         <!-- 1. CUSTOM DROPDOWN STATUS SETOR (REKAP) -->
+         <div class="relative" id="wadah-custom-setor-rekap">
+             <label class="text-[8px] md:text-[9px] font-bold md:font-black text-slate-500 uppercase tracking-wider md:tracking-widest mb-1 md:mb-1.5 ml-1 flex items-center gap-1"><i class="fa-solid fa-server text-emerald-500"></i> Status Setor</label>
+             <select id="export-rekap-filter" onchange="renderRekap()" class="hidden">
+                 <option value="semua">Semua</option>
+                 <option value="disetor">Sudah Disetor</option>
+                 <option value="antre">Belum Disetor</option>
+             </select>
+ 
+             <button type="button" id="btn-custom-setor-rekap" onclick="toggleCustomFilterSlip('setor-rekap')" class="w-full pl-2 pr-5 md:pl-3.5 md:pr-7 h-7 md:h-10 rounded-full text-[8.5px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                 <span id="label-setor-rekap" class="truncate w-full text-center pointer-events-none">Semua</span>
+                 <i id="chevron-setor-rekap" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[7.5px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+             </button>
+ 
+             <div id="drop-setor-rekap-slip" class="hidden opacity-0 scale-95 origin-top-right lg:origin-top-left transition-all duration-200 absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+6px)] w-48 lg:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col gap-1">
+                 <div id="list-custom-setor-rekap" class="flex flex-col gap-1"></div>
+             </div>
+         </div>
+     </div>
+ 
+     <!-- GARIS PEMISAH -->
+     <div class="w-full h-px bg-slate-200/50 my-0.5 md:my-1"></div>
+ 
+     <!-- FILTER SPESIFIK (CUSTOM GLASSMORPHISM) -->
+     <div>
+         <label class="text-[8px] md:text-[9px] font-bold md:font-black text-slate-500 uppercase tracking-wider md:tracking-widest mb-1.5 md:mb-2.5 ml-1 flex items-center gap-1"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Spesifik</label>
+         <div class="grid grid-cols-2 lg:grid-cols-1 gap-1.5 md:gap-2.5">
+             
+             <!-- 2. CUSTOM DROPDOWN SARIMBIT (REKAP) -->
+             <div class="relative" id="wadah-custom-sarimbit-rekap">
+                 <select id="filter-sarimbit-rekap" onchange="updateRekapOptions(); renderRekap()" class="hidden"><option value="">Sarimbit</option></select>
+                 <button type="button" id="btn-custom-sarimbit-rekap" onclick="toggleCustomFilterSlip('sarimbit-rekap')" class="w-full pl-2 pr-5 md:pl-3.5 md:pr-7 h-7 md:h-10 rounded-full text-[8.5px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                     <span id="label-sarimbit-rekap" class="truncate w-full text-center pointer-events-none">Sarimbit</span>
+                     <i id="chevron-sarimbit-rekap" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[7.5px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+                 </button>
+                 <div id="drop-sarimbit-rekap-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+6px)] w-56 lg:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
+                     <div id="list-custom-sarimbit-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                 </div>
+             </div>
+ 
+             <!-- 3. CUSTOM DROPDOWN VARIAN (REKAP) -->
+             <div class="relative" id="wadah-custom-varian-rekap">
+                 <select id="filter-varian-rekap" onchange="updateRekapOptions(); renderRekap()" class="hidden"><option value="">Varian</option></select>
+                 <button type="button" id="btn-custom-varian-rekap" onclick="toggleCustomFilterSlip('varian-rekap')" class="w-full pl-2 pr-5 md:pl-3.5 md:pr-7 h-7 md:h-10 rounded-full text-[8.5px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                     <span id="label-varian-rekap" class="truncate w-full text-center pointer-events-none">Varian</span>
+                     <i id="chevron-varian-rekap" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[7.5px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+                 </button>
+                 <div id="drop-varian-rekap-slip" class="hidden opacity-0 scale-95 origin-top-right lg:origin-top-left transition-all duration-200 absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+6px)] w-52 lg:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
+                     <div id="list-custom-varian-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                 </div>
+             </div>
+ 
+             <!-- 4. CUSTOM DROPDOWN BARANG (REKAP) -->
+             <div class="relative" id="wadah-custom-barang-rekap">
+                 <select id="filter-barang-rekap" onchange="updateRekapOptions(); renderRekap()" class="hidden"><option value="">Nama Barang</option></select>
+                 <button type="button" id="btn-custom-barang-rekap" onclick="toggleCustomFilterSlip('barang-rekap')" class="w-full pl-2 pr-5 md:pl-3.5 md:pr-7 h-7 md:h-10 rounded-full text-[8.5px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                     <span id="label-barang-rekap" class="truncate w-full text-center pointer-events-none">Nama Barang</span>
+                     <i id="chevron-barang-rekap" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[7.5px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+                 </button>
+                 <div id="drop-barang-rekap-slip" class="hidden opacity-0 scale-95 origin-top-left transition-all duration-200 absolute left-0 top-[calc(100%+6px)] w-56 lg:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
+                     <div id="list-custom-barang-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                 </div>
+             </div>
+ 
+             <!-- 5. CUSTOM DROPDOWN SIZE (REKAP) -->
+             <div class="relative" id="wadah-custom-size-rekap">
+                 <select id="filter-size-rekap" onchange="renderRekap()" class="hidden"><option value="">Size</option></select>
+                 <button type="button" id="btn-custom-size-rekap" onclick="toggleCustomFilterSlip('size-rekap')" class="w-full pl-2 pr-5 md:pl-3.5 md:pr-7 h-7 md:h-10 rounded-full text-[8.5px] md:text-[11px] font-bold text-slate-800 ios-glass outline-none transition-all duration-300 hover:shadow-md cursor-pointer flex items-center justify-center relative z-10">
+                     <span id="label-size-rekap" class="truncate w-full text-center pointer-events-none">Size</span>
+                     <i id="chevron-size-rekap" class="fa-solid fa-chevron-down absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-[7.5px] md:text-[9px] text-slate-500 transition-transform duration-300 pointer-events-none"></i>
+                 </button>
+                 <div id="drop-size-rekap-slip" class="hidden opacity-0 scale-95 origin-top-right lg:origin-top-left transition-all duration-200 absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+6px)] w-44 lg:w-full bg-white/90 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[40vh]">
+                     <div id="list-custom-size-rekap" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                 </div>
+             </div>
+ 
+         </div>
+     </div>
+     </div>
     </div>
 
          <!-- PANEL KANAN (TABEL & TOTAL) -->
@@ -1080,18 +1078,18 @@
                     </div>
                 </div>
 
-                <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar min-h-[400px]">
-                  <table class="w-full text-sm text-left min-w-[500px]">
-                      <thead class="bg-slate-50/90 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200 shadow-sm">
-                          <tr class="text-slate-500 uppercase text-[10px] tracking-widest font-bold">
-                              <th class="px-6 py-4 w-[45%]">Koleksi & Barang</th>
-                              <th class="px-6 py-4 w-[30%]">Varian / Size</th>
-                              <th class="px-6 py-4 w-[25%] text-center">Jumlah Qty</th>
-                          </tr>
-                      </thead>
-                        <tbody id="tbody-rekap" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
+                <div class="overflow-y-auto overflow-x-hidden md:overflow-x-auto flex-1 custom-scrollbar min-h-[400px]">
+                    <table class="w-full text-left table-fixed md:table-auto min-w-0 md:min-w-[500px]">
+                        <thead class="bg-slate-50/90 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200 shadow-sm">
+                            <tr class="text-slate-500 uppercase text-[8.5px] md:text-[10px] tracking-wider font-medium">
+                                <th class="px-2 py-2.5 md:px-6 md:py-4 w-[50%] md:w-[45%]">Koleksi & Barang</th>
+                                <th class="px-1.5 py-2.5 md:px-6 md:py-4 w-[32%] md:w-[30%]">Varian / Size</th>
+                                <th class="px-1.5 py-2.5 md:px-6 md:py-4 w-[18%] md:w-[25%] text-center">Qty</th>
+                            </tr>
+                        </thead>
+                          <tbody id="tbody-rekap" class="divide-y divide-slate-100"></tbody>
+                      </table>
+                  </div>
                 <div id="pagination-rekap" class="border-t border-slate-200/60 bg-white/80 backdrop-blur-md p-2 relative z-20 shrink-0"></div>
             </div>
         </div>
@@ -4124,25 +4122,25 @@ async function handleOrderSubmit(e) {
                 
                 return `
             <tr>
-                <td class="px-5 py-4 border-b border-slate-100">
-                    <div class="font-bold text-slate-800 text-sm mb-1">${escapeHTML(m.sarimbit)}</div>
-                    <div class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">${escapeHTML(m.pusat)}</div>
+                <td class="px-2.5 py-2 md:px-5 md:py-4 border-b border-slate-100 align-top">
+                    <div class="font-medium md:font-bold text-slate-800 text-[10.5px] md:text-sm leading-tight mb-0.5 md:mb-1">${escapeHTML(m.sarimbit)}</div>
+                    <div class="text-[8.5px] md:text-[10px] text-blue-600 font-medium md:font-bold uppercase tracking-wide">${escapeHTML(m.pusat)}</div>
                 </td>
-                <td class="px-5 py-4 border-b border-slate-100">
-                    <div class="font-bold text-slate-700 text-sm mb-1">${escapeHTML(m.barang)}</div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">${escapeHTML(m.varian)}</span>
-                        <span class="text-[10px] font-black text-slate-300">|</span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">SZ: ${escapeHTML(m.size)}</span>
+                <td class="px-2.5 py-2 md:px-5 md:py-4 border-b border-slate-100 align-top">
+                    <div class="font-medium md:font-bold text-slate-700 text-[10.5px] md:text-sm leading-tight mb-0.5 md:mb-1">${escapeHTML(m.barang)}</div>
+                    <div class="flex flex-wrap items-center gap-1">
+                        <span class="text-[8.5px] md:text-[10px] font-normal md:font-bold text-slate-500 uppercase">${escapeHTML(m.varian)}</span>
+                        <span class="text-[8.5px] md:text-[10px] text-slate-300">|</span>
+                        <span class="text-[8.5px] md:text-[10px] font-medium md:font-bold text-slate-500 uppercase">SZ: ${escapeHTML(m.size)}</span>
                     </div>
                 </td>
-                <td class="px-5 py-4 border-b border-slate-100 text-right">
-                    <div class="font-black text-slate-800 mb-1 text-sm">${formatRp(m.harga)}</div>
-                    <div class="text-[10px] font-bold text-slate-500 flex justify-end">${gramBadge}</div>
+                <td class="px-2.5 py-2 md:px-5 md:py-4 border-b border-slate-100 text-right align-top whitespace-nowrap">
+                    <div class="font-semibold md:font-black text-slate-800 mb-0.5 md:mb-1 text-[10.5px] md:text-sm tabular-nums">${formatRp(m.harga)}</div>
+                    <div class="text-[8.5px] md:text-[10px] font-normal md:font-bold text-slate-500 flex justify-end">${gramBadge}</div>
                 </td>
-                <td class="px-5 py-4 border-b border-slate-100 text-center">
-                    <button onclick="editMaster('${escapeHTML(m.pusat)}', '${escapeHTML(m.sarimbit)}', '${escapeHTML(m.barang)}', '${escapeHTML(m.varian)}', '${escapeHTML(m.size)}', ${m.harga}, ${m.berat})" class="w-8 h-8 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-600 rounded-full hover:from-orange-500 hover:to-orange-600 hover:text-white transition-all border border-white shadow-[0_4px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_12px_rgba(234,88,12,0.4)] active:scale-95 flex items-center justify-center mx-auto group">
-                        <i class="fa-solid fa-pen text-[11px] group-hover:scale-110 transition-transform"></i>
+                <td class="px-2 py-2 md:px-5 md:py-4 border-b border-slate-100 text-center align-middle">
+                    <button onclick="editMaster('${escapeHTML(m.pusat)}', '${escapeHTML(m.sarimbit)}', '${escapeHTML(m.barang)}', '${escapeHTML(m.varian)}', '${escapeHTML(m.size)}', ${m.harga}, ${m.berat})" class="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-600 rounded-full hover:from-orange-500 hover:to-orange-600 hover:text-white transition-all border border-white shadow-[0_4px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_12px_rgba(234,88,12,0.4)] active:scale-95 flex items-center justify-center mx-auto group">
+                        <i class="fa-solid fa-pen text-[9.5px] md:text-[11px] group-hover:scale-110 transition-transform"></i>
                     </button>
                 </td>
             </tr>
@@ -4775,21 +4773,21 @@ async function handleOrderSubmit(e) {
 
             return `
             <tr id="rekap-rowA-${idAman}" class="${rowClass} transition-all duration-300 group">
-                <td class="px-5 py-4 border-b border-slate-100">
-                    <div class="flex items-center gap-3">
-                        <button onclick="document.getElementById('${laciId}').classList.toggle('hidden')" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm focus:outline-none cursor-pointer border border-slate-200 shrink-0">
-                            <i class="fa-solid fa-plus text-xs"></i>
+                <td class="px-2 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 align-middle">
+                    <div class="flex items-center gap-1.5 md:gap-3">
+                        <button onclick="document.getElementById('${laciId}').classList.toggle('hidden')" class="w-5 h-5 md:w-7 md:h-7 rounded-md md:rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm focus:outline-none cursor-pointer border border-slate-200 shrink-0">
+                            <i class="fa-solid fa-plus text-[9px] md:text-xs"></i>
                         </button>
-                        <span class="font-bold ${isChecked ? 'text-emerald-700 line-through decoration-emerald-300' : 'text-slate-700'} transition-colors">${prod}</span>
+                        <span class="text-[10.5px] md:text-[13px] font-normal antialiased leading-snug break-words ${isChecked ? 'text-emerald-700 line-through decoration-emerald-300' : 'text-slate-700'} transition-colors">${prod}</span>
                     </div>
                 </td>
-                <td class="px-5 py-4 border-b border-slate-100">
-                    <span class="text-[13px] font-semibold uppercase tracking-wide transition-colors ${labelSizeClass}">${varian} / ${size}</span>
+                <td class="px-1.5 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 align-middle">
+                    <span class="text-[10px] md:text-xs font-normal antialiased uppercase leading-snug break-words transition-colors ${labelSizeClass}">${varian} / ${size}</span>
                 </td>
-                <td class="px-5 py-4 border-b border-slate-100 text-center font-black ${isChecked ? 'text-emerald-500' : 'text-blue-600'} text-xl transition-colors" id="rekap-qtytampil-${idAman}">${data.qtyTampil}</td>
+                <td class="px-1.5 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 text-center font-medium tabular-nums ${isChecked ? 'text-emerald-500' : 'text-blue-600'} text-xs md:text-base transition-colors align-middle" id="rekap-qtytampil-${idAman}">${data.qtyTampil}</td>
             </tr>
             <tr id="${laciId}" class="hidden bg-slate-50 border-b border-slate-200 shadow-inner">
-                <td colspan="3" class="px-14 py-4">
+                <td colspan="3" class="px-3 py-3 md:px-14 md:py-4">
                     <div class="flex items-center gap-6 max-w-sm">
                         <div class="flex flex-col bg-white px-4 py-3 rounded-xl border border-emerald-100 shadow-sm flex-1">
                             <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sudah Disetor</span>
@@ -8971,11 +8969,10 @@ function pilihProdukModal(metaString) {
         bangunOpsiDariSelect('size-rekap', 'filter-size-rekap', 'list-custom-size-rekap', 'label-size-rekap', 'btn-custom-size-rekap', 'chevron-size-rekap', 'Semua Size', 'fa-ruler-combined', 'fa-maximize', 'hijau');
 
         // --- D. MENU INPUT ORDER (FORMULIR PESANAN) ---
-        bangunOpsiDariSelect('order-ekspedisi', 'o-ekspedisi', 'list-custom-order-ekspedisi', 'label-order-ekspedisi', 'btn-custom-order-ekspedisi', 'chevron-order-ekspedisi', 'Pilih Ekspedisi', 'fa-truck-fast', 'fa-box', 'hijau');
-        bangunOpsiDariSelect('order-sumber', 'o-sumber', 'list-custom-order-sumber', 'label-order-sumber', 'btn-custom-order-sumber', 'chevron-order-sumber', 'Pilih Sumber', 'fa-bullhorn', 'fa-hashtag', 'hijau');
-        bangunOpsiDariSelect('order-toko', 'o-toko', 'list-custom-order-toko', 'label-order-toko', 'btn-custom-order-toko', 'chevron-order-toko', 'Pilih Toko', 'fa-store', 'fa-bag-shopping', 'hijau');
+        bangunOpsiDariSelect('order-ekspedisi', 'o-ekspedisi', 'list-custom-order-ekspedisi', 'label-order-ekspedisi', 'btn-custom-order-ekspedisi', 'chevron-order-ekspedisi', 'Ekspedisi', 'fa-truck-fast', 'fa-box', 'hijau');
+        bangunOpsiDariSelect('order-sumber', 'o-sumber', 'list-custom-order-sumber', 'label-order-sumber', 'btn-custom-order-sumber', 'chevron-order-sumber', 'Sumber', 'fa-bullhorn', 'fa-hashtag', 'hijau');
+        bangunOpsiDariSelect('order-toko', 'o-toko', 'list-custom-order-toko', 'label-order-toko', 'btn-custom-order-toko', 'chevron-order-toko', 'Toko', 'fa-store', 'fa-bag-shopping', 'hijau');
         bangunOpsiDariSelect('order-diskon', 'o-tipe-diskon', 'list-custom-order-diskon', 'label-order-diskon', 'btn-custom-order-diskon', 'chevron-order-diskon', 'Tanpa Diskon', 'fa-tag', 'fa-percent', 'hijau');
-
         // --- E. POP-UP KATALOG PENCARIAN PRODUK (INPUT ORDER) ---
         bangunOpsiDariSelect('modal-sarimbit', 'filterSarimbitModal', 'list-custom-modal-sarimbit', 'label-modal-sarimbit', 'btn-custom-modal-sarimbit', 'chevron-modal-sarimbit', 'Semua Sarimbit', 'fa-layer-group', 'fa-shirt', 'hijau');
         bangunOpsiDariSelect('modal-barang', 'filterBarangModal', 'list-custom-modal-barang', 'label-modal-barang', 'btn-custom-modal-barang', 'chevron-modal-barang', 'Semua Barang', 'fa-boxes-stacked', 'fa-tag', 'hijau');
