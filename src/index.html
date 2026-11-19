@@ -475,6 +475,12 @@
 
     <div class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest px-5 md:px-6 mt-4 md:mt-6 mb-1 md:mb-2">Lainnya</div>
 
+    <!-- MENU DASHBOARD ANALITIK (KHUSUS MUNCUL DI ANDROID) -->
+    <button onclick="pindahHalaman('dashboard.html')" style="display: none;" class="android-only-menu hidden nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent" id="nav-dashboard">
+        <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-teal-200 to-emerald-300 border-[1.5px] border-white shadow-sm text-emerald-800 flex items-center justify-center transition-all duration-300 drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)] group-hover:scale-110"><i class="fa-solid fa-chart-line text-[10px] md:text-xs"></i></div>
+        <span class="tracking-wide">Dashboard</span>
+    </button>
+
     <button onclick="pindahHalaman('pembukuan.html')" class="nav-btn w-full flex text-left items-center gap-3 md:gap-4 px-4 md:px-5 py-2 md:py-2.5 text-slate-600 font-medium text-[13px] md:text-sm group cursor-pointer border-transparent">
         <div class="icon-box w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-orange-200 to-orange-300 border-[1.5px] border-white shadow-sm text-orange-700 flex items-center justify-center transition-all duration-300 drop-shadow-[0_2px_4px_rgba(249,115,22,0.3)] group-hover:scale-110"><i class="fa-solid fa-chart-pie text-[10px] md:text-xs"></i></div>
         <span class="tracking-wide">Pembukuan</span>
@@ -7007,31 +7013,45 @@ function unduhPdfSumber(tipe) {
     window.saveAs(doc.output('blob'), namaFile);
     if (typeof showToast === 'function') showToast("✅ PDF Berhasil Diunduh!");
 }
+ // ==============================================================
+    // DETEKSI KHUSUS ANDROID (HP ASLI, PWA, APK TAURI, & DEVTOOLS)
     // ==============================================================
-    // DETEKSI ANDROID UNTUK MENAMPILKAN MENU SIDEBAR & TOMBOL KIRI BAWAH
-    // ==============================================================
-    document.addEventListener("DOMContentLoaded", () => {
-        const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+    function cekTampilanKhususAndroid() {
+        const ua = navigator.userAgent.toLowerCase();
+        const isIOS = /iphone|ipad|ipod/.test(ua);
+        // Kata "android" tidak pernah ada di Windows/Mac, aman untuk PWA maupun APK Tauri
+        const isAndroidUA = ua.includes("android");
+        // Khusus simulasi HP di Chrome DevTools laptop
+        const isSimulasiHP = !window.__TAURI__ && !isIOS && window.innerWidth < 768 && window.matchMedia("(pointer: coarse)").matches;
+        const isAndroid = isAndroidUA || isSimulasiHP;
 
-        if (isAndroid) {
-            // 1. Tampilkan Menu Dashboard dan Riwayat di Sidebar
-            document.querySelectorAll('.android-only-menu').forEach(menu => {
+        document.querySelectorAll('.android-only-menu').forEach(menu => {
+            if (isAndroid) {
                 menu.classList.remove('hidden');
-            });
+                menu.style.setProperty('display', 'flex', 'important');
+            } else {
+                menu.classList.add('hidden');
+                menu.style.setProperty('display', 'none', 'important');
+            }
+        });
 
-            // 2. Sembunyikan tombol garis tiga di kiri atas
-            const btnHeader = document.getElementById("btn-header-menu");
+        const btnHeader = document.getElementById("btn-header-menu");
+        const fabMenu = document.getElementById("fab-menu-android");
+        if (isAndroid) {
             if (btnHeader) btnHeader.classList.add("hidden");
-
-            // 3. Munculkan tombol garis tiga melayang (FAB) di kiri bawah
-            const fabMenu = document.getElementById("fab-menu-android");
             if (fabMenu) fabMenu.classList.remove("hidden");
+        } else {
+            if (btnHeader) btnHeader.classList.remove("hidden");
+            if (fabMenu) fabMenu.classList.add("hidden");
         }
-    });
-   // =========================================================================
-// SCRIPT FINAL: AUTO-OPEN POPUP & MEMORI SARIMBIT PINTAR
-// =========================================================================
-window.rowAktifPencarian = null;
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", cekTampilanKhususAndroid);
+    } else {
+        cekTampilanKhususAndroid();
+    }
+    window.addEventListener("resize", cekTampilanKhususAndroid);
 
 // 1. FUNGSI TAMBAH BARANG: BUKA POP-UP OTOMATIS (DIPERBAIKI)
 function addOrderRow() {
