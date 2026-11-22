@@ -3722,6 +3722,7 @@ async function handleOrderSubmit(e) {
             if (wadahBayar) wadahBayar.innerHTML = '';
             if (typeof window.tambahBarisPembayaranForm === 'function') window.tambahBarisPembayaranForm();
 
+            const daftarSarimbitLog = [...new Set(items.map(i => i.sarimbit).filter(Boolean))].join(', ') || '-';
             let pesanLog = "";
             if (isEditMode) {
                 let perubahan = [];
@@ -3739,8 +3740,8 @@ async function handleOrderSubmit(e) {
                 if (oldTotalPcs !== totalPcsLog) perubahan.push(`Qty: ${oldTotalPcs} ➔ ${totalPcsLog} Pcs`);
                 if (oldGrandTotal !== grandTotalLog) perubahan.push(`Tagihan: Rp ${oldGrandTotal.toLocaleString('id-ID')} ➔ Rp ${grandTotalLog.toLocaleString('id-ID')}`);
                 
-                if (perubahan.length > 0) pesanLog = `Revisi Pesanan ${customer}: ${perubahan.join(' | ')} [ID: ${idToSave}]`;
-                else pesanLog = `Revisi Pesanan ${customer} (Detail Kurir/Alamat/Varian diubah) [ID: ${idToSave}]`;
+                if (perubahan.length > 0) pesanLog = `Revisi Pesanan ${customer} (${daftarSarimbitLog}): ${perubahan.join(' | ')} [ID: ${idToSave}]`;
+                else pesanLog = `Revisi Pesanan ${customer} (${daftarSarimbitLog}) - Detail Kurir/Alamat/Varian diubah [ID: ${idToSave}]`;
                 
                 delete form.dataset.editMode; 
                 btnSave.classList.replace('bg-orange-500', 'bg-[#007AFF]');
@@ -3755,7 +3756,7 @@ async function handleOrderSubmit(e) {
                     }, 50);
                 }
             } else {
-                pesanLog = `Pesanan Baru dari ${customer} (${toko}) - ${totalPcsLog} Pcs | Total Tagihan: Rp ${grandTotalLog.toLocaleString('id-ID')} [ID: ${idToSave}]`;
+                pesanLog = `Pesanan Baru dari ${customer} (${toko} • Sarimbit: ${daftarSarimbitLog}) - ${totalPcsLog} Pcs | Total Tagihan: Rp ${grandTotalLog.toLocaleString('id-ID')} [ID: ${idToSave}]`;
                 document.getElementById('o-nama').focus(); 
             }
 
@@ -3812,11 +3813,15 @@ async function handleOrderSubmit(e) {
       // Update ke memori lokal browser (agar tampilan langsung berubah)
       orderData.forEach(o => { if ((o.idcustomer || o.idCustomer) === idCustomer) o[field] = nilaiBersih; });
         
+      const daftarSarimbitDirect = [...new Set(
+            orderData.filter(o => (o.idcustomer || o.idCustomer) === idCustomer).map(o => o.sarimbit).filter(Boolean)
+        )].join(', ') || '-';
+
         window.DatabaseAPI.updateFieldKeSheet(
             idCustomer, field, nilaiBersih,
             () => { // onSuccess
                 showToast(`✅ ${fieldLabel} Berhasil Diperbarui!`);
-                if (teksLama !== teksBaru) catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer}: ${fieldLabel} (${teksLama} ➔ ${teksBaru}) [ID: ${idCustomer}]`);
+                if (teksLama !== teksBaru) catatLog('UPDATE', 'ORDER', `Revisi Keuangan ${namaCustomer} (${daftarSarimbitDirect}): ${fieldLabel} (${teksLama} ➔ ${teksBaru}) [ID: ${idCustomer}]`);
             },
             (e) => showToast("❌ Gagal memperbarui status!") // onFailure
         );
@@ -3824,12 +3829,16 @@ async function handleOrderSubmit(e) {
 
     function hapusSatuCustomer(idCustomer) {
         if (confirm(`Apakah Anda yakin ingin menghapus SELURUH pesanan customer ini?`)) {
+            const itemsHapus = orderData.filter(o => (o.idcustomer || o.idCustomer) === idCustomer);
+            const namaHapus = itemsHapus[0] ? (itemsHapus[0].customer || "Tanpa Nama").toUpperCase() : idCustomer;
+            const sarimbitHapus = [...new Set(itemsHapus.map(o => o.sarimbit).filter(Boolean))].join(', ') || '-';
+
             showToast("Menghapus data pesanan...");
             window.DatabaseAPI.hapusDataCustomer(
                 idCustomer,
                 (pesan) => { // onSuccess
                     showToast("✅ " + pesan); 
-                    catatLog('DELETE', 'ORDER', `Menghapus seluruh pesanan Customer ID: ${idCustomer}`);
+                    catatLog('DELETE', 'ORDER', `Menghapus pesanan ${namaHapus} (Sarimbit: ${sarimbitHapus})`);
                     loadAllData();
                 }
             );
@@ -5296,13 +5305,15 @@ async function handleOrderSubmit(e) {
     async function printOneSlip(idCustomer) {
         const items = orderData.filter(o => o.idcustomer === idCustomer || o.idCustomer === idCustomer);
         if(items.length === 0) return;
-        const namaCust = items[0].customer; await generateWord(items, `SLIP_${namaCust.toUpperCase()}`);
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh File Word Invoice untuk Pelanggan: ${namaCust.toUpperCase()}`);
+        const namaCust = items[0].customer || "Tanpa Nama";
+        const srmCust = [...new Set(items.map(o => o.sarimbit).filter(Boolean))].join(', ') || '-';
+        await generateWord(items, `SLIP_${namaCust.toUpperCase()}`);
+        catatLog('DOWNLOAD', 'SLIP', `Mengunduh Word Invoice Customer: ${namaCust.toUpperCase()} (Sarimbit: ${srmCust})`);
     }
     async function downloadFilteredWord() {
         const search = document.getElementById('search-customer').value.toLowerCase();
-        const elemenFilterToko = document.getElementById('filter-toko-slip'); const filterToko = elemenFilterToko ? elemenFilterToko.value : "Semua";
-        const elemenFilterSarimbit = document.getElementById('filter-sarimbit-slip'); const filterSarimbit = elemenFilterSarimbit ? elemenFilterSarimbit.value : "Semua";
+        const elemenFilterToko = document.getElementById('filter-toko-slip'); const filterToko = elemenFilterToko ? elemenFilterToko.value : "";
+        const elemenFilterSarimbit = document.getElementById('filter-sarimbit-slip'); const filterSarimbit = elemenFilterSarimbit ? elemenFilterSarimbit.value : "";
         
         const advFilter = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : null;
         const targetData = orderData.filter(o => {
@@ -5316,8 +5327,15 @@ async function handleOrderSubmit(e) {
         if(!targetData.length) return showToast("⚠️ Tidak ada data!");
         const fileName = getDynamicFilename('INVOICE');
         await generateWord(targetData, fileName);
-        
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh Kumpulan Word Invoice untuk (${filterToko || 'Toko'} - ${filterSarimbit || 'Sarimbit'})`);
+
+        const custUnikWord = [...new Set(targetData.map(o => (o.idcustomer || o.idCustomer || o.customer || "").toString().trim()))];
+        const srmWord = filterSarimbit || ([...new Set(targetData.map(o => o.sarimbit).filter(Boolean))].slice(0, 3).join(', ') || 'Semua Sarimbit');
+        if (custUnikWord.length === 1) {
+            const namaSatu = (targetData[0].customer || "Tanpa Nama").toUpperCase();
+            catatLog('DOWNLOAD', 'SLIP', `Mengunduh Word Invoice Customer: ${namaSatu} (Sarimbit: ${srmWord})`);
+        } else {
+            catatLog('DOWNLOAD', 'SLIP', `Mengunduh Word Invoice (${custUnikWord.length} Cust • Sarimbit: ${filterSarimbit || 'Semua Sarimbit'} • Toko: ${filterToko || 'Semua Toko'})`);
+        }
     }
     async function generateWord(data, filename) {
         const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, TabStopType, VerticalAlign } = docx;
@@ -5697,7 +5715,8 @@ async function handleOrderSubmit(e) {
         window.saveAs(doc.output('blob'), `NOTA_${cleanName}.pdf`);
         showToast("✅ PDF Nota Berhasil Diunduh!");
         
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Nota Transparan untuk: ${head.customer.toUpperCase()}`);
+        const srmNota = [...new Set(items.map(o => o.sarimbit).filter(Boolean))].join(', ') || '-';
+        catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Nota Customer: ${(head.customer || "Tanpa Nama").toUpperCase()} (Sarimbit: ${srmNota})`);
     }
 
     // HELPER FORMAT TANGGAL LENGKAP (Nama Hari, Tanggal Bulan Tahun)
@@ -5866,7 +5885,14 @@ async function handleOrderSubmit(e) {
         const finalFileName = fileNameParts.join('_').replace(/[^a-zA-Z0-9]/g, '_') + ".xlsx";
         XLSX.writeFile(wb, finalFileName); 
         showToast("Excel Berhasil Diunduh!");
-        catatLog('DOWNLOAD', 'SLIP', `Mengunduh Excel Database Pelanggan (${filterToko || "Semua Toko"})`);
+        const listCustExcel = Object.values(groups);
+        if (listCustExcel.length === 1) {
+            const cSatu = listCustExcel[0];
+            const srmSatu = [...new Set(cSatu.items.map(o => o.sarimbit).filter(Boolean))].join(', ') || '-';
+            catatLog('DOWNLOAD', 'SLIP', `Mengunduh Excel Customer: ${(cSatu.nama || "Tanpa Nama").toUpperCase()} (Sarimbit: ${srmSatu})`);
+        } else {
+            catatLog('DOWNLOAD', 'SLIP', `Mengunduh Excel Pelanggan (${listCustExcel.length} Cust • Sarimbit: ${filter || "Semua Sarimbit"} • Toko: ${filterToko || "Semua Toko"})`);
+        }
     }
     // FUNGSI BARU: UNDUH DAFTAR KONTAK (NAMA & WA) SAJA UNTUK BROADCAST
     function downloadKontakWAExcel() {
@@ -5947,7 +5973,14 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
         XLSX.writeFile(wb, finalFileName); 
         
         showToast("✅ Kontak WA Berhasil Diunduh!");
-        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'SLIP', `Mengunduh Excel Kontak WA (${filterToko || "Semua Toko"})`);
+        if (typeof catatLog === 'function') {
+            if (customerUnik.size === 1) {
+                const cSatuWA = Array.from(customerUnik.values())[0];
+                catatLog('DOWNLOAD', 'SLIP', `Mengunduh Kontak WA Customer: ${cSatuWA.nama.toUpperCase()} (Sarimbit: ${filter || "Semua Sarimbit"})`);
+            } else {
+                catatLog('DOWNLOAD', 'SLIP', `Mengunduh Excel Kontak WA (${customerUnik.size} Kontak • Sarimbit: ${filter || "Semua Sarimbit"} • Toko: ${filterToko || "Semua Toko"})`);
+            }
+        }
     }
     async function downloadCustomerPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4'); 
@@ -6090,7 +6123,16 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             showToast("PDF Berhasil Diunduh!");
         }
         
-        if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Rincian Database Pelanggan`);
+        if (typeof catatLog === 'function') {
+            const listCustPdf = Object.values(groups);
+            if (listCustPdf.length === 1) {
+                const cSatuPdf = listCustPdf[0];
+                const srmSatuPdf = [...new Set(cSatuPdf.items.map(o => o.sarimbit).filter(Boolean))].join(', ') || '-';
+                catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Customer: ${(cSatuPdf.nama || "Tanpa Nama").toUpperCase()} (Sarimbit: ${srmSatuPdf})`);
+            } else {
+                catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Rincian Pelanggan (${listCustPdf.length} Cust • Sarimbit: ${filter || "Semua Sarimbit"} • Toko: ${filterToko || "Semua Toko"})`);
+            }
+        }
     }
     async function arsipPerSarimbit() {
         if (!appSettings.allowArchive) return showToast("⚠️ Izin Pengarsipan belum diaktifkan!");
@@ -8642,11 +8684,15 @@ function pilihProdukModal(metaString) {
                     
                     const totalBaru = riwayat.reduce((sum, b) => sum + Number(b.nominal), 0);
                     
+                    const daftarSarimbitBayar = typeof orderData !== 'undefined'
+                        ? ([...new Set(orderData.filter(o => (o.idcustomer || o.idCustomer) === idCustomer).map(o => o.sarimbit).filter(Boolean))].join(', ') || '-')
+                        : '-';
+
                     if (typeof catatLog === 'function') {
                         if (totalLama !== totalBaru) {
-                            catatLog('UPDATE', 'SLIP', `Uang Masuk ${namaCustRiwayat}: Rp ${totalLama.toLocaleString('id-ID')} ➔ Rp ${totalBaru.toLocaleString('id-ID')} [ID: ${idCustomer}]`);
+                            catatLog('UPDATE', 'SLIP', `Uang Masuk ${namaCustRiwayat} (${daftarSarimbitBayar}): Rp ${totalLama.toLocaleString('id-ID')} ➔ Rp ${totalBaru.toLocaleString('id-ID')} [ID: ${idCustomer}]`);
                         } else {
-                            catatLog('UPDATE', 'SLIP', `Revisi Tanggal Pembayaran: ${namaCustRiwayat} [ID: ${idCustomer}]`);
+                            catatLog('UPDATE', 'SLIP', `Revisi Tanggal Pembayaran ${namaCustRiwayat} (${daftarSarimbitBayar}) [ID: ${idCustomer}]`);
                         }
                     }
                     
@@ -8962,7 +9008,7 @@ function pilihProdukModal(metaString) {
                 let daftarPerubahan = [];
                 
                 const titikDuaPertama = displayDet.indexOf(':');
-                if (titikDuaPertama !== -1 && titikDuaPertama < 50) { 
+                if (titikDuaPertama !== -1 && titikDuaPertama < 120) {
                     judulLog = displayDet.substring(0, titikDuaPertama).trim();
                     const sisaTeks = displayDet.substring(titikDuaPertama + 1).trim();
                     daftarPerubahan = sisaTeks.split('|').map(s => s.trim());
