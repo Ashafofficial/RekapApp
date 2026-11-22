@@ -1930,55 +1930,79 @@
                 </div>
             </div>
 
-            <!-- LOGISTIK EKSPEDISI -->
-            <div>
-                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-truck text-blue-400 mr-1.5"></i> Logistik Ekspedisi</h4>
-                <div class="flex flex-wrap gap-2.5">
-                    <label class="cursor-pointer flex-1 min-w-[100px]">
-                        <input type="checkbox" id="fc-jne" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Hanya JNE
-                        </div>
-                    </label>
-                    <label class="cursor-pointer flex-1 min-w-[100px]">
-                        <input type="checkbox" id="fc-jnt" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-rose-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Hanya JNT
-                        </div>
-                    </label>
-                    <label class="cursor-pointer flex-1 min-w-[100px]">
-                        <input type="checkbox" id="fc-pos" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-yellow-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Hanya POS
-                        </div>
-                    </label>
-                </div>
+           <!-- LOGISTIK EKSPEDISI -->
+           <div>
+            <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-truck text-blue-400 mr-1.5"></i> Logistik Ekspedisi</h4>
+            <div class="flex flex-wrap gap-2.5">
+                <label class="cursor-pointer flex-1 min-w-[100px]">
+                    <input type="checkbox" id="fc-jne" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Hanya JNE
+                    </div>
+                </label>
+                <label class="cursor-pointer flex-1 min-w-[100px]">
+                    <input type="checkbox" id="fc-jnt" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-rose-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Hanya JNT
+                    </div>
+                </label>
+                <label class="cursor-pointer flex-1 min-w-[100px]">
+                    <input type="checkbox" id="fc-pos" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-yellow-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Hanya POS
+                    </div>
+                </label>
+                <label class="cursor-pointer flex-1 min-w-[100px]">
+                    <input type="checkbox" id="fc-lion" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-red-600 peer-checked:to-pink-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(220,38,38,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Hanya LION
+                    </div>
+                </label>
+                <label class="cursor-pointer flex-1 min-w-[120px]">
+                    <input type="checkbox" id="fc-ambil" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-teal-500 peer-checked:to-emerald-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Ambil Sendiri
+                    </div>
+                </label>
+                <label class="cursor-pointer flex-1 min-w-[130px]">
+                    <input type="checkbox" id="fc-ekslain" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-slate-100/70 text-slate-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-slate-700 peer-checked:to-slate-900 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(15,23,42,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Lainnya / Kosong
+                    </div>
+                </label>
             </div>
+        </div>
 
-            <!-- WILAYAH PENGIRIMAN -->
-            <div>
-                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-map-location-dot text-emerald-400 mr-1.5"></i> Wilayah Pengiriman</h4>
-                <div class="grid grid-cols-2 gap-2.5">
-                    <label class="cursor-pointer">
-                        <input type="checkbox" id="fc-jawa" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Hanya Pulau Jawa
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="checkbox" id="fc-luarjawa" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Hanya Luar Jawa
-                        </div>
-                    </label>
-                    <label class="cursor-pointer col-span-2">
-                        <input type="checkbox" id="fc-noalamat" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-rose-200/80 bg-rose-50/70 text-rose-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-rose-100 active:scale-95 shadow-sm">
-                            Belum Ada Alamat Lengkap (Kosong)
-                        </div>
-                    </label>
-                </div>
+        <!-- WILAYAH PENGIRIMAN -->
+        <div>
+            <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-map-location-dot text-emerald-400 mr-1.5"></i> Wilayah Pengiriman</h4>
+            <div class="grid grid-cols-2 gap-2.5">
+                <label class="cursor-pointer">
+                    <input type="checkbox" id="fc-jawa" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Hanya Pulau Jawa
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" id="fc-luarjawa" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        Hanya Luar Jawa
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" id="fc-luarnegeri" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-violet-200/80 bg-violet-50/70 text-violet-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-violet-600 peer-checked:to-indigo-600 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(124,58,237,0.35)] hover:bg-violet-100 active:scale-95 shadow-sm">
+                        Hanya Luar Negeri
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" id="fc-noalamat" class="peer sr-only">
+                    <div class="px-4 py-3 rounded-full border border-rose-200/80 bg-rose-50/70 text-rose-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-rose-100 active:scale-95 shadow-sm">
+                        Belum Ada Alamat
+                    </div>
+                </label>
             </div>
+        </div>
             
             <!-- INFORMASI BERAT BARANG -->
             <div>
@@ -2100,7 +2124,7 @@
         </div>
         
         <!-- LATAR BELAKANG KONTEN DIBUAT TRANSPARAN MENYATU DENGAN KACA -->
-        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent">
+        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent space-y-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                 <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-300/50 -translate-x-1/2"></div>
                 
@@ -2116,6 +2140,25 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Kekurangan / Belum
                     </h4>
                     <div id="wadah-stat-kurang" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- BAGIAN BARU: WILAYAH PENGIRIMAN & LOGISTIK EKSPEDISI -->
+            <div class="pt-6 border-t border-white/60 grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                <div class="hidden md:block absolute left-1/2 top-6 bottom-0 w-px bg-slate-300/50 -translate-x-1/2"></div>
+
+                <div class="space-y-5 pr-0 md:pr-4">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-white/60 pb-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> Wilayah Pengiriman
+                    </h4>
+                    <div id="wadah-stat-wilayah" class="space-y-4"></div>
+                </div>
+
+                <div class="space-y-5 pl-0 md:pl-4">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-white/60 pb-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Logistik & Ekspedisi
+                    </h4>
+                    <div id="wadah-stat-ekspedisi" class="space-y-4"></div>
                 </div>
             </div>
         </div>
@@ -2141,6 +2184,19 @@
                             <option value="blm_bayar_all">Belum Bayar Sama Sekali (Uang Masuk Rp 0)</option>
                             <option value="sdh_alamat">Alamat Lengkap</option>
                             <option value="blm_alamat">Belum Ada Alamat</option>
+                        </optgroup>
+                        <optgroup label="Wilayah Pengiriman">
+                            <option value="wil_jawa">Pulau Jawa</option>
+                            <option value="wil_luarjawa">Luar Pulau Jawa</option>
+                            <option value="wil_luarnegeri">Luar Negeri</option>
+                        </optgroup>
+                        <optgroup label="Logistik Ekspedisi">
+                            <option value="eks_jne">Pengiriman via JNE</option>
+                            <option value="eks_jnt">Pengiriman via JNT</option>
+                            <option value="eks_pos">Pengiriman via POS</option>
+                            <option value="eks_lion">Pengiriman via LION</option>
+                            <option value="eks_ambil">Ambil Sendiri</option>
+                            <option value="eks_lain">Lainnya / Belum Pilih Kurir</option>
                         </optgroup>
                         <optgroup label="Rincian Ongkos Kirim">
                             <option value="sdh_ongkir_all">Sudah Ongkir (Semua)</option>
@@ -2179,13 +2235,19 @@
       
       const idGrad = `grad-${kategoriId}-${Math.random().toString(36).substr(2, 5)}`;
       
-      const warnaUtama = warnaTipe === 'hijau' ? '#10b981' : '#f43f5e';
-      const warnaMuda = warnaTipe === 'hijau' ? '#34d399' : '#fb7185';
-      const warnaBg = warnaTipe === 'hijau' ? '#d1fae5' : '#ffe4e6';
-      
-      const classTeks = warnaTipe === 'hijau' ? 'text-emerald-600' : 'text-rose-600';
-      const classGradienBar = warnaTipe === 'hijau' ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-500 to-red-400';
-      const classTrack = warnaTipe === 'hijau' ? 'bg-emerald-100' : 'bg-rose-100';
+      let warnaUtama = '#10b981', warnaMuda = '#34d399', warnaBg = '#d1fae5';
+      let classTeks = 'text-emerald-600', classGradienBar = 'bg-gradient-to-r from-emerald-500 to-teal-400', classTrack = 'bg-emerald-100';
+
+      if (warnaTipe === 'merah') {
+          warnaUtama = '#f43f5e'; warnaMuda = '#fb7185'; warnaBg = '#ffe4e6';
+          classTeks = 'text-rose-600'; classGradienBar = 'bg-gradient-to-r from-rose-500 to-red-400'; classTrack = 'bg-rose-100';
+      } else if (warnaTipe === 'biru') {
+          warnaUtama = '#3b82f6'; warnaMuda = '#6366f1'; warnaBg = '#dbeafe';
+          classTeks = 'text-blue-600'; classGradienBar = 'bg-gradient-to-r from-blue-500 to-indigo-500'; classTrack = 'bg-blue-100';
+      } else if (warnaTipe === 'ungu') {
+          warnaUtama = '#7c3aed'; warnaMuda = '#a855f7'; warnaBg = '#ede9fe';
+          classTeks = 'text-violet-600'; classGradienBar = 'bg-gradient-to-r from-violet-600 to-purple-500'; classTrack = 'bg-violet-100';
+      }
 
       const detailList = hitungDetailSarimbit(dataArray);
       let htmlDetail = '';
@@ -2482,8 +2544,36 @@
       htmlKurang += buatItemOngkirDitel("blm_ongkir", "Belum Ongkir", dataBlmOngkir, total, blmOngkir_Open, blmOngkir_Close, blmOngkir_Ready, 'merah');
       htmlKurang += buatItemGrafikStatistik("blm_alamat", "Belum Ada Alamat", dataBlmAlamat, total, 'merah');
 
+      // FILTERING WILAYAH PENGIRIMAN (JAWA, LUAR JAWA, LUAR NEGERI)
+      const dataJawa = dataStatistikAktif.filter(d => d.isJawa);
+      const dataLuarJawa = dataStatistikAktif.filter(d => d.isLuarJawa);
+      const dataLuarNegeri = dataStatistikAktif.filter(d => d.isLuarNegeri);
+
+      let htmlWilayah = "";
+      htmlWilayah += buatItemGrafikStatistik("wil_jawa", "Pulau Jawa", dataJawa, total, 'hijau');
+      htmlWilayah += buatItemGrafikStatistik("wil_luarjawa", "Luar Pulau Jawa", dataLuarJawa, total, 'biru');
+      htmlWilayah += buatItemGrafikStatistik("wil_luarnegeri", "Luar Negeri", dataLuarNegeri, total, 'ungu');
+
+      // FILTERING LOGISTIK EKSPEDISI (JNE, JNT, POS, LION, AMBIL SENDIRI, LAINNYA)
+      const dataJNE = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'JNE');
+      const dataJNT = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'JNT');
+      const dataPOS = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'POS');
+      const dataLION = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'LION');
+      const dataAmbil = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'AMBIL_SENDIRI');
+      const dataEksLain = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'LAINNYA');
+
+      let htmlEkspedisi = "";
+      htmlEkspedisi += buatItemGrafikStatistik("eks_jne", "JNE", dataJNE, total, 'biru');
+      htmlEkspedisi += buatItemGrafikStatistik("eks_jnt", "JNT", dataJNT, total, 'biru');
+      htmlEkspedisi += buatItemGrafikStatistik("eks_pos", "POS", dataPOS, total, 'biru');
+      htmlEkspedisi += buatItemGrafikStatistik("eks_lion", "LION", dataLION, total, 'ungu');
+      htmlEkspedisi += buatItemGrafikStatistik("eks_ambil", "Ambil Sendiri", dataAmbil, total, 'hijau');
+      htmlEkspedisi += buatItemGrafikStatistik("eks_lain", "Lainnya / Belum Pilih", dataEksLain, total, 'merah');
+
       document.getElementById('wadah-stat-selesai').innerHTML = htmlSelesai;
       document.getElementById('wadah-stat-kurang').innerHTML = htmlKurang;
+      if (document.getElementById('wadah-stat-wilayah')) document.getElementById('wadah-stat-wilayah').innerHTML = htmlWilayah;
+      if (document.getElementById('wadah-stat-ekspedisi')) document.getElementById('wadah-stat-ekspedisi').innerHTML = htmlEkspedisi;
       document.getElementById('modalStatistikProgress').classList.remove('hidden');
       
       // TRIGGER ANIMASI JALAN (Setelah modal muncul)
@@ -2534,7 +2624,18 @@
           case "blm_ongkir_open": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir && d.statusProduksi === "OPEN_PO"); labelKategori = "BLM_ONGKIR_OPEN_PO"; break;
           case "blm_ongkir_close": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir && d.statusProduksi === "CLOSE_PO"); labelKategori = "BLM_ONGKIR_CLOSE_PO"; break;
           case "blm_ongkir_ready": dataTersaring = dataStatistikAktif.filter(d => !d.sdhOngkir && d.statusProduksi === "READY"); labelKategori = "BLM_ONGKIR_READY"; break;
-      }
+
+case "wil_jawa": dataTersaring = dataStatistikAktif.filter(d => d.isJawa); labelKategori = "WILAYAH_PULAU_JAWA"; break;
+case "wil_luarjawa": dataTersaring = dataStatistikAktif.filter(d => d.isLuarJawa); labelKategori = "WILAYAH_LUAR_JAWA"; break;
+case "wil_luarnegeri": dataTersaring = dataStatistikAktif.filter(d => d.isLuarNegeri); labelKategori = "WILAYAH_LUAR_NEGERI"; break;
+
+case "eks_jne": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'JNE'); labelKategori = "EKSPEDISI_JNE"; break;
+case "eks_jnt": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'JNT'); labelKategori = "EKSPEDISI_JNT"; break;
+case "eks_pos": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'POS'); labelKategori = "EKSPEDISI_POS"; break;
+case "eks_lion": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'LION'); labelKategori = "EKSPEDISI_LION"; break;
+case "eks_ambil": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'AMBIL_SENDIRI'); labelKategori = "AMBIL_SENDIRI"; break;
+case "eks_lain": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEkspedisi === 'LAINNYA'); labelKategori = "EKSPEDISI_LAINNYA"; break;
+}
 
       if (dataTersaring.length === 0) return showToast("⚠️ Tidak ada data untuk kategori ini!");
 
@@ -2620,11 +2721,60 @@
             blmBayar: document.getElementById('fc-blmbayar')?.checked, blmLunas: document.getElementById('fc-blmlunas')?.checked,
             blmOngkir: document.getElementById('fc-blmongkir')?.checked, sdhOngkir: document.getElementById('fc-sdhongkir')?.checked,
             jnt: document.getElementById('fc-jnt')?.checked, jne: document.getElementById('fc-jne')?.checked, pos: document.getElementById('fc-pos')?.checked,
-            jawa: document.getElementById('fc-jawa')?.checked, luarJawa: document.getElementById('fc-luarjawa')?.checked, noAlamat: document.getElementById('fc-noalamat')?.checked,
+            lion: document.getElementById('fc-lion')?.checked, ambil: document.getElementById('fc-ambil')?.checked, eksLain: document.getElementById('fc-ekslain')?.checked,
+            jawa: document.getElementById('fc-jawa')?.checked, luarJawa: document.getElementById('fc-luarjawa')?.checked,
+            luarNegeri: document.getElementById('fc-luarnegeri')?.checked, noAlamat: document.getElementById('fc-noalamat')?.checked,
             blmGram: document.getElementById('fc-blmgram')?.checked
         };
     }
 
+    // MESIN DETEKSI LUAR NEGERI (ANTI SALAH DETEKSI ALAMAT INDONESIA & 0852 TELKOMSEL)
+    // 1. Singkatan administratif Indonesia dengan titik (kebal walau tanpa spasi seperti Kel.Negeri, Kec.Bilah, Kab.Labuhanbatu, Prov.Sumatera)
+    const REGEX_SINGKATAN_INDO = /(?:^|[\s.,:(/-])(?:kec|kel|kab|prov|ds|dsn|gg)\.(?=[a-z0-9\s])/i;
+
+    // 2. Kata administratif & wilayah Indonesia (mendukung tanda titik dua seperti "Kelurahan:" / "Kecamatan:")
+    const REGEX_ADMIN_INDO = /(?:^|[\s.,:(/-])(?:rt\.?\s*\d+|rw\.?\s*\d+|rt\s*\/\s*rw|kec|kecamatan|kel|kelurahan|kab|kabupaten|desa|dusun|gang|prov|provinsi|indonesia|indomaret|alfamart|alfamidi|jawa barat|jawa tengah|jawa timur|jabar|jateng|jatim|dki jakarta|jakarta|banten|yogyakarta|jogja|sumatera|sumatra|kalimantan|sulawesi|riau|lampung|jambi|bengkulu|aceh|maluku|papua|ntb|ntt|kuantan singingi|medan johor|jepang pakis|kota bekasi|bekasi|bandung|surabaya|semarang|bogor|depok|tangerang|kudus|pati|jepara|demak|solo|surakarta|malang|sidoarjo|gresik|kediri|blitar|jember|banyuwangi|cirebon|tasikmalaya|garut|sukabumi|cianjur|karawang|purwakarta|subang|indramayu|majalengka|kuningan|ciamis|serang|cilegon|pandeglang|lebak|pekalongan|tegal|brebes|purwokerto|banyumas|cilacap|kebumen|magelang|klaten|boyolali|sragen|wonogiri|salatiga|medan|labuhanbatu|makassar|palembang|pekanbaru|batam|padang|banjarmasin|balikpapan|samarinda|pontianak|manado|denpasar|mataram|kupang|jayapura|ambon|palu|kendari|gorontalo)(?=$|[\s.,:)/-])/i;
+
+    const REGEX_NEGARA_LUAR = /\b(malaysia|singapura|singapore|brunei|brunei darussalam|taiwan|hong kong|hongkong|hk|macau|macao|jepang|japan|korea selatan|south korea|arab saudi|saudi arabia|qatar|uni emirat arab|uae|uea|dubai|abu dhabi|kuwait|kesultanan oman|sultanate of oman|bahrain|yordania|jordan|mesir|egypt|turki|turkey|australia|selandia baru|new zealand|amerika serikat|united states|usa|united kingdom|inggris|netherlands|germany|france|italy|spain|switzerland|canada|thailand|filipina|philippines|vietnam|cambodia|tiongkok|luar negeri|overseas|international)\b/i;
+
+    const REGEX_KOTA_LUAR = /\b(kuala lumpur|selangor|johor bahru|johor|penang|sabah|sarawak|malacca|kedah|kelantan|terengganu|pahang|negeri sembilan|perlis|putrajaya|shah alam|petaling jaya|subang jaya|klang|ipoh|kuching|kota kinabalu|ampang|cheras|puchong|seremban|kuantan pahang|miri|sibu|tawau|sandakan|bintulu|cyberjaya|jurong|tampines|woodlands|yishun|bedok|sengkang|punggol|changi|hougang|ang mo kio|toa payoh|bishan|clementi|bukit batok|pasir ris|sembawang|edgedale|bandar seri begawan|kuala belait|tutong|gadong|taipei|taichung|kaohsiung|tainan|taoyuan|hsinchu|keelung|changhua|chiayi|new taipei|pingtung|yilan|hualien|kowloon|tsuen wan|sha tin|causeway bay|coeswaybay|yuen long|yunlong|aan ekspress|aan express|wan chai|mong kok|tsim sha tsui|tokyo|osaka|kyoto|nagoya|yokohama|fukuoka|sapporo|kobe|hiroshima|chiba|saitama|shizuoka|aichi|kanagawa|hyogo|ibaraki|gunma|gifu|okinawa|seoul|busan|incheon|daegu|daejeon|gwangju|ulsan|suwon|gyeonggi|ansan|jeju|riyadh|jeddah|makkah|mekkah|madinah|dammam|khobar|doha|sharjah|muscat|manama|cairo|istanbul|ankara|sydney|melbourne|brisbane|perth|adelaide|canberra|darwin|tasmania|new south wales|queensland|auckland|wellington|christchurch|california|new york|texas|los angeles|chicago|manchester|birmingham|rotterdam|berlin|munich|frankfurt|hamburg|zurich|toronto|vancouver|bangkok|manila|beijing|shanghai|guangzhou|shenzhen)\b/i;
+
+    function deteksiAlamatIndonesia(teksAlamat) {
+        if (!teksAlamat) return false;
+        const almt = String(teksAlamat).trim().toLowerCase();
+        if (!almt || almt === '-') return false;
+        return REGEX_SINGKATAN_INDO.test(almt) || REGEX_ADMIN_INDO.test(almt);
+    }
+
+    function deteksiAlamatLuarNegeri(teksAlamat) {
+        if (!teksAlamat) return false;
+        const almt = String(teksAlamat).trim().toLowerCase();
+        if (!almt || almt === '-') return false;
+        if (deteksiAlamatIndonesia(almt)) return false;
+        if (REGEX_NEGARA_LUAR.test(almt)) return true;
+        if (REGEX_KOTA_LUAR.test(almt)) return true;
+        return false;
+    }
+
+    function deteksiApakahLuarNegeri(teksAlamat, noTelp = "") {
+        // 1. Jika alamat jelas di Indonesia, mutlak BUKAN Luar Negeri
+        if (deteksiAlamatIndonesia(teksAlamat)) return false;
+        // 2. Cek nama negara / kota luar negeri pada alamat
+        if (deteksiAlamatLuarNegeri(teksAlamat)) return true;
+
+        const telpRaw = String(noTelp || "").trim();
+        if (!telpRaw) return false;
+        const digits = telpRaw.replace(/[^0-9]/g, '');
+        if (digits.length < 8) return false;
+        // 3. Cek kode negara asing (+ atau 00 selain Indonesia)
+        if (telpRaw.startsWith('+') && !digits.startsWith('62')) return true;
+        if (digits.startsWith('00') && !digits.startsWith('0062')) return true;
+        // 4. Nomor Hong Kong / Taiwan yang dipisah spasi/strip (aman dari nomor Telkomsel 0852 tanpa 0 depan)
+        if (/^(852|886)[\s-]\d{4}[\s-]?\d{4,5}$/.test(telpRaw)) return true;
+        // 5. Kode negara asing tanpa tanda + yang tidak pernah bentrok dengan nomor 08xx Indonesia
+        if (/^(60|65|673|966|971|974|61)\d{7,}$/.test(digits)) return true;
+        return false;
+    }
    // FUNGSI CERDAS DETEKSI ALAMAT KOSONG (KEBAL DARI KATA "SEBELUM")
    function cekApakahBelumAdaAlamat(teksAlamat) {
         if (!teksAlamat) return true;
@@ -2666,9 +2816,10 @@
             if (['2', '3', '7', '8', '9'].includes(digitAwal)) return false; // Pasti Luar Jawa
         }
 
-        // 2. CEK DAFTAR PROVINSI / KABUPATEN / KOTA LUAR PULAU JAWA
-        // Jika ada nama wilayah Luar Jawa (misal Riau, Dumai, Sintang, Kalimantan, Banjarmasin, Makassar, dll), langsung kunci sebagai LUAR JAWA!
-        if (REGEX_PROV_KOTA_LUAR_JAWA.test(almt)) {
+       // 2. CEK DAFTAR PROVINSI / KABUPATEN / KOTA LUAR PULAU JAWA
+        // Bersihkan nama kecamatan di Jawa yang mirip kota luar Jawa (misal: Medan Satria Bekasi, Padang Lumajang)
+        const almtCekLuarJawa = almt.replace(/\bmedan\s+satria\b/g, 'medansatria');
+        if (REGEX_PROV_KOTA_LUAR_JAWA.test(almtCekLuarJawa)) {
             return false;
         }
 
@@ -2729,16 +2880,15 @@
     }
 
     function evaluasiFilterLanjutan(o, f) {
-        if (!f.blmBayar && !f.blmLunas && !f.blmOngkir && !f.sdhOngkir && !f.jnt && !f.jne && !f.pos && !f.jawa && !f.luarJawa && !f.noAlamat && !f.blmGram) return true;
+        if (!f.blmBayar && !f.blmLunas && !f.blmOngkir && !f.sdhOngkir && !f.jnt && !f.jne && !f.pos && !f.lion && !f.ambil && !f.eksLain && !f.jawa && !f.luarJawa && !f.luarNegeri && !f.noAlamat && !f.blmGram) return true;
         
         const ongkir = Number(o.ongkir) || 0;
-        const eks = (o.ekspedisi || "").toUpperCase();
+        const eks = (o.ekspedisi || "").trim().toUpperCase();
 
         let passKeuangan = true;
         if (f.blmBayar || f.blmLunas || f.blmOngkir || f.sdhOngkir) {
             passKeuangan = false;
             
-            // Kalkulasi Keuangan Pintar (Otomatis hitung sisa tagihan semua barang milik customer)
             let totalBayar = 0;
             const riwayat = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(o) : [];
             riwayat.forEach(b => totalBayar += (Number(b.nominal) || 0));
@@ -2753,7 +2903,6 @@
             let diskon = (dTipe === 'persen') ? (totalBelanja * dNilai) / 100 : (dTipe === 'angka' ? dNilai : 0);
             const grandTotal = Math.max(0, totalBelanja - diskon) + ongkir;
 
-            // Logika Penyaringan
             if (f.blmBayar && totalBayar === 0) passKeuangan = true;
             if (f.blmLunas && totalBayar < grandTotal) passKeuangan = true;
             if (f.blmOngkir && ongkir === 0) passKeuangan = true;
@@ -2761,21 +2910,36 @@
         }
 
         let passEks = true;
-        if (f.jnt || f.jne || f.pos) {
+        if (f.jnt || f.jne || f.pos || f.lion || f.ambil || f.eksLain) {
             passEks = false;
-            if (f.jnt && eks.includes("JNT")) passEks = true;
-            if (f.jne && eks.includes("JNE")) passEks = true;
-            if (f.pos && eks.includes("POS")) passEks = true;
+            const isJne = eks.includes("JNE");
+            const isJnt = eks.includes("JNT") || eks.includes("J&T");
+            const isPos = eks.includes("POS");
+            const isLion = eks.includes("LION");
+            const isAmbil = eks.includes("AMBIL");
+            const isLain = !isJne && !isJnt && !isPos && !isLion && !isAmbil;
+
+            if (f.jne && isJne) passEks = true;
+            if (f.jnt && isJnt) passEks = true;
+            if (f.pos && isPos) passEks = true;
+            if (f.lion && isLion) passEks = true;
+            if (f.ambil && isAmbil) passEks = true;
+            if (f.eksLain && isLain) passEks = true;
         }
 
         let passAlamat = true;
-        if (f.jawa || f.luarJawa || f.noAlamat) {
+        if (f.jawa || f.luarJawa || f.luarNegeri || f.noAlamat) {
             passAlamat = false;
-            const isNoAlamat = cekApakahBelumAdaAlamat(o.alamat);
-            const isJawa = !isNoAlamat ? deteksiApakahPulauJawa(o.alamat) : false;
+            const isAlamatLN = deteksiAlamatLuarNegeri(o.alamat);
+            const isLuarNegeri = deteksiApakahLuarNegeri(o.alamat, o.telepon || o.telp);
+            const isNoAlamat = !isAlamatLN && cekApakahBelumAdaAlamat(o.alamat);
+            const isJawa = (!isLuarNegeri && !isNoAlamat) ? deteksiApakahPulauJawa(o.alamat) : false;
+            const isLuarJawa = (!isLuarNegeri && !isNoAlamat && !isJawa);
+
             if (f.noAlamat && isNoAlamat) passAlamat = true;
-            if (f.jawa && !isNoAlamat && isJawa) passAlamat = true;
-            if (f.luarJawa && !isNoAlamat && !isJawa) passAlamat = true;
+            if (f.luarNegeri && isLuarNegeri) passAlamat = true;
+            if (f.jawa && isJawa) passAlamat = true;
+            if (f.luarJawa && isLuarJawa) passAlamat = true;
         }
 
         // --- LOGIKA FILTER GRAMASI 0 DENGAN CACHE (TIDAK LAG) ---
@@ -7998,26 +8162,24 @@ function pilihProdukModal(metaString) {
     // =========================================================================
     document.addEventListener("DOMContentLoaded", () => {
         
-        // 1. FUNGSI TERAPKAN FILTER LANJUTAN (ANTI-LAG)
-        window.terapkanFilterLanjutan = function() {
-            // A. TUTUP MODAL SEKETIKA (UI Instant Feedback)
+       // 1. FUNGSI TERAPKAN FILTER LANJUTAN (ANTI-LAG)
+       window.terapkanFilterLanjutan = function() {
             document.getElementById('modalFilterLanjutan').classList.add('hidden');
             
             const f = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : {};
-            const isAktif = f.blmBayar || f.blmLunas || f.blmOngkir || f.sdhOngkir || f.jnt || f.jne || f.pos || f.jawa || f.luarJawa || f.noAlamat || f.blmGram;
+            const isAktif = f.blmBayar || f.blmLunas || f.blmOngkir || f.sdhOngkir || f.jnt || f.jne || f.pos || f.lion || f.ambil || f.eksLain || f.jawa || f.luarJawa || f.luarNegeri || f.noAlamat || f.blmGram;
             
             const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
             if (btnFilter) {
                 if (isAktif) {
-                    btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-black text-white bg-rose-500 border border-rose-600 hover:bg-rose-600 active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-rose-500/30";
+                    btnFilter.className = "h-9 px-3.5 rounded-full text-[10px] font-black text-white bg-rose-500 border border-rose-600 hover:bg-rose-600 active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-rose-500/30";
                     btnFilter.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyaring...`;
                 } else {
-                    btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm";
+                    btnFilter.className = "h-9 px-3.5 rounded-full text-[10px] font-black text-indigo-600 bg-gradient-to-br from-indigo-50 to-white border border-indigo-200/60 hover:bg-indigo-50 active:scale-95 transition-all flex items-center gap-1.5 shadow-md";
                     btnFilter.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter Extra`;
                 }
             }
             
-            // B. JEDA NAFAS BROWSER 50ms (Memisahkan beban hitungan dari UI)
             setTimeout(() => {
                 if(typeof window.renderSlip === 'function') window.renderSlip();
                 if (btnFilter && isAktif) btnFilter.innerHTML = `<i class="fa-solid fa-filter"></i> Filter Aktif`;
@@ -8027,7 +8189,7 @@ function pilihProdukModal(metaString) {
         // 2. FUNGSI RESET FILTER LANJUTAN (ANTI-LAG)
         window.resetFilterLanjutan = function() {
             document.getElementById('modalFilterLanjutan').classList.add('hidden');
-            ['fc-blmbayar', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-jawa', 'fc-luarjawa', 'fc-noalamat', 'fc-blmgram'].forEach(id => {
+            ['fc-blmbayar', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-lion', 'fc-ambil', 'fc-ekslain', 'fc-jawa', 'fc-luarjawa', 'fc-luarnegeri', 'fc-noalamat', 'fc-blmgram'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.checked = false;
             });
             
@@ -8782,7 +8944,20 @@ function pilihProdukModal(metaString) {
         sekarang.setHours(0,0,0,0);
 
         return Object.values(groups).map(g => {
-            const isNoAlamat = typeof cekApakahBelumAdaAlamat === 'function' ? cekApakahBelumAdaAlamat(g.alamat) : (g.alamat === "-" || g.alamat === "");
+            const isAlamatLN = typeof deteksiAlamatLuarNegeri === 'function' ? deteksiAlamatLuarNegeri(g.alamat) : false;
+            const isLuarNegeri = typeof deteksiApakahLuarNegeri === 'function' ? deteksiApakahLuarNegeri(g.alamat, g.telp) : false;
+            const isNoAlamat = !isAlamatLN && (typeof cekApakahBelumAdaAlamat === 'function' ? cekApakahBelumAdaAlamat(g.alamat) : (g.alamat === "-" || g.alamat === ""));
+            const isJawa = (!isLuarNegeri && !isNoAlamat && typeof deteksiApakahPulauJawa === 'function') ? deteksiApakahPulauJawa(g.alamat) : false;
+            const isLuarJawa = (!isLuarNegeri && !isNoAlamat && !isJawa);
+
+            const eksUpper = String(g.ekspedisi || "").trim().toUpperCase();
+            let kategoriEkspedisi = "LAINNYA";
+            if (eksUpper.includes("JNE")) kategoriEkspedisi = "JNE";
+            else if (eksUpper.includes("JNT") || eksUpper.includes("J&T")) kategoriEkspedisi = "JNT";
+            else if (eksUpper.includes("POS")) kategoriEkspedisi = "POS";
+            else if (eksUpper.includes("LION")) kategoriEkspedisi = "LION";
+            else if (eksUpper.includes("AMBIL")) kategoriEkspedisi = "AMBIL_SENDIRI";
+
             const totalQty = g.items.reduce((sum, it) => sum + (Number(it.jumlah) || 0), 0);
             const gross = g.items.reduce((sum, it) => sum + ((Number(it.jumlah) || 0) * (Number(it.harga) || 0)), 0);
             const dTipe = g.items[0]?.diskonTipe || 'none';
@@ -8832,7 +9007,11 @@ function pilihProdukModal(metaString) {
                 sudahBayar: totalBayar > 0,
                 sudahLunas: sisaTagihan <= 0,
                 sdhOngkir: g.ongkir > 0,
-                sdhAlamat: !isNoAlamat
+                sdhAlamat: !isNoAlamat,
+                isJawa: isJawa,
+                isLuarJawa: isLuarJawa,
+                isLuarNegeri: isLuarNegeri,
+                kategoriEkspedisi: kategoriEkspedisi
             };
         });
     };
