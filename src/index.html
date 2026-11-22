@@ -888,17 +888,17 @@
        </div>
            <div class="glass rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 bg-white/40 relative">
                <div class="overflow-x-auto">
-                     <table class="w-full text-xs md:text-sm text-left min-w-[390px] md:min-w-[600px]">
-                         <thead>
-                           <tr class="text-slate-500 uppercase text-[8.5px] md:text-[10px] tracking-wider font-semibold md:font-bold">
-                               <th class="px-2.5 py-2.5 md:px-5 md:py-4">Koleksi</th>
-                               <th class="px-2.5 py-2.5 md:px-5 md:py-4">Detail Produk</th>
-                               <th class="px-2.5 py-2.5 md:px-5 md:py-4 text-right">Harga & Berat</th>
-                               <th class="px-2 py-2.5 md:px-5 md:py-4 text-center">Aksi</th>
-                           </tr>
-                         </thead>
-                         <tbody id="tbody-master" class="divide-y divide-slate-100"></tbody>
-                     </table>
+                <table style="font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;" class="w-full text-xs md:text-[13px] text-left min-w-[390px] md:min-w-[600px] antialiased">
+                    <thead>
+                      <tr class="text-slate-400 uppercase text-[8.5px] md:text-[10px] tracking-widest font-medium">
+                          <th class="px-2.5 py-2.5 md:px-5 md:py-3.5 font-medium">Koleksi</th>
+                          <th class="px-2.5 py-2.5 md:px-5 md:py-3.5 font-medium">Detail Produk</th>
+                          <th class="px-2.5 py-2.5 md:px-5 md:py-3.5 text-right font-medium">Harga & Berat</th>
+                          <th class="px-2 py-2.5 md:px-5 md:py-3.5 text-center font-medium">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-master" class="divide-y divide-slate-100"></tbody>
+                </table>
                  </div>
              </div>
             <div id="pagination-master" class="pt-1"></div>
@@ -1353,8 +1353,15 @@
 
     <!-- HALAMAN: DASHBOARD SUMBER -->
     <div id="page-dashboardsumber" class="page space-y-6 max-w-7xl mx-auto w-full">
-        <div class="mb-5 border-b border-slate-200 pb-4">
-            <h2 class="text-3xl font-black tracking-tight text-slate-800">Dashboard Sumber Orderan</h2>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-3 border-b border-slate-200 pb-4">
+            <div>
+                <h2 class="text-3xl font-black tracking-tight text-slate-800">Dashboard Sumber Orderan</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="bukaModalStatistikSumber()" class="h-9 px-3.5 rounded-full text-[10px] font-black text-blue-600 bg-gradient-to-br from-blue-50 to-white border border-blue-200/60 hover:bg-blue-50 active:scale-95 transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-1.5 shadow-md hover:shadow-lg hover:shadow-blue-500/40 group">
+                    <i class="fa-solid fa-chart-pie group-hover:scale-110 transition-transform"></i> Statistik
+                </button>
+            </div>
         </div>
         
   <!-- Filter Dashboard Sumber & Tombol Unduh (Desain Compact Pill Samsung) -->
@@ -1991,6 +1998,80 @@
         <div class="p-5 border-t border-white/50 bg-transparent flex justify-between gap-3 shrink-0">
           <button onclick="resetFilterLanjutan()" class="flex-1 py-3.5 bg-slate-200/60 text-slate-600 rounded-full font-bold text-xs hover:bg-slate-300 transition-colors active:scale-95 shadow-sm border border-slate-300/40 backdrop-blur-sm">Reset</button>
           <button onclick="terapkanFilterLanjutan()" class="flex-[2] py-3.5 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-full font-bold text-xs hover:from-indigo-700 hover:to-blue-600 shadow-[0_4px_15px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400"><i class="fa-solid fa-check mr-1.5"></i> Terapkan Filter</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL STATISTIK SUMBER ORDERAN (GAYA KACA iOS PERSIS RINCIAN CUSTOMER) -->
+<div id="modalStatistikSumber" onclick="if(event.target === this) this.classList.add('hidden')" class="hidden fixed inset-0 z-[120] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
+    <div class="ios-glass rounded-[2rem] w-full max-w-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col">
+        
+        <!-- HEADER TRANSPARAN EFEK KACA -->
+        <div class="p-5 md:p-6 bg-transparent border-b border-white/50 flex justify-between items-center relative z-10 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
+                    <i class="fa-solid fa-chart-simple text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-lg md:text-xl tracking-tight text-slate-800 leading-none">Statistik Sumber Orderan</h3>
+                    <p id="subjudul-statistik-sumber" class="text-[11px] text-slate-600 font-bold mt-1">Berdasarkan filter aktif saat ini</p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('modalStatistikSumber').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-white/40 text-slate-600 rounded-full hover:bg-white/60 transition-colors border border-white/60 active:scale-95 shadow-sm">
+                <i class="fa-solid fa-xmark font-bold"></i>
+            </button>
+        </div>
+        
+        <!-- KONTEN 2 KOLOM DENGAN DONAT SVG & PROGRESS BAR -->
+        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-300/50 -translate-x-1/2"></div>
+                
+                <div class="space-y-5 pr-0 md:pr-4">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-white/60 pb-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Kontribusi Sumber (PCS)
+                    </h4>
+                    <div id="wadah-stat-sumber-pcs" class="space-y-4"></div>
+                </div>
+
+                <div class="space-y-5 pl-0 md:pl-4">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-white/60 pb-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Distribusi Customer & Kosong
+                    </h4>
+                    <div id="wadah-stat-sumber-cust" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER: PILIHAN UNDUH EXCEL -->
+        <div class="p-4 md:p-5 bg-transparent border-t border-white/50 flex flex-col gap-4 shrink-0">
+            <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-1 w-full">
+                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-list-check mr-1 text-indigo-500"></i> Kategori Sumber:</label>
+                    <select id="kategori-unduh-stat-sumber" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-white/50 border border-white/60 outline-none focus:bg-white focus:border-blue-500 cursor-pointer shadow-sm">
+                        <option value="semua">Semua Sumber (Sesuai Filter)</option>
+                        <option value="WhatsApp">Hanya WhatsApp</option>
+                        <option value="Instagram">Hanya Instagram</option>
+                        <option value="TikTok">Hanya TikTok</option>
+                        <option value="Reseller">Hanya Reseller</option>
+                        <option value="Tidak Diketahui">Sumber Kosong (Tidak Diketahui)</option>
+                    </select>
+                </div>
+                
+                <div class="flex-1 w-full">
+                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 block"><i class="fa-solid fa-file-export mr-1 text-emerald-500"></i> Format Laporan:</label>
+                    <select id="format-unduh-stat-sumber" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-white/50 border border-white/60 outline-none focus:bg-white focus:border-emerald-500 cursor-pointer shadow-sm">
+                        <option value="ringkasan">📊 Rekap Ringkasan per Sumber</option>
+                        <option value="lengkap">📋 Rincian Lengkap per Customer</option>
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-auto">
+                    <button onclick="unduhRekapStatistikSumberExcel()" class="w-full bg-gradient-to-r from-slate-700 to-slate-800 text-white px-5 py-2 md:py-2.5 rounded-xl font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] border border-slate-600 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2.5 group">
+                        <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -4122,23 +4203,23 @@ async function handleOrderSubmit(e) {
                 
                 return `
             <tr>
-                <td class="px-2.5 py-2 md:px-5 md:py-4 border-b border-slate-100 align-top">
-                    <div class="font-medium md:font-bold text-slate-800 text-[10.5px] md:text-sm leading-tight mb-0.5 md:mb-1">${escapeHTML(m.sarimbit)}</div>
-                    <div class="text-[8.5px] md:text-[10px] text-blue-600 font-medium md:font-bold uppercase tracking-wide">${escapeHTML(m.pusat)}</div>
+                <td class="px-2.5 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 align-top">
+                    <div class="font-normal text-slate-800 text-[11px] md:text-[13px] tracking-[0.01em] leading-snug mb-0.5">${escapeHTML(m.sarimbit)}</div>
+                    <div class="text-[9px] md:text-[10.5px] text-blue-600/80 font-normal uppercase tracking-wider">${escapeHTML(m.pusat)}</div>
                 </td>
-                <td class="px-2.5 py-2 md:px-5 md:py-4 border-b border-slate-100 align-top">
-                    <div class="font-medium md:font-bold text-slate-700 text-[10.5px] md:text-sm leading-tight mb-0.5 md:mb-1">${escapeHTML(m.barang)}</div>
-                    <div class="flex flex-wrap items-center gap-1">
-                        <span class="text-[8.5px] md:text-[10px] font-normal md:font-bold text-slate-500 uppercase">${escapeHTML(m.varian)}</span>
-                        <span class="text-[8.5px] md:text-[10px] text-slate-300">|</span>
-                        <span class="text-[8.5px] md:text-[10px] font-medium md:font-bold text-slate-500 uppercase">SZ: ${escapeHTML(m.size)}</span>
+                <td class="px-2.5 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 align-top">
+                    <div class="font-normal text-slate-700 text-[11px] md:text-[13px] tracking-[0.01em] leading-snug mb-0.5">${escapeHTML(m.barang)}</div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-[9px] md:text-[10.5px] font-light text-slate-500 uppercase tracking-wide">${escapeHTML(m.varian)}</span>
+                        <span class="text-[9px] md:text-[10.5px] text-slate-300">|</span>
+                        <span class="text-[9px] md:text-[10.5px] font-normal text-slate-500 uppercase tracking-wide">SZ: ${escapeHTML(m.size)}</span>
                     </div>
                 </td>
-                <td class="px-2.5 py-2 md:px-5 md:py-4 border-b border-slate-100 text-right align-top whitespace-nowrap">
-                    <div class="font-semibold md:font-black text-slate-800 mb-0.5 md:mb-1 text-[10.5px] md:text-sm tabular-nums">${formatRp(m.harga)}</div>
-                    <div class="text-[8.5px] md:text-[10px] font-normal md:font-bold text-slate-500 flex justify-end">${gramBadge}</div>
+                <td class="px-2.5 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 text-right align-top whitespace-nowrap">
+                    <div class="font-medium text-slate-800 mb-0.5 text-[11px] md:text-[13px] tabular-nums tracking-[0.01em]">${formatRp(m.harga)}</div>
+                    <div class="text-[9px] md:text-[10.5px] font-light text-slate-500 flex justify-end tabular-nums">${gramBadge}</div>
                 </td>
-                <td class="px-2 py-2 md:px-5 md:py-4 border-b border-slate-100 text-center align-middle">
+                <td class="px-2 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 text-center align-middle">
                     <button onclick="editMaster('${escapeHTML(m.pusat)}', '${escapeHTML(m.sarimbit)}', '${escapeHTML(m.barang)}', '${escapeHTML(m.varian)}', '${escapeHTML(m.size)}', ${m.harga}, ${m.berat})" class="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-600 rounded-full hover:from-orange-500 hover:to-orange-600 hover:text-white transition-all border border-white shadow-[0_4px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_12px_rgba(234,88,12,0.4)] active:scale-95 flex items-center justify-center mx-auto group">
                         <i class="fa-solid fa-pen text-[9.5px] md:text-[11px] group-hover:scale-110 transition-transform"></i>
                     </button>
@@ -4436,6 +4517,7 @@ async function handleOrderSubmit(e) {
         const buildSlipHtml = (idAman, c, itemHTML, btnAlertHtml, totalPcsCustomer, beratFormatted) => {
             idYangDibutuhkanSlip.add(`slip-row-${idAman}`);
             const namaAmanStr = (c.nama || "").replace(/'/g, "\\'"); // escape nama
+            const telpAmanStr = String(c.telp || "").replace(/['"\r\n]/g, "").trim();
             return `
            <tr id="slip-row-${idAman}" class="align-top border-b border-slate-200">
                 <td class="pt-8 pb-6 pl-6 pr-1.5 md:pr-2.5 relative">
@@ -4457,10 +4539,10 @@ async function handleOrderSubmit(e) {
                         <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center justify-center gap-3 z-20 whitespace-nowrap">
                             <div class="font-black text-slate-800 text-[13px] leading-none drop-shadow-sm tracking-wide">${c.nama.toUpperCase()}</div>
                             
-                            <!-- Nomor WA Terintegrasi di dalam kapsul -->
-                            <div onclick="hubungiWA('${c.telp}')" title="Klik untuk chat WhatsApp langsung" class="text-[12px] font-black text-slate-600 flex items-center gap-1.5 hover:text-emerald-600 cursor-pointer transition-colors leading-none">
-                                <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i> ${c.telp}
-                            </div>
+                          <!-- Nomor WA Terintegrasi di dalam kapsul -->
+                            <button type="button" onclick="event.stopPropagation(); hubungiWA('${telpAmanStr}')" title="Klik untuk buka chat WhatsApp" class="text-[12px] font-black text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1.5 cursor-pointer transition-all leading-none active:scale-95">
+                                <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i> <span class="underline decoration-emerald-300 underline-offset-2">${c.telp || '-'}</span>
+                            </button>
                         </div>
 
                        <div class="absolute inset-0 bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
@@ -5618,6 +5700,26 @@ async function handleOrderSubmit(e) {
         catatLog('DOWNLOAD', 'SLIP', `Mengunduh PDF Nota Transparan untuk: ${head.customer.toUpperCase()}`);
     }
 
+    // HELPER FORMAT TANGGAL LENGKAP (Nama Hari, Tanggal Bulan Tahun)
+    function formatTanggalLengkapIndo(tglRaw, idCustomer = "") {
+        let d = null;
+        if (tglRaw) {
+            const parsed = new Date(tglRaw);
+            if (!isNaN(parsed.getTime())) d = parsed;
+        }
+        if (!d && idCustomer) {
+            const matchTs = String(idCustomer).match(/\d{13}/);
+            if (matchTs) {
+                const parsedTs = new Date(parseInt(matchTs[0], 10));
+                if (!isNaN(parsedTs.getTime())) d = parsedTs;
+            }
+        }
+        if (!d) return "-";
+        const namaHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        return `${namaHari[d.getDay()]}, ${d.getDate()} ${namaBulan[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
     function downloadCustomerExcel() {
         const search = document.getElementById('search-customer').value.toLowerCase();
         const filter = document.getElementById('filter-sarimbit-slip').value;
@@ -5629,7 +5731,7 @@ async function handleOrderSubmit(e) {
         orderData.forEach(o => {
             const cocokNama = (o.customer || "").toLowerCase().includes(search); 
             const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
-            const cocokTelp = (o.telepon || "").includes(search); // REVISI: Bisa cari nomor WA
+            const cocokTelp = (o.telepon || "").includes(search);
             if (search && !cocokNama && !cocokSarimbit && !cocokTelp) return;
             
             if (filterToko && o.toko !== filterToko) return; 
@@ -5642,9 +5744,13 @@ async function handleOrderSubmit(e) {
             
             if (!groups[idUnik]) { 
                 groups[idUnik] = { 
+                    idCustomer: idUnik,
+                    tanggal: o.tanggal || "",
                     toko: o.toko || "-", nama: o.customer, alamat: o.alamat, telp: o.telepon, items: [], 
                     cicilan1: Number(o.cicilan1 || 0), cicilan2: Number(o.cicilan2 || 0), cicilan3: Number(o.cicilan3 || 0), ongkir: Number(o.ongkir || 0) 
                 }; 
+            } else if (!groups[idUnik].tanggal && o.tanggal) {
+                groups[idUnik].tanggal = o.tanggal;
             }
             groups[idUnik].items.push(o);
         });
@@ -5657,7 +5763,7 @@ async function handleOrderSubmit(e) {
         });
         if (maxBayar < 1) maxBayar = 1;
 
-        const headRow = [ "No", "Toko", "Nama", "Alamat", "Telepon", "Sarimbit", "Nama Barang", "Varian", "Size", "Qty" ];
+        const headRow = [ "No", "Tanggal Order", "Toko", "Nama", "Alamat", "Telepon", "Sarimbit", "Nama Barang", "Varian", "Size", "Qty" ];
         for (let i = 0; i < maxBayar; i++) headRow.push(i === 0 ? "DP Awal" : `Pembayaran ${i+1}`);
         headRow.push("Ongkir & Berat", "Ekspedisi", "Status");
 
@@ -5668,8 +5774,8 @@ async function handleOrderSubmit(e) {
         Object.keys(groups).forEach(name => {
             const c = groups[name]; const startRow = dataExcel.length; 
             const riwayat = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(c.items[0]) : [];
+            const tglLengkap = formatTanggalLengkapIndo(c.tanggal, c.idCustomer);
             
-            // Kalkulasi Sisa Tagihan Pintar
             const totalBelanja = c.items.reduce((sum, it) => sum + ((Number(it.harga) || 0) * (Number(it.jumlah) || 0)), 0);
             const dTipe = c.items[0].diskonTipe || 'none';
             const dNilai = Number(c.items[0].diskonNilai) || 0;
@@ -5695,6 +5801,7 @@ async function handleOrderSubmit(e) {
             c.items.forEach((it, i) => {
                 const row = [ 
                     i === 0 ? nomor : "", 
+                    i === 0 ? tglLengkap : "",
                     i === 0 ? c.toko : "", 
                     i === 0 ? c.nama.toUpperCase() : "", 
                     i === 0 ? c.alamat : "", 
@@ -5706,7 +5813,6 @@ async function handleOrderSubmit(e) {
                     `${it.jumlah} Pcs`
                 ];
                 
-                // Masukkan dinamis pembayaran
                 for (let k = 0; k < maxBayar; k++) {
                     if (i === 0) {
                         row.push(riwayat[k] ? Number(riwayat[k].nominal) : "");
@@ -5725,8 +5831,8 @@ async function handleOrderSubmit(e) {
 
             if (c.items.length > 1) {
                 const endRow = startRow + c.items.length - 1;
-                for (let col = 0; col <= 4; col++) merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
-                for (let col = 10; col < 10 + maxBayar + 3; col++) merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
+                for (let col = 0; col <= 5; col++) merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
+                for (let col = 11; col < 11 + maxBayar + 3; col++) merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
             }
             nomor++;
         });
@@ -5743,7 +5849,7 @@ async function handleOrderSubmit(e) {
         ws['!merges'] = merges;
         
         const colsStyles = [ 
-            { wch: 5 }, { wch: 18 }, { wch: 25 }, { wch: 40 }, { wch: 16 }, 
+            { wch: 5 }, { wch: 26 }, { wch: 18 }, { wch: 25 }, { wch: 40 }, { wch: 16 }, 
             { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 10 }, { wch: 12 } 
         ]; 
         for (let i = 0; i < maxBayar; i++) colsStyles.push({ wch: 15 });
@@ -5852,12 +5958,20 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
         
         orderData.forEach(o => {
             const cocokNama = (o.customer || "").toLowerCase().includes(search); const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
-            const cocokTelp = (o.telepon || "").includes(search); // Tambahan fitur cari nomor HP
+            const cocokTelp = (o.telepon || "").includes(search);
             if (search && !cocokNama && !cocokSarimbit && !cocokTelp) return;
             if (filterToko && o.toko !== filterToko) return; if (filter && o.sarimbit !== filter) return;
             if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             const rawId = (o.idcustomer || o.idCustomer || "").toString().trim(); const cleanName = o.customer.toString().toLowerCase().replace(/\s+/g, ' ').trim(); const idUnik = rawId !== "" ? rawId : "ID_LAMA_" + cleanName;
-            if (!groups[idUnik]) { groups[idUnik] = { toko: o.toko || "-", nama: o.customer, alamat: o.alamat, telp: o.telepon, ongkir: Number(o.ongkir || 0), items: [] }; }
+            if (!groups[idUnik]) {
+                groups[idUnik] = {
+                    idCustomer: idUnik,
+                    tanggal: o.tanggal || "",
+                    toko: o.toko || "-", nama: o.customer, alamat: o.alamat, telp: o.telepon, ongkir: Number(o.ongkir || 0), items: []
+                };
+            } else if (!groups[idUnik].tanggal && o.tanggal) {
+                groups[idUnik].tanggal = o.tanggal;
+            }
             groups[idUnik].items.push(o);
         });
 
@@ -5868,9 +5982,9 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             if (riwayat.length > maxBayar) maxBayar = riwayat.length;
         });
         if (maxBayar < 1) maxBayar = 1;
-        if (maxBayar > 4) maxBayar = 4; // Batasi maksimal 4 kolom bayar agar kertas A4 tidak jebol
+        if (maxBayar > 4) maxBayar = 4;
 
-        const headRow = ['No', 'Toko', 'Pelanggan', 'Alamat', 'Koleksi & Barang', 'Varian/Sz', 'Qty'];
+        const headRow = ['No', 'Tanggal', 'Toko', 'Pelanggan', 'Alamat', 'Koleksi & Barang', 'Varian/Sz', 'Qty'];
         for (let i = 0; i < maxBayar; i++) headRow.push(i === 0 ? "DP Awal" : `Bayar ${i+1}`);
         headRow.push('Logistik', 'Status');
 
@@ -5881,8 +5995,8 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             const c = groups[name];
             const riwayat = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(c.items[0]) : [];
             const rowCount = c.items.length;
+            const tglLengkap = formatTanggalLengkapIndo(c.tanggal, c.idCustomer);
 
-            // Kalkulasi Sisa Tagihan Pintar
             const totalBelanja = c.items.reduce((sum, it) => sum + ((Number(it.harga) || 0) * (Number(it.jumlah) || 0)), 0);
             const dTipe = c.items[0].diskonTipe || 'none';
             const dNilai = Number(c.items[0].diskonNilai) || 0;
@@ -5907,11 +6021,11 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             const eks = c.items[0].ekspedisi || "-";
             const infoLogistik = `${formatRp(c.ongkir)}\n${(totalBeratGram/1000).toFixed(2)} kg\nKurir: ${eks}`;
 
-            // PENCETAKAN BARIS CERDAS DENGAN EFEK MERGE (ROWSPAN)
             c.items.forEach((it, i) => {
                 const row = [];
                 if (i === 0) {
                     row.push({ content: nomor, rowSpan: rowCount, styles: { halign: 'center', valign: 'middle' } });
+                    row.push({ content: tglLengkap, rowSpan: rowCount, styles: { halign: 'center', valign: 'middle' } });
                     row.push({ content: c.toko, rowSpan: rowCount, styles: { valign: 'middle' } });
                     row.push({ content: `${(c.nama || "").toUpperCase()}\n${c.telp || "-"}`, rowSpan: rowCount, styles: { valign: 'middle' } });
                     row.push({ content: c.alamat || "-", rowSpan: rowCount, styles: { valign: 'middle' } });
@@ -5942,19 +6056,20 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
         if(bodyData.length === 0) return showToast("Tidak ada data!");
         doc.setFontSize(14); doc.text(`Rincian Order Customer ${filter ? '- ' + filter : ''} ${filterToko ? '- ' + filterToko : ''}`, 14, 15); doc.setFontSize(10);
         
-        // KALIBRASI LEBAR KOLOM FLEKSIBEL (Agar muat sempurna di A4 Landscape)
+        // KALIBRASI LEBAR KOLOM A4 LANDSCAPE (Termasuk kolom Tanggal Lengkap)
         const colStyles = { 
-            0: { cellWidth: 8, halign: 'center' }, 
-            1: { cellWidth: 15 }, 
-            2: { cellWidth: 28 }, 
-            3: { cellWidth: 38 }, 
-            4: { cellWidth: 35 }, 
-            5: { cellWidth: 18 },
-            6: { cellWidth: 8, halign: 'center' }
+            0: { cellWidth: 7, halign: 'center' }, 
+            1: { cellWidth: 24, halign: 'center' }, 
+            2: { cellWidth: 15 }, 
+            3: { cellWidth: 25 }, 
+            4: { cellWidth: 34 }, 
+            5: { cellWidth: 31 }, 
+            6: { cellWidth: 16 },
+            7: { cellWidth: 7, halign: 'center' }
         };
-        for (let i = 0; i < maxBayar; i++) colStyles[7 + i] = { cellWidth: 17, halign: 'right' };
-        colStyles[7 + maxBayar] = { cellWidth: 20, halign: 'right' }; // Logistik
-        colStyles[8 + maxBayar] = { cellWidth: 15, halign: 'center' }; // Status
+        for (let i = 0; i < maxBayar; i++) colStyles[8 + i] = { cellWidth: 16, halign: 'right' };
+        colStyles[8 + maxBayar] = { cellWidth: 18, halign: 'right' }; // Logistik
+        colStyles[9 + maxBayar] = { cellWidth: 14, halign: 'center' }; // Status
 
         doc.autoTable({ 
             startY: 20, 
@@ -5969,9 +6084,7 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
         const namaFileRincian = getDynamicFilename('RINCIAN_CUSTOMER') + '.pdf';
         
         if (window.__TAURI__) {
-            const arrayBuffer = doc.output('arraybuffer');
-            const uint8Array = new Uint8Array(arrayBuffer);
-            window.simpanKeTauriData(uint8Array, namaFileRincian);
+            window.simpanKeTauriData(doc.output('blob'), namaFileRincian);
         } else {
             doc.save(namaFileRincian); 
             showToast("PDF Berhasil Diunduh!");
@@ -6941,6 +7054,239 @@ const fBulanEl = document.getElementById('filter-bulan-sumber');
     }
 }
 
+window.dataStatistikSumberAktif = [];
+
+function buatKartuStatistikSumber(kategoriId, judul, jumlah, totalSemua, satuan, detailPairs, warnaTipe) {
+    const persen = totalSemua > 0 ? Math.round((jumlah / totalSemua) * 100) : 0;
+    const idGrad = `grad-sbr-${kategoriId}-${Math.random().toString(36).substr(2, 5)}`;
+
+    let warnaUtama = '#10b981', warnaMuda = '#34d399', warnaBg = '#d1fae5';
+    let classTeks = 'text-emerald-600', classGradienBar = 'bg-gradient-to-r from-emerald-500 to-teal-400', classTrack = 'bg-emerald-100';
+
+    if (warnaTipe === 'merah') {
+        warnaUtama = '#f43f5e'; warnaMuda = '#fb7185'; warnaBg = '#ffe4e6';
+        classTeks = 'text-rose-600'; classGradienBar = 'bg-gradient-to-r from-rose-500 to-red-400'; classTrack = 'bg-rose-100';
+    } else if (warnaTipe === 'biru') {
+        warnaUtama = '#3b82f6'; warnaMuda = '#6366f1'; warnaBg = '#dbeafe';
+        classTeks = 'text-blue-600'; classGradienBar = 'bg-gradient-to-r from-blue-500 to-indigo-500'; classTrack = 'bg-blue-100';
+    }
+
+    let htmlDetail = '';
+    if (detailPairs && detailPairs.length > 0) {
+        htmlDetail = `<div id="det-sbr-${kategoriId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 space-y-1.5 overflow-y-auto max-h-32 pr-1 custom-scrollbar">`;
+        detailPairs.forEach(d => {
+            htmlDetail += `<div class="flex justify-between items-center text-[10px]"><span class="font-bold text-slate-600 truncate pr-2">${escapeHTML(d[0])}</span><span class="font-black ${classTeks} shrink-0">${d[1]} ${satuan}</span></div>`;
+        });
+        htmlDetail += `</div>`;
+    } else {
+        htmlDetail = `<div id="det-sbr-${kategoriId}" class="hidden mt-3 pt-3 border-t border-slate-100/50 text-center text-[10px] font-bold text-slate-400">Tidak ada rincian sarimbit</div>`;
+    }
+
+    const radius = 15.91549430918954;
+    return `
+    <div onclick="document.getElementById('det-sbr-${kategoriId}').classList.toggle('hidden')" class="cursor-pointer flex flex-col bg-white/90 p-3 md:p-3.5 rounded-2xl border border-white/60 shadow-sm group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_12px_20px_-8px_rgba(79,70,229,0.25)] hover:border-indigo-300 hover:z-10 relative">
+        <div class="flex items-center gap-3 md:gap-4">
+            <div class="w-10 h-10 md:w-12 md:h-12 relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 rounded-full shadow-inner bg-slate-50/50">
+                <svg viewBox="0 0 36 36" class="donat-svg absolute inset-0">
+                    <defs>
+                        <linearGradient id="${idGrad}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="${warnaUtama}" />
+                            <stop offset="100%" stop-color="${warnaMuda}" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="donat-track" stroke="${warnaBg}" cx="18" cy="18" r="${radius}"></circle>
+                    <circle class="donat-isi animasi-donat-stroke" stroke="url(#${idGrad})" cx="18" cy="18" r="${radius}" data-persen="${persen}"></circle>
+                </svg>
+                <div class="relative z-10 w-7 h-7 md:w-8 md:h-8 bg-white/95 rounded-full flex items-center justify-center text-[9px] md:text-[10px] font-black text-slate-700 shadow-[0_2px_4px_rgba(0,0,0,0.05)]">${persen}%</div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center mb-1.5 gap-1">
+                    <span class="text-[10px] md:text-[11px] font-black text-slate-800 truncate pr-1 group-hover:text-indigo-600 transition-colors tracking-tight">${escapeHTML(judul)}</span>
+                    <span class="text-[9px] md:text-[10px] font-black ${classTeks} shrink-0 whitespace-nowrap">(${persen}%) <span class="text-[8px] md:text-[9px] font-bold text-slate-400 ml-0.5">${jumlah}/${totalSemua} ${satuan}</span></span>
+                </div>
+                <div class="w-full h-2 md:h-2.5 ${classTrack} rounded-full overflow-hidden p-0.5">
+                    <div class="animasi-bar h-full ${classGradienBar} rounded-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-0" data-persen="${persen}%"></div>
+                </div>
+            </div>
+        </div>
+        ${htmlDetail}
+    </div>`;
+}
+
+async function bukaModalStatistikSumber() {
+    try {
+        const orders = await dbLokal.orders.filter(o => o.syncstatus !== -1).toArray();
+        const batasTanggal = new Date(2026, 7, 21);
+        batasTanggal.setHours(0, 0, 0, 0);
+
+        const opsiBulan = { year: 'numeric', month: 'long' };
+        const filterBulan = document.getElementById('filter-bulan-sumber')?.value || "";
+        const filterTglMulai = document.getElementById('filter-tgl-mulai-sumber')?.value || "";
+        const filterTglAkhir = document.getElementById('filter-tgl-akhir-sumber')?.value || "";
+
+        const filteredOrders = orders.filter(o => {
+            const dateObj = o.tanggal ? new Date(o.tanggal) : new Date();
+            const objWaktu = new Date(dateObj);
+            objWaktu.setHours(0, 0, 0, 0);
+            const namaBulan = dateObj.toLocaleDateString('id-ID', opsiBulan);
+
+            if (objWaktu.getTime() < batasTanggal.getTime()) return false;
+            if (filterBulan && namaBulan !== filterBulan) return false;
+            if (filterTglMulai && objWaktu.getTime() < new Date(filterTglMulai).setHours(0, 0, 0, 0)) return false;
+            if (filterTglAkhir && objWaktu.getTime() > new Date(filterTglAkhir).setHours(23, 59, 59, 999)) return false;
+            return true;
+        });
+
+        window.dataStatistikSumberAktif = filteredOrders;
+
+        const mapSumber = {};
+        let totalPcsSemua = 0;
+        const setCustSemua = new Set();
+
+        filteredOrders.forEach(o => {
+            const sumber = o.asal_order && o.asal_order.trim() !== "" ? o.asal_order.trim() : "Tidak Diketahui";
+            const qty = Number(o.jumlah) || 0;
+            const idCust = String(o.idcustomer || o.idCustomer || o.customer || o.id);
+            const srm = o.sarimbit || "Lainnya";
+
+            if (!mapSumber[sumber]) {
+                mapSumber[sumber] = { nama: sumber, pcs: 0, custSet: new Set(), perSarimbitPcs: {}, perSarimbitCust: {} };
+            }
+            mapSumber[sumber].pcs += qty;
+            mapSumber[sumber].custSet.add(idCust);
+            mapSumber[sumber].perSarimbitPcs[srm] = (mapSumber[sumber].perSarimbitPcs[srm] || 0) + qty;
+            if (!mapSumber[sumber].perSarimbitCust[srm]) mapSumber[sumber].perSarimbitCust[srm] = new Set();
+            mapSumber[sumber].perSarimbitCust[srm].add(idCust);
+
+            totalPcsSemua += qty;
+            setCustSemua.add(idCust);
+        });
+
+        const totalCustSemua = setCustSemua.size;
+        const labelBulan = filterBulan || "Semua Bulan";
+        const labelRentang = (filterTglMulai || filterTglAkhir) ? ` • ${filterTglMulai || '...'} s/d ${filterTglAkhir || '...'}` : "";
+        document.getElementById('subjudul-statistik-sumber').innerText = `Filter: ${labelBulan}${labelRentang} (Total: ${totalPcsSemua} Pcs • ${totalCustSemua} Cust)`;
+
+        const sumberAktifList = Object.values(mapSumber)
+            .filter(s => s.nama !== "Tidak Diketahui")
+            .sort((a, b) => b.pcs - a.pcs);
+        const sumberKosong = mapSumber["Tidak Diketahui"] || { nama: "Tidak Diketahui", pcs: 0, custSet: new Set(), perSarimbitPcs: {}, perSarimbitCust: {} };
+
+        // KOLOM KIRI: Kontribusi Sumber Berdasarkan Total PCS (Hijau)
+        let htmlKiri = "";
+        sumberAktifList.forEach((s, idx) => {
+            const detailPcs = Object.entries(s.perSarimbitPcs).sort((a, b) => b[1] - a[1]);
+            htmlKiri += buatKartuStatistikSumber(`pcs_${idx}`, s.nama, s.pcs, totalPcsSemua, "Pcs", detailPcs, "hijau");
+        });
+        if (!htmlKiri) htmlKiri = `<div class="text-center py-6 text-xs font-bold text-slate-400">Belum ada data sumber terisi.</div>`;
+
+        // KOLOM KANAN: Data Sumber Kosong (Merah) + Distribusi Pelanggan per Sumber (Biru)
+        let htmlKanan = "";
+        const detailKosongPcs = Object.entries(sumberKosong.perSarimbitPcs).sort((a, b) => b[1] - a[1]);
+        htmlKanan += buatKartuStatistikSumber("kosong_pcs", "Belum Ada Sumber (PCS)", sumberKosong.pcs, totalPcsSemua, "Pcs", detailKosongPcs, "merah");
+
+        const detailKosongCust = Object.entries(sumberKosong.perSarimbitCust).map(([k, v]) => [k, v.size]).sort((a, b) => b[1] - a[1]);
+        htmlKanan += buatKartuStatistikSumber("kosong_cust", "Belum Ada Sumber (Cust)", sumberKosong.custSet.size, totalCustSemua, "Cust", detailKosongCust, "merah");
+
+        sumberAktifList.forEach((s, idx) => {
+            const detailCust = Object.entries(s.perSarimbitCust).map(([k, v]) => [k, v.size]).sort((a, b) => b[1] - a[1]);
+            htmlKanan += buatKartuStatistikSumber(`cust_${idx}`, `${s.nama} (Pelanggan)`, s.custSet.size, totalCustSemua, "Cust", detailCust, "biru");
+        });
+
+        document.getElementById('wadah-stat-sumber-pcs').innerHTML = htmlKiri;
+        document.getElementById('wadah-stat-sumber-cust').innerHTML = htmlKanan;
+
+        // Perbarui dropdown kategori unduh sesuai sumber yang tersedia
+        const selKat = document.getElementById('kategori-unduh-stat-sumber');
+        if (selKat) {
+            let optHtml = `<option value="semua">Semua Sumber (Sesuai Filter)</option>`;
+            sumberAktifList.forEach(s => { optHtml += `<option value="${escapeHTML(s.nama)}">Hanya ${escapeHTML(s.nama)}</option>`; });
+            optHtml += `<option value="Tidak Diketahui">Sumber Kosong (Tidak Diketahui)</option>`;
+            selKat.innerHTML = optHtml;
+        }
+
+        document.getElementById('modalStatistikSumber').classList.remove('hidden');
+
+        // Jalankan animasi progress bar & donat SVG persis seperti Rincian Customer
+        setTimeout(() => {
+            document.querySelectorAll('#modalStatistikSumber .animasi-bar').forEach(bar => {
+                bar.style.width = bar.dataset.persen;
+            });
+            document.querySelectorAll('#modalStatistikSumber .animasi-donat-stroke').forEach(donat => {
+                donat.style.strokeDashoffset = 100 - Number(donat.dataset.persen);
+            });
+        }, 50);
+    } catch (err) {
+        console.error("Gagal membuka statistik sumber:", err);
+        if (typeof showToast === 'function') showToast("❌ Gagal memuat statistik sumber!");
+    }
+}
+
+function unduhRekapStatistikSumberExcel() {
+    const data = window.dataStatistikSumberAktif || [];
+    if (data.length === 0) return showToast("⚠️ Tidak ada data sumber untuk diunduh!");
+
+    const kategori = document.getElementById('kategori-unduh-stat-sumber')?.value || "semua";
+    const formatData = document.getElementById('format-unduh-stat-sumber')?.value || "ringkasan";
+
+    const tersaring = data.filter(o => {
+        const sbr = o.asal_order && o.asal_order.trim() !== "" ? o.asal_order.trim() : "Tidak Diketahui";
+        return kategori === "semua" || sbr === kategori;
+    });
+
+    if (tersaring.length === 0) return showToast("⚠️ Tidak ada data untuk kategori ini!");
+
+    const wb = XLSX.utils.book_new();
+    let namaFile = `STATISTIK_SUMBER_${kategori.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`;
+
+    if (formatData === "ringkasan") {
+        const rekap = {};
+        let totalPcs = 0;
+        tersaring.forEach(o => {
+            const sbr = o.asal_order && o.asal_order.trim() !== "" ? o.asal_order.trim() : "Tidak Diketahui";
+            const idCust = String(o.idcustomer || o.idCustomer || o.customer || o.id);
+            const qty = Number(o.jumlah) || 0;
+            if (!rekap[sbr]) rekap[sbr] = { pcs: 0, custSet: new Set() };
+            rekap[sbr].pcs += qty;
+            rekap[sbr].custSet.add(idCust);
+            totalPcs += qty;
+        });
+
+        const rows = [["No", "Sumber Order", "Total Pelanggan", "Total PCS", "Persentase PCS"]];
+        let no = 1;
+        Object.entries(rekap).sort((a, b) => b[1].pcs - a[1].pcs).forEach(([sbr, val]) => {
+            const pct = totalPcs > 0 ? ((val.pcs / totalPcs) * 100).toFixed(1) + "%" : "0%";
+            rows.push([no++, sbr, val.custSet.size, val.pcs, pct]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 6 }, { wch: 24 }, { wch: 18 }, { wch: 14 }, { wch: 16 }];
+        if (typeof bikinStylingExcel === 'function') bikinStylingExcel(ws);
+        XLSX.utils.book_append_sheet(wb, ws, "Ringkasan_Sumber");
+        namaFile += "_RINGKASAN";
+    } else {
+        const rows = [["No", "Tanggal Order", "Sumber Order", "Toko", "Nama Pelanggan", "No. WhatsApp", "Sarimbit", "Barang", "Varian/Size", "Qty"]];
+        tersaring.forEach((o, idx) => {
+            const sbr = o.asal_order && o.asal_order.trim() !== "" ? o.asal_order.trim() : "Tidak Diketahui";
+            const tglStr = typeof formatTanggalLengkapIndo === 'function' ? formatTanggalLengkapIndo(o.tanggal, o.idcustomer || o.idCustomer) : (o.tanggal || "-");
+            rows.push([
+                idx + 1, tglStr, sbr, o.toko || "-", (o.customer || "-").toUpperCase(),
+                o.telepon || "-", o.sarimbit || "-", o.barang || "-", `${o.varian || "-"}/${o.size || "-"}`, Number(o.jumlah) || 0
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 5 }, { wch: 24 }, { wch: 16 }, { wch: 18 }, { wch: 24 }, { wch: 16 }, { wch: 22 }, { wch: 24 }, { wch: 16 }, { wch: 8 }];
+        if (typeof bikinStylingExcel === 'function') bikinStylingExcel(ws);
+        XLSX.utils.book_append_sheet(wb, ws, "Rincian_Sumber");
+        namaFile += "_LENGKAP";
+    }
+
+    XLSX.writeFile(wb, `${namaFile}.xlsx`);
+    showToast("✅ Excel Statistik Sumber berhasil diunduh!");
+    if (typeof catatLog === 'function') catatLog('DOWNLOAD', 'SUMBER', `Mengunduh Excel Statistik Sumber (${kategori})`);
+}
+
 function toggleModalUnduh(show) {
     const modal = document.getElementById('modal-unduh-pdf');
     if (show) {
@@ -7657,39 +8003,131 @@ function pilihProdukModal(metaString) {
 
         // 3. FUNGSI RENDER SLIP CERDAS (GAYA SAMSUNG & DROPDOWN BEBAS HAMBATAN)
         const fungsiAsliRenderSlip = window.renderSlip;
-       // ==========================================
-    // FUNGSI PINTAR BUKA WHATSAPP (Tauri + HP + Web)
+ // ==========================================
+    // FUNGSI PINTAR PILIHAN WHATSAPP (APP TERINSTAL / WA WEB / SALIN)
     // ==========================================
-    window.hubungiWA = async function(noTelp) {
-        let no = String(noTelp).replace(/[^0-9]/g, '');
-        if (no.startsWith('0')) no = '62' + no.substring(1);
-        
+    window.bukaLinkEksternalWA = async function(targetUrl, isAppProtocol = false) {
+        // 1. Jalur Tauri v2 (Windows / Mac / APK Android)
+        if (window.__TAURI__ && window.__TAURI__.core) {
+            try {
+                await window.__TAURI__.core.invoke('plugin:opener|open_url', { url: targetUrl });
+                return;
+            } catch (errOpener) {
+                console.warn("Opener Tauri gagal, lanjut fallback:", errOpener);
+            }
+        }
+
+        // 2. Fallback Browser / PWA
+        if (isAppProtocol || /android|iphone|ipad|ipod/i.test(navigator.userAgent)) {
+            window.location.href = targetUrl;
+        } else {
+            const link = document.createElement('a');
+            link.href = targetUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+    };
+
+    window.tutupModalPilihWA = function() {
+        const modal = document.getElementById('modal-pilih-wa');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.eksekusiPilihWA = async function(mode) {
+        const no = window.__nomorWATerpilih || '';
+        window.tutupModalPilihWA();
+        if (!no) return;
+
+        if (mode === 'app') {
+            // Langsung buka Aplikasi WhatsApp terinstal (HP Android / Windows / Mac)
+            // Di HP dengan WA Biasa & WA Bisnis / Dual WA, sistem Android otomatis menampilkan pilihan akun
+            await window.bukaLinkEksternalWA(`whatsapp://send?phone=${no}`, true);
+        } else if (mode === 'web') {
+            // Buka WhatsApp Web di Browser (untuk akun WA kedua yang login di Chrome/Safari)
+            await window.bukaLinkEksternalWA(`https://web.whatsapp.com/send?phone=${no}`, false);
+        } else if (mode === 'copy') {
+            const nomorTampil = '0' + no.substring(2);
+            try {
+                await navigator.clipboard.writeText(nomorTampil);
+                if (typeof showToast === 'function') showToast(`📋 Nomor ${nomorTampil} disalin!`);
+            } catch (e) {
+                if (typeof showToast === 'function') showToast(`ℹ️ Nomor: ${nomorTampil}`);
+            }
+        }
+    };
+
+    window.hubungiWA = function(noTelp) {
+        let no = String(noTelp || '').replace(/[^0-9]/g, '');
+        if (no.startsWith('0')) {
+            no = '62' + no.substring(1);
+        } else if (no.startsWith('8')) {
+            no = '62' + no;
+        }
+
         if (no.length < 9) {
-            if(typeof showToast === 'function') showToast("⚠️ Nomor WhatsApp tidak valid!");
+            if (typeof showToast === 'function') showToast("⚠️ Nomor WhatsApp kosong atau tidak valid!");
             return;
         }
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const waLink = `https://web.whatsapp.com/send?phone=${no}`;
-        
-        // 1. JIKA BERADA DI DALAM APLIKASI TAURI (LAPTOP / MAC)
-        if (window.__TAURI__) {
-            try {
-                // Perintah khusus mem-bypass keamanan Tauri untuk melempar link ke Safari/Chrome
-                await window.__TAURI__.core.invoke('plugin:shell|open', { path: waLink });
-            } catch (e) {
-                console.error("Gagal buka WA di Tauri:", e);
-                window.open(waLink, '_blank'); // Fallback
-            }
-        } 
-        // 2. JIKA DI HP (PWA / BROWSER HP)
-        else if (isMobile) {
-            window.location.href = `whatsapp://send?phone=${no}`;
-        } 
-        // 3. JIKA DI BROWSER WEB LAPTOP BIASA
-        else {
-            window.open(waLink, '_blank');
+        window.__nomorWATerpilih = no;
+        const nomorDisplay = '+' + no;
+
+        // Buat pop-up pilihan WA otomatis jika belum ada di halaman
+        let modal = document.getElementById('modal-pilih-wa');
+        if (!modal) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `
+            <div id="modal-pilih-wa" onclick="if(event.target === this) tutupModalPilihWA()" class="hidden fixed inset-0 z-[99999] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="ios-glass bg-white/95 rounded-[1.8rem] w-full max-w-xs p-5 shadow-2xl border border-white/80 animate-fade-in-up">
+                    <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-200/70">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-black text-slate-800 leading-tight">Buka Chat WhatsApp</div>
+                                <div id="label-nomor-modal-wa" class="text-[11px] font-bold text-emerald-700"></div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="tutupModalPilihWA()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <button type="button" onclick="eksekusiPilihWA('app')" class="w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-left flex items-center gap-3 shadow-md active:scale-95 transition-all">
+                            <i class="fa-brands fa-whatsapp text-lg w-5 text-center"></i>
+                            <div class="leading-tight">
+                                <div class="text-xs font-extrabold">Aplikasi WhatsApp</div>
+                                <div class="text-[9.5px] text-emerald-100 font-medium">Buka di WA terinstal (HP / Windows)</div>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="eksekusiPilihWA('web')" class="w-full py-2.5 px-3.5 rounded-2xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200/80 text-left flex items-center gap-3 active:scale-95 transition-all">
+                            <i class="fa-solid fa-globe text-base w-5 text-center text-blue-600"></i>
+                            <div class="leading-tight">
+                                <div class="text-xs font-extrabold">WhatsApp Web</div>
+                                <div class="text-[9.5px] text-blue-600/80 font-medium">Buka di Browser (Chrome / Safari)</div>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="eksekusiPilihWA('copy')" class="w-full py-2 px-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-left flex items-center gap-3 active:scale-95 transition-all">
+                            <i class="fa-regular fa-copy text-sm w-5 text-center text-slate-500"></i>
+                            <div class="text-[11px] font-bold">Salin Nomor WA</div>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+            document.body.appendChild(wrapper.firstElementChild);
+            modal = document.getElementById('modal-pilih-wa');
         }
+
+        const labelNomor = document.getElementById('label-nomor-modal-wa');
+        if (labelNomor) labelNomor.innerText = nomorDisplay;
+        modal.classList.remove('hidden');
     };
         window.renderSlip = function() {
             // A. EKSEKUSI FUNGSI RENDER UTAMA
