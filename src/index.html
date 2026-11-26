@@ -1883,145 +1883,218 @@
 </div>
   <!-- MODAL FILTER LANJUTAN SLIP (SAMSUNG ONE UI x iOS GLASS) -->
  <!-- REVISI 1: Latar belakang luar dibuat transparan (gelap tapi tidak blur) -->
-<div id="modalFilterLanjutan" class="hidden fixed inset-0 z-[120] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
-    
-    <!-- REVISI 3: Gunakan ios-glass agar kebal di Windows/Laptop -->
+ <div id="modalFilterLanjutan" onclick="if(event.target === this) this.classList.add('hidden')" class="hidden fixed inset-0 z-[120] bg-slate-900/40 flex items-center justify-center px-4 transition-opacity">
     <div class="ios-glass rounded-[2rem] w-full max-w-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col">
         
-        <!-- HEADER ALA iOS (Transparan murni) -->
-        <div class="p-5 flex justify-between items-center border-b border-white/50 relative z-10 bg-transparent shrink-0">
-            <h3 class="font-black text-lg flex items-center gap-2 text-slate-800"><i class="fa-solid fa-filter text-indigo-500"></i> Filter Lanjutan</h3>
-            <button onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-slate-200/50 text-slate-500 rounded-full hover:bg-slate-300/60 hover:text-slate-700 transition-colors active:scale-95 border border-white/40">
+        <!-- HEADER -->
+        <div class="px-5 py-4 flex justify-between items-center border-b border-white/50 relative z-10 bg-transparent shrink-0">
+            <h3 class="font-black text-base md:text-lg flex items-center gap-2 text-slate-800">
+                <i class="fa-solid fa-filter text-indigo-500 text-sm"></i> Filter Lanjutan
+            </h3>
+            <button type="button" onclick="document.getElementById('modalFilterLanjutan').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-slate-200/50 text-slate-500 rounded-full hover:bg-slate-300/60 hover:text-slate-700 transition-colors active:scale-95 border border-white/40">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
         
-        <!-- BODY (Otomatis tembus pandang mengikuti wadah) -->
-        <div class="p-6 max-h-[65vh] overflow-y-auto space-y-7 custom-scrollbar relative flex-1 bg-transparent">
+        <!-- BODY (UKURAN SERAGAM, RINGKAS & SATU WARNA) -->
+        <div class="p-5 max-h-[65vh] overflow-y-auto space-y-5 custom-scrollbar relative flex-1 bg-transparent">
             
+            <!-- STATUS PRODUKSI -->
+            <div>
+                <h4 class="text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-industry text-indigo-500"></i> Status Produksi
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-prod-open" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Open PO
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-prod-close" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Close PO
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-prod-ready" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Ready
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-prod-blmready" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Belum Ready
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <!-- STATUS KEUANGAN -->
             <div>
-                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-money-bill-wave text-indigo-400 mr-1.5"></i> Status Keuangan</h4>
-                <div class="grid grid-cols-2 md:grid-cols-2 gap-2.5">
+                <h4 class="text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-money-bill-wave text-indigo-500"></i> Status Keuangan
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmbayar" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Belum Bayar (Belum DP)
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Belum Bayar
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmlunas" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                            Belum Lunas (Nyicil)
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Belum Lunas
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-blmbayar-lewat" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Belum Bayar (Tempo)
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-blmlunas-lewat" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Belum Lunas (Tempo)
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmongkir" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
                             Belum Ongkir
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-sdhongkir" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:bg-white active:scale-95 shadow-sm">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
                             Sudah Ongkir
                         </div>
                     </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-lunasongkir" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Lunas + Ongkir
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-lunasblmongkir" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Lunas Belum Ongkir
+                        </div>
+                    </label>
                 </div>
             </div>
 
-           <!-- LOGISTIK EKSPEDISI -->
-           <div>
-            <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-truck text-blue-400 mr-1.5"></i> Logistik Ekspedisi</h4>
-            <div class="flex flex-wrap gap-2.5">
-                <label class="cursor-pointer flex-1 min-w-[100px]">
-                    <input type="checkbox" id="fc-jne" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Hanya JNE
-                    </div>
-                </label>
-                <label class="cursor-pointer flex-1 min-w-[100px]">
-                    <input type="checkbox" id="fc-jnt" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-rose-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Hanya JNT
-                    </div>
-                </label>
-                <label class="cursor-pointer flex-1 min-w-[100px]">
-                    <input type="checkbox" id="fc-pos" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-yellow-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Hanya POS
-                    </div>
-                </label>
-                <label class="cursor-pointer flex-1 min-w-[100px]">
-                    <input type="checkbox" id="fc-lion" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-red-600 peer-checked:to-pink-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(220,38,38,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Hanya LION
-                    </div>
-                </label>
-                <label class="cursor-pointer flex-1 min-w-[120px]">
-                    <input type="checkbox" id="fc-ambil" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-teal-500 peer-checked:to-emerald-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Ambil Sendiri
-                    </div>
-                </label>
-                <label class="cursor-pointer flex-1 min-w-[130px]">
-                    <input type="checkbox" id="fc-ekslain" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-slate-200/80 bg-slate-100/70 text-slate-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-slate-700 peer-checked:to-slate-900 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(15,23,42,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Lainnya / Kosong
-                    </div>
-                </label>
+            <!-- LOGISTIK EKSPEDISI -->
+            <div>
+                <h4 class="text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-truck text-indigo-500"></i> Logistik Ekspedisi
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-jne" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            JNE
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-jnt" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            JNT
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-pos" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            POS
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-lion" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            LION
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-ambil" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Ambil Sendiri
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-ekslain" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Lainnya / Kosong
+                        </div>
+                    </label>
+                </div>
             </div>
-        </div>
 
-        <!-- WILAYAH PENGIRIMAN -->
-        <div>
-            <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-map-location-dot text-emerald-400 mr-1.5"></i> Wilayah Pengiriman</h4>
-            <div class="grid grid-cols-2 gap-2.5">
-                <label class="cursor-pointer">
-                    <input type="checkbox" id="fc-jawa" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Hanya Pulau Jawa
-                    </div>
-                </label>
-                <label class="cursor-pointer">
-                    <input type="checkbox" id="fc-luarjawa" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-white/60 bg-white/70 text-slate-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-white active:scale-95 shadow-sm">
-                        Hanya Luar Jawa
-                    </div>
-                </label>
-                <label class="cursor-pointer">
-                    <input type="checkbox" id="fc-luarnegeri" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-violet-200/80 bg-violet-50/70 text-violet-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-violet-600 peer-checked:to-indigo-600 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(124,58,237,0.35)] hover:bg-violet-100 active:scale-95 shadow-sm">
-                        Hanya Luar Negeri
-                    </div>
-                </label>
-                <label class="cursor-pointer">
-                    <input type="checkbox" id="fc-noalamat" class="peer sr-only">
-                    <div class="px-4 py-3 rounded-full border border-rose-200/80 bg-rose-50/70 text-rose-500 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:bg-rose-100 active:scale-95 shadow-sm">
-                        Belum Ada Alamat
-                    </div>
-                </label>
+            <!-- WILAYAH PENGIRIMAN -->
+            <div>
+                <h4 class="text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-map-location-dot text-indigo-500"></i> Wilayah Pengiriman
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-jawa" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Pulau Jawa
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-luarjawa" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Luar Jawa
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-luarnegeri" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Luar Negeri
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-sdhalamat" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Alamat Lengkap
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="checkbox" id="fc-noalamat" class="peer sr-only">
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Belum Ada Alamat
+                        </div>
+                    </label>
+                </div>
             </div>
-        </div>
             
             <!-- INFORMASI BERAT BARANG -->
             <div>
-                <h4 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest pl-2"><i class="fa-solid fa-weight-scale text-orange-400 mr-1.5"></i> Informasi Berat Barang</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <h4 class="text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-weight-scale text-indigo-500"></i> Informasi Berat Barang
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <label class="cursor-pointer">
                         <input type="checkbox" id="fc-blmgram" class="peer sr-only">
-                        <div class="px-4 py-3 rounded-full border border-orange-200/80 bg-orange-50/70 text-orange-600 text-xs font-bold text-center transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-amber-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_15px_rgba(249,115,22,0.3)] hover:bg-orange-100 active:scale-95 shadow-sm">
-                            Belum Ada Total Gram (0 gr)
+                        <div class="h-9 px-2.5 rounded-full border border-slate-200/80 bg-white/80 text-slate-600 text-[11px] font-bold flex items-center justify-center text-center leading-tight transition-all duration-200 peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-blue-500 peer-checked:text-white peer-checked:border-transparent peer-checked:shadow-[0_4px_12px_rgba(79,70,229,0.28)] hover:bg-white hover:border-indigo-300 active:scale-95 shadow-sm select-none">
+                            Gramasi 0 gr
                         </div>
                     </label>
                 </div>
             </div>
         </div>
 
-        <!-- FOOTER (TOMBOL AKSI KAPSUL) TRANSPARAN -->
-        <div class="p-5 border-t border-white/50 bg-transparent flex justify-between gap-3 shrink-0">
-          <button onclick="resetFilterLanjutan()" class="flex-1 py-3.5 bg-slate-200/60 text-slate-600 rounded-full font-bold text-xs hover:bg-slate-300 transition-colors active:scale-95 shadow-sm border border-slate-300/40 backdrop-blur-sm">Reset</button>
-          <button onclick="terapkanFilterLanjutan()" class="flex-[2] py-3.5 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-full font-bold text-xs hover:from-indigo-700 hover:to-blue-600 shadow-[0_4px_15px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400"><i class="fa-solid fa-check mr-1.5"></i> Terapkan Filter</button>
+        <!-- FOOTER -->
+        <div class="px-5 py-4 border-t border-white/50 bg-transparent flex justify-between gap-3 shrink-0">
+            <button type="button" onclick="resetFilterLanjutan()" class="flex-1 py-2.5 bg-slate-200/60 text-slate-600 rounded-full font-bold text-xs hover:bg-slate-300 transition-colors active:scale-95 shadow-sm border border-slate-300/40 backdrop-blur-sm">Reset</button>
+            <button type="button" onclick="terapkanFilterLanjutan()" class="flex-[2] py-2.5 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-full font-bold text-xs hover:from-indigo-700 hover:to-blue-600 shadow-[0_4px_15px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400">
+                <i class="fa-solid fa-check mr-1.5"></i> Terapkan Filter
+            </button>
         </div>
     </div>
 </div>
@@ -2046,8 +2119,52 @@
             </button>
         </div>
         
-        <!-- KONTEN 2 KOLOM DENGAN DONAT SVG & PROGRESS BAR -->
-        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent">
+        <!-- KONTEN DIAGRAM TREN + 2 KOLOM DONAT SVG & PROGRESS BAR -->
+        <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent space-y-8">
+
+            <!-- DIAGRAM GARIS TREN ORDERAN PER SUMBER + FILTER SUMBER & TANGGAL -->
+            <div class="bg-white/95 rounded-3xl border border-white/80 shadow-sm p-4 md:p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <!-- Legenda Garis Dinamis (Otomatis menyesuaikan sumber aktif) -->
+                    <div id="legenda-grafik-tren-sumber" class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs font-bold text-slate-700"></div>
+
+                    <!-- Kolom Filter Sumber & Rentang Tanggal (Flatpickr) -->
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <!-- Custom Dropdown Filter Sumber (Gaya Kaca iOS) -->
+                        <div class="relative" id="wadah-custom-stat-chart-sumber">
+                            <select id="filter-sumber-stat-chart" onchange="renderGrafikTrenSumber()" class="hidden">
+                                <option value="">Semua Sumber</option>
+                            </select>
+
+                            <button type="button" id="btn-custom-stat-chart-sumber" onclick="toggleCustomFilterSlip('stat-chart-sumber')" class="shrink-0 h-9 ios-glass pl-3.5 pr-7 rounded-full text-[11px] font-bold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[115px] max-w-[165px] flex items-center justify-center relative z-10">
+                                <span id="label-stat-chart-sumber" class="truncate w-full text-center pointer-events-none">Sumber</span>
+                                <i id="chevron-stat-chart-sumber" class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                            </button>
+
+                            <div id="drop-stat-chart-sumber-slip" class="hidden opacity-0 scale-95 origin-top-left sm:origin-top-right transition-all duration-200 absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+10px)] w-52 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[38vh]">
+                                <div id="list-custom-stat-chart-sumber" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Rentang Tanggal (Flatpickr) -->
+                        <div class="h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 rounded-full px-3.5 transition-all cursor-pointer flex items-center shadow-sm">
+                            <i class="fa-regular fa-calendar-days text-slate-400 text-[11px] mr-2 shrink-0"></i>
+                            <input type="text" id="filter-date-range-stat-sumber" placeholder="Pilih Rentang Tanggal..." class="w-[145px] sm:w-[165px] p-0 m-0 bg-transparent border-none outline-none text-[11px] font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
+                            <input type="hidden" id="stat-sumber-tgl-mulai">
+                            <input type="hidden" id="stat-sumber-tgl-akhir">
+                        </div>
+
+                        <!-- Tombol Reset Filter Diagram -->
+                        <button type="button" onclick="resetTanggalGrafikSumber()" title="Reset Filter Grafik" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all active:scale-95 shrink-0 border border-slate-200/60">
+                            <i class="fa-solid fa-rotate-left text-[11px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Area Diagram SVG Interaktif -->
+                <div id="wadah-grafik-tren-sumber" class="relative w-full select-none touch-none"></div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                 <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-300/50 -translate-x-1/2"></div>
                 
@@ -2125,6 +2242,51 @@
         
         <!-- LATAR BELAKANG KONTEN DIBUAT TRANSPARAN MENYATU DENGAN KACA -->
         <div class="p-6 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar relative flex-1 bg-transparent space-y-8">
+
+            <!-- DIAGRAM GARIS TREN PENJUALAN & UANG MASUK + FILTER TANGGAL -->
+            <div class="bg-white/95 rounded-3xl border border-white/80 shadow-sm p-4 md:p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <!-- Legenda Garis (Biru: Customer, Oranye-Merah: Total Qty) -->
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#1d70b8] shrink-0"></span>
+                            <span>Customer</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#ee4d2d] shrink-0"></span>
+                            <span>Total Qty (Pcs)</span>
+                        </div>
+                    </div>
+
+                   <!-- Kolom Filter Sarimbit & Rentang Tanggal (Flatpickr) -->
+                   <div class="flex flex-wrap items-center gap-2">
+                    <!-- Dropdown Filter Nama Sarimbit Khusus Diagram -->
+                    <div class="relative">
+                        <i class="fa-solid fa-shirt text-slate-400 text-[10px] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <select id="filter-sarimbit-stat-chart" onchange="renderGrafikTrenStatistik()" class="h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 rounded-full pl-8 pr-7 text-[11px] font-bold text-slate-700 outline-none appearance-none cursor-pointer transition-all shadow-sm max-w-[175px] truncate">
+                            <option value="">Semua Sarimbit</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down text-slate-400 text-[9px] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+
+                    <div class="h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 rounded-full px-3.5 transition-all cursor-pointer flex items-center shadow-sm">
+                        <i class="fa-regular fa-calendar-days text-slate-400 text-[11px] mr-2 shrink-0"></i>
+                        <input type="text" id="filter-date-range-stat-slip" placeholder="Pilih Rentang Tanggal..." class="w-[145px] sm:w-[165px] p-0 m-0 bg-transparent border-none outline-none text-[11px] font-bold text-slate-700 cursor-pointer focus:ring-0 text-center">
+                        <input type="hidden" id="stat-chart-tgl-mulai">
+                        <input type="hidden" id="stat-chart-tgl-akhir">
+                    </div>
+                    <button type="button" onclick="resetTanggalGrafikStatistik()" title="Reset Filter Grafik" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all active:scale-95 shrink-0 border border-slate-200/60">
+                        <i class="fa-solid fa-rotate-left text-[11px]"></i>
+                    </button>
+                </div>
+                </div>
+
+                <!-- Area Diagram SVG Interaktif -->
+                <div id="wadah-grafik-tren-stat" class="relative w-full select-none touch-none">
+                    <!-- Diisi otomatis oleh renderGrafikTrenStatistik() -->
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                 <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-300/50 -translate-x-1/2"></div>
                 
@@ -2489,6 +2651,373 @@
       </div>`;
   }
 
+  function keKunciTanggalLokal(tglRaw, idCust = "") {
+      if (tglRaw) {
+          const s = String(tglRaw).trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+          const d = new Date(s);
+          if (!isNaN(d.getTime())) {
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          }
+      }
+      if (idCust) {
+          const matchTs = String(idCust).match(/\d{13}/);
+          if (matchTs) {
+              const d = new Date(parseInt(matchTs[0], 10));
+              if (!isNaN(d.getTime())) {
+                  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+              }
+          }
+      }
+      return null;
+  }
+
+  function initKalenderGrafikStatistik() {
+      const inputEl = document.getElementById('filter-date-range-stat-slip');
+      if (!inputEl || inputEl._flatpickr || typeof flatpickr !== 'function') return;
+
+      flatpickr(inputEl, {
+          mode: "range",
+          dateFormat: "Y-m-d",
+          locale: "id",
+          altInput: true,
+          altFormat: "d M Y",
+          onOpen: function(selectedDates, dateStr, instance) {
+              if (instance.calendarContainer) instance.calendarContainer.style.zIndex = "999999";
+          },
+          onChange: function(selectedDates, dateStr, instance) {
+              const hiddenStart = document.getElementById('stat-chart-tgl-mulai');
+              const hiddenEnd = document.getElementById('stat-chart-tgl-akhir');
+              if (selectedDates.length === 2) {
+                  hiddenStart.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                  hiddenEnd.value = instance.formatDate(selectedDates[1], "Y-m-d");
+                  renderGrafikTrenStatistik();
+              } else if (selectedDates.length === 1) {
+                  const satuTgl = instance.formatDate(selectedDates[0], "Y-m-d");
+                  hiddenStart.value = satuTgl;
+                  hiddenEnd.value = satuTgl;
+                  renderGrafikTrenStatistik();
+              } else {
+                  hiddenStart.value = "";
+                  hiddenEnd.value = "";
+                  renderGrafikTrenStatistik();
+              }
+          }
+      });
+  }
+
+  function isiDropdownSarimbitGrafikStatistik() {
+      const sel = document.getElementById('filter-sarimbit-stat-chart');
+      if (!sel) return;
+
+      const prevVal = sel.value;
+      const mapSarimbit = new Map();
+      const tambahSarimbit = (nama) => {
+          const bersih = String(nama || "").trim();
+          if (!bersih || bersih === "-") return;
+          const kunci = bersih.toLowerCase();
+          if (!mapSarimbit.has(kunci)) mapSarimbit.set(kunci, bersih);
+      };
+
+      const dataSumber = (Array.isArray(window.dataStatistikAktif) && window.dataStatistikAktif.length > 0)
+          ? window.dataStatistikAktif
+          : (typeof dataStatistikAktif !== 'undefined' && Array.isArray(dataStatistikAktif) ? dataStatistikAktif : []);
+
+      dataSumber.forEach(c => {
+          if (c.sarimbitSet && typeof c.sarimbitSet.forEach === 'function') {
+              c.sarimbitSet.forEach(s => tambahSarimbit(s));
+          }
+          if (Array.isArray(c.items)) {
+              c.items.forEach(it => tambahSarimbit(it.sarimbit));
+          }
+          if (c.daftarSarimbit) {
+              String(c.daftarSarimbit).split(',').forEach(s => tambahSarimbit(s));
+          }
+      });
+
+      // Cadangan ke orderData jika daftar sarimbit belum terbaca dari dataStatistikAktif
+      if (mapSarimbit.size === 0 && typeof orderData !== 'undefined' && Array.isArray(orderData)) {
+          orderData.forEach(o => {
+              if (o.isArchived === true || o.isarchived === true) return;
+              tambahSarimbit(o.sarimbit);
+          });
+      }
+
+      const listSorted = Array.from(mapSarimbit.values()).sort((a, b) => a.localeCompare(b));
+      const signatureBaru = listSorted.join('||');
+
+      if (sel.dataset.lastOptions !== signatureBaru || sel.options.length <= 1) {
+          sel.innerHTML = '';
+          const optSemua = document.createElement('option');
+          optSemua.value = '';
+          optSemua.textContent = 'Semua Sarimbit';
+          sel.appendChild(optSemua);
+
+          listSorted.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s;
+              opt.textContent = s;
+              sel.appendChild(opt);
+          });
+          sel.dataset.lastOptions = signatureBaru;
+      }
+
+      sel.value = listSorted.includes(prevVal) ? prevVal : '';
+  }
+
+  function resetTanggalGrafikStatistik() {
+      const inputEl = document.getElementById('filter-date-range-stat-slip');
+      if (inputEl && inputEl._flatpickr) inputEl._flatpickr.clear();
+      const s = document.getElementById('stat-chart-tgl-mulai');
+      const e = document.getElementById('stat-chart-tgl-akhir');
+      const selSrm = document.getElementById('filter-sarimbit-stat-chart');
+      if (s) s.value = "";
+      if (e) e.value = "";
+      if (selSrm) selSrm.value = "";
+      renderGrafikTrenStatistik();
+  }
+
+  function renderGrafikTrenStatistik() {
+      const wadah = document.getElementById('wadah-grafik-tren-stat');
+      if (!wadah) return;
+
+      // Pastikan daftar nama sarimbit selalu terisi setiap kali grafik dirender
+      isiDropdownSarimbitGrafikStatistik();
+
+      const dataSumber = Array.isArray(dataStatistikAktif) ? dataStatistikAktif : [];
+      const filterSarimbitChart = (document.getElementById('filter-sarimbit-stat-chart')?.value || "").trim().toLowerCase();
+      const mapCust = {};
+      const mapPcs = {};
+      let semuaTanggal = [];
+
+      dataSumber.forEach(c => {
+          const itemsCust = (c.items && c.items.length > 0) ? c.items : [c];
+          const itemsCocok = filterSarimbitChart
+              ? itemsCust.filter(it => String(it.sarimbit || "").trim().toLowerCase() === filterSarimbitChart)
+              : itemsCust;
+
+          if (itemsCocok.length === 0) return;
+
+          const head = itemsCocok[0];
+          const tglOrder = keKunciTanggalLokal(head.tanggal, c.idCustomer);
+          if (tglOrder) {
+              const qtyCocok = filterSarimbitChart
+                  ? itemsCocok.reduce((sum, it) => sum + (Number(it.jumlah) || 0), 0)
+                  : (Number(c.totalQty) || 0);
+              mapCust[tglOrder] = (mapCust[tglOrder] || 0) + 1;
+              mapPcs[tglOrder] = (mapPcs[tglOrder] || 0) + qtyCocok;
+              semuaTanggal.push(tglOrder);
+          }
+      });
+
+      // Tentukan rentang tanggal grafik (Prioritas: Filter Kalender Grafik -> Filter Tanggal Slip -> 7 Hari Terakhir)
+      let tglMulaiStr = document.getElementById('stat-chart-tgl-mulai')?.value || document.getElementById('filter-tgl-mulai-slip')?.value || "";
+      let tglAkhirStr = document.getElementById('stat-chart-tgl-akhir')?.value || document.getElementById('filter-tgl-akhir-slip')?.value || "";
+
+      let startDate, endDate;
+      if (tglMulaiStr && tglAkhirStr) {
+          const [sy, sm, sd] = tglMulaiStr.split('-').map(Number);
+          const [ey, em, ed] = tglAkhirStr.split('-').map(Number);
+          startDate = new Date(sy, sm - 1, sd);
+          endDate = new Date(ey, em - 1, ed);
+      } else {
+          let maxDate = new Date();
+          if (semuaTanggal.length > 0) {
+              semuaTanggal.sort();
+              const tglTerakhir = semuaTanggal[semuaTanggal.length - 1];
+              const [ly, lm, ld] = tglTerakhir.split('-').map(Number);
+              maxDate = new Date(ly, lm - 1, ld);
+          }
+          maxDate.setHours(0, 0, 0, 0);
+          endDate = new Date(maxDate);
+          startDate = new Date(maxDate);
+          startDate.setDate(startDate.getDate() - 6);
+      }
+
+      if (startDate > endDate) {
+          const tmp = startDate; startDate = endDate; endDate = tmp;
+      }
+
+      const hariList = [];
+      let totalPcsRentang = 0;
+      let totalCustRentang = 0;
+      const cursor = new Date(startDate);
+      let guard = 0;
+      while (cursor <= endDate && guard < 366) {
+          const y = cursor.getFullYear();
+          const m = String(cursor.getMonth() + 1).padStart(2, '0');
+          const d = String(cursor.getDate()).padStart(2, '0');
+          const key = `${y}-${m}-${d}`;
+          const pcsHari = mapPcs[key] || 0;
+          const custHari = mapCust[key] || 0;
+          totalPcsRentang += pcsHari;
+          totalCustRentang += custHari;
+          hariList.push({
+              key: key,
+              labelPendek: `${d}/${m}`,
+              labelTooltip: `${d}-${m}-${y}`,
+              pcs: pcsHari,
+              cust: custHari
+          });
+          cursor.setDate(cursor.getDate() + 1);
+          guard++;
+      }
+
+      if (hariList.length === 0) {
+          wadah.innerHTML = `<div class="py-10 text-center text-xs font-bold text-slate-400">Tidak ada data order pada rentang tanggal ini.</div>`;
+          return;
+      }
+
+      const vbW = 680, vbH = 220;
+      const padL = 22, padR = 22, padT = 18, padB = 34;
+      const plotW = vbW - padL - padR;
+      const plotH = vbH - padT - padB;
+
+      let maxVal = 0;
+      hariList.forEach(h => {
+          if (h.pcs > maxVal) maxVal = h.pcs;
+          if (h.cust > maxVal) maxVal = h.cust;
+      });
+      const yMax = maxVal > 0 ? maxVal : 1;
+
+      const points = hariList.map((h, i) => {
+          const x = hariList.length === 1 ? (padL + plotW / 2) : (padL + (i / (hariList.length - 1)) * plotW);
+          const yQty = padT + plotH - (h.pcs / yMax) * plotH;
+          const yCust = padT + plotH - (h.cust / yMax) * plotH;
+          return { ...h, x, yQty, yCust };
+      });
+
+      // Garis bantu horizontal putus-putus (4 tingkat)
+      let gridHTML = '';
+      for (let i = 0; i < 4; i++) {
+          const gy = padT + (i / 4) * plotH;
+          gridHTML += `<line x1="${padL}" y1="${gy}" x2="${vbW - padR}" y2="${gy}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5 5" />`;
+      }
+      gridHTML += `<line x1="${padL}" y1="${padT + plotH}" x2="${vbW - padR}" y2="${padT + plotH}" stroke="#cbd5e1" stroke-width="1.2" />`;
+
+      // Polyline untuk Customer (Biru) dan Total Qty (Oranye-Merah)
+      const polyCust = points.map(p => `${p.x.toFixed(1)},${p.yCust.toFixed(1)}`).join(' ');
+      const polyQty = points.map(p => `${p.x.toFixed(1)},${p.yQty.toFixed(1)}`).join(' ');
+
+      // Label sumbu X
+      const stepLabel = Math.max(1, Math.ceil(points.length / 7));
+      let xLabelsHTML = '';
+      points.forEach((p, idx) => {
+          if (idx % stepLabel === 0 || idx === points.length - 1) {
+              if (idx === points.length - 1 && points.length > 2 && (idx % stepLabel !== 0) && ((points.length - 1) - Math.floor((points.length - 2) / stepLabel) * stepLabel) < stepLabel * 0.5) {
+                  return;
+              }
+              xLabelsHTML += `<text x="${p.x.toFixed(1)}" y="${vbH - 10}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">${p.labelPendek}</text>`;
+          }
+      });
+
+      const dotTunggal = points.length === 1
+          ? `<circle cx="${points[0].x}" cy="${points[0].yCust}" r="4" fill="#1d70b8" /><circle cx="${points[0].x}" cy="${points[0].yQty}" r="4" fill="#ee4d2d" />`
+          : '';
+
+      wadah.innerHTML = `
+          <div class="relative w-full">
+              <svg id="svg-tren-stat" viewBox="0 0 ${vbW} ${vbH}" class="w-full h-48 md:h-56 overflow-visible cursor-crosshair">
+                  ${gridHTML}
+                  ${points.length > 1 ? `<polyline fill="none" stroke="#1d70b8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${polyCust}" />` : ''}
+                  ${points.length > 1 ? `<polyline fill="none" stroke="#ee4d2d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${polyQty}" />` : ''}
+                  ${dotTunggal}
+
+                  <!-- Garis vertikal interaktif (Crosshair) -->
+                  <line id="stat-chart-crosshair" x1="0" y1="${padT - 4}" x2="0" y2="${padT + plotH}" stroke="#d9534f" stroke-width="1.5" style="opacity:0; pointer-events:none;" />
+                  <circle id="stat-chart-dot-cust" cx="0" cy="0" r="4.5" fill="#1d70b8" stroke="#ffffff" stroke-width="1.8" style="opacity:0; pointer-events:none;" />
+                  <circle id="stat-chart-dot-qty" cx="0" cy="0" r="4.5" fill="#ee4d2d" stroke="#ffffff" stroke-width="1.8" style="opacity:0; pointer-events:none;" />
+
+                  ${xLabelsHTML}
+              </svg>
+
+             <!-- Kotak Tooltip Melayang (Transparan Bening) -->
+              <div id="stat-chart-tooltip" class="hidden pointer-events-none absolute top-3 z-30 bg-white/35 backdrop-blur-[1.5px] rounded-xl border border-slate-300/60 shadow-[0_6px_20px_rgba(15,23,42,0.08)] px-4 py-2.5 min-w-[200px] transition-all duration-75">
+                  <div id="stat-tt-tgl" class="text-center font-black text-slate-900 text-xs mb-2 tracking-wide drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]"></div>
+                  <div class="space-y-1.5 text-[11px] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
+                      <div class="flex items-center justify-between gap-5">
+                          <span class="flex items-center gap-2 text-slate-700 font-bold"><span class="w-2.5 h-2.5 rounded-full bg-[#1d70b8] shrink-0"></span> Customer</span>
+                          <span id="stat-tt-cust" class="font-black text-slate-900 tabular-nums">0 Cust</span>
+                      </div>
+                      <div class="flex items-center justify-between gap-5">
+                          <span class="flex items-center gap-2 text-slate-700 font-bold"><span class="w-2.5 h-2.5 rounded-full bg-[#ee4d2d] shrink-0"></span> Total Qty</span>
+                          <span id="stat-tt-qty" class="font-black text-slate-900 tabular-nums">0 Pcs</span>
+                      </div>
+                  </div>
+                  <div id="stat-tt-info" class="mt-2 pt-1.5 border-t border-slate-300/40 text-[9.5px] text-center font-bold text-slate-600 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]"></div>
+              </div>
+          </div>
+      `;
+
+      const svgEl = document.getElementById('svg-tren-stat');
+      const crosshair = document.getElementById('stat-chart-crosshair');
+      const dotCust = document.getElementById('stat-chart-dot-cust');
+      const dotQty = document.getElementById('stat-chart-dot-qty');
+      const tooltip = document.getElementById('stat-chart-tooltip');
+
+      const tampilkanTitik = (idx) => {
+          const pt = points[idx];
+          if (!pt) return;
+
+          crosshair.setAttribute('x1', pt.x);
+          crosshair.setAttribute('x2', pt.x);
+          crosshair.style.opacity = '1';
+
+          dotCust.setAttribute('cx', pt.x);
+          dotCust.setAttribute('cy', pt.yCust);
+          dotCust.style.opacity = '1';
+
+          dotQty.setAttribute('cx', pt.x);
+          dotQty.setAttribute('cy', pt.yQty);
+          dotQty.style.opacity = '1';
+
+          document.getElementById('stat-tt-tgl').innerText = pt.labelTooltip;
+          document.getElementById('stat-tt-cust').innerText = `${pt.cust.toLocaleString('id-ID')} Cust`;
+          document.getElementById('stat-tt-qty').innerText = `${pt.pcs.toLocaleString('id-ID')} Pcs`;
+          document.getElementById('stat-tt-info').innerText = `Periode: ${totalCustRentang.toLocaleString('id-ID')} Cust • ${totalPcsRentang.toLocaleString('id-ID')} Pcs`;
+
+          const pctX = (pt.x / vbW) * 100;
+          tooltip.classList.remove('hidden');
+          if (pctX > 66) {
+              tooltip.style.left = `calc(${pctX}% - 12px)`;
+              tooltip.style.transform = 'translateX(-100%)';
+          } else if (pctX < 34) {
+              tooltip.style.left = `calc(${pctX}% + 12px)`;
+              tooltip.style.transform = 'translateX(0)';
+          } else {
+              tooltip.style.left = `${pctX}%`;
+              tooltip.style.transform = 'translateX(-50%)';
+          }
+      };
+
+      const prosesGerak = (clientX) => {
+          const rect = svgEl.getBoundingClientRect();
+          if (!rect.width) return;
+          const svgX = ((clientX - rect.left) / rect.width) * vbW;
+          let idx = 0;
+          if (points.length > 1) {
+              idx = Math.round(((svgX - padL) / plotW) * (points.length - 1));
+              idx = Math.max(0, Math.min(points.length - 1, idx));
+          }
+          tampilkanTitik(idx);
+      };
+
+      svgEl.addEventListener('mousemove', (e) => prosesGerak(e.clientX));
+      svgEl.addEventListener('click', (e) => prosesGerak(e.clientX));
+      svgEl.addEventListener('mouseleave', () => {
+          crosshair.style.opacity = '0';
+          dotCust.style.opacity = '0';
+          dotQty.style.opacity = '0';
+          tooltip.classList.add('hidden');
+      });
+      svgEl.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches[0]) prosesGerak(e.touches[0].clientX);
+      }, { passive: true });
+      svgEl.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) prosesGerak(e.touches[0].clientX);
+      }, { passive: true });
+  }
+
   function bukaModalStatistik() {
       dataStatistikAktif = kumpulkanDataPelangganStatistik();
       const total = dataStatistikAktif.length;
@@ -2529,17 +3058,17 @@
       const blmOngkir_Ready = dataBlmOngkir.filter(d => d.statusProduksi === "READY");
 
       let htmlSelesai = "";
-      htmlSelesai += buatItemGrafikStatistik("sdh_close", "Sudah Close PO", dataClosePO, total, 'hijau');
-      htmlSelesai += buatItemGrafikStatistik("sdh_ready", "Sudah Ready", dataReady, total, 'hijau');
-      htmlSelesai += buatItemGrafikStatistik("sdh_lunas", "Sudah Lunas (Rp 0)", dataSudahLunas, total, 'hijau');
-      htmlSelesai += buatItemGrafikStatistik("sdh_bayar", "Ada Uang Masuk (Min. DP)", dataSudahBayar, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_close", "Close PO", dataClosePO, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_ready", "Ready", dataReady, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_lunas", " Lunas", dataSudahLunas, total, 'hijau');
+      htmlSelesai += buatItemGrafikStatistik("sdh_bayar", "Ada Uang Masuk", dataSudahBayar, total, 'hijau');
       htmlSelesai += buatItemOngkirDitel("sdh_ongkir", "Sudah Ongkir", dataSdhOngkir, total, sdhOngkir_Open, sdhOngkir_Close, sdhOngkir_Ready, 'hijau');
       htmlSelesai += buatItemGrafikStatistik("sdh_alamat", "Alamat Lengkap", dataSdhAlamat, total, 'hijau');
 
       let htmlKurang = "";
       htmlKurang += buatItemGrafikStatistik("masih_open", "Masih Open PO", dataOpenPO, total, 'merah');
       htmlKurang += buatItemGrafikStatistik("blm_ready", "Belum Ready", dataBelumReady, total, 'merah');
-      htmlKurang += buatItemKeuanganDitel("blm_lunas", "Belum Lunas (Masih Nyicil)", dataBelumLunas, total, dataBelumLunas_Lewat, dataBelumLunas_Aman, 'merah');
+      htmlKurang += buatItemKeuanganDitel("blm_lunas", "Belum Lunas", dataBelumLunas, total, dataBelumLunas_Lewat, dataBelumLunas_Aman, 'merah');
       htmlKurang += buatItemKeuanganDitel("blm_bayar", "Belum Bayar Sama Sekali", dataBelumBayar, total, dataBelumBayar_Lewat, dataBelumBayar_Aman, 'merah');
       htmlKurang += buatItemOngkirDitel("blm_ongkir", "Belum Ongkir", dataBlmOngkir, total, blmOngkir_Open, blmOngkir_Close, blmOngkir_Ready, 'merah');
       htmlKurang += buatItemGrafikStatistik("blm_alamat", "Belum Ada Alamat", dataBlmAlamat, total, 'merah');
@@ -2575,6 +3104,9 @@
       if (document.getElementById('wadah-stat-wilayah')) document.getElementById('wadah-stat-wilayah').innerHTML = htmlWilayah;
       if (document.getElementById('wadah-stat-ekspedisi')) document.getElementById('wadah-stat-ekspedisi').innerHTML = htmlEkspedisi;
       document.getElementById('modalStatistikProgress').classList.remove('hidden');
+      if (typeof initKalenderGrafikStatistik === 'function') initKalenderGrafikStatistik();
+      if (typeof isiDropdownSarimbitGrafikStatistik === 'function') isiDropdownSarimbitGrafikStatistik();
+      if (typeof renderGrafikTrenStatistik === 'function') renderGrafikTrenStatistik();
       
       // TRIGGER ANIMASI JALAN (Setelah modal muncul)
       setTimeout(() => {
@@ -2718,13 +3250,17 @@ case "eks_lain": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEksped
  // MESIN PENYARING FILTER LANJUTAN
  function dapatkanKondisiFilterLanjutan() {
         return {
+            prodOpen: document.getElementById('fc-prod-open')?.checked, prodClose: document.getElementById('fc-prod-close')?.checked,
+            prodReady: document.getElementById('fc-prod-ready')?.checked, prodBlmReady: document.getElementById('fc-prod-blmready')?.checked,
             blmBayar: document.getElementById('fc-blmbayar')?.checked, blmLunas: document.getElementById('fc-blmlunas')?.checked,
+            blmBayarLewat: document.getElementById('fc-blmbayar-lewat')?.checked, blmLunasLewat: document.getElementById('fc-blmlunas-lewat')?.checked,
             blmOngkir: document.getElementById('fc-blmongkir')?.checked, sdhOngkir: document.getElementById('fc-sdhongkir')?.checked,
+            lunasOngkir: document.getElementById('fc-lunasongkir')?.checked, lunasBlmOngkir: document.getElementById('fc-lunasblmongkir')?.checked,
             jnt: document.getElementById('fc-jnt')?.checked, jne: document.getElementById('fc-jne')?.checked, pos: document.getElementById('fc-pos')?.checked,
             lion: document.getElementById('fc-lion')?.checked, ambil: document.getElementById('fc-ambil')?.checked, eksLain: document.getElementById('fc-ekslain')?.checked,
             jawa: document.getElementById('fc-jawa')?.checked, luarJawa: document.getElementById('fc-luarjawa')?.checked,
-            luarNegeri: document.getElementById('fc-luarnegeri')?.checked, noAlamat: document.getElementById('fc-noalamat')?.checked,
-            blmGram: document.getElementById('fc-blmgram')?.checked
+            luarNegeri: document.getElementById('fc-luarnegeri')?.checked, sdhAlamat: document.getElementById('fc-sdhalamat')?.checked,
+            noAlamat: document.getElementById('fc-noalamat')?.checked, blmGram: document.getElementById('fc-blmgram')?.checked
         };
     }
 
@@ -2879,36 +3415,120 @@ case "eks_lain": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEksped
         return hasil || 0;
     }
 
+    // HELPER STATUS PRODUKSI & JATUH TEMPO (SAMA PERSIS DENGAN MESIN STATISTIK)
+    function cekProduksiDanTempoCustomer(semuaItem) {
+        let statusProduksi = "OPEN_PO";
+        let isC1Lewat = false;
+        let isLunasLewat = false;
+
+        if (typeof pembukuanData === 'undefined' || !pembukuanData.length) {
+            return { statusProduksi, isC1Lewat, isLunasLewat };
+        }
+
+        const parsingTglAman = (tglString) => {
+            if (!tglString) return null;
+            let str = String(tglString).trim();
+            if (str.includes('/') || str.includes('.')) {
+                const pemisah = str.includes('/') ? '/' : '.';
+                const bagian = str.split(pemisah);
+                if (bagian[0].length <= 2 && bagian[2].length === 4) str = `${bagian[2]}-${bagian[1]}-${bagian[0]}`;
+            }
+            const hasilTgl = new Date(str);
+            if (isNaN(hasilTgl.getTime())) return null;
+            hasilTgl.setHours(0, 0, 0, 0);
+            return hasilTgl;
+        };
+
+        const sekarang = new Date();
+        sekarang.setHours(0, 0, 0, 0);
+        const sarimbitSet = new Set(semuaItem.map(it => it.sarimbit).filter(Boolean));
+
+        sarimbitSet.forEach(namaSrm => {
+            const buku = pembukuanData.find(b => b.sarimbit === namaSrm);
+            if (buku) {
+                const tglClose = parsingTglAman(buku.close);
+                const tglReady = parsingTglAman(buku.ready);
+                if (tglReady && tglReady.getTime() <= sekarang.getTime()) statusProduksi = "READY";
+                else if (tglClose && tglClose.getTime() <= sekarang.getTime() && statusProduksi !== "READY") statusProduksi = "CLOSE_PO";
+
+                const tglC1 = parsingTglAman(buku.c1 ? String(buku.c1).split(/to|-/)[0] : null);
+                const tglLunas = parsingTglAman((buku.Lunas || buku.lunas) ? String(buku.Lunas || buku.lunas).split(/to|-/)[0] : null);
+
+                if (tglC1 && tglC1.getTime() <= sekarang.getTime()) isC1Lewat = true;
+                if (tglLunas && tglLunas.getTime() <= sekarang.getTime()) isLunasLewat = true;
+            }
+        });
+
+        return { statusProduksi, isC1Lewat, isLunasLewat };
+    }
+
     function evaluasiFilterLanjutan(o, f) {
-        if (!f.blmBayar && !f.blmLunas && !f.blmOngkir && !f.sdhOngkir && !f.jnt && !f.jne && !f.pos && !f.lion && !f.ambil && !f.eksLain && !f.jawa && !f.luarJawa && !f.luarNegeri && !f.noAlamat && !f.blmGram) return true;
+        if (
+            !f.prodOpen && !f.prodClose && !f.prodReady && !f.prodBlmReady &&
+            !f.blmBayar && !f.blmLunas && !f.blmBayarLewat && !f.blmLunasLewat &&
+            !f.blmOngkir && !f.sdhOngkir && !f.lunasOngkir && !f.lunasBlmOngkir &&
+            !f.jnt && !f.jne && !f.pos && !f.lion && !f.ambil && !f.eksLain &&
+            !f.jawa && !f.luarJawa && !f.luarNegeri && !f.sdhAlamat && !f.noAlamat && !f.blmGram
+        ) return true;
         
         const ongkir = Number(o.ongkir) || 0;
         const eks = (o.ekspedisi || "").trim().toUpperCase();
 
+        const butuhDataCust = f.prodOpen || f.prodClose || f.prodReady || f.prodBlmReady ||
+            f.blmBayar || f.blmLunas || f.blmBayarLewat || f.blmLunasLewat ||
+            f.blmOngkir || f.sdhOngkir || f.lunasOngkir || f.lunasBlmOngkir;
+
+        let semuaItem = [o];
+        if (butuhDataCust) {
+            const idCust = o.idcustomer || o.idCustomer;
+            semuaItem = typeof orderData !== 'undefined' ? orderData.filter(x => (x.idcustomer || x.idCustomer) === idCust) : [o];
+        }
+
+        let infoProdTempo = null;
+        if (f.prodOpen || f.prodClose || f.prodReady || f.prodBlmReady || f.blmBayarLewat || f.blmLunasLewat) {
+            infoProdTempo = cekProduksiDanTempoCustomer(semuaItem);
+        }
+
+        // 1. FILTER STATUS PRODUKSI
+        let passProduksi = true;
+        if (f.prodOpen || f.prodClose || f.prodReady || f.prodBlmReady) {
+            passProduksi = false;
+            const st = infoProdTempo.statusProduksi;
+            if (f.prodOpen && st === "OPEN_PO") passProduksi = true;
+            if (f.prodClose && (st === "CLOSE_PO" || st === "READY")) passProduksi = true;
+            if (f.prodReady && st === "READY") passProduksi = true;
+            if (f.prodBlmReady && st !== "READY") passProduksi = true;
+        }
+
+        // 2. FILTER STATUS KEUANGAN
         let passKeuangan = true;
-        if (f.blmBayar || f.blmLunas || f.blmOngkir || f.sdhOngkir) {
+        if (f.blmBayar || f.blmLunas || f.blmBayarLewat || f.blmLunasLewat || f.blmOngkir || f.sdhOngkir || f.lunasOngkir || f.lunasBlmOngkir) {
             passKeuangan = false;
             
             let totalBayar = 0;
             const riwayat = typeof window.dapatkanRiwayatAman === 'function' ? window.dapatkanRiwayatAman(o) : [];
             riwayat.forEach(b => totalBayar += (Number(b.nominal) || 0));
             
-            const idCust = o.idcustomer || o.idCustomer;
-            const semuaItem = typeof orderData !== 'undefined' ? orderData.filter(x => (x.idcustomer || x.idCustomer) === idCust) : [o];
             let totalBelanja = 0;
             semuaItem.forEach(it => totalBelanja += (Number(it.harga) || 0) * (Number(it.jumlah) || 0));
             
             const dTipe = o.diskonTipe || 'none';
             const dNilai = Number(o.diskonNilai) || 0;
             let diskon = (dTipe === 'persen') ? (totalBelanja * dNilai) / 100 : (dTipe === 'angka' ? dNilai : 0);
-            const grandTotal = Math.max(0, totalBelanja - diskon) + ongkir;
+            const tagihanBarang = Math.max(0, totalBelanja - diskon);
+            const grandTotal = tagihanBarang + ongkir;
 
             if (f.blmBayar && totalBayar === 0) passKeuangan = true;
             if (f.blmLunas && totalBayar < grandTotal) passKeuangan = true;
+            if (f.blmBayarLewat && totalBayar === 0 && infoProdTempo.isC1Lewat) passKeuangan = true;
+            if (f.blmLunasLewat && totalBayar < grandTotal && infoProdTempo.isLunasLewat) passKeuangan = true;
             if (f.blmOngkir && ongkir === 0) passKeuangan = true;
             if (f.sdhOngkir && ongkir > 0) passKeuangan = true;
+            if (f.lunasOngkir && tagihanBarang > 0 && ongkir > 0 && totalBayar >= grandTotal) passKeuangan = true;
+            if (f.lunasBlmOngkir && tagihanBarang > 0 && totalBayar >= tagihanBarang && (ongkir === 0 || totalBayar < grandTotal)) passKeuangan = true;
         }
 
+        // 3. FILTER EKSPEDISI
         let passEks = true;
         if (f.jnt || f.jne || f.pos || f.lion || f.ambil || f.eksLain) {
             passEks = false;
@@ -2927,8 +3547,9 @@ case "eks_lain": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEksped
             if (f.eksLain && isLain) passEks = true;
         }
 
+        // 4. FILTER WILAYAH & ALAMAT
         let passAlamat = true;
-        if (f.jawa || f.luarJawa || f.luarNegeri || f.noAlamat) {
+        if (f.jawa || f.luarJawa || f.luarNegeri || f.sdhAlamat || f.noAlamat) {
             passAlamat = false;
             const isAlamatLN = deteksiAlamatLuarNegeri(o.alamat);
             const isLuarNegeri = deteksiApakahLuarNegeri(o.alamat, o.telepon || o.telp);
@@ -2936,28 +3557,26 @@ case "eks_lain": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEksped
             const isJawa = (!isLuarNegeri && !isNoAlamat) ? deteksiApakahPulauJawa(o.alamat) : false;
             const isLuarJawa = (!isLuarNegeri && !isNoAlamat && !isJawa);
 
+            if (f.sdhAlamat && !isNoAlamat) passAlamat = true;
             if (f.noAlamat && isNoAlamat) passAlamat = true;
             if (f.luarNegeri && isLuarNegeri) passAlamat = true;
             if (f.jawa && isJawa) passAlamat = true;
             if (f.luarJawa && isLuarJawa) passAlamat = true;
         }
 
-        // --- LOGIKA FILTER GRAMASI 0 DENGAN CACHE (TIDAK LAG) ---
+        // 5. FILTER GRAMASI 0
         let passGram = true;
         if (f.blmGram) {
             passGram = false;
             let gramItem = Number(o.berat || o.Berat || 0);
-            
-            // Cek Master dengan kecepatan instan (O(1))
             if (gramItem === 0) {
                 const liveWeight = dapatkanBeratLive(o.sarimbit, o.barang, o.varian, o.size);
                 if (liveWeight > 0) gramItem = liveWeight;
             }
-            
             if (gramItem === 0) passGram = true;
         }
 
-        return passKeuangan && passEks && passAlamat && passGram;
+        return passProduksi && passKeuangan && passEks && passAlamat && passGram;
     }
    // =======================================================
     // LOGIKA MODAL PENCARIAN & QTY STEPPER (FULL SCREEN)
@@ -4706,21 +5325,23 @@ async function handleOrderSubmit(e) {
                     </div>
                                         
                     <!-- Kotak Kontak & Alamat -->
-                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-3 pt-6 rounded-xl border border-slate-200 mt-4 space-y-2 shadow-sm hover:shadow-md transition-shadow relative overflow-visible group">
+                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 px-2.5 pb-3 pt-0 rounded-xl border border-slate-200 mt-4 flex flex-col shadow-sm hover:shadow-md transition-shadow relative overflow-visible group">
                         
-                        <!-- KAPSUL NAMA & TELEPON (Tengah Atas) -->
-                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center justify-center gap-3 z-20 whitespace-nowrap">
-                            <div class="font-black text-slate-800 text-[13px] leading-none drop-shadow-sm tracking-wide">${c.nama.toUpperCase()}</div>
-                            
-                          <!-- Nomor WA Terintegrasi di dalam kapsul -->
-                            <button type="button" onclick="event.stopPropagation(); hubungiWA('${telpAmanStr}')" title="Klik untuk buka chat WhatsApp" class="text-[12px] font-black text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1.5 cursor-pointer transition-all leading-none active:scale-95">
-                                <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i> <span class="underline decoration-emerald-300 underline-offset-2">${c.telp || '-'}</span>
-                            </button>
+                        <!-- KAPSUL NAMA & TELEPON (Sejajar Jika Muat, Turun ke Bawah Jika Kepanjangan) -->
+                        <div class="flex justify-center -mt-4 mb-1.5 relative z-20 w-full">
+                            <div class="bg-white px-3.5 py-1.5 rounded-[1.25rem] border border-slate-200 shadow-sm inline-flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 max-w-full">
+                                <div class="font-black text-slate-800 text-[13px] leading-tight drop-shadow-sm tracking-wide text-center break-words max-w-full">${c.nama.toUpperCase()}</div>
+                                
+                                <!-- Nomor WA Terintegrasi di dalam kapsul -->
+                                <button type="button" onclick="event.stopPropagation(); hubungiWA('${telpAmanStr}')" title="Klik untuk buka chat WhatsApp" class="text-[12px] font-black text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 cursor-pointer transition-all leading-none active:scale-95 shrink-0 whitespace-nowrap">
+                                    <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i> <span class="underline decoration-emerald-300 underline-offset-2">${c.telp || '-'}</span>
+                                </button>
+                            </div>
                         </div>
 
-                       <div class="absolute inset-0 bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+                        <div class="absolute inset-0 bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
                         <!-- Teks Alamat -->
-                        <div class="text-[11.5px] text-slate-600 font-medium leading-relaxed text-center relative z-10 px-3 py-1">${c.alamat}</div>
+                        <div class="text-[11.5px] text-slate-600 font-medium leading-relaxed text-center relative z-10 px-2 py-1">${c.alamat}</div>
                     </div>
 
                     <!-- ONGKIR & RIWAYAT SEJAJAR VERTICAL -->
@@ -7353,6 +7974,414 @@ function buatKartuStatistikSumber(kategoriId, judul, jumlah, totalSemua, satuan,
     </div>`;
 }
 
+function initKalenderGrafikSumber() {
+    const inputEl = document.getElementById('filter-date-range-stat-sumber');
+    if (!inputEl || inputEl._flatpickr || typeof flatpickr !== 'function') return;
+
+    flatpickr(inputEl, {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        locale: "id",
+        altInput: true,
+        altFormat: "d M Y",
+        onOpen: function(selectedDates, dateStr, instance) {
+            if (instance.calendarContainer) instance.calendarContainer.style.zIndex = "999999";
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            const hiddenStart = document.getElementById('stat-sumber-tgl-mulai');
+            const hiddenEnd = document.getElementById('stat-sumber-tgl-akhir');
+            if (selectedDates.length === 2) {
+                hiddenStart.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                hiddenEnd.value = instance.formatDate(selectedDates[1], "Y-m-d");
+                renderGrafikTrenSumber();
+            } else if (selectedDates.length === 1) {
+                const satuTgl = instance.formatDate(selectedDates[0], "Y-m-d");
+                hiddenStart.value = satuTgl;
+                hiddenEnd.value = satuTgl;
+                renderGrafikTrenSumber();
+            } else {
+                hiddenStart.value = "";
+                hiddenEnd.value = "";
+                renderGrafikTrenSumber();
+            }
+        }
+    });
+}
+
+function isiDropdownSumberGrafik() {
+    const sel = document.getElementById('filter-sumber-stat-chart');
+    if (!sel) return;
+
+    const prevVal = sel.value;
+    const mapTotal = {};
+    const dataSumber = Array.isArray(window.dataStatistikSumberAktif) ? window.dataStatistikSumberAktif : [];
+
+    dataSumber.forEach(o => {
+        const sbr = (o.asal_order && o.asal_order.trim() !== "") ? o.asal_order.trim() : "Tidak Diketahui";
+        mapTotal[sbr] = (mapTotal[sbr] || 0) + (Number(o.jumlah) || 0);
+    });
+
+    const listSorted = Object.keys(mapTotal).sort((a, b) => {
+        if (a === "Tidak Diketahui") return 1;
+        if (b === "Tidak Diketahui") return -1;
+        return (mapTotal[b] || 0) - (mapTotal[a] || 0);
+    });
+
+    const signatureBaru = listSorted.join('||');
+    if (sel.dataset.lastOptions !== signatureBaru || sel.options.length <= 1) {
+        sel.innerHTML = '';
+        const optSemua = document.createElement('option');
+        optSemua.value = '';
+        optSemua.textContent = 'Semua Sumber';
+        sel.appendChild(optSemua);
+
+        listSorted.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            sel.appendChild(opt);
+        });
+        sel.dataset.lastOptions = signatureBaru;
+    }
+
+    sel.value = listSorted.includes(prevVal) ? prevVal : '';
+    if (typeof window.sinkronisasiUIFilterSlip === 'function') window.sinkronisasiUIFilterSlip();
+}
+
+function resetTanggalGrafikSumber() {
+    const inputEl = document.getElementById('filter-date-range-stat-sumber');
+    if (inputEl && inputEl._flatpickr) inputEl._flatpickr.clear();
+    const s = document.getElementById('stat-sumber-tgl-mulai');
+    const e = document.getElementById('stat-sumber-tgl-akhir');
+    const selSbr = document.getElementById('filter-sumber-stat-chart');
+    if (s) s.value = "";
+    if (e) e.value = "";
+    if (selSbr) selSbr.value = "";
+    if (typeof window.sinkronisasiUIFilterSlip === 'function') window.sinkronisasiUIFilterSlip();
+    renderGrafikTrenSumber();
+}
+
+function renderGrafikTrenSumber() {
+    const wadah = document.getElementById('wadah-grafik-tren-sumber');
+    const legendaEl = document.getElementById('legenda-grafik-tren-sumber');
+    if (!wadah) return;
+
+    isiDropdownSumberGrafik();
+
+    const dataSumber = Array.isArray(window.dataStatistikSumberAktif) ? window.dataStatistikSumberAktif : [];
+    const filterSumberChart = (document.getElementById('filter-sumber-stat-chart')?.value || "").trim();
+
+    const ambilTglKey = (tglRaw, idCust) => {
+        if (typeof keKunciTanggalLokal === 'function') return keKunciTanggalLokal(tglRaw, idCust);
+        const d = tglRaw ? new Date(tglRaw) : new Date();
+        if (isNaN(d.getTime())) return null;
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    const WARNA_SUMBER = {
+        'WhatsApp': '#10b981',
+        'Instagram': '#ec4899',
+        'Reseller': '#3b82f6',
+        'TikTok': '#8b5cf6',
+        'Tidak Diketahui': '#f59e0b'
+    };
+    const PALET_CADANGAN = ['#06b6d4', '#f97316', '#6366f1', '#14b8a6', '#e11d48'];
+
+    const totalPerSumber = {};
+    const mapHarian = {}; // mapHarian[tglKey][sumber] = { pcs, custSet }
+    const mapCustTotalHari = {}; // mapCustTotalHari[tglKey] = Set()
+    let semuaTanggal = [];
+
+    dataSumber.forEach(o => {
+        const sbr = (o.asal_order && o.asal_order.trim() !== "") ? o.asal_order.trim() : "Tidak Diketahui";
+        if (filterSumberChart && sbr !== filterSumberChart) return;
+
+        const idCust = String(o.idcustomer || o.idCustomer || o.customer || o.id);
+        const tglKey = ambilTglKey(o.tanggal, idCust);
+        if (!tglKey) return;
+
+        const qty = Number(o.jumlah) || 0;
+        totalPerSumber[sbr] = (totalPerSumber[sbr] || 0) + qty;
+        semuaTanggal.push(tglKey);
+
+        if (!mapHarian[tglKey]) mapHarian[tglKey] = {};
+        if (!mapHarian[tglKey][sbr]) mapHarian[tglKey][sbr] = { pcs: 0, custSet: new Set() };
+        mapHarian[tglKey][sbr].pcs += qty;
+        mapHarian[tglKey][sbr].custSet.add(idCust);
+
+        if (!mapCustTotalHari[tglKey]) mapCustTotalHari[tglKey] = new Set();
+        mapCustTotalHari[tglKey].add(idCust);
+    });
+
+    // Tentukan rentang tanggal (Filter Kalender Diagram -> Filter Tanggal Halaman Sumber -> 7 Hari Terakhir)
+    const tglMulaiStr = document.getElementById('stat-sumber-tgl-mulai')?.value || document.getElementById('filter-tgl-mulai-sumber')?.value || "";
+    const tglAkhirStr = document.getElementById('stat-sumber-tgl-akhir')?.value || document.getElementById('filter-tgl-akhir-sumber')?.value || "";
+
+    let startDate, endDate;
+    if (tglMulaiStr && tglAkhirStr) {
+        const [sy, sm, sd] = tglMulaiStr.split('-').map(Number);
+        const [ey, em, ed] = tglAkhirStr.split('-').map(Number);
+        startDate = new Date(sy, sm - 1, sd);
+        endDate = new Date(ey, em - 1, ed);
+    } else {
+        let maxDate = new Date();
+        if (semuaTanggal.length > 0) {
+            semuaTanggal.sort();
+            const [ly, lm, ld] = semuaTanggal[semuaTanggal.length - 1].split('-').map(Number);
+            maxDate = new Date(ly, lm - 1, ld);
+        }
+        maxDate.setHours(0, 0, 0, 0);
+        endDate = new Date(maxDate);
+        startDate = new Date(maxDate);
+        startDate.setDate(startDate.getDate() - 6);
+    }
+
+    if (startDate > endDate) {
+        const tmp = startDate; startDate = endDate; endDate = tmp;
+    }
+
+    const daftarSumberUrut = Object.keys(totalPerSumber).sort((a, b) => {
+        if (a === "Tidak Diketahui") return 1;
+        if (b === "Tidak Diketahui") return -1;
+        return (totalPerSumber[b] || 0) - (totalPerSumber[a] || 0);
+    });
+
+    // Susun seri garis:
+    // - Jika "Semua Sumber": 1 garis berwarna per sumber (berdasarkan Qty Pcs)
+    // - Jika pilih 1 Sumber: 2 garis (Customer berwarna biru + Total Qty berwarna oranye-merah)
+    const modeTunggal = Boolean(filterSumberChart);
+    let seriesList = [];
+
+    if (modeTunggal) {
+        seriesList = [
+            { id: 'cust', label: 'Customer', warna: '#1d70b8', satuan: 'Cust' },
+            { id: 'qty', label: `Total Qty (${filterSumberChart})`, warna: '#ee4d2d', satuan: 'Pcs' }
+        ];
+    } else {
+        let idxPalet = 0;
+        seriesList = daftarSumberUrut.map((namaSbr, i) => {
+            const warna = WARNA_SUMBER[namaSbr] || PALET_CADANGAN[(idxPalet++) % PALET_CADANGAN.length];
+            return { id: `sbr_${i}`, keySumber: namaSbr, label: namaSbr, warna: warna, satuan: 'Pcs' };
+        });
+    }
+
+    if (legendaEl) {
+        if (seriesList.length === 0) {
+            legendaEl.innerHTML = `<span class="text-slate-400">Belum ada data sumber</span>`;
+        } else {
+            legendaEl.innerHTML = seriesList.map(s => `
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color:${s.warna};"></span>
+                    <span>${escapeHTML(s.label)}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    const hariList = [];
+    let totalPcsRentang = 0;
+    const setCustRentang = new Set();
+    const cursor = new Date(startDate);
+    let guard = 0;
+
+    while (cursor <= endDate && guard < 366) {
+        const y = cursor.getFullYear();
+        const m = String(cursor.getMonth() + 1).padStart(2, '0');
+        const d = String(cursor.getDate()).padStart(2, '0');
+        const key = `${y}-${m}-${d}`;
+        const dataHari = mapHarian[key] || {};
+
+        let pcsHariTotal = 0;
+        const custHariSet = mapCustTotalHari[key] || new Set();
+        custHariSet.forEach(cid => setCustRentang.add(cid));
+
+        const values = {};
+        if (modeTunggal) {
+            const info = dataHari[filterSumberChart] || { pcs: 0, custSet: new Set() };
+            values.cust = info.custSet.size;
+            values.qty = info.pcs;
+            pcsHariTotal = info.pcs;
+        } else {
+            seriesList.forEach(s => {
+                const info = dataHari[s.keySumber] || { pcs: 0, custSet: new Set() };
+                values[s.id] = info.pcs;
+                pcsHariTotal += info.pcs;
+            });
+        }
+        totalPcsRentang += pcsHariTotal;
+
+        hariList.push({
+            key: key,
+            labelPendek: `${d}/${m}`,
+            labelTooltip: `${d}-${m}-${y}`,
+            values: values,
+            totalPcsHari: pcsHariTotal,
+            totalCustHari: custHariSet.size
+        });
+        cursor.setDate(cursor.getDate() + 1);
+        guard++;
+    }
+
+    if (hariList.length === 0 || seriesList.length === 0) {
+        wadah.innerHTML = `<div class="py-10 text-center text-xs font-bold text-slate-400">Tidak ada data order pada filter ini.</div>`;
+        return;
+    }
+
+    const vbW = 680, vbH = 220;
+    const padL = 22, padR = 22, padT = 18, padB = 34;
+    const plotW = vbW - padL - padR;
+    const plotH = vbH - padT - padB;
+
+    let maxVal = 0;
+    hariList.forEach(h => {
+        seriesList.forEach(s => {
+            const v = h.values[s.id] || 0;
+            if (v > maxVal) maxVal = v;
+        });
+    });
+    const yMax = maxVal > 0 ? maxVal : 1;
+
+    const points = hariList.map((h, i) => {
+        const x = hariList.length === 1 ? (padL + plotW / 2) : (padL + (i / (hariList.length - 1)) * plotW);
+        const ys = {};
+        seriesList.forEach(s => {
+            const v = h.values[s.id] || 0;
+            ys[s.id] = padT + plotH - (v / yMax) * plotH;
+        });
+        return { ...h, x, ys };
+    });
+
+    // Garis bantu horizontal putus-putus
+    let gridHTML = '';
+    for (let i = 0; i < 4; i++) {
+        const gy = padT + (i / 4) * plotH;
+        gridHTML += `<line x1="${padL}" y1="${gy}" x2="${vbW - padR}" y2="${gy}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5 5" />`;
+    }
+    gridHTML += `<line x1="${padL}" y1="${padT + plotH}" x2="${vbW - padR}" y2="${padT + plotH}" stroke="#cbd5e1" stroke-width="1.2" />`;
+
+    // Polyline & titik interaktif tiap seri
+    let linesHTML = '';
+    let hoverDotsHTML = '';
+    seriesList.forEach(s => {
+        if (points.length > 1) {
+            const ptsStr = points.map(p => `${p.x.toFixed(1)},${p.ys[s.id].toFixed(1)}`).join(' ');
+            linesHTML += `<polyline fill="none" stroke="${s.warna}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${ptsStr}" />`;
+        } else {
+            linesHTML += `<circle cx="${points[0].x}" cy="${points[0].ys[s.id]}" r="4" fill="${s.warna}" />`;
+        }
+        hoverDotsHTML += `<circle id="sbr-dot-${s.id}" cx="0" cy="0" r="4.5" fill="${s.warna}" stroke="#ffffff" stroke-width="1.8" style="opacity:0; pointer-events:none;" />`;
+    });
+
+    // Label sumbu X
+    const stepLabel = Math.max(1, Math.ceil(points.length / 7));
+    let xLabelsHTML = '';
+    points.forEach((p, idx) => {
+        if (idx % stepLabel === 0 || idx === points.length - 1) {
+            if (idx === points.length - 1 && points.length > 2 && (idx % stepLabel !== 0) && ((points.length - 1) - Math.floor((points.length - 2) / stepLabel) * stepLabel) < stepLabel * 0.5) {
+                return;
+            }
+            xLabelsHTML += `<text x="${p.x.toFixed(1)}" y="${vbH - 10}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">${p.labelPendek}</text>`;
+        }
+    });
+
+    wadah.innerHTML = `
+        <div class="relative w-full">
+            <svg id="svg-tren-sumber" viewBox="0 0 ${vbW} ${vbH}" class="w-full h-48 md:h-56 overflow-visible cursor-crosshair">
+                ${gridHTML}
+                ${linesHTML}
+                <line id="sbr-chart-crosshair" x1="0" y1="${padT - 4}" x2="0" y2="${padT + plotH}" stroke="#d9534f" stroke-width="1.5" style="opacity:0; pointer-events:none;" />
+                ${hoverDotsHTML}
+                ${xLabelsHTML}
+            </svg>
+
+            <!-- Kotak Tooltip Melayang (Transparan Bening) -->
+            <div id="sbr-chart-tooltip" class="hidden pointer-events-none absolute top-2 z-30 bg-white/35 backdrop-blur-[1.5px] rounded-xl border border-slate-300/60 shadow-[0_6px_20px_rgba(15,23,42,0.08)] px-4 py-2.5 min-w-[205px] transition-all duration-75">
+                <div id="sbr-tt-tgl" class="text-center font-black text-slate-900 text-xs mb-2 tracking-wide drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]"></div>
+                <div id="sbr-tt-rows" class="space-y-1.5 text-[11px] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]"></div>
+                <div id="sbr-tt-info" class="mt-2 pt-1.5 border-t border-slate-300/40 text-[9.5px] text-center font-bold text-slate-600 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]"></div>
+            </div>
+        </div>
+    `;
+
+    const svgEl = document.getElementById('svg-tren-sumber');
+    const crosshair = document.getElementById('sbr-chart-crosshair');
+    const tooltip = document.getElementById('sbr-chart-tooltip');
+
+    const tampilkanTitik = (idx) => {
+        const pt = points[idx];
+        if (!pt) return;
+
+        crosshair.setAttribute('x1', pt.x);
+        crosshair.setAttribute('x2', pt.x);
+        crosshair.style.opacity = '1';
+
+        let rowsHtml = '';
+        seriesList.forEach(s => {
+            const dotEl = document.getElementById(`sbr-dot-${s.id}`);
+            if (dotEl) {
+                dotEl.setAttribute('cx', pt.x);
+                dotEl.setAttribute('cy', pt.ys[s.id]);
+                dotEl.style.opacity = '1';
+            }
+            const nilai = pt.values[s.id] || 0;
+            rowsHtml += `
+                <div class="flex items-center justify-between gap-4">
+                    <span class="flex items-center gap-2 text-slate-600 font-semibold"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color:${s.warna};"></span> ${escapeHTML(s.label)}</span>
+                    <span class="font-bold text-slate-800 tabular-nums">${nilai.toLocaleString('id-ID')} ${s.satuan}</span>
+                </div>
+            `;
+        });
+
+        document.getElementById('sbr-tt-tgl').innerText = pt.labelTooltip;
+        document.getElementById('sbr-tt-rows').innerHTML = rowsHtml;
+        document.getElementById('sbr-tt-info').innerText = modeTunggal
+            ? `Periode: ${setCustRentang.size.toLocaleString('id-ID')} Cust • ${totalPcsRentang.toLocaleString('id-ID')} Pcs`
+            : `Hari ini: ${pt.totalCustHari.toLocaleString('id-ID')} Cust • ${pt.totalPcsHari.toLocaleString('id-ID')} Pcs`;
+
+        const pctX = (pt.x / vbW) * 100;
+        tooltip.classList.remove('hidden');
+        if (pctX > 66) {
+            tooltip.style.left = `calc(${pctX}% - 12px)`;
+            tooltip.style.transform = 'translateX(-100%)';
+        } else if (pctX < 34) {
+            tooltip.style.left = `calc(${pctX}% + 12px)`;
+            tooltip.style.transform = 'translateX(0)';
+        } else {
+            tooltip.style.left = `${pctX}%`;
+            tooltip.style.transform = 'translateX(-50%)';
+        }
+    };
+
+    const prosesGerak = (clientX) => {
+        const rect = svgEl.getBoundingClientRect();
+        if (!rect.width) return;
+        const svgX = ((clientX - rect.left) / rect.width) * vbW;
+        let idx = 0;
+        if (points.length > 1) {
+            idx = Math.round(((svgX - padL) / plotW) * (points.length - 1));
+            idx = Math.max(0, Math.min(points.length - 1, idx));
+        }
+        tampilkanTitik(idx);
+    };
+
+    svgEl.addEventListener('mousemove', (e) => prosesGerak(e.clientX));
+    svgEl.addEventListener('click', (e) => prosesGerak(e.clientX));
+    svgEl.addEventListener('mouseleave', () => {
+        crosshair.style.opacity = '0';
+        seriesList.forEach(s => {
+            const dotEl = document.getElementById(`sbr-dot-${s.id}`);
+            if (dotEl) dotEl.style.opacity = '0';
+        });
+        tooltip.classList.add('hidden');
+    });
+    svgEl.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) prosesGerak(e.touches[0].clientX);
+    }, { passive: true });
+    svgEl.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) prosesGerak(e.touches[0].clientX);
+    }, { passive: true });
+}
+
 async function bukaModalStatistikSumber() {
     try {
         const orders = await dbLokal.orders.filter(o => o.syncstatus !== -1).toArray();
@@ -7446,6 +8475,8 @@ async function bukaModalStatistikSumber() {
         }
 
         document.getElementById('modalStatistikSumber').classList.remove('hidden');
+        if (typeof initKalenderGrafikSumber === 'function') initKalenderGrafikSumber();
+        if (typeof renderGrafikTrenSumber === 'function') renderGrafikTrenSumber();
 
         // Jalankan animasi progress bar & donat SVG persis seperti Rincian Customer
         setTimeout(() => {
@@ -8201,8 +9232,7 @@ function pilihProdukModal(metaString) {
             document.getElementById('modalFilterLanjutan').classList.add('hidden');
             
             const f = typeof dapatkanKondisiFilterLanjutan === 'function' ? dapatkanKondisiFilterLanjutan() : {};
-            const isAktif = f.blmBayar || f.blmLunas || f.blmOngkir || f.sdhOngkir || f.jnt || f.jne || f.pos || f.lion || f.ambil || f.eksLain || f.jawa || f.luarJawa || f.luarNegeri || f.noAlamat || f.blmGram;
-            
+            const isAktif = f.prodOpen || f.prodClose || f.prodReady || f.prodBlmReady || f.blmBayar || f.blmLunas || f.blmBayarLewat || f.blmLunasLewat || f.blmOngkir || f.sdhOngkir || f.lunasOngkir || f.lunasBlmOngkir || f.jnt || f.jne || f.pos || f.lion || f.ambil || f.eksLain || f.jawa || f.luarJawa || f.luarNegeri || f.sdhAlamat || f.noAlamat || f.blmGram;
             const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
             if (btnFilter) {
                 if (isAktif) {
@@ -8223,7 +9253,7 @@ function pilihProdukModal(metaString) {
         // 2. FUNGSI RESET FILTER LANJUTAN (ANTI-LAG)
         window.resetFilterLanjutan = function() {
             document.getElementById('modalFilterLanjutan').classList.add('hidden');
-            ['fc-blmbayar', 'fc-blmlunas', 'fc-blmongkir', 'fc-sdhongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-lion', 'fc-ambil', 'fc-ekslain', 'fc-jawa', 'fc-luarjawa', 'fc-luarnegeri', 'fc-noalamat', 'fc-blmgram'].forEach(id => {
+            ['fc-prod-open', 'fc-prod-close', 'fc-prod-ready', 'fc-prod-blmready', 'fc-blmbayar', 'fc-blmlunas', 'fc-blmbayar-lewat', 'fc-blmlunas-lewat', 'fc-blmongkir', 'fc-sdhongkir', 'fc-lunasongkir', 'fc-lunasblmongkir', 'fc-jnt', 'fc-jne', 'fc-pos', 'fc-lion', 'fc-ambil', 'fc-ekslain', 'fc-jawa', 'fc-luarjawa', 'fc-luarnegeri', 'fc-sdhalamat', 'fc-noalamat', 'fc-blmgram'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.checked = false;
             });
             
