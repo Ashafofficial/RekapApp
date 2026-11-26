@@ -5792,13 +5792,26 @@ async function handleOrderSubmit(e) {
         let grandTotal = totalBelanja - totalDiskon + ongkir;
         if (grandTotal < 0) grandTotal = 0;
 
-        const cicilan1 = Number(head.cicilan1 || 0);
-        const cicilan2 = Number(head.cicilan2 || 0);
-        const cicilan3 = Number(head.cicilan3 || 0);
-        const totalMasuk = cicilan1 + cicilan2 + cicilan3;
+        // TARIK RIWAYAT PEMBAYARAN DINAMIS (Bisa 1, 2, 3, 4, dst.)
+        const riwayatBayar = typeof window.dapatkanRiwayatAman === 'function'
+            ? window.dapatkanRiwayatAman(head)
+            : [
+                { nominal: Number(head.cicilan1 || 0) },
+                { nominal: Number(head.cicilan2 || 0) },
+                { nominal: Number(head.cicilan3 || 0) }
+              ].filter(b => b.nominal > 0);
+
+        const totalMasuk = riwayatBayar.reduce((sum, b) => sum + (Number(b.nominal) || 0), 0);
         const sisaTagihan = grandTotal - totalMasuk;
+        const isLunas = sisaTagihan <= 0;
 
         let yInfo = finalY + 10;
+        const estimasiTinggi = 86 + (Math.max(1, riwayatBayar.length) * 6);
+        if (yInfo + estimasiTinggi > 285) {
+            doc.addPage();
+            yInfo = 20;
+        }
+
         doc.setDrawColor(226, 232, 240);
         doc.line(100, yInfo, 196, yInfo);
         
@@ -5832,35 +5845,56 @@ async function handleOrderSubmit(e) {
         doc.setTextColor(37, 99, 235); doc.setFontSize(11);
         doc.text(formatRp(grandTotal), 192, yInfo + 6.5, { align: "right" });
 
+        // CETAK PEMBAYARAN MASUK DINAMIS
         yInfo += 16;
-        doc.setFontSize(9); doc.setTextColor(100, 116, 139); doc.setFont(undefined, 'normal');
-        doc.text("Pembayaran Masuk (DP/Cicilan 1)", 104, yInfo);
-        doc.setTextColor(5, 150, 105); doc.setFont(undefined, 'bold'); 
-        doc.text(`- ${formatRp(cicilan1)}`, 192, yInfo, { align: "right" });
+        if (riwayatBayar.length === 0) {
+            doc.setFontSize(9); doc.setTextColor(100, 116, 139); doc.setFont(undefined, 'normal');
+            doc.text("Pembayaran Masuk (DP/Cicilan 1)", 104, yInfo);
+            doc.setTextColor(5, 150, 105); doc.setFont(undefined, 'bold');
+            doc.text(`- ${formatRp(0)}`, 192, yInfo, { align: "right" });
+            yInfo += 6;
+        } else {
+            riwayatBayar.forEach((byr, idx) => {
+                const isTerakhir = idx === riwayatBayar.length - 1;
+                let labelBayar = "";
+                if (isLunas && isTerakhir) {
+                    labelBayar = "Pembayaran Masuk (Pelunasan)";
+                } else if (idx === 0) {
+                    labelBayar = "Pembayaran Masuk (DP/Cicilan 1)";
+                } else {
+                    labelBayar = `Pembayaran Masuk (Cicilan ${idx + 1})`;
+                }
 
-        yInfo += 6;
-        doc.setTextColor(100, 116, 139); doc.setFont(undefined, 'normal');
-        doc.text("Pembayaran Masuk (Cicilan 2)", 104, yInfo);
-        doc.setTextColor(5, 150, 105); doc.setFont(undefined, 'bold');
-        doc.text(`- ${formatRp(cicilan2)}`, 192, yInfo, { align: "right" });
-        
-        yInfo += 6;
-        doc.setTextColor(100, 116, 139); doc.setFont(undefined, 'normal');
-        doc.text("Pembayaran Masuk (Pelunasan)", 104, yInfo);
-        doc.setTextColor(5, 150, 105); doc.setFont(undefined, 'bold');
-        doc.text(`- ${formatRp(cicilan3)}`, 192, yInfo, { align: "right" });
+                doc.setFontSize(9); doc.setTextColor(100, 116, 139); doc.setFont(undefined, 'normal');
+                doc.text(labelBayar, 104, yInfo);
+                doc.setTextColor(5, 150, 105); doc.setFont(undefined, 'bold');
+                doc.text(`- ${formatRp(Number(byr.nominal) || 0)}`, 192, yInfo, { align: "right" });
+                yInfo += 6;
+            });
+        }
 
-        yInfo += 6;
-        doc.setFillColor(255, 241, 242);
-        doc.setDrawColor(244, 63, 94);
-        doc.setLineWidth(0.5);
-        doc.roundedRect(100, yInfo, 96, 14, 2, 2, 'DF');
-        doc.setTextColor(225, 29, 72); 
-        doc.setFontSize(10); doc.setFont(undefined, 'bold');
-        doc.text("SISA TAGIHAN", 104, yInfo + 9);
-        doc.setFontSize(14);
-        doc.text(formatRp(sisaTagihan), 192, yInfo + 9.5, { align: "right" });
-
+        // KOTAK SISA TAGIHAN / LUNAS
+        if (isLunas) {
+            doc.setFillColor(236, 253, 245);
+            doc.setDrawColor(16, 185, 129);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(100, yInfo, 96, 14, 2, 2, 'DF');
+            doc.setTextColor(5, 150, 105);
+            doc.setFontSize(10); doc.setFont(undefined, 'bold');
+            doc.text("STATUS TAGIHAN", 104, yInfo + 9);
+            doc.setFontSize(14);
+            doc.text("LUNAS", 192, yInfo + 9.5, { align: "right" });
+        } else {
+            doc.setFillColor(255, 241, 242);
+            doc.setDrawColor(244, 63, 94);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(100, yInfo, 96, 14, 2, 2, 'DF');
+            doc.setTextColor(225, 29, 72); 
+            doc.setFontSize(10); doc.setFont(undefined, 'bold');
+            doc.text("SISA TAGIHAN", 104, yInfo + 9);
+            doc.setFontSize(14);
+            doc.text(formatRp(sisaTagihan), 192, yInfo + 9.5, { align: "right" });
+        }
         yInfo += 30;
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.2);
