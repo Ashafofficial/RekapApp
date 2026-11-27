@@ -2272,13 +2272,20 @@
 
                    <!-- Kolom Filter Sarimbit & Rentang Tanggal (Flatpickr) -->
                    <div class="flex flex-wrap items-center gap-2">
-                    <!-- Dropdown Filter Nama Sarimbit Khusus Diagram -->
-                    <div class="relative">
-                        <i class="fa-solid fa-shirt text-slate-400 text-[10px] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                        <select id="filter-sarimbit-stat-chart" onchange="renderGrafikTrenStatistik()" class="h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 rounded-full pl-8 pr-7 text-[11px] font-bold text-slate-700 outline-none appearance-none cursor-pointer transition-all shadow-sm max-w-[175px] truncate">
+                    <!-- Custom Dropdown Filter Nama Sarimbit Khusus Diagram (Gaya Kaca iOS) -->
+                    <div class="relative" id="wadah-custom-stat-chart-sarimbit">
+                        <select id="filter-sarimbit-stat-chart" onchange="renderGrafikTrenStatistik()" class="hidden">
                             <option value="">Semua Sarimbit</option>
                         </select>
-                        <i class="fa-solid fa-chevron-down text-slate-400 text-[9px] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+
+                        <button type="button" id="btn-custom-stat-chart-sarimbit" onclick="toggleCustomFilterSlip('stat-chart-sarimbit')" class="shrink-0 h-9 ios-glass pl-3.5 pr-7 rounded-full text-[11px] font-bold text-slate-800 cursor-pointer outline-none transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[115px] max-w-[175px] flex items-center justify-center relative z-10">
+                            <span id="label-stat-chart-sarimbit" class="truncate w-full text-center pointer-events-none">Sarimbit</span>
+                            <i id="chevron-stat-chart-sarimbit" class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 transition-transform duration-300 pointer-events-none"></i>
+                        </button>
+
+                        <div id="drop-stat-chart-sarimbit-slip" class="hidden opacity-0 scale-95 origin-top-left sm:origin-top-right transition-all duration-200 absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+10px)] w-60 bg-white/85 backdrop-blur-2xl rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/80 z-[9999] p-2 flex flex-col max-h-[38vh]">
+                            <div id="list-custom-stat-chart-sarimbit" class="overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-0.5"></div>
+                        </div>
                     </div>
 
                     <div class="h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 rounded-full px-3.5 transition-all cursor-pointer flex items-center shadow-sm">
@@ -2390,7 +2397,7 @@
                     </select>
                 </div>
                 
-                <div class="w-full md:w-auto">
+               <div class="w-full md:w-auto">
                     <button onclick="unduhRekapStatistikExcel()" class="w-full bg-gradient-to-r from-slate-700 to-slate-800 text-white px-5 py-2 md:py-2.5 rounded-xl font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-[0_4px_12px_rgba(15,23,42,0.3)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.5)] border border-slate-600 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2.5 group">
                         <i class="fa-solid fa-file-excel text-emerald-400 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300"></i> UNDUH
                     </button>
@@ -2398,7 +2405,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <script>
@@ -2775,6 +2781,7 @@
       }
 
       sel.value = listSorted.includes(prevVal) ? prevVal : '';
+      if (typeof window.sinkronisasiUIFilterSlip === 'function') window.sinkronisasiUIFilterSlip();
   }
 
   function resetTanggalGrafikStatistik() {
@@ -2786,6 +2793,7 @@
       if (s) s.value = "";
       if (e) e.value = "";
       if (selSrm) selSrm.value = "";
+      if (typeof window.sinkronisasiUIFilterSlip === 'function') window.sinkronisasiUIFilterSlip();
       renderGrafikTrenStatistik();
   }
 
@@ -3456,7 +3464,7 @@ case "eks_lain": dataTersaring = dataStatistikAktif.filter(d => d.kategoriEksped
         const sarimbitSet = new Set(semuaItem.map(it => it.sarimbit).filter(Boolean));
 
         sarimbitSet.forEach(namaSrm => {
-            const buku = pembukuanData.find(b => b.sarimbit === namaSrm);
+            const buku = pembukuanData.find(b => cocokFilterTeks(b.sarimbit, namaSrm));
             if (buku) {
                 const tglClose = parsingTglAman(buku.close);
                 const tglReady = parsingTglAman(buku.ready);
@@ -4134,61 +4142,220 @@ function tutupModalTagihan() {
     document.getElementById('modalInfoTagihan').classList.add('hidden');
 }
 
-// FUNGSI TRANSISI PINDAH FILE HTML
+// ==============================================================
+// MEMORI TAMPILAN PER MENU (ANTI-REFRESH & SIMPAN POSISI SCROLL)
+// ==============================================================
+window.tabStateMemori = {
+    scrollPos: {},
+    sudahRender: { order: true, pengaturan: true },
+    perluUpdate: { master: true, rekap: true, slip: true, dashboardsumber: true, notif: false },
+    signatureData: ""
+};
+
+// Rekam posisi scroll secara otomatis setiap kali layar digulir
+document.addEventListener('DOMContentLoaded', () => {
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+        mainEl.addEventListener('scroll', () => {
+            const pageAktif = document.querySelector('.page.active');
+            if (pageAktif) {
+                const tabAktif = pageAktif.id.replace('page-', '');
+                window.tabStateMemori.scrollPos[tabAktif] = mainEl.scrollTop;
+            }
+        }, { passive: true });
+    }
+});
+
+function hitungSignatureDataAplikasi() {
+    let sumOrdQty = 0, sumOrdUang = 0, maxOrd = "";
+    for (let i = 0; i < orderData.length; i++) {
+        const o = orderData[i];
+        sumOrdQty += Number(o.jumlah) || 0;
+        sumOrdUang += (Number(o.ongkir) || 0) + (Number(o.cicilan1) || 0) + (Number(o.cicilan2) || 0) + (Number(o.cicilan3) || 0) + (Number(o.total) || 0);
+        const t = o.updated_at || o.tanggal || "";
+        if (t > maxOrd) maxOrd = t;
+    }
+    let sumMst = 0, maxMst = "";
+    for (let i = 0; i < masterData.length; i++) {
+        const m = masterData[i];
+        sumMst += (Number(m.harga) || 0) + (Number(m.berat) || 0);
+        const t = m.updated_at || "";
+        if (t > maxMst) maxMst = t;
+    }
+    let maxBuku = "";
+    for (let i = 0; i < pembukuanData.length; i++) {
+        const t = pembukuanData[i].updated_at || "";
+        if (t > maxBuku) maxBuku = t;
+    }
+    return `${orderData.length}:${sumOrdQty}:${sumOrdUang}:${maxOrd}|${masterData.length}:${sumMst}:${maxMst}|${pembukuanData.length}:${maxBuku}`;
+}
+
+function tandaiSemuaTabPerluUpdate(kecualiTab = null) {
+    // Log Aktivitas ('notif') sengaja tidak ikut ditandai agar tidak auto-refresh saat pindah menu
+    ['master', 'rekap', 'slip', 'dashboardsumber'].forEach(tab => {
+        if (tab !== kecualiTab) window.tabStateMemori.perluUpdate[tab] = true;
+    });
+}
+
+function jalankanRenderTabParsial(t, kunciScroll = true, dariSesi = false) {
+    const mainElement = document.querySelector('main');
+    const posisiScroll = kunciScroll && mainElement ? mainElement.scrollTop : (window.tabStateMemori.scrollPos[t] || 0);
+
+    const pulihkanScroll = () => {
+        if (mainElement && posisiScroll > 0) {
+            requestAnimationFrame(() => { mainElement.scrollTop = posisiScroll; });
+            setTimeout(() => {
+                if (document.getElementById('page-' + t)?.classList.contains('active')) {
+                    mainElement.scrollTop = posisiScroll;
+                }
+            }, 120);
+        }
+    };
+
+    if (t === 'master' && typeof renderMaster === 'function') {
+        renderMaster();
+        pulihkanScroll();
+    } else if (t === 'rekap' && typeof renderRekap === 'function') {
+        renderRekap();
+        pulihkanScroll();
+    } else if (t === 'slip' && typeof renderSlip === 'function') {
+        renderSlip();
+        pulihkanScroll();
+    } else if (t === 'dashboardsumber' && typeof renderDashboardSumber === 'function') {
+        Promise.resolve(renderDashboardSumber()).then(pulihkanScroll);
+    } else if (t === 'notif' && typeof window.renderLogAktivitas === 'function') {
+        // Saat kembali dari halaman lain (dariSesi=true), muat instan dari memori lokal tanpa refresh cloud
+        const paksaCloud = !dariSesi && !window.tabStateMemori.sudahRender.notif;
+        Promise.resolve(window.renderLogAktivitas(paksaCloud, dariSesi)).then(pulihkanScroll);
+    }
+
+    window.tabStateMemori.sudahRender[t] = true;
+    window.tabStateMemori.perluUpdate[t] = false;
+}
+
+function simpanMemoriTampilanKeSesi() {
+    try {
+        const mainElement = document.querySelector('main');
+        const pageAktif = document.querySelector('.page.active');
+        const tabAktif = pageAktif ? pageAktif.id.replace('page-', '') : 'order';
+        if (mainElement) window.tabStateMemori.scrollPos[tabAktif] = mainElement.scrollTop;
+
+        const idFilterDisimpan = [
+            'search-customer', 'filter-toko-slip', 'filter-sarimbit-slip', 'filter-tagihan-slip',
+            'search-master', 'filter-berat-master', 'filter-sarimbit-master',
+            'filter-sarimbit-rekap', 'filter-varian-rekap', 'filter-barang-rekap', 'filter-size-rekap', 'export-rekap-filter',
+            'filter-bulan-sumber'
+        ];
+        const filterVals = {};
+        idFilterDisimpan.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) filterVals[id] = el.value;
+        });
+
+        sessionStorage.setItem('sarimbit_memori_tampilan', JSON.stringify({
+            activeTab: tabAktif,
+            scrollPos: window.tabStateMemori.scrollPos,
+            pages: { master: currentPageMaster, slip: currentPageSlip, rekap: currentPageRekap },
+            filters: filterVals
+        }));
+    } catch (e) {}
+}
+
+function pulihkanMemoriTampilanDariSesi() {
+    if (window.sudahPulihkanSesiTampilan) return false;
+    window.sudahPulihkanSesiTampilan = true;
+    const raw = sessionStorage.getItem('sarimbit_memori_tampilan');
+    if (!raw) return false;
+    sessionStorage.removeItem('sarimbit_memori_tampilan');
+
+    try {
+        const saved = JSON.parse(raw);
+        if (saved.scrollPos) window.tabStateMemori.scrollPos = saved.scrollPos;
+        if (saved.pages) {
+            currentPageMaster = saved.pages.master || 1;
+            currentPageSlip = saved.pages.slip || 1;
+            currentPageRekap = saved.pages.rekap || 1;
+        }
+        if (saved.filters) {
+            Object.keys(saved.filters).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = saved.filters[id];
+            });
+            if (typeof updateRekapOptions === 'function') updateRekapOptions();
+            if (typeof window.sinkronisasiUIFilterSlip === 'function') window.sinkronisasiUIFilterSlip();
+        }
+        if (saved.activeTab && saved.activeTab !== 'order') {
+            switchTab(saved.activeTab, { dariSesi: true });
+            return true;
+        } else if (saved.scrollPos && saved.scrollPos.order) {
+            const mainEl = document.querySelector('main');
+            if (mainEl) requestAnimationFrame(() => { mainEl.scrollTop = saved.scrollPos.order; });
+        }
+    } catch (e) {}
+    return false;
+}
+
+// FUNGSI TRANSISI PINDAH FILE HTML (SIMPAN MENU & SCROLL TERAKHIR SEBELUM KELUAR)
 function pindahHalaman(url) {
+    simpanMemoriTampilanKeSesi();
     document.body.classList.add('fade-keluar');
     setTimeout(() => {
         window.location.href = url;
     }, 450);
 }
 
-// LOGIKA TAB & SIDEBAR
-function switchTab(t) {
-        const newActive = document.getElementById('page-'+t);
-        if (!newActive || newActive.classList.contains('active')) return;
+// LOGIKA TAB & SIDEBAR (TIDAK AUTO-REFRESH & KEMBALIKAN POSISI SCROLL TERAKHIR)
+function switchTab(t, opsi = {}) {
+    const newActive = document.getElementById('page-' + t);
+    if (!newActive || newActive.classList.contains('active')) return;
 
-        // Reset tombol navigasi
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link')); 
-        if(document.getElementById('nav-'+t)) document.getElementById('nav-'+t).classList.add('active-link'); 
-        
-        const sidebar = document.getElementById('main-sidebar');
-        if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
-            toggleSidebar();
-        }
+    const mainElement = document.querySelector('main');
 
-       // Sembunyikan semua halaman seketika agar tidak terjadi bug tumpang tindih
-       document.querySelectorAll('.page').forEach(p => {
-            p.classList.remove('active');
-        });
-        
-        // Pengaman: Hilangkan tombol simpan melayang jika admin berpindah menu
-        const wadahSimpan = document.getElementById('wadah-simpan-pesanan');
-        if (wadahSimpan) {
-            if (t !== 'order') wadahSimpan.style.display = 'none';
-            else wadahSimpan.style.display = 'flex';
-        }
-        
-        // Munculkan halaman target secara instan agar animasi CSS langsung berjalan tanpa delay
-        newActive.classList.add('active');
-        
-        // Reset posisi scroll ke paling atas seketika
-        const mainElement = document.querySelector('main');
-        if(mainElement) mainElement.scrollTop = 0;
-
-        // ==============================================================
-        // OBAT ANTI NGE-LAG (JEDA NAFAS BROWSER)
-        // ==============================================================
-        // Tunda kalkulasi tabel yang sangat berat selama 250 milidetik (0.25 detik).
-        // Ini memberi waktu kepada browser untuk "melukis" animasi perpindahan menu 
-        // terlebih dahulu sampai selesai dengan sangat mulus.
-        setTimeout(() => {
-            // Eksekusi render data sesuai menu setelah animasi selesai
-            if(t === 'master') renderMaster(); 
-            if(t === 'rekap') renderRekap(); 
-            if(t === 'slip') renderSlip(); 
-            if(t === 'dashboardsumber') renderDashboardSumber();
-        }, 250);
+    // 1. Simpan posisi scroll menu yang sedang ditinggalkan
+    const pageLama = document.querySelector('.page.active');
+    if (pageLama && mainElement) {
+        const tabLama = pageLama.id.replace('page-', '');
+        window.tabStateMemori.scrollPos[tabLama] = mainElement.scrollTop;
     }
+
+    // Reset tombol navigasi
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
+    if (document.getElementById('nav-' + t)) document.getElementById('nav-' + t).classList.add('active-link');
+
+    const sidebar = document.getElementById('main-sidebar');
+    if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+        toggleSidebar();
+    }
+
+    // Sembunyikan halaman lama & tampilkan halaman target tanpa membongkar isi layarnya
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+    const wadahSimpan = document.getElementById('wadah-simpan-pesanan');
+    if (wadahSimpan) {
+        if (t !== 'order') wadahSimpan.style.display = 'none';
+        else wadahSimpan.style.display = 'flex';
+    }
+
+    newActive.classList.add('active');
+
+    // 2. Pulihkan posisi scroll terakhir milik menu tujuan secara instan
+    const posisiTujuan = window.tabStateMemori.scrollPos[t] || 0;
+    if (mainElement) {
+        mainElement.scrollTop = posisiTujuan;
+        requestAnimationFrame(() => { mainElement.scrollTop = posisiTujuan; });
+    }
+
+    // 3. Hanya render jika menu BELUM PERNAH dibuka ATAU ada perubahan data (kecuali 'notif' yang manual via tombol Sinkron)
+    const belumDimuat = !window.tabStateMemori.sudahRender[t];
+    const adaPembaruan = (t !== 'notif') && !!window.tabStateMemori.perluUpdate[t];
+
+    if (belumDimuat || adaPembaruan) {
+        setTimeout(() => {
+            if (!newActive.classList.contains('active')) return;
+            jalankanRenderTabParsial(t, false, !!opsi.dariSesi);
+        }, belumDimuat ? 120 : 40);
+    }
+}
     function toggleSidebar() { 
         const sidebar = document.getElementById('main-sidebar'); const overlay = document.getElementById('sidebar-overlay');
         if (sidebar.classList.contains('-translate-x-full')) { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); } 
@@ -4256,14 +4423,31 @@ function switchTab(t) {
                     });
                 }
                 updateGlobalFilters();
-                
-                // PERBAIKAN ANTI-LAG: Hanya gambar tabel yang sedang aktif dilihat oleh Admin
-                if (document.getElementById('page-master')?.classList.contains('active')) renderMaster();
-                else if (document.getElementById('page-rekap')?.classList.contains('active')) renderRekap();
-                else if (document.getElementById('page-slip')?.classList.contains('active')) renderSlip();
-                
-                if (isKeepScroll) { setTimeout(() => window.scrollTo({ top: currentScrollPos, behavior: 'instant' }), 150); }
-                console.log("✅ Data UI Berhasil Dimuat");
+
+// Pulihkan tab, filter, dan posisi scroll jika baru kembali dari halaman lain (misal Pembukuan)
+const dipulihkanDariSesi = pulihkanMemoriTampilanDariSesi();
+
+// Cek apakah ada perubahan data dibanding tampilan sebelumnya
+const sigBaru = hitungSignatureDataAplikasi();
+const adaPerubahanData = (sigBaru !== window.tabStateMemori.signatureData);
+window.tabStateMemori.signatureData = sigBaru;
+
+const pageAktif = document.querySelector('.page.active');
+const tabAktif = pageAktif ? pageAktif.id.replace('page-', '') : 'order';
+
+if (adaPerubahanData) {
+    tandaiSemuaTabPerluUpdate(tabAktif);
+}
+
+// Perbarui secara parsial HANYA jika data benar-benar berubah (tanpa menggeser scroll)
+if (!dipulihkanDariSesi && ['master', 'rekap', 'slip', 'dashboardsumber'].includes(tabAktif)) {
+    if (adaPerubahanData || !window.tabStateMemori.sudahRender[tabAktif]) {
+        jalankanRenderTabParsial(tabAktif, true, false);
+    }
+}
+
+if (isKeepScroll) { setTimeout(() => window.scrollTo({ top: currentScrollPos, behavior: 'instant' }), 150); }
+console.log("✅ Data UI Berhasil Dimuat");
 
                 // ==============================================================
                 // PEMANGGILAN SMART ALARM (HANYA JALAN 1x SAAT PERTAMA KALI LOAD)
@@ -4874,27 +5058,66 @@ async function handleOrderSubmit(e) {
             );
         }
     }
+    // HELPER UNIVERSAL ANTI-BUG FILTER (Kebal spasi ujung, spasi ganda, Enter, kutip, besar/kecil)
+    window.normFilterTeks = function(val) {
+        return String(val || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    };
+
+    window.cocokFilterTeks = function(dataVal, filterVal) {
+        if (!filterVal) return true;
+        return window.normFilterTeks(dataVal) === window.normFilterTeks(filterVal);
+    };
+
+    window.isiOpsiSelectAman = function(elOrId, daftarNilai, labelDefault, nilaiAktif) {
+        const sel = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+        if (!sel) return '';
+
+        const mapUnik = new Map();
+        (daftarNilai || []).forEach(v => {
+            const teksRapi = String(v || '').replace(/\s+/g, ' ').trim();
+            const kunci = teksRapi.toLowerCase();
+            if (kunci && !mapUnik.has(kunci)) {
+                mapUnik.set(kunci, teksRapi);
+            }
+        });
+
+        const sorted = Array.from(mapUnik.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+        const kunciAktif = window.normFilterTeks(nilaiAktif);
+
+        sel.innerHTML = '';
+        const optDef = document.createElement('option');
+        optDef.value = '';
+        optDef.textContent = labelDefault;
+        sel.appendChild(optDef);
+
+        let valTerpilih = '';
+        sorted.forEach(([kunci, teksRapi]) => {
+            const opt = document.createElement('option');
+            opt.value = teksRapi;
+            opt.textContent = teksRapi;
+            if (kunciAktif && kunci === kunciAktif) valTerpilih = teksRapi;
+            sel.appendChild(opt);
+        });
+
+        sel.value = valTerpilih;
+        return valTerpilih;
+    };
+
     function updateGlobalFilters() {
-        const sarimbitsOrder = [...new Set(orderData.map(o => o.sarimbit))].sort();
-        const sarimbitsMaster = [...new Set(masterData.map(m => m.sarimbit))].sort();
-        const valRekap = document.getElementById('filter-sarimbit-rekap') ? document.getElementById('filter-sarimbit-rekap').value : "";
-        const valMaster = document.getElementById('filter-sarimbit-master') ? document.getElementById('filter-sarimbit-master').value : "";
-        const valSlip = document.getElementById('filter-sarimbit-slip') ? document.getElementById('filter-sarimbit-slip').value : "";
+        const sarimbitsOrder = orderData.map(o => o.sarimbit);
+        const sarimbitsMaster = masterData.map(m => m.sarimbit);
 
         const sRekap = document.getElementById('filter-sarimbit-rekap');
-        if(sRekap) { sRekap.innerHTML = `<option value="">Sarimbit</option>` + sarimbitsOrder.map(s => `<option value="${s}">${s}</option>`).join(''); sRekap.value = valRekap; }
+        if (sRekap) isiOpsiSelectAman(sRekap, sarimbitsOrder, "Sarimbit", sRekap.value);
 
         const fMaster = document.getElementById('filter-sarimbit-master');
-        if(fMaster) { fMaster.innerHTML = `<option value="">Sarimbit</option>` + sarimbitsMaster.map(s => `<option value="${s}">${s}</option>`).join(''); fMaster.value = valMaster; }
+        if (fMaster) isiOpsiSelectAman(fMaster, sarimbitsMaster, "Sarimbit", fMaster.value);
 
         const sSlip = document.getElementById('filter-sarimbit-slip');
-        if(sSlip) { sSlip.innerHTML = `<option value="">Sarimbit</option>` + sarimbitsOrder.map(s => `<option value="${s}">${s}</option>`).join(''); sSlip.value = valSlip; }
+        if (sSlip) isiOpsiSelectAman(sSlip, sarimbitsOrder, "Sarimbit", sSlip.value);
 
-        const optionsHTML = `<option value="">-- Sarimbit --</option>` + sarimbitsMaster.map(s => `<option value="${s}">${s}</option>`).join('');
         document.querySelectorAll('.row-filter-sarimbit').forEach(sel => {
-            const currentVal = sel.value; 
-            sel.innerHTML = optionsHTML;
-            sel.value = currentVal;
+            isiOpsiSelectAman(sel, sarimbitsMaster, "-- Sarimbit --", sel.value);
         });
         updateRekapOptions();
     }
@@ -4944,25 +5167,12 @@ async function handleOrderSubmit(e) {
         dataTersaring.forEach(m => sarimbitTersedia.add(m.sarimbit));
         
         if (filterSarimbitEl) {
-            const tempVal = filterSarimbitEl.value; 
-            let optionsHTML = `<option value="">Sarimbit</option>`;
-            [...sarimbitTersedia].sort().forEach(s => {
-                optionsHTML += `<option value="${s}">${s}</option>`;
-            });
-            filterSarimbitEl.innerHTML = optionsHTML;
-            
-            if (sarimbitTersedia.has(tempVal)) {
-                filterSarimbitEl.value = tempVal;
-                filterSarimbit = tempVal;
-            } else {
-                filterSarimbitEl.value = "";
-                filterSarimbit = "";
-            }
+            filterSarimbit = isiOpsiSelectAman(filterSarimbitEl, [...sarimbitTersedia], "Sarimbit", filterSarimbitEl.value);
         }
 
         // 3. Terapkan filter Sarimbit untuk tampilan tabel
         if (filterSarimbit) {
-            dataTersaring = dataTersaring.filter(m => m.sarimbit === filterSarimbit);
+            dataTersaring = dataTersaring.filter(m => cocokFilterTeks(m.sarimbit, filterSarimbit));
         }
         
        // --- LOGIKA MUNCUL/HILANG TOMBOL HAPUS MASSAL ---
@@ -4999,14 +5209,16 @@ async function handleOrderSubmit(e) {
             return;
         }
 
-        tbody.innerHTML = paginatedData.map(m => {
-            // Beri tanda visual merah yang berkedip halus jika gramasi masih 0
+       // PEMBARUAN PARSIAL MASTER BARANG (Hanya perbarui baris yang berubah tanpa mereset scroll)
+       const idTerpakaiMaster = new Set();
+        const urutanRowMaster = [];
+        let htmlBaruMaster = '';
+
+        const buatIsiSelMaster = (m) => {
             const gramBadge = Number(m.berat || m.Berat || 0) === 0 
                 ? `<span class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded border border-rose-200 animate-pulse shadow-sm">0 gr</span>` 
                 : `${m.berat} gr`;
-                
-                return `
-            <tr>
+            return `
                 <td class="px-2.5 py-2.5 md:px-5 md:py-3.5 border-b border-slate-100 align-top">
                     <div class="font-normal text-slate-800 text-[11px] md:text-[13px] tracking-[0.01em] leading-snug mb-0.5">${escapeHTML(m.sarimbit)}</div>
                     <div class="text-[9px] md:text-[10.5px] text-blue-600/80 font-normal uppercase tracking-wider">${escapeHTML(m.pusat)}</div>
@@ -5027,9 +5239,46 @@ async function handleOrderSubmit(e) {
                     <button onclick="editMaster('${escapeHTML(m.pusat)}', '${escapeHTML(m.sarimbit)}', '${escapeHTML(m.barang)}', '${escapeHTML(m.varian)}', '${escapeHTML(m.size)}', ${m.harga}, ${m.berat})" class="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-600 rounded-full hover:from-orange-500 hover:to-orange-600 hover:text-white transition-all border border-white shadow-[0_4px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_12px_rgba(234,88,12,0.4)] active:scale-95 flex items-center justify-center mx-auto group">
                         <i class="fa-solid fa-pen text-[9.5px] md:text-[11px] group-hover:scale-110 transition-transform"></i>
                     </button>
-                </td>
-            </tr>
-        `}).join('');
+                </td>`;
+        };
+
+        paginatedData.forEach((m, idx) => {
+            const sig = `${m.pusat || ''}|${m.sarimbit || ''}|${m.barang || ''}|${m.varian || ''}|${m.size || ''}|${Number(m.harga) || 0}|${Number(m.berat) || 0}`;
+            let rowId = `master-row-${m.id ? String(m.id).replace(/[^a-zA-Z0-9_-]/g, '') : idx}`;
+            if (idTerpakaiMaster.has(rowId)) rowId = `${rowId}-${idx}`;
+            idTerpakaiMaster.add(rowId);
+            urutanRowMaster.push(rowId);
+
+            const rowAda = document.getElementById(rowId);
+            if (rowAda) {
+                if (rowAda.dataset.sig !== sig) {
+                    rowAda.innerHTML = buatIsiSelMaster(m);
+                    rowAda.dataset.sig = sig;
+                    rowAda.classList.add('bg-blue-50', 'transition-colors', 'duration-500');
+                    setTimeout(() => rowAda.classList.remove('bg-blue-50'), 1500);
+                }
+            } else {
+                htmlBaruMaster += `<tr id="${rowId}" data-sig="${escapeHTML(sig)}">${buatIsiSelMaster(m)}</tr>`;
+            }
+        });
+
+        Array.from(tbody.children).forEach(tr => {
+            if (!tr.id || !idTerpakaiMaster.has(tr.id)) tr.remove();
+        });
+        if (htmlBaruMaster) tbody.insertAdjacentHTML('beforeend', htmlBaruMaster);
+
+        let prevMasterRow = null;
+        urutanRowMaster.forEach(rowId => {
+            const r = document.getElementById(rowId);
+            if (r) {
+                if (!prevMasterRow) {
+                    if (tbody.firstChild !== r) tbody.insertBefore(r, tbody.firstChild);
+                } else if (prevMasterRow.nextSibling !== r) {
+                    tbody.insertBefore(r, prevMasterRow.nextSibling);
+                }
+                prevMasterRow = r;
+            }
+        });
         
         renderPaginationControls(totalItems, totalPages);
         
@@ -5163,21 +5412,9 @@ async function handleOrderSubmit(e) {
             sarimbitTersedia.add(o.sarimbit);
         });
 
-        // 3. Susun ulang pilihan Dropdown Sarimbit secara cerdas
-        if (filterSarimbitEl) {
-            const tempVal = filterSarimbitEl.value; 
-            let optionsHTML = `<option value="">Sarimbit</option>`;
-            [...sarimbitTersedia].sort().forEach(s => {
-                optionsHTML += `<option value="${s}">${s}</option>`;
-            });
-            filterSarimbitEl.innerHTML = optionsHTML;
-            if (sarimbitTersedia.has(tempVal)) {
-                filterSarimbitEl.value = tempVal;
-                filterSarimbit = tempVal;
-            } else {
-                filterSarimbitEl.value = "";
-                filterSarimbit = "";
-            }
+       // 3. Susun ulang pilihan Dropdown Sarimbit secara cerdas (kebal spasi/karakter khusus)
+       if (filterSarimbitEl) {
+            filterSarimbit = isiOpsiSelectAman(filterSarimbitEl, [...sarimbitTersedia], "Sarimbit", filterSarimbitEl.value);
         }
         // =========================================================
 
@@ -5206,7 +5443,7 @@ async function handleOrderSubmit(e) {
             const cocokNama = o.customer.toLowerCase().includes(search);
             const cocokSarimbit = o.sarimbit.toLowerCase().includes(search);
             if (search && !cocokNama && !cocokSarimbit) return;
-            if (filterSarimbit && o.sarimbit !== filterSarimbit) return;
+            if (filterSarimbit && !cocokFilterTeks(o.sarimbit, filterSarimbit)) return;
             if (filterToko && o.toko !== filterToko) return;
             if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
 
@@ -5551,10 +5788,10 @@ async function handleOrderSubmit(e) {
                 if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
                 if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
             }
-            if(fSarimbit && o.sarimbit !== fSarimbit) return;
-            if(fVarian && o.varian !== fVarian) return;
-            if(fBarang && o.barang !== fBarang) return;
-            if(fSize && o.size !== fSize) return; 
+            if (fSarimbit && !cocokFilterTeks(o.sarimbit, fSarimbit)) return;
+         if (fVarian && !cocokFilterTeks(o.varian, fVarian)) return;
+         if (fBarang && !cocokFilterTeks(o.barang, fBarang)) return;
+         if (fSize && !cocokFilterTeks(o.size, fSize)) return;
 
             const key = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
             if (!summary[key]) summary[key] = { total: 0 };
@@ -5758,13 +5995,13 @@ async function handleOrderSubmit(e) {
     function updateRekapOptions() { 
         const fTglMulai = document.getElementById('filter-tgl-mulai-rekap').value;
         const fTglAkhir = document.getElementById('filter-tgl-akhir-rekap').value;
-        const sVal = document.getElementById('filter-sarimbit-rekap').value; 
-        const vVal = document.getElementById('filter-varian-rekap').value; 
-        const bVal = document.getElementById('filter-barang-rekap').value;
+        const sValRaw = document.getElementById('filter-sarimbit-rekap').value; 
+        const vValRaw = document.getElementById('filter-varian-rekap').value; 
+        const bValRaw = document.getElementById('filter-barang-rekap').value;
+        const szValRaw = document.getElementById('filter-size-rekap').value;
         
         let filtered = orderData;
         
-        // 1. Potong data berdasarkan rentang tanggal terlebih dahulu
         if (fTglMulai || fTglAkhir) {
             filtered = filtered.filter(o => {
                 const tglOrder = new Date(o.tanggal); 
@@ -5774,30 +6011,19 @@ async function handleOrderSubmit(e) {
             });
         }
         
-        // 2. Update opsi Sarimbit
-        // KUNCI PERBAIKAN: .filter(x => x && String(x).trim() !== "") digunakan untuk MEMBUNUH data kosong hantu!
-        const sarimbits = [...new Set(filtered.map(o => o.sarimbit))].filter(x => x && String(x).trim() !== "").sort();
-        updateSelectElement('filter-sarimbit-rekap', sarimbits, "Sarimbit", sVal);
-        
-        // 3. Lanjutkan filter Sarimbit untuk opsi Varian
-        if (sVal) filtered = filtered.filter(o => o.sarimbit === sVal);
-        const varians = [...new Set(filtered.map(o => o.varian))].filter(x => x && String(x).trim() !== "").sort();
-        updateSelectElement('filter-varian-rekap', varians, "Varian", vVal);
-        
-        // 4. Lanjutkan filter Varian untuk opsi Barang
-        if (vVal) filtered = filtered.filter(o => o.varian === vVal);
-        const barangs = [...new Set(filtered.map(o => o.barang))].filter(x => x && String(x).trim() !== "").sort();
-        updateSelectElement('filter-barang-rekap', barangs, "Nama Barang", bVal);
-        
-        // 5. Lanjutkan filter Barang untuk opsi Size
-        if (bVal) filtered = filtered.filter(o => o.barang === bVal);
-        const sizes = [...new Set(filtered.map(o => o.size))].filter(x => x && String(x).trim() !== "").sort();
-        updateSelectElement('filter-size-rekap', sizes, "Size", document.getElementById('filter-size-rekap').value);
+        const sVal = isiOpsiSelectAman('filter-sarimbit-rekap', filtered.map(o => o.sarimbit), "Sarimbit", sValRaw);
+        if (sVal) filtered = filtered.filter(o => cocokFilterTeks(o.sarimbit, sVal));
+
+        const vVal = isiOpsiSelectAman('filter-varian-rekap', filtered.map(o => o.varian), "Varian", vValRaw);
+        if (vVal) filtered = filtered.filter(o => cocokFilterTeks(o.varian, vVal));
+
+        const bVal = isiOpsiSelectAman('filter-barang-rekap', filtered.map(o => o.barang), "Nama Barang", bValRaw);
+        if (bVal) filtered = filtered.filter(o => cocokFilterTeks(o.barang, bVal));
+
+        isiOpsiSelectAman('filter-size-rekap', filtered.map(o => o.size), "Size", szValRaw);
     }
     function updateSelectElement(id, options, defaultText, currentValue) {
-        const el = document.getElementById(id); let html = `<option value="">${defaultText}</option>`;
-        options.forEach(opt => { const selected = opt === currentValue ? 'selected' : ''; html += `<option value="${opt}" ${selected}>${opt}</option>`; });
-        el.innerHTML = html;
+        return isiOpsiSelectAman(id, options, defaultText, currentValue);
     }
 
     function renderPaginationControls(totalItems, totalPages) {
@@ -5834,7 +6060,7 @@ async function handleOrderSubmit(e) {
         let filtered = masterData.filter(m => {
             const cocokSearch = m.barang.toLowerCase().includes(search) || m.sarimbit.toLowerCase().includes(search);
             if (search && !cocokSearch) return false;
-            if (filter && m.sarimbit !== filter) return false;
+            if (filter && !cocokFilterTeks(m.sarimbit, filter)) return false;
             
             const berat = Number(m.berat || m.Berat || 0);
             if (filterBerat === 'nol' && berat > 0) return false;
@@ -5918,10 +6144,10 @@ async function handleOrderSubmit(e) {
                 if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
                 if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
             }
-            if(fSarimbit && o.sarimbit !== fSarimbit) return; 
-            if(fVarian && o.varian !== fVarian) return; 
-            if(fBarang && o.barang !== fBarang) return; 
-            if(fSize && o.size !== fSize) return; 
+            if (fSarimbit && !cocokFilterTeks(o.sarimbit, fSarimbit)) return;
+            if (fVarian && !cocokFilterTeks(o.varian, fVarian)) return;
+            if (fBarang && !cocokFilterTeks(o.barang, fBarang)) return;
+            if (fSize && !cocokFilterTeks(o.size, fSize)) return;
             
             const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
             
@@ -6045,8 +6271,7 @@ async function handleOrderSubmit(e) {
         
         orderData.forEach(o => {
             if (fTglMulai || fTglAkhir) { const tglOrder = new Date(o.tanggal); if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; }
-            if(fSarimbit && o.sarimbit !== fSarimbit) return; if(fVarian && o.varian !== fVarian) return; if(fBarang && o.barang !== fBarang) return; if(fSize && o.size !== fSize) return;
-         
+            if (fSarimbit && !cocokFilterTeks(o.sarimbit, fSarimbit)) return; if (fVarian && !cocokFilterTeks(o.varian, fVarian)) return; if (fBarang && !cocokFilterTeks(o.barang, fBarang)) return; if (fSize && !cocokFilterTeks(o.size, fSize)) return;
             const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
             summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
         });
@@ -6117,7 +6342,7 @@ async function handleOrderSubmit(e) {
             const namaCust = (o.customer || "").toLowerCase(); const sarimbitData = (o.sarimbit || "").toLowerCase(); const tokoData = (o.toko || "");
             const cocokSearch = namaCust.includes(search) || sarimbitData.includes(search);
             const cocokToko = (filterToko === "Semua" || filterToko === "") || (tokoData === filterToko);
-            const cocokSarimbitFilter = (filterSarimbit === "Semua" || filterSarimbit === "") || (sarimbitData === filterSarimbit.toLowerCase());
+            const cocokSarimbitFilter = (filterSarimbit === "Semua" || filterSarimbit === "") || cocokFilterTeks(o.sarimbit, filterSarimbit);
             const passAdv = advFilter ? evaluasiFilterLanjutan(o, advFilter) : true;
             return cocokSearch && cocokToko && cocokSarimbitFilter && passAdv;
         });
@@ -6585,7 +6810,7 @@ async function handleOrderSubmit(e) {
             if (search && !cocokNama && !cocokSarimbit && !cocokTelp) return;
             
             if (filterToko && o.toko !== filterToko) return; 
-            if (filter && o.sarimbit !== filter) return;
+            if (filter && !cocokFilterTeks(o.sarimbit, filter)) return;
             if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             
             const rawId = (o.idcustomer || o.idCustomer || "").toString().trim(); 
@@ -6743,7 +6968,7 @@ async function handleOrderSubmit(e) {
             if (search && !cocokNama && !cocokSarimbit && !cocokTelp) return;
             
             if (filterToko && o.toko !== filterToko) return; 
-            if (filter && o.sarimbit !== filter) return;
+            if (filter && !cocokFilterTeks(o.sarimbit, filter)) return;
             if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             
             const rawId = (o.idcustomer || o.idCustomer || "").toString().trim(); 
@@ -6824,7 +7049,8 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             const cocokNama = (o.customer || "").toLowerCase().includes(search); const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
             const cocokTelp = (o.telepon || "").includes(search);
             if (search && !cocokNama && !cocokSarimbit && !cocokTelp) return;
-            if (filterToko && o.toko !== filterToko) return; if (filter && o.sarimbit !== filter) return;
+            if (filterToko && o.toko !== filterToko) return; 
+            if (filter && !cocokFilterTeks(o.sarimbit, filter)) return;
             if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
             const rawId = (o.idcustomer || o.idCustomer || "").toString().trim(); const cleanName = o.customer.toString().toLowerCase().replace(/\s+/g, ' ').trim(); const idUnik = rawId !== "" ? rawId : "ID_LAMA_" + cleanName;
             if (!groups[idUnik]) {
@@ -6980,7 +7206,7 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
         showToast("⏳ Mengunci Omset & Qty ke Pembukuan...");
         
         try {
-            const orderTarget = orderData.filter(o => o.sarimbit === fSarimbit);
+            const orderTarget = orderData.filter(o => cocokFilterTeks(o.sarimbit, fSarimbit));
             const totalQtyTerjual = orderTarget.reduce((sum, o) => sum + Number(o.jumlah || 0), 0);
             
             let totalOmsetTerjual = 0;
@@ -7005,8 +7231,8 @@ const ws = XLSX.utils.aoa_to_sheet(excelData);
             window.DatabaseAPI.prosesArsipSarimbit(
                 archivePayload, fSarimbit,
                 () => { // onSuccess
-                    orderData = orderData.filter(o => o.sarimbit !== fSarimbit);
-                    masterData = masterData.filter(m => m.sarimbit !== fSarimbit);
+                    orderData = orderData.filter(o => !cocokFilterTeks(o.sarimbit, fSarimbit));
+                    masterData = masterData.filter(m => !cocokFilterTeks(m.sarimbit, fSarimbit));
 
                     showToast(`✅ Sukses! Orderan disembunyikan. Target Omset aman di Dashboard Pembukuan.`);
                     appSettings.allowArchive = false;
@@ -7419,10 +7645,10 @@ window.renderDataAuditKeModal = function() {
             if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
             if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
         }
-        if(fSarimbit && o.sarimbit !== fSarimbit) return; 
-        if(fVarian && o.varian !== fVarian) return; 
-        if(fBarang && o.barang !== fBarang) return; 
-        if(fSize && o.size !== fSize) return;
+        if (fSarimbit && !cocokFilterTeks(o.sarimbit, fSarimbit)) return;
+     if (fVarian && !cocokFilterTeks(o.varian, fVarian)) return;
+     if (fBarang && !cocokFilterTeks(o.barang, fBarang)) return;
+     if (fSize && !cocokFilterTeks(o.size, fSize)) return;
      
         const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
         summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
@@ -7603,10 +7829,10 @@ window.exportCeklisPDF = function() {
             if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
             if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
         }
-        if(fSarimbit && o.sarimbit !== fSarimbit) return; 
-        if(fVarian && o.varian !== fVarian) return; 
-        if(fBarang && o.barang !== fBarang) return; 
-        if(fSize && o.size !== fSize) return;
+        if (fSarimbit && !cocokFilterTeks(o.sarimbit, fSarimbit)) return;
+     if (fVarian && !cocokFilterTeks(o.varian, fVarian)) return;
+     if (fBarang && !cocokFilterTeks(o.barang, fBarang)) return;
+     if (fSize && !cocokFilterTeks(o.size, fSize)) return;
      
         const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
         summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
@@ -7676,9 +7902,7 @@ window.exportCeklisPDF = function() {
     
     const fileName = `CEKLIS_PABRIK_${fSarimbit || "SEMUA"}.pdf`;
     if (window.__TAURI__) {
-        const arrayBuffer = doc.output('arraybuffer');
-        const uint8Array = new Uint8Array(arrayBuffer);
-        window.simpanKeTauriData(uint8Array, fileName);
+        window.simpanKeTauriData(doc.output('blob'), fileName);
     } else {
         window.saveAs(doc.output('blob'), fileName);
         showToast("✅ PDF Ceklis Pabrik Berhasil Diunduh!");
@@ -7717,10 +7941,10 @@ window.setorSemuaFilter = function() {
             if (fTglMulai && tglOrder < new Date(fTglMulai).setHours(0,0,0,0)) return; 
             if (fTglAkhir && tglOrder > new Date(fTglAkhir).setHours(23,59,59,999)) return; 
         }
-        if(fSarimbit && o.sarimbit !== fSarimbit) return;
-        if(fVarian && o.varian !== fVarian) return;
-        if(fBarang && o.barang !== fBarang) return;
-        if(fSize && o.size !== fSize) return;
+        if (fSarimbit && !cocokFilterTeks(o.sarimbit, fSarimbit)) return;
+     if (fVarian && !cocokFilterTeks(o.varian, fVarian)) return;
+     if (fBarang && !cocokFilterTeks(o.barang, fBarang)) return;
+     if (fSize && !cocokFilterTeks(o.size, fSize)) return;
 
         const keyLengkap = `${o.sarimbit} - ${o.barang}||${o.varian}||${o.size}`;
         summary[keyLengkap] = (summary[keyLengkap] || 0) + Number(o.jumlah);
@@ -8857,7 +9081,7 @@ function bukaModalPencarian(btn) {
 }
 
 function cariProdukBesar() {
-    const query = document.getElementById('inputPencarianBesar').value.toLowerCase();
+    const query = normFilterTeks(document.getElementById('inputPencarianBesar').value);
     const filterSarimbit = document.getElementById('filterSarimbitModal').value;
     const filterBarangEl = document.getElementById('filterBarangModal');
     const filterWarnaEl = document.getElementById('filterWarnaModal');
@@ -8869,46 +9093,24 @@ function cariProdukBesar() {
 
     if (hasilSaringanAwal.length > 0) {
         hasilSaringanAwal = hasilSaringanAwal.filter(m => {
-            if (filterSarimbit && m.sarimbit !== filterSarimbit) return false;
+            if (filterSarimbit && !cocokFilterTeks(m.sarimbit, filterSarimbit)) return false;
             const namaLengkap = `${m.pusat} ${m.sarimbit} ${m.barang} ${m.varian} ${m.size}`.toLowerCase();
             return namaLengkap.includes(query);
         });
     }
 
-    if (hasilSaringanAwal.length > 0) {
-        const barangTersedia = [...new Set(hasilSaringanAwal.map(m => m.barang))].sort();
-        let opsiBarang = `<option value="">-- Barang --</option>`;
-        barangTersedia.forEach(b => { opsiBarang += `<option value="${b}">${b}</option>`; });
-        
-        filterBarangEl.innerHTML = opsiBarang;
-        if (barangTersedia.includes(barangAktif)) filterBarangEl.value = barangAktif;
-        else filterBarangEl.value = "";
-    } else {
-        filterBarangEl.innerHTML = `<option value="">-- Barang --</option>`;
-    }
+    const barangFinal = isiOpsiSelectAman(filterBarangEl, hasilSaringanAwal.map(m => m.barang), '-- Barang --', barangAktif);
 
-    const barangFinal = filterBarangEl.value;
     let saringanWarna = hasilSaringanAwal;
     if (barangFinal) {
-        saringanWarna = saringanWarna.filter(m => m.barang === barangFinal);
+        saringanWarna = saringanWarna.filter(m => cocokFilterTeks(m.barang, barangFinal));
     }
 
-    if (saringanWarna.length > 0) {
-        const warnaTersedia = [...new Set(saringanWarna.map(m => m.varian))].sort();
-        let opsiWarna = `<option value="">-- Warna --</option>`;
-        warnaTersedia.forEach(w => { opsiWarna += `<option value="${w}">${w}</option>`; });
-        
-        filterWarnaEl.innerHTML = opsiWarna;
-        if (warnaTersedia.includes(warnaAktif)) filterWarnaEl.value = warnaAktif;
-        else filterWarnaEl.value = "";
-    } else {
-        filterWarnaEl.innerHTML = `<option value="">-- Warna --</option>`;
-    }
+    const warnaFinal = isiOpsiSelectAman(filterWarnaEl, saringanWarna.map(m => m.varian), '-- Warna --', warnaAktif);
 
-    const warnaFinal = filterWarnaEl.value;
     let hasilRender = saringanWarna;
     if (warnaFinal) {
-        hasilRender = saringanWarna.filter(m => m.varian === warnaFinal);
+        hasilRender = saringanWarna.filter(m => cocokFilterTeks(m.varian, warnaFinal));
     }
 
     renderProdukModal(hasilRender.slice(0, 100));
@@ -9189,8 +9391,8 @@ function pilihProdukModal(metaString) {
             }
         };
     
-        // 5. OVERRIDE: Pop-up Agar Tidak Lupa Ingatan!
-        window.bukaModalPencarian = function(btn) {
+       // 5. OVERRIDE: Pop-up Agar Tidak Lupa Ingatan!
+       window.bukaModalPencarian = function(btn) {
             if(btn) window.rowAktifPencarian = btn.closest('.order-row');
             document.getElementById('modalPencarian').classList.remove('hidden');
             document.getElementById('inputPencarianBesar').value = "";
@@ -9198,11 +9400,6 @@ function pilihProdukModal(metaString) {
             const selectSarimbit = document.getElementById('filterSarimbitModal');
             const selectBarang = document.getElementById('filterBarangModal');
             const selectWarna = document.getElementById('filterWarnaModal');
-            
-            if (typeof masterData !== 'undefined' && masterData && masterData.length > 0) {
-                const listSarimbit = [...new Set(masterData.map(m => m.sarimbit))].sort();
-                selectSarimbit.innerHTML = `<option value="">--  Sarimbit --</option>` + listSarimbit.map(s => `<option value="${s}">${s}</option>`).join('');
-            }
             
             // SCANNER PINTAR: Mencari Sarimbit secara paksa dari semua baris (dari bawah ke atas)
             let sarimbitIngatan = "";
@@ -9214,14 +9411,17 @@ function pilihProdukModal(metaString) {
                     try { 
                         const meta = JSON.parse(inputData.dataset.meta);
                         if (meta && meta.sarimbit) {
-                            sarimbitIngatan = meta.sarimbit; // Ketemu memorinya!
+                            sarimbitIngatan = meta.sarimbit;
                             break; 
                         }
                     } catch(e) {}
                 }
             }
+
+            if (typeof masterData !== 'undefined' && masterData && masterData.length > 0) {
+                isiOpsiSelectAman(selectSarimbit, masterData.map(m => m.sarimbit), '-- Sarimbit --', sarimbitIngatan);
+            }
             
-            selectSarimbit.value = sarimbitIngatan; // Otomatis mengatur dropdown!
             selectBarang.innerHTML = `<option value="">-- Barang --</option>`;
             selectBarang.value = "";
             selectWarna.innerHTML = `<option value="">-- Warna --</option>`;
@@ -9271,7 +9471,7 @@ function pilihProdukModal(metaString) {
             
             const btnFilter = document.querySelector('button[onclick*="modalFilterLanjutan"]');
             if (btnFilter) {
-                btnFilter.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm";
+                btnFilter.className = "h-9 px-3.5 rounded-full text-[10px] font-black text-indigo-600 bg-gradient-to-br from-indigo-50 to-white border border-indigo-200/60 hover:bg-indigo-50 active:scale-95 transition-all flex items-center gap-1.5 shadow-md";
                 btnFilter.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Mereset...`;
             }
             
@@ -9452,22 +9652,10 @@ function pilihProdukModal(metaString) {
                 });
             }
 
-          // Susun ulang pilihan Dropdown Sarimbit secara mandiri
+          // Susun ulang pilihan Dropdown Sarimbit secara mandiri (kebal spasi/karakter khusus)
           if (filterSarimbitEl) {
-                const tempVal = filterSarimbitEl.value; 
-                let optionsHTML = `<option value="">Sarimbit</option>`;
-                [...sarimbitTersedia].sort().forEach(s => {
-                    optionsHTML += `<option value="${s}">${s}</option>`;
-                });
-                filterSarimbitEl.innerHTML = optionsHTML;
-                
-                // Pertahankan pilihan lama jika masih lolos filter extra, jika tidak, reset.
-                if (sarimbitTersedia.has(tempVal)) {
-                    filterSarimbitEl.value = tempVal;
-                } else {
-                    filterSarimbitEl.value = ""; 
-                }
-            }
+              isiOpsiSelectAman(filterSarimbitEl, [...sarimbitTersedia], "Sarimbit", filterSarimbitEl.value);
+          }
             
             // C. LOGIKA PEWARNAAN GAYA SAMSUNG ONE UI
             const warnaMati = ['bg-slate-100', 'text-slate-700', 'hover:bg-slate-200'];
@@ -9975,7 +10163,7 @@ function pilihProdukModal(metaString) {
                 const cocokNama = (o.customer || "").toLowerCase().includes(search);
                 const cocokSarimbit = (o.sarimbit || "").toLowerCase().includes(search);
                 if (search && !cocokNama && !cocokSarimbit) return;
-                if (filterSarimbit && o.sarimbit !== filterSarimbit) return;
+                if (filterSarimbit && !cocokFilterTeks(o.sarimbit, filterSarimbit)) return;
                 if (filterToko && o.toko !== filterToko) return;
                 if (filterTagihan === "aktif" && !listMendesak.has(o.sarimbit)) return;
                 if (advFilter && !evaluasiFilterLanjutan(o, advFilter)) return;
@@ -10054,7 +10242,7 @@ function pilihProdukModal(metaString) {
 
             if (typeof pembukuanData !== 'undefined') {
                 g.sarimbitSet.forEach(namaSrm => {
-                    const buku = pembukuanData.find(b => b.sarimbit === namaSrm);
+                    const buku = pembukuanData.find(b => cocokFilterTeks(b.sarimbit, namaSrm));
                     if (buku) {
                         const tglClose = parsingTglAman(buku.close);
                         const tglReady = parsingTglAman(buku.ready);
@@ -10182,14 +10370,19 @@ function pilihProdukModal(metaString) {
         }
     };
 
-   // 4. FUNGSI MENARIK & MENCETAK DATA LOG DARI CLOUD + LOKAL (SAMSUNG ONE UI DESIGN)
-   window.renderLogAktivitas = async function(paksaCloud = false) {
+  // 4. FUNGSI MENARIK & MENCETAK DATA LOG DARI CLOUD + LOKAL (ANTI-REFRESH & JAGA SCROLL)
+  window.renderLogAktivitas = async function(paksaCloud = false, senyap = false) {
         const wadah = document.getElementById('wadah-list-notif');
         if (!wadah) return;
-        
-        // Reset container ke blok biasa untuk loading
-        wadah.className = "space-y-3.5 custom-scrollbar";
-        wadah.innerHTML = `<div class="py-20 text-center text-slate-400 font-bold animate-pulse"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 block text-amber-500"></i>Mencari jejak aktivitas dari awan...</div>`;
+
+        const mainEl = document.querySelector('main');
+        const scrollSebelum = mainEl ? mainEl.scrollTop : 0;
+
+        // Jangan hapus layar dengan animasi loading jika kartu log sudah tampil di layar
+        if (!senyap && !wadah.dataset.lastLogSig) {
+            wadah.className = "space-y-3.5 custom-scrollbar";
+            wadah.innerHTML = `<div class="py-20 text-center text-slate-400 font-bold animate-pulse"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 block text-amber-500"></i>Mencari jejak aktivitas dari awan...</div>`;
+        }
         
         let dataLokal = [];
         try { dataLokal = await dbLokal.logs.toArray(); } catch(e){}
@@ -10206,14 +10399,21 @@ function pilihProdukModal(metaString) {
                     dataCloud.forEach(l => mapLogs.set(String(l.id), l));
                     dataLokal = Array.from(mapLogs.values());
                     await dbLokal.logs.bulkPut(dataLokal);
-                    if(typeof showToast === 'function') showToast("🔄 Data Log tersinkronisasi.");
+                    if(!senyap && typeof showToast === 'function') showToast("🔄 Data Log tersinkronisasi.");
                 }
             } catch(e) {}
         }
         
         dataLokal.sort((a,b) => new Date(b.time) - new Date(a.time));
         const dataTampil = dataLokal.slice(0, 100);
-        
+
+        // Jika isi log tidak berubah dari yang sudah tampil di layar, biarkan tampilan utuh tanpa refresh
+        const sigLogBaru = dataTampil.map(l => String(l.id)).join(',');
+        if (wadah.dataset.lastLogSig && wadah.dataset.lastLogSig === sigLogBaru) {
+            if (mainEl && scrollSebelum > 0) mainEl.scrollTop = scrollSebelum;
+            return;
+        }
+        wadah.dataset.lastLogSig = sigLogBaru;
         if (dataTampil.length === 0) {
             wadah.innerHTML = `<div class="py-20 text-center text-slate-400 font-bold"><i class="fa-solid fa-bell-slash text-5xl mb-4 block text-slate-300"></i>Belum ada aktivitas tim yang tercatat.</div>`;
             return;
@@ -10518,14 +10718,13 @@ function pilihProdukModal(metaString) {
         }
     };
     
-    // 6. MENGKAITKAN TOMBOL MENU AGAR ME-RENDER LOG AKTIVITAS
-    const fungsiAsliSwitchTabLog = window.switchTab;
-    window.switchTab = function(t) {
-        if(typeof fungsiAsliSwitchTabLog === 'function') fungsiAsliSwitchTabLog(t);
-        if (t === 'notif') {
-            setTimeout(() => { window.renderLogAktivitas(true); }, 250);
+   // 6. SIMPAN MEMORI JIKA ADMIN KLIK TAUTAN HALAMAN LAIN (SEPERTI OTORISASI VVIP)
+   document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (link && !link.getAttribute('href').startsWith('#') && !link.getAttribute('href').startsWith('http')) {
+            if (typeof simpanMemoriTampilanKeSesi === 'function') simpanMemoriTampilanKeSesi();
         }
-    };
+    });
 </script>
 <script>
     // =========================================================================
@@ -10536,7 +10735,8 @@ function pilihProdukModal(metaString) {
         'berat-master', 'sarimbit-master',
         'setor-rekap', 'sarimbit-rekap', 'varian-rekap', 'barang-rekap', 'size-rekap',
         'order-ekspedisi', 'order-sumber', 'order-toko', 'order-diskon',
-        'modal-sarimbit', 'modal-barang', 'modal-warna'
+        'modal-sarimbit', 'modal-barang', 'modal-warna',
+        'stat-chart-sarimbit', 'stat-chart-sumber'
     ];
 
     window.tutupSemuaDropdownFilterSlip = function(kecualiTipe = null) {
@@ -10575,6 +10775,11 @@ function pilihProdukModal(metaString) {
     };
 
     window.pilihCustomFilterSlip = function(tipe, nilai) {
+        let nilaiAsli = nilai;
+        try {
+            nilaiAsli = decodeURIComponent(nilai);
+        } catch (e) {}
+
         const petaIdSelect = {
             'toko': 'filter-toko-slip',
             'sarimbit': 'filter-sarimbit-slip',
@@ -10592,15 +10797,18 @@ function pilihProdukModal(metaString) {
             'order-diskon': 'o-tipe-diskon',
             'modal-sarimbit': 'filterSarimbitModal',
             'modal-barang': 'filterBarangModal',
-            'modal-warna': 'filterWarnaModal'
+            'modal-warna': 'filterWarnaModal',
+            'stat-chart-sarimbit': 'filter-sarimbit-stat-chart',
+            'stat-chart-sumber': 'filter-sumber-stat-chart'
         };
 
         const selectAsli = document.getElementById(petaIdSelect[tipe]);
         if (selectAsli) {
-            selectAsli.value = nilai;
+            const opsiCocok = Array.from(selectAsli.options).find(opt => opt.value === nilaiAsli)
+                || Array.from(selectAsli.options).find(opt => normFilterTeks(opt.value) === normFilterTeks(nilaiAsli));
+            selectAsli.value = opsiCocok ? opsiCocok.value : nilaiAsli;
         }
         window.tutupSemuaDropdownFilterSlip();
-
         if (tipe === 'berat-master' || tipe === 'sarimbit-master') {
             if (typeof window.renderMaster === 'function') window.renderMaster();
         } else if (tipe === 'sarimbit-rekap' || tipe === 'varian-rekap' || tipe === 'barang-rekap') {
@@ -10612,6 +10820,10 @@ function pilihProdukModal(metaString) {
             if (typeof window.updateLiveStruk === 'function') window.updateLiveStruk();
         } else if (tipe.startsWith('modal-')) {
             if (typeof window.cariProdukBesar === 'function') window.cariProdukBesar();
+        } else if (tipe === 'stat-chart-sarimbit') {
+            if (typeof renderGrafikTrenStatistik === 'function') renderGrafikTrenStatistik();
+        } else if (tipe === 'stat-chart-sumber') {
+            if (typeof renderGrafikTrenSumber === 'function') renderGrafikTrenSumber();
         } else {
             if (typeof window.renderSlip === 'function') window.renderSlip();
         }
@@ -10651,43 +10863,43 @@ function pilihProdukModal(metaString) {
             const chev = document.getElementById(idChev);
             if (!sel || !list) return;
 
-            const valAktif = String(sel.value || '').trim();
+            const valAktifKunci = normFilterTeks(sel.value);
             
-            // Penyaring Anti-Duplikat
+            // Penyaring Anti-Duplikat sambil tetap menjaga nilai asli dari <option>
             const nilaiTerpakai = new Set();
             const opsiUnik = [];
             Array.from(sel.options).forEach((opt, idx) => {
-                const valBersih = String(opt.value || '').trim();
-                if (idx > 0 && valBersih === '') return;
-                if (nilaiTerpakai.has(valBersih)) return;
-                nilaiTerpakai.add(valBersih);
-                // Bersihkan strip "-- Sarimbit --" pada opsi bawaan modal
-                const teksBersih = String(opt.text || '').replace(/^--\s*|\s*--$/g, '').trim();
-                opsiUnik.push({ value: valBersih, text: teksBersih });
+                const rawVal = String(opt.value || '');
+                const kunciUnik = normFilterTeks(rawVal);
+                if (idx > 0 && kunciUnik === '') return;
+                if (nilaiTerpakai.has(kunciUnik)) return;
+                nilaiTerpakai.add(kunciUnik);
+                const teksBersih = String(opt.text || '').replace(/^--\s*|\s*--$/g, '').replace(/\s+/g, ' ').trim();
+                opsiUnik.push({ rawValue: rawVal, trimKey: kunciUnik, text: teksBersih });
             });
 
             list.innerHTML = opsiUnik.map(opt => {
-                const nilai = opt.value;
-                const isDef = (nilai === '' || nilai === 'semua' || nilai === 'none');
+                const kunci = opt.trimKey;
+                const isDef = (kunci === '' || kunci === 'semua' || kunci === 'none');
                 const teks = isDef ? teksDefault : opt.text;
-                const aktif = nilai === valAktif;
-                const safeNilai = String(nilai).replace(/'/g, "\\'");
+                const aktif = kunci === valAktifKunci;
+                const encodedNilai = encodeURIComponent(opt.rawValue).replace(/'/g, "%27");
                 const ikon = isDef ? ikonDefault : ikonItem;
                 
-                const warnaBarisAktif = (modeWarna === 'merah' && nilai === 'aktif')
+                const warnaBarisAktif = (modeWarna === 'merah' && kunci === 'aktif')
                     ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-md shadow-rose-500/25'
                     : 'bg-gradient-to-r from-emerald-700 to-emerald-900 text-white shadow-md shadow-emerald-900/25';
 
                 return `
-                <button type="button" onclick="pilihCustomFilterSlip('${tipe}', '${safeNilai}')" class="flex items-center justify-between w-full text-left px-3 py-2.5 rounded-2xl transition-all text-[11px] font-black group ${aktif ? warnaBarisAktif : 'hover:bg-white/90 text-slate-700 hover:text-emerald-800'}">
-                    <span class="flex items-center gap-2.5 truncate"><i class="fa-solid ${ikon} text-[10px] ${aktif ? 'text-white' : 'text-emerald-700'}"></i> <span class="truncate">${teks}</span></span>
+                <button type="button" onclick="pilihCustomFilterSlip('${tipe}', '${encodedNilai}')" class="flex items-center justify-between w-full text-left px-3 py-2.5 rounded-2xl transition-all text-[11px] font-black group ${aktif ? warnaBarisAktif : 'hover:bg-white/90 text-slate-700 hover:text-emerald-800'}">
+                    <span class="flex items-center gap-2.5 truncate"><i class="fa-solid ${ikon} text-[10px] ${aktif ? 'text-white' : 'text-emerald-700'}"></i> <span class="truncate">${escapeHTML(teks)}</span></span>
                     ${aktif ? '<i class="fa-solid fa-check text-[10px] shrink-0 ml-1"></i>' : ''}
                 </button>`;
             }).join('');
 
-            const opsiTerpilih = opsiUnik.find(o => o.value === valAktif);
-            const isDefault = (valAktif === '' || valAktif === 'semua' || valAktif === 'none');
-            if (lbl) lbl.innerText = isDefault ? teksDefault.replace(/^Semua\s+/i, '') : (opsiTerpilih ? opsiTerpilih.text : valAktif);
+            const opsiTerpilih = opsiUnik.find(o => o.trimKey === valAktifKunci);
+            const isDefault = (valAktifKunci === '' || valAktifKunci === 'semua' || valAktifKunci === 'none');
+            if (lbl) lbl.innerText = isDefault ? teksDefault.replace(/^Semua\s+/i, '') : (opsiTerpilih ? opsiTerpilih.text : String(sel.value || '').trim());
             aturWarnaTombol(btn, chev, !isDefault, modeWarna);
         };
 
@@ -10716,6 +10928,9 @@ function pilihProdukModal(metaString) {
         bangunOpsiDariSelect('modal-sarimbit', 'filterSarimbitModal', 'list-custom-modal-sarimbit', 'label-modal-sarimbit', 'btn-custom-modal-sarimbit', 'chevron-modal-sarimbit', 'Semua Sarimbit', 'fa-layer-group', 'fa-shirt', 'hijau');
         bangunOpsiDariSelect('modal-barang', 'filterBarangModal', 'list-custom-modal-barang', 'label-modal-barang', 'btn-custom-modal-barang', 'chevron-modal-barang', 'Semua Barang', 'fa-boxes-stacked', 'fa-tag', 'hijau');
         bangunOpsiDariSelect('modal-warna', 'filterWarnaModal', 'list-custom-modal-warna', 'label-modal-warna', 'btn-custom-modal-warna', 'chevron-modal-warna', 'Semua Warna', 'fa-palette', 'fa-droplet', 'hijau');
+        // --- F. FILTER DIAGRAM STATISTIK (RINCIAN CUSTOMER & SUMBER) ---
+        bangunOpsiDariSelect('stat-chart-sarimbit', 'filter-sarimbit-stat-chart', 'list-custom-stat-chart-sarimbit', 'label-stat-chart-sarimbit', 'btn-custom-stat-chart-sarimbit', 'chevron-stat-chart-sarimbit', 'Semua Sarimbit', 'fa-layer-group', 'fa-shirt', 'hijau');
+        bangunOpsiDariSelect('stat-chart-sumber', 'filter-sumber-stat-chart', 'list-custom-stat-chart-sumber', 'label-stat-chart-sumber', 'btn-custom-stat-chart-sumber', 'chevron-stat-chart-sumber', 'Semua Sumber', 'fa-bullhorn', 'fa-hashtag', 'hijau');
     };
 
     document.addEventListener('DOMContentLoaded', function() {

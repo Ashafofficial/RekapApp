@@ -10,7 +10,9 @@
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => console.log("Pembukuan Offline Aktif!"));
+      if (!window.__TAURI__ && !window.__TAURI_INTERNALS__) {
+        navigator.serviceWorker.register('sw.js').then(() => console.log("Pembukuan Offline Aktif!"));
+      }
     }
   </script>
   
@@ -835,6 +837,17 @@ let rawSummary = [];
         }
     }
 
+    // HELPER KUNCI UNIK: Memisahkan Sarimbit yang namanya sama tapi beda Brand/Pusat
+    function normBuku(v) {
+        return String(v || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+    function buatKunciBuku(sarimbit, brand) {
+        return `${normBuku(sarimbit)}||${normBuku(brand)}`;
+    }
+    function buatIdAmanBuku(sarimbit, brand) {
+        return btoa(encodeURIComponent(buatKunciBuku(sarimbit, brand))).replace(/[^a-zA-Z0-9]/g, '');
+    }
+
     async function muatDataPembukuan() {
         try {
             const orders = await dbLokal.orders.filter(o => o.syncstatus !== -1 && o.isarchived !== true && o.isArchived !== true).toArray();
@@ -843,21 +856,47 @@ let rawSummary = [];
             const olahDanGambarTabel = (bukuData) => {
                 const summaryMap = {};
                 bukuData.forEach(p => {
-                    summaryMap[p.sarimbit] = { totalOrder: Number(p.total) || 0, totalOmset: Number(p.omset) || 0, isPrinted: p.isPrinted || false, isInformed: p.isInformed || false, ...p };
+                    const brandBuku = String(p.brand || p.pusat || '').replace(/\s+/g, ' ').trim();
+                    const sarimbitBuku = String(p.sarimbit || '').replace(/\s+/g, ' ').trim();
+                    const kunci = buatKunciBuku(sarimbitBuku, brandBuku);
+                    const lama = summaryMap[kunci];
+                    const tBaru = new Date(p.updated_at || 0).getTime();
+                    const tLama = lama ? new Date(lama.updated_at || 0).getTime() : -1;
+                    if (!lama || tBaru >= tLama) {
+                        summaryMap[kunci] = {
+                            totalOrder: Number(p.total) || 0,
+                            totalOmset: Number(p.omset) || 0,
+                            isPrinted: p.isPrinted || false,
+                            isInformed: p.isInformed || false,
+                            ...p,
+                            sarimbit: sarimbitBuku || p.sarimbit,
+                            brand: brandBuku
+                        };
+                    }
                 });
 
                 const orderGroup = {};
                 orders.forEach(o => {
-                    if(!orderGroup[o.sarimbit]) orderGroup[o.sarimbit] = {};
-                    if(!orderGroup[o.sarimbit][o.idcustomer]) orderGroup[o.sarimbit][o.idcustomer] = [];
-                    orderGroup[o.sarimbit][o.idcustomer].push(o);
+                    const srmAsli = String(o.sarimbit || '').replace(/\s+/g, ' ').trim();
+                    const brdAsli = String(o.pusat || o.brand || '').replace(/\s+/g, ' ').trim();
+                    const kunci = buatKunciBuku(srmAsli, brdAsli);
+                    const idCust = o.idcustomer || o.idCustomer || o.customer || o.id;
+
+                    if (!orderGroup[kunci]) {
+                        orderGroup[kunci] = { sarimbit: srmAsli, brand: brdAsli, customers: {} };
+                    }
+                    if (!orderGroup[kunci].customers[idCust]) orderGroup[kunci].customers[idCust] = [];
+                    orderGroup[kunci].customers[idCust].push(o);
                 });
 
-                Object.keys(orderGroup).forEach(sarimbit => {
-                    let qtyAktif = 0; let omsetAktif = 0; let namaBrand = ""; let waktuTerbaru = 0; 
-                    Object.values(orderGroup[sarimbit]).forEach(items => {
-                        if (!namaBrand && items[0].pusat) namaBrand = items[0].pusat;
-                        const grossInvoice = items.reduce((sum, it) => sum + ((Number(it.jumlah)||0) * (Number(it.harga)||0)), 0);
+                Object.keys(orderGroup).forEach(kunci => {
+                    const grup = orderGroup[kunci];
+                    const sarimbit = grup.sarimbit;
+                    const namaBrand = grup.brand;
+                    let qtyAktif = 0; let omsetAktif = 0; let waktuTerbaru = 0;
+
+                    Object.values(grup.customers).forEach(items => {
+                        const grossInvoice = items.reduce((sum, it) => sum + ((Number(it.jumlah) || 0) * (Number(it.harga) || 0)), 0);
                         const dTipe = items[0].diskonTipe || 'none'; const dNilai = Number(items[0].diskonNilai) || 0;
                         let diskonInvoice = 0;
                         if (dTipe === 'persen') diskonInvoice = (grossInvoice * dNilai) / 100;
@@ -867,21 +906,36 @@ let rawSummary = [];
 
                         omsetAktif += netInvoice;
                         items.forEach(it => {
-                            qtyAktif += (Number(it.jumlah)||0);
+                            qtyAktif += (Number(it.jumlah) || 0);
                             let tglOrder = new Date(it.tanggal).getTime();
                             if (tglOrder > waktuTerbaru) waktuTerbaru = tglOrder;
                         });
                     });
 
-                    if (!summaryMap[sarimbit]) {
-                        summaryMap[sarimbit] = { sarimbit: sarimbit, isArchived: false, isPrinted: false, isInformed: false, brand: namaBrand, close: "", ready: "", c1: "", c2: "", lunas: "", dp: 0, bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap", waktuPembuatan: waktuTerbaru };
+                    // Jika dulu ada data pembukuan lama yang kolom brand-nya kosong, serap ke pasangan brand pertama
+                    if (!summaryMap[kunci] && namaBrand) {
+                        const kunciTanpaBrand = buatKunciBuku(sarimbit, "");
+                        if (summaryMap[kunciTanpaBrand]) {
+                            summaryMap[kunci] = { ...summaryMap[kunciTanpaBrand], brand: namaBrand };
+                            delete summaryMap[kunciTanpaBrand];
+                        }
                     }
-                    summaryMap[sarimbit].totalOrder = qtyAktif;
-                    summaryMap[sarimbit].totalOmset = omsetAktif;
-                    if (!summaryMap[sarimbit].waktuPembuatan || summaryMap[sarimbit].waktuPembuatan < waktuTerbaru) summaryMap[sarimbit].waktuPembuatan = waktuTerbaru; 
-                    if (!summaryMap[sarimbit].brand) summaryMap[sarimbit].brand = namaBrand;
-                });
 
+                    if (!summaryMap[kunci]) {
+                        summaryMap[kunci] = {
+                            sarimbit: sarimbit, isArchived: false, isPrinted: false, isInformed: false,
+                            brand: namaBrand, close: "", ready: "", c1: "", c2: "", lunas: "",
+                            dp: 0, bayar: 0, statusKirim: "Langsung", statusAlamat: "Belum Lengkap",
+                            waktuPembuatan: waktuTerbaru
+                        };
+                    }
+                    summaryMap[kunci].totalOrder = qtyAktif;
+                    summaryMap[kunci].totalOmset = omsetAktif;
+                    if (!summaryMap[kunci].waktuPembuatan || summaryMap[kunci].waktuPembuatan < waktuTerbaru) {
+                        summaryMap[kunci].waktuPembuatan = waktuTerbaru;
+                    }
+                    if (!summaryMap[kunci].brand) summaryMap[kunci].brand = namaBrand;
+                });
                 let mergedSummary = Object.values(summaryMap);
                 mergedSummary.sort((a, b) => (b.waktuPembuatan || 0) - (a.waktuPembuatan || 0));
                 
@@ -944,9 +998,12 @@ let rawSummary = [];
            
            const timerCari = setInterval(() => {
                percobaanCari++;
-               // Cari id baris tabel yang dienkripsi (Base64) dengan aman
-               const idAmanTarget = btoa(encodeURIComponent(sarimbitBidikan)).replace(/[^a-zA-Z0-9]/g, '');
-               const barisTarget = document.getElementById(`row-${idAmanTarget}`);
+               // Cari baris desktop yang nama sarimbit-nya cocok (tetap ketemu walau id kini pakai Sarimbit + Brand)
+               const barisTarget = Array.from(document.querySelectorAll('.item-row')).find(tr => {
+                   if (tr.id && tr.id.endsWith('-mobile')) return false;
+                   const elNama = tr.querySelector('.sarimbit-name > div');
+                   return elNama && normBuku(elNama.innerText) === normBuku(sarimbitBidikan);
+               });
                
                if (barisTarget) {
                    clearInterval(timerCari);
@@ -1050,12 +1107,13 @@ let rawSummary = [];
         // 1. FUNGSI UPDATE DATA CERDAS (MENGUBAH ISI TANPA MERESET LAYAR)
         // =========================================================================
         const updateRowCerdas = (item, isArsip) => {
-            const idAman = btoa(encodeURIComponent(item.sarimbit || "")).replace(/[^a-zA-Z0-9]/g, '');
+            const idAman = buatIdAmanBuku(item.sarimbit, item.brand || item.pusat);
             const rowEl = document.getElementById(`row-${idAman}`);
             
             if (!rowEl) return false; 
 
             idYangDibutuhkan.add(`row-${idAman}`);
+            idYangDibutuhkan.add(`row-${idAman}-mobile`);
 
             const noUrutEl = rowEl.querySelector('.no-urut');
             if (noUrutEl && noUrutEl.innerText !== String(urutanVisual)) noUrutEl.innerText = urutanVisual;
@@ -1120,9 +1178,10 @@ let rawSummary = [];
             const sarimbitName = item.sarimbit || "Tanpa Nama";
             const safeSarimbitJS = sarimbitName.replace(/'/g, "\\'").replace(/"/g, '\\"');
             const safeSarimbitAttr = sarimbitName.replace(/"/g, '&quot;');
-            const idAman = btoa(encodeURIComponent(sarimbitName)).replace(/[^a-zA-Z0-9]/g, '');
+            const idAman = buatIdAmanBuku(sarimbitName, item.brand || item.pusat);
             
             idYangDibutuhkan.add(`row-${idAman}`);
+            idYangDibutuhkan.add(`row-${idAman}-mobile`);
 
             const autoSave = `onchange="simpanRow('${idAman}', '${safeSarimbitJS}')" onkeypress="if(event.key === 'Enter') this.blur();"`;
             const finalQty = (item.totalOrder && item.totalOrder > 0) ? item.totalOrder : (item.total || 0);
@@ -1382,8 +1441,16 @@ let rawSummary = [];
         // =========================================================================
         // 3. SAPU BERSIH DOM LAMA YANG SUDAH TIDAK RELEVAN
         // =========================================================================
-        dataAktif.forEach(item => idYangDibutuhkan.add(`row-${btoa(encodeURIComponent(item.sarimbit || "")).replace(/[^a-zA-Z0-9]/g, '')}`));
-        dataArsip.forEach(item => idYangDibutuhkan.add(`row-${btoa(encodeURIComponent(item.sarimbit || "")).replace(/[^a-zA-Z0-9]/g, '')}`));
+        dataAktif.forEach(item => {
+            const idUnik = buatIdAmanBuku(item.sarimbit, item.brand || item.pusat);
+            idYangDibutuhkan.add(`row-${idUnik}`);
+            idYangDibutuhkan.add(`row-${idUnik}-mobile`);
+        });
+        dataArsip.forEach(item => {
+            const idUnik = buatIdAmanBuku(item.sarimbit, item.brand || item.pusat);
+            idYangDibutuhkan.add(`row-${idUnik}`);
+            idYangDibutuhkan.add(`row-${idUnik}-mobile`);
+        });
         if (dataArsip.length > 0) idYangDibutuhkan.add('garis-pembatas-arsip');
 
         Array.from(tbody.children).forEach(tr => {
@@ -1481,12 +1548,17 @@ let rawSummary = [];
       const isPrintedBaru = document.getElementById(`print-${idAman}`).checked;
       const isInformedBaru = document.getElementById(`info-${idAman}`).checked;
 
-      const activeData = rawSummary.find(item => item.sarimbit === sarimbit);
+      const kunciTarget = buatKunciBuku(sarimbit, brandBaru);
+      const activeData = rawSummary.find(item => buatKunciBuku(item.sarimbit, item.brand || item.pusat) === kunciTarget);
 
       let statusArsipAsli = false;
       let idValidTarget = null;
       try {
-          const existingData = await dbLokal.pembukuan.where('sarimbit').equals(sarimbit).first();
+          const semuaBuku = await dbLokal.pembukuan.toArray();
+          let existingData = semuaBuku.find(p => buatKunciBuku(p.sarimbit, p.brand || p.pusat) === kunciTarget);
+          if (!existingData && activeData && activeData.id) {
+              existingData = semuaBuku.find(p => String(p.id) === String(activeData.id));
+          }
           if (existingData) {
               statusArsipAsli = existingData.isarchived || existingData.isArchived || false;
               idValidTarget = existingData.id;
@@ -1494,7 +1566,6 @@ let rawSummary = [];
       } catch (err) { }
       if (!idValidTarget && activeData && activeData.id) idValidTarget = activeData.id;
       if (!idValidTarget) idValidTarget = Date.now() + Math.floor(Math.random() * 1000);
-
       // ==============================================================
       // CEK PERUBAHAN DATA (SMART COMPARATOR) - Mencegah Spam Save & Log
       // ==============================================================
@@ -1590,7 +1661,9 @@ let rawSummary = [];
         }
 
         await dbLokal.pembukuan.put(dataToSave);
-
+        if (activeData) {
+            Object.assign(activeData, dataToSave, { Lunas: dataToSave.lunas });
+        }
         // NOTIFIKASI JUJUR
         if (suksesKeAwan) {
             if(typeof showToast === 'function') showToast("✅  Data tersimpan!");
@@ -1659,7 +1732,7 @@ let rawSummary = [];
         const isPrinted = row.querySelectorAll('input[type="checkbox"]')[0]?.checked || false;
 
         const cocokS = sName.includes(sQuery);
-        const cocokB = (bQuery === "") || (bName === bQuery);
+        const cocokB = (bQuery === "") || (normBuku(bName) === normBuku(bQuery));
         const cocokTeks = cocokS && cocokB;
         
         let cocokStatus = true;
@@ -1865,9 +1938,11 @@ window.bukaModalStatistikBuku = function() {
             const tglClose = parsingTglAman(item.close);
             const tglReady = parsingTglAman(item.ready);
             
-            if (tglReady && tglReady.getTime() <= sekarang) listReady.push(item.sarimbit);
-            else if (tglClose && tglClose.getTime() <= sekarang) listClose.push(item.sarimbit);
-            else listOpen.push(item.sarimbit);
+            const labelSrm = item.brand ? `${item.sarimbit} (${item.brand})` : item.sarimbit;
+
+            if (tglReady && tglReady.getTime() <= sekarang) listReady.push(labelSrm);
+            else if (tglClose && tglClose.getTime() <= sekarang) listClose.push(labelSrm);
+            else listOpen.push(labelSrm);
 
             // FASE KEUANGAN: Evaluasi Uang Masuk dari Admin
             const uangMasukDP = Number(item.dp) || 0;
@@ -1876,8 +1951,8 @@ window.bukaModalStatistikBuku = function() {
             const akumulasiMasuk = uangMasukDP + uangMasukLunas;
             
             // Masukkan ke Keranjang Keuangan jika lulus syarat
-            if (akumulasiMasuk > 0) listDP.push(item.sarimbit);
-            if (akumulasiMasuk > 0 && akumulasiMasuk >= totalOmsetToko) listLunas.push(item.sarimbit);
+            if (akumulasiMasuk > 0) listDP.push(labelSrm);
+            if (akumulasiMasuk > 0 && akumulasiMasuk >= totalOmsetToko) listLunas.push(labelSrm);
         }
     });
 
