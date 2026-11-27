@@ -988,51 +988,65 @@ let rawSummary = [];
        // FITUR PINTAR: TANGKAP PERINTAH DARI KLIK NOTIFIKASI DI INDEX.HTML
        // =======================================================
        const sarimbitBidikan = sessionStorage.getItem('sorot_sarimbit_pembukuan');
+       const brandBidikan = sessionStorage.getItem('sorot_brand_pembukuan') || "";
        if (sarimbitBidikan) {
-           // Segera hapus memorinya agar tidak terjadi efek berulang saat di-refresh manual
            sessionStorage.removeItem('sorot_sarimbit_pembukuan');
-           
-           // Kita gunakan interval untuk memastikan tabel sudah selesai digambar (dirender) di layar
-           let pencarianSelesai = false;
+           sessionStorage.removeItem('sorot_brand_pembukuan');
+
+           const normCari = (v) => String(v || '').replace(/\s+/g, ' ').trim().toLowerCase();
+           const inputCari = document.getElementById('filter-sarimbit');
+           if (inputCari) inputCari.value = sarimbitBidikan;
+
            let percobaanCari = 0;
-           
            const timerCari = setInterval(() => {
                percobaanCari++;
-               // Cari baris desktop yang nama sarimbit-nya cocok (tetap ketemu walau id kini pakai Sarimbit + Brand)
-               const barisTarget = Array.from(document.querySelectorAll('.item-row')).find(tr => {
-                   if (tr.id && tr.id.endsWith('-mobile')) return false;
-                   const elNama = tr.querySelector('.sarimbit-name > div');
-                   return elNama && normBuku(elNama.innerText) === normBuku(sarimbitBidikan);
-               });
-               
+               const semuaBarisDesktop = Array.from(document.querySelectorAll('.item-row')).filter(tr => !(tr.id && tr.id.endsWith('-mobile')));
+
+               // Utamakan kecocokan Sarimbit + Brand, lalu fallback ke Sarimbit saja
+               let barisTarget = null;
+               if (brandBidikan) {
+                   barisTarget = semuaBarisDesktop.find(tr => {
+                       const elNama = tr.querySelector('.sarimbit-name > div');
+                       const elBrand = tr.querySelector('.brand-name');
+                       return elNama && elBrand && normCari(elNama.innerText) === normCari(sarimbitBidikan) && normCari(elBrand.value) === normCari(brandBidikan);
+                   });
+               }
+               if (!barisTarget) {
+                   barisTarget = semuaBarisDesktop.find(tr => {
+                       const elNama = tr.querySelector('.sarimbit-name > div');
+                       return elNama && normCari(elNama.innerText) === normCari(sarimbitBidikan);
+                   });
+               }
+
                if (barisTarget) {
                    clearInterval(timerCari);
-                   pencarianSelesai = true;
-                   
-                   // 1. Filter paksa pencarian tabel agar sarimbit target tampil (jika daftar sangat panjang)
-                   const inputCari = document.getElementById('filter-sarimbit');
-                   if (inputCari) {
-                       inputCari.value = sarimbitBidikan;
-                       if(typeof filterTable === 'function') filterTable();
+
+                   // 1. Terapkan filter pencarian Sarimbit (dan Brand jika ada)
+                   if (inputCari) inputCari.value = sarimbitBidikan;
+                   if (brandBidikan) {
+                       const selPusat = document.getElementById('filter-pusat');
+                       if (selPusat) {
+                           const opsiBrand = Array.from(selPusat.options).find(opt => normCari(opt.value) === normCari(brandBidikan));
+                           if (opsiBrand) selPusat.value = opsiBrand.value;
+                       }
                    }
-                   
-                   // 2. Gulir layar (Scroll) langsung menuju baris target
-                   barisTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                   
-                   // 3. Efek Kedip Sorot (Blink Kuning Lembut) agar mata Admin tertuju padanya
+                   if (typeof filterTable === 'function') filterTable();
+                   if (typeof window.sinkronisasiUIFilterBuku === 'function') window.sinkronisasiUIFilterBuku();
+
+                   // 2. Pilih baris yang terlihat (Desktop atau Mobile) lalu gulir dan beri sorotan
+                   const barisTampil = (window.innerWidth < 768 && document.getElementById(barisTarget.id + '-mobile'))
+                       ? document.getElementById(barisTarget.id + '-mobile')
+                       : barisTarget;
+
+                   barisTampil.scrollIntoView({ behavior: 'smooth', block: 'center' });
                    setTimeout(() => {
-                       barisTarget.classList.add('bg-amber-100', 'transition-colors', 'duration-[1500ms]');
-                       
-                       setTimeout(() => {
-                           barisTarget.classList.remove('bg-amber-100');
-                       }, 2000);
-                   }, 500); // Tunda sebentar efek kedipnya agar serasi dengan scroll layar
-                   
-               } else if (percobaanCari > 30) {
-                   // Berhenti mencari jika setelah 3 detik baris tidak ditemukan
+                       barisTampil.classList.add('bg-amber-100', 'transition-colors', 'duration-[1500ms]');
+                       setTimeout(() => barisTampil.classList.remove('bg-amber-100'), 2200);
+                   }, 400);
+               } else if (percobaanCari > 40) {
                    clearInterval(timerCari);
                }
-           }, 100); // Meraba tabel setiap 100 milidetik
+           }, 100);
        }
     };
 
@@ -1566,33 +1580,32 @@ let rawSummary = [];
       } catch (err) { }
       if (!idValidTarget && activeData && activeData.id) idValidTarget = activeData.id;
       if (!idValidTarget) idValidTarget = Date.now() + Math.floor(Math.random() * 1000);
+    // ==============================================================
+      // CEK PERUBAHAN DATA & REKAM DETAIL LAMA -> BARU UNTUK LOG AKTIVITAS
       // ==============================================================
-      // CEK PERUBAHAN DATA (SMART COMPARATOR) - Mencegah Spam Save & Log
-      // ==============================================================
-      let isChanged = false;
-      if (!activeData) {
-          isChanged = true;
-      } else {
-          if (
-              (activeData.close || "") !== valClose ||
-              (activeData.ready || "") !== valReady ||
-              (activeData.c1 || "") !== valC1 ||
-              (activeData.c2 || "") !== valC2 ||
-              (activeData.Lunas || activeData.lunas || "") !== valLunas ||
-              (Number(activeData.dp) || 0) !== dpBersih ||
-              (Number(activeData.bayar) || 0) !== bayarBersih ||
-              (activeData.statusKirim || "") !== kirimBaru ||
-              (activeData.statusAlamat || "") !== alamatBaru ||
-              (activeData.isPrinted === true) !== isPrintedBaru ||
-              (activeData.isInformed === true) !== isInformedBaru ||
-              (activeData.brand || "") !== brandBaru
-          ) {
-              isChanged = true;
-          }
-      }
+      const lama = activeData || {};
+      const fmtTglLog = (v) => (v && String(v).trim() !== "") ? formatTanggalPanjang(v) : "Kosong";
+      const fmtTeksLog = (v) => (v && String(v).trim() !== "") ? String(v).trim() : "Kosong";
+      const fmtRpLog = (v) => `Rp ${(Number(v) || 0).toLocaleString('id-ID')}`;
+      const fmtBoolLog = (v) => v === true ? "Sudah" : "Belum";
+
+      const daftarPerubahan = [];
+      if ((lama.close || "") !== valClose) daftarPerubahan.push(`Tgl Close: ${fmtTglLog(lama.close)} ➔ ${fmtTglLog(valClose)}`);
+      if ((lama.ready || "") !== valReady) daftarPerubahan.push(`Tgl Ready: ${fmtTglLog(lama.ready)} ➔ ${fmtTglLog(valReady)}`);
+      if ((lama.c1 || "") !== valC1) daftarPerubahan.push(`Jadwal C1: ${fmtTeksLog(lama.c1)} ➔ ${fmtTeksLog(valC1)}`);
+      if ((lama.c2 || "") !== valC2) daftarPerubahan.push(`Jadwal C2: ${fmtTeksLog(lama.c2)} ➔ ${fmtTeksLog(valC2)}`);
+      const lunasLama = lama.Lunas || lama.lunas || "";
+      if (lunasLama !== valLunas) daftarPerubahan.push(`Jadwal Lunas: ${fmtTeksLog(lunasLama)} ➔ ${fmtTeksLog(valLunas)}`);
+      if ((Number(lama.dp) || 0) !== dpBersih) daftarPerubahan.push(`Nominal DP: ${fmtRpLog(lama.dp)} ➔ ${fmtRpLog(dpBersih)}`);
+      if ((Number(lama.bayar) || 0) !== bayarBersih) daftarPerubahan.push(`Nominal Lunas: ${fmtRpLog(lama.bayar)} ➔ ${fmtRpLog(bayarBersih)}`);
+      if ((lama.statusKirim || "Langsung") !== kirimBaru) daftarPerubahan.push(`Logistik: ${fmtTeksLog(lama.statusKirim || "Langsung")} ➔ ${fmtTeksLog(kirimBaru)}`);
+      if ((lama.statusAlamat || "Belum Lengkap") !== alamatBaru) daftarPerubahan.push(`Status Alamat: ${fmtTeksLog(lama.statusAlamat || "Belum Lengkap")} ➔ ${fmtTeksLog(alamatBaru)}`);
+      if ((lama.isPrinted === true) !== isPrintedBaru) daftarPerubahan.push(`Status Print: ${fmtBoolLog(lama.isPrinted === true)} ➔ ${fmtBoolLog(isPrintedBaru)}`);
+      if ((lama.isInformed === true) !== isInformedBaru) daftarPerubahan.push(`Status Info: ${fmtBoolLog(lama.isInformed === true)} ➔ ${fmtBoolLog(isInformedBaru)}`);
+      if ((lama.brand || "") !== brandBaru) daftarPerubahan.push(`Brand: ${fmtTeksLog(lama.brand)} ➔ ${fmtTeksLog(brandBaru)}`);
 
       // JIKA TIDAK ADA PERUBAHAN, SISTEM DIAM 100% (Tanpa loader, tanpa notif, tanpa log)
-      if (!isChanged) return;
+      if (daftarPerubahan.length === 0) return;
       // ==============================================================
 
       // 1. DATA UNTUK LOKAL
@@ -1679,7 +1692,7 @@ let rawSummary = [];
                 device: namaPerangkat,
                 action: 'UPDATE',
                 module: 'PEMBUKUAN',
-                detail: `Update Jadwal/Status Sarimbit: ${sarimbit} [KEY: ${sarimbit}]`
+                detail: `Pembukuan ${sarimbit}${brandBaru ? ` (${brandBaru})` : ''}: ${daftarPerubahan.join(' | ')} [KEY: ${sarimbit}${brandBaru ? `||${brandBaru}` : ''}]`
             };
             await dbLokal.logs.put(logPembukuan);
             if (navigator.onLine && typeof SUPABASE_URL !== 'undefined') {

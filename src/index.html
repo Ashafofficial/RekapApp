@@ -1418,55 +1418,55 @@
     </button>
 </div>
 
-    <!-- TABEL REKAPITULASI SUMBER PER BULAN -->
-    <h3 class="font-black text-lg text-slate-800 mb-3 mt-6 ml-2 tracking-tight">Rekapitulasi Per Bulan</h3>
-    <div class="bg-white/90 backdrop-blur-md rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white overflow-hidden mb-8">
-        <div class="overflow-x-auto">
-            <table id="tabel-export-bulan" class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-                        <th class="px-5 py-4 font-black">Bulan</th>
-                        <th class="px-5 py-4 font-black">Sumber Order</th>
-                        <th class="px-5 py-4 font-black text-center">Total Pcs</th>
-                    </tr>
-                </thead>
-                <tbody id="tabel-dashboard-sumber-bulan" class="divide-y divide-slate-100 text-slate-700 text-sm">
-                    <!-- Data Bulan render di sini -->
-                </tbody>
-                <tfoot class="bg-slate-50 text-slate-800 text-sm">
-                    <tr>
-                        <td colspan="2" class="px-5 py-4 border-t border-slate-200 font-black uppercase tracking-widest text-[11px]">TOTAL KESELURUHAN</td>
-                        <td id="total-item-sumber-bulan" class="px-5 py-4 border-t border-slate-200 text-center font-black text-blue-600 text-lg">0</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
+   <!-- TABEL REKAPITULASI SUMBER PER BULAN (FONT TIPIS, JELAS & PADAT) -->
+   <h3 class="font-bold text-sm md:text-base text-slate-700 mb-2 mt-4 ml-1 tracking-tight">Rekapitulasi Per Bulan</h3>
+   <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_6px_24px_rgb(0,0,0,0.04)] border border-white overflow-hidden mb-5">
+       <div class="overflow-x-auto">
+           <table id="tabel-export-bulan" style="font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;" class="w-full text-left border-collapse antialiased">
+               <thead>
+                   <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[8.5px] md:text-[10px] font-medium uppercase tracking-wider">
+                       <th class="px-2.5 py-2 md:px-4 md:py-2.5 font-medium w-[44%] md:w-[40%]">Bulan</th>
+                       <th class="px-2.5 py-2 md:px-4 md:py-2.5 font-medium w-[36%] md:w-[40%]">Sumber Order</th>
+                       <th class="px-2.5 py-2 md:px-4 md:py-2.5 font-medium text-center w-[20%]">Total Pcs</th>
+                   </tr>
+               </thead>
+               <tbody id="tabel-dashboard-sumber-bulan" class="divide-y divide-slate-100 text-slate-700 text-[10.5px] md:text-xs font-normal">
+                   <!-- Data Bulan render di sini -->
+               </tbody>
+               <tfoot class="bg-slate-50/90 text-slate-700">
+                   <tr>
+                       <td colspan="2" class="px-2.5 py-2 md:px-4 md:py-2.5 border-t border-slate-200 font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-slate-600">TOTAL KESELURUHAN</td>
+                       <td id="total-item-sumber-bulan" class="px-2.5 py-2 md:px-4 md:py-2.5 border-t border-slate-200 text-center font-semibold text-blue-600 text-xs md:text-sm tabular-nums">0</td>
+                   </tr>
+               </tfoot>
+           </table>
+       </div>
+   </div>
 
-    <!-- TABEL REKAPITULASI SUMBER PER HARI -->
-    <h3 class="font-black text-lg text-slate-800 mb-3 ml-2 tracking-tight">Rekapitulasi Per Hari</h3>
-    <div class="bg-white/90 backdrop-blur-md rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white overflow-hidden">
-        <div class="overflow-x-auto">
-            <table id="tabel-export-hari" class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-                        <th class="px-5 py-4 font-black">Tanggal</th>
-                        <th class="px-5 py-4 font-black">Sumber Order</th>
-                        <th class="px-5 py-4 font-black text-center">Total Pcs</th>
-                    </tr>
-                </thead>
-                <tbody id="tabel-dashboard-sumber-hari" class="divide-y divide-slate-100 text-slate-700 text-sm">
-                    <!-- Data Hari render di sini -->
-                </tbody>
-                <tfoot class="bg-slate-50 text-slate-800 text-sm">
-                    <tr>
-                        <td colspan="2" class="px-5 py-4 border-t border-slate-200 font-black uppercase tracking-widest text-[11px]">TOTAL KESELURUHAN</td>
-                        <td id="total-item-sumber-hari" class="px-5 py-4 border-t border-slate-200 text-center font-black text-blue-600 text-lg">0</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
+   <!-- TABEL REKAPITULASI SUMBER PER HARI (FONT TIPIS, JELAS & PADAT) -->
+   <h3 class="font-bold text-sm md:text-base text-slate-700 mb-2 ml-1 tracking-tight">Rekapitulasi Per Hari</h3>
+   <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_6px_24px_rgb(0,0,0,0.04)] border border-white overflow-hidden">
+       <div class="overflow-x-auto">
+           <table id="tabel-export-hari" style="font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;" class="w-full text-left border-collapse antialiased">
+               <thead>
+                   <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[8.5px] md:text-[10px] font-medium uppercase tracking-wider">
+                       <th class="px-2.5 py-2 md:px-4 md:py-2.5 font-medium w-[44%] md:w-[40%]">Tanggal</th>
+                       <th class="px-2.5 py-2 md:px-4 md:py-2.5 font-medium w-[36%] md:w-[40%]">Sumber Order</th>
+                       <th class="px-2.5 py-2 md:px-4 md:py-2.5 font-medium text-center w-[20%]">Total Pcs</th>
+                   </tr>
+               </thead>
+               <tbody id="tabel-dashboard-sumber-hari" class="divide-y divide-slate-100 text-slate-700 text-[10.5px] md:text-xs font-normal">
+                   <!-- Data Hari render di sini -->
+               </tbody>
+               <tfoot class="bg-slate-50/90 text-slate-700">
+                   <tr>
+                       <td colspan="2" class="px-2.5 py-2 md:px-4 md:py-2.5 border-t border-slate-200 font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-slate-600">TOTAL KESELURUHAN</td>
+                       <td id="total-item-sumber-hari" class="px-2.5 py-2 md:px-4 md:py-2.5 border-t border-slate-200 text-center font-semibold text-blue-600 text-xs md:text-sm tabular-nums">0</td>
+                   </tr>
+               </tfoot>
+           </table>
+       </div>
+   </div>
     </div>
 
    <!-- HALAMAN: LOG AKTIVITAS (NOTIF) -->
@@ -1481,7 +1481,7 @@
         </button>
     </div>
     
-    <div class="bg-white/80 backdrop-blur-2xl p-6 md:p-8 rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative z-10 min-h-[60vh]">
+    <div class="bg-transparent relative z-10 min-h-[60vh]">
         <div id="wadah-list-notif" class="space-y-3.5 custom-scrollbar">
             <!-- Data Log Injeksi JS Masuk Sini -->
         </div>
@@ -8092,7 +8092,8 @@ async function renderDashboardSumber() {
                 groupData[d[fieldWaktu]].subtotal += d.qty;
             });
 
-            // Render baris tabel dan baris subtotal
+         // Render baris tabel dan baris subtotal (Ringkas, Font Tipis & Jelas)
+         let htmlRows = '';
             urutanWaktu.forEach(waktu => {
                 const dataGroup = groupData[waktu];
                 const rowspanCount = dataGroup.items.length;
@@ -8100,25 +8101,26 @@ async function renderDashboardSumber() {
                 dataGroup.items.forEach((data, index) => {
                     let tdWaktuHTML = "";
                     if (index === 0) {
-                        tdWaktuHTML = `<td rowspan="${rowspanCount}" class="p-4 font-bold text-slate-800 border-r border-slate-200 align-middle bg-white/40">${waktu}</td>`;
+                        tdWaktuHTML = `<td rowspan="${rowspanCount}" class="px-2.5 py-1.5 md:px-4 md:py-2 font-normal text-slate-700 text-[10px] md:text-[12px] leading-snug tracking-[0.01em] border-r border-slate-100 align-middle bg-white/40">${waktu}</td>`;
                     }
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                    htmlRows += `
+                        <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
                             ${tdWaktuHTML}
-                            <td class="p-4 font-semibold text-violet-700">${data.sumber}</td>
-                            <td class="p-4 text-center font-bold text-blue-600 text-lg">${data.qty}</td>
+                            <td class="px-2.5 py-1.5 md:px-4 md:py-2 font-normal text-violet-700 text-[10px] md:text-[12px] leading-snug tracking-[0.01em]">${data.sumber}</td>
+                            <td class="px-2.5 py-1.5 md:px-4 md:py-2 text-center font-medium text-blue-600 text-[11px] md:text-[12.5px] tabular-nums">${data.qty}</td>
                         </tr>
                     `;
                 });
 
-                // Baris Subtotal untuk setiap hari/bulan tersebut
-                tbody.innerHTML += `
-                    <tr class="bg-violet-50/50 border-b-[3px] border-slate-200/80">
-                        <td colspan="2" class="p-3 pr-4 text-right font-bold text-slate-500 uppercase text-[10px] tracking-widest">Subtotal ${waktu}</td>
-                        <td class="p-3 text-center font-black text-violet-700 text-lg">${dataGroup.subtotal}</td>
+                // Baris Subtotal ringkas untuk setiap hari/bulan tersebut
+                htmlRows += `
+                    <tr class="bg-violet-50/40 border-b-2 border-slate-200/70">
+                        <td colspan="2" class="px-2.5 py-1 md:px-4 md:py-1.5 text-right font-medium text-slate-500 uppercase text-[8.5px] md:text-[9.5px] tracking-wider">Subtotal ${waktu}</td>
+                        <td class="px-2.5 py-1 md:px-4 md:py-1.5 text-center font-semibold text-violet-700 text-[11px] md:text-[12.5px] tabular-nums">${dataGroup.subtotal}</td>
                     </tr>
                 `;
             });
+            tbody.innerHTML = htmlRows;
         };
 
         // Render Data ke Layar
@@ -10606,6 +10608,28 @@ function pilihProdukModal(metaString) {
             if (matchNama && matchNama[1]) {
                 kataKunciNama = matchNama[1].trim();
             }
+        }
+
+        if (module === 'PEMBUKUAN') {
+            let targetSarimbit = "";
+            let targetBrand = "";
+
+            if (keyRahasia) {
+                const partsKey = keyRahasia.split('||');
+                targetSarimbit = (partsKey[0] || "").trim();
+                targetBrand = (partsKey[1] || "").trim();
+            } else {
+                const matchBuku = detail.match(/(?:Revisi Pembukuan|Update Jadwal\/Status Sarimbit:)\s+([^(:|\[]+)/i);
+                if (matchBuku && matchBuku[1]) targetSarimbit = matchBuku[1].trim();
+            }
+
+            if (targetSarimbit) {
+                sessionStorage.setItem('sorot_sarimbit_pembukuan', targetSarimbit);
+                if (targetBrand) sessionStorage.setItem('sorot_brand_pembukuan', targetBrand);
+                else sessionStorage.removeItem('sorot_brand_pembukuan');
+            }
+            pindahHalaman('pembukuan.html');
+            return;
         }
 
         if (module === 'MASTER') {
