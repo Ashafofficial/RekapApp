@@ -9,8 +9,20 @@
   
   <link rel="manifest" href="manifest.json">
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => console.log("Mode Offline Aktif!"));
+    if ("serviceWorker" in navigator) {
+      if (window.__TAURI__ || window.__TAURI_INTERNALS__) {
+        Promise.all([
+          navigator.serviceWorker.getRegistrations().then(r => Promise.all(r.map(x => x.unregister()))),
+          "caches" in window ? caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))) : Promise.resolve()
+        ]).then(([u]) => {
+          if (u && u.length && !sessionStorage.getItem("sw_cleared")) {
+            sessionStorage.setItem("sw_cleared", "1");
+            location.reload();
+          }
+        });
+      } else {
+        navigator.serviceWorker.register("sw.js").then(() => console.log("Mode Offline Aktif!"));
+      }
     }
   </script>
   
